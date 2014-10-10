@@ -1,6 +1,7 @@
 xml2rfc ?= xml2rfc
 kramdown-rfc2629 ?= kramdown-rfc2629
 idnits ?= idnits
+rfcdiff ?= rfcdiff
 
 draft := $(basename $(lastword $(sort $(wildcard draft-*.xml)) $(sort $(wildcard draft-*.md))))
 
@@ -18,8 +19,9 @@ else
 next_ver ?= $(shell printf "%.2d" $$((1$(current_ver)-99)))
 endif
 next := $(draft)-$(next_ver)
+current := $(draft)-$(current_ver)
 
-.PHONY: latest submit clean
+.PHONY: latest submit diff clean
 
 latest: $(draft).txt $(draft).html
 
@@ -28,10 +30,18 @@ submit: $(next).txt
 idnits: $(next).txt
 	$(idnits) $<
 
+diff:   $(draft).txt
+	-git show $(current):$(draft)$(draft_type) > $(current).xml 
+	-$(xml2rfc) $(current).xml --text
+	-$(rfcdiff) --browse $(draft).txt $(current).txt
+	-rm -f $(current).xml
+	-rm -f $(current).txt
+
 clean:
 	-rm -f $(draft).txt $(draft).html index.html
 	-rm -f $(next).txt $(next).html
 	-rm -f $(draft)-[0-9][0-9].xml
+	-rm -f *.diff.html
 ifeq (md,$(draft_type))
 	-rm -f $(draft).xml
 endif
