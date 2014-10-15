@@ -8,6 +8,8 @@ xml2rfc ?= xml2rfc
 kramdown-rfc2629 ?= kramdown-rfc2629
 oxtradoc ?= oxtradoc.in
 idnits ?= idnits
+rfcdiff ?= rfcdiff --browse
+
 
 draft := $(basename $(lastword $(sort $(wildcard draft-*.xml)) $(sort $(wildcard draft-*.md)) $(sort $(wildcard draft-*.org)) ))
 
@@ -25,8 +27,9 @@ else
 next_ver ?= $(shell printf "%.2d" $$((1$(current_ver)-99)))
 endif
 next := $(draft)-$(next_ver)
+diff_ver := $(draft)-$(current_ver)
 
-.PHONY: latest submit clean
+.PHONY: latest submit diff clean
 
 latest: $(draft).txt $(draft).html
 
@@ -35,10 +38,15 @@ submit: $(next).txt
 idnits: $(next).txt
 	$(idnits) $<
 
+diff:   $(diff_ver).txt $(draft).txt
+	$(rfcdiff) $(draft).txt $(diff_ver).txt
+
 clean:
 	-rm -f $(draft).txt $(draft).html index.html
 	-rm -f $(next).txt $(next).html
 	-rm -f $(draft)-[0-9][0-9].xml
+	-rm -f *.diff.html
+	-rm -f $(diff_ver).txt
 ifeq (md,$(draft_type))
 	-rm -f $(draft).xml
 endif
@@ -48,6 +56,9 @@ endif
 
 $(next).xml: $(draft).xml
 	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
+
+$(diff_ver).xml: $(draft).xml
+	git show $(diff_ver):$(draft)$(draft_type) > $@
 
 .INTERMEDIATE: $(draft).xml
 %.xml: %.md
