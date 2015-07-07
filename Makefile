@@ -195,6 +195,9 @@ endif
 
 .PHONY: setup-ghpages
 setup-ghpages:
+# Abort if there are local changes
+	@test `git status -s | wc -l` -eq 0 || \
+	  ! echo "Error: Uncommitted changes on branch"
 # Check if the gh-pages branch already exists locally
 	@if git show-ref refs/heads/gh-pages >/dev/null 2>&1; then \
 	  ! echo "Error: gh-pages branch already exists"; \
