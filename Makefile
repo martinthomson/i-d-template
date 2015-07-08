@@ -28,7 +28,7 @@ rfcdiff ?= rfcdiff --browse
 #   https://www.gnu.org/software/enscript/
 enscript ?= enscript
 #   http://www.ghostscript.com/
-ps2pdf ?= ps2pdf 
+ps2pdf ?= ps2pdf
 
 # Where to get references
 XML_RESOURCE_ORG_PREFIX ?= http://unicorn-wg.github.io/idrefs
