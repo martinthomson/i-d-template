@@ -118,6 +118,12 @@ endif
 %.pdf: %.txt
 	$(enscript) --margins 76::76: -B -q -p - $^ | $(ps2pdf) - $@
 
+GITHUB_REPO = $(shell git ls-remote --get-url | sed -e 's/^.*github\.com.//;s/\.git$$//')
+.PHONY: issues
+issues: issues.json
+issues.json:
+	curl https://api.github.com/repos/$(GITHUB_REPO)/issues?state=open > $@
+
 ## Update this Makefile
 
 # The prerequisites here are what is updated
