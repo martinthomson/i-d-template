@@ -18,6 +18,8 @@ group.  This guide will use the name `unicorn-wg` for your working group.
 [Make a new repository](https://github.com/new).  This guide will use the
 name name `unicorn-protocol` here.
 
+When prompted, select the option to initialize the repository with a README.
+
 Clone that repository:
 ```sh
 $ git clone https://github.com/unicorn-wg/unicorn-protocol.git
@@ -25,8 +27,12 @@ $ git clone https://github.com/unicorn-wg/unicorn-protocol.git
 Copy the contents of this respository in:
 ```sh
 $ cd unicorn-protocol
-$ git pull https://github.com/martinthomson/i-d-template.git master
+$ git remote add i-d-template https://github.com/martinthomson/i-d-template.git
+$ git fetch i-d-template
+$ git reset i-d-template/master --hard
 ```
+(Note that git reset is a sharp tool, especially with the `--hard` option.)
+
 Choose whether you want to use markdown, outline, or xml as your input form.
 If you already have a draft, then that decision is already made for you.
 
