@@ -198,6 +198,8 @@ setup-ghpages:
 # Abort if there are local changes
 	@test `git status -s | wc -l` -eq 0 || \
 	  ! echo "Error: Uncommitted changes on branch"
+	@git remote show -n origin >/dev/null 2>&1 || \
+	  ! echo "Error: No remote named 'origin' configured"
 # Check if the gh-pages branch already exists locally
 	@if git show-ref refs/heads/gh-pages >/dev/null 2>&1; then \
 	  ! echo "Error: gh-pages branch already exists"; \
