@@ -8,3 +8,4 @@
 .refcache
 .i-d-template
 venv/
+issues.json

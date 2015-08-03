@@ -22,83 +22,51 @@ idnits ?= idnits
 
 # For diff:
 #   https://tools.ietf.org/tools/rfcdiff/
-rfcdiff ?= rfcdiff --browse
+rfcdiff ?= rfcdiff
 
 # For generating PDF:
 #   https://www.gnu.org/software/enscript/
 enscript ?= enscript
 #   http://www.ghostscript.com/
-ps2pdf ?= ps2pdf 
+ps2pdf ?= ps2pdf
+
+# Where to get references
+XML_RESOURCE_ORG_PREFIX ?= http://unicorn-wg.github.io/idrefs
 
 
 ## Work out what to build
 
-draft := $(basename $(lastword $(sort $(wildcard draft-*.xml)) $(sort $(wildcard draft-*.org)) $(sort $(wildcard draft-*.md))))
+drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
 
-ifeq (,$(draft))
+ifeq (,$(drafts))
 $(warning No file named draft-*.md or draft-*.xml or draft-*.org)
 $(error Read README.md for setup instructions)
 endif
 
-draft_type := $(suffix $(firstword $(wildcard $(draft).md $(draft).org $(draft).xml)))
+draft_types := $(foreach draft,$(drafts),$(suffix $(firstword $(wildcard $(draft).md $(draft).org $(draft).xml))))
 
-current_ver := $(shell git tag | grep '$(draft)-[0-9][0-9]' | tail -1 | sed -e"s/.*-//")
-ifeq (,$(current_ver))
-next_ver ?= 00
-else
-next_ver ?= $(shell printf "%.2d" $$((1$(current_ver)-99)))
-endif
-next := $(draft)-$(next_ver)
-diff_ver := $(draft)-$(current_ver)
+f_prev_tag = $(shell git tag | grep '$(draft)-[0-9][0-9]' | tail -1 | sed -e"s/.*-//")
+f_next_tag = $(if $(f_prev_tag),$(shell printf "%.2d" $$(( 1$(f_prev_tag) - 99)) ),00)
+drafts_next := $(foreach draft,$(drafts),$(draft)-$(f_next_tag))
+drafts_prev := $(foreach draft,$(drafts),$(draft)-$(f_prev_tag))
 
+drafts_txt := $(addsuffix .txt,$(drafts))
+drafts_html := $(addsuffix .html,$(drafts))
+drafts_next_txt := $(addsuffix .txt,$(drafts_next))
+drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 
-## Targets
-
-.PHONY: latest txt html pdf submit diff clean update ghpages
-
+## Basic Targets
+.PHONY: latest txt html pdf
 latest: txt html
-txt: $(draft).txt
-html: $(draft).html
-pdf: $(draft).pdf
+txt: $(drafts_txt)
+html: $(drafts_html)
+pdf: $(addsuffix .pdf,$(drafts))
 
-submit: $(next).txt
-
-idnits: $(next).txt
-	$(idnits) $<
-
-## If you'd like the main github page to show the draft text.
-readme: $(next).txt
-	@echo '```' > README.md
-	@cat $(next).txt >> README.md
-	@echo '```' >> README.md
-
-clean:
-	-rm -f $(draft).{txt,html,pdf} index.html
-	-rm -f $(draft)-[0-9][0-9].{xml,md,org,txt,html,pdf}
-	-rm -f *.diff.html
-ifneq (.xml,$(draft_type))
-	-rm -f $(draft).xml
-endif
-
-## diff
-
-$(next).xml: $(draft).xml
-	sed -e"s/$(basename $<)-latest/$(basename $@)/" $< > $@
-
-ifneq (,$(current_ver))
-.INTERMEDIATE: $(addprefix $(draft)-$(current_ver),.txt $(draft_type))
-diff: $(draft).txt $(draft)-$(current_ver).txt
-	-$(rfcdiff) $^
-
-$(draft)-$(current_ver)$(draft_type):
-	git show $(draft)-$(current_ver):$(draft)$(draft_type) > $@
-endif
-
-## Recipes
-
-.INTERMEDIATE: $(draft).xml
+## Basic Recipes
+.INTERMEDIATE: $(addsuffix .xml,$(drafts))
 %.xml: %.md
-	$(kramdown-rfc2629) $< > $@
+	XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
+	  $(kramdown-rfc2629) $< > $@
 
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
@@ -108,16 +76,85 @@ endif
 
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
-%.html: %.htmltmp
+%.html: %.htmltmp lib/addstyle.sed lib/style.css
 	sed -f lib/addstyle.sed $< > $@
 
 %.pdf: %.txt
-	$(enscript) --margins 76::76: -B -q -p - $^ | $(ps2pdf) - $@
+	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
+
+## Turns the drafts into README.md
+.PHONY: readme
+readme: README.md
+README.md: $(drafts_txt)
+	@echo '```' > README.md
+	@cat $^ >> README.md
+	@echo '```' >> README.md
+
+## Build copies of drafts for submission
+.PHONY: submit
+submit: $(drafts_next_txt)
+
+define makerule_submit_xml =
+$(1)
+	sed -e"s/$$(basename $$<)-latest/$$(basename $$@)/" $$< > $$@
+endef
+submit_deps := $(join $(addsuffix .xml: ,$(drafts_next)),$(addsuffix .xml,$(drafts)))
+$(foreach rule,$(submit_deps),$(eval $(call makerule_submit_xml,$(rule))))
+
+## Check for validity
+.PHONY: check idnits
+check: idnits
+idnits: $(drafts_next_txt)
+	echo $^ | xargs -n 1 sh -c '$(idnits) $$0'
+
+## Build diffs between the current draft versions and any previous version
+# This is makefile magic that requires Make 4.0
+
+draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts)))
+.PHONY: diff
+diff: $(draft_diffs)
+
+.INTERMEDIATE: $(join $(drafts_prev),$(draft_types))
+define makerule_diff =
+$$(word 1,$$(subst ~, ,$(1))): $$(word 2,$$(subst ~, ,$(1))) $$(word 3,$$(subst ~, ,$(1)))
+	-$(rfcdiff) --html --stdout $$^ > $$@
+endef
+concat = $(join $(1),$(addprefix ~,$(2)))
+diff_deps := $(call concat,$(draft_diffs),$(call concat,$(drafts_next_txt),$(drafts_prev_txt)))
+$(foreach rule,$(diff_deps),$(eval $(call makerule_diff,$(rule))))
+
+define makerule_prev =
+.INTERMEDIATE: $$(word 1,$$(subst ~, ,$(1)))
+$$(word 1,$$(subst ~, ,$(1))):
+	git show $$(word 2,$$(subst ~, ,$(1))):$$(word 3,$$(subst ~, ,$(1))) > $$@
+endef
+drafts_prev_out := $(join $(drafts_prev),$(draft_types))
+drafts_prev_in := $(join $(drafts),$(draft_types))
+prev_versions := $(call concat,$(drafts_prev_out),$(call concat,$(drafts_prev),$(drafts_prev_in)))
+$(foreach args,$(prev_versions),$(eval $(call makerule_prev,$(args))))
+
+## Store a copy of any github issues
+
+GITHUB_REPO = $(shell git ls-remote --get-url | sed -e 's/^.*github\.com.//;s/\.git$$//')
+.PHONY: issues
+issues:
+	curl https://api.github.com/repos/$(GITHUB_REPO)/issues?state=open > $@.json
+
+## Cleanup
+
+COMMA := ,
+.PHONY: clean
+clean:
+	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
+	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
+	-rm -f $(draft_diffs)
+	-$(foreach draft,$(drafts),[ -f $(draft).md -o -f $(draft).org ] && rm -f $(draft).xml;)true
 
 ## Update this Makefile
 
 # The prerequisites here are what is updated
 .INTERMEDIATE: .i-d-template.diff
+.PHONY: update
 update: Makefile lib .gitignore SUBMITTING.md
 	git diff --quiet -- $^ || \
 	  (echo "You have uncommitted changes to:" $^ 1>&2; exit 1)
@@ -159,10 +196,25 @@ else
 IS_MASTER :=
 endif
 
-index.html: $(draft).html
-	cp $< $@
+define INDEX_HTML =
+<!DOCTYPE html>\n\
+<html>\n\
+<head><title>$(GITHUB_REPO) drafts</title></head>\n\
+<body><ul>\n\
+$(foreach draft,$(drafts),<li><a href="$(draft).html">$(draft)</a> (<a href="$(draft).txt">txt</a>)</li>\n)\
+</ul></body>\n\
+</html>
+endef
 
-ghpages: index.html $(draft).txt
+index.html: $(drafts_html) $(drafts_txt)
+ifeq (1,$(words $(drafts)))
+	cp $< $@
+else
+	echo -e '$(INDEX_HTML)' >$@
+endif
+
+.PHONY: ghpages
+ghpages: index.html $(drafts_html) $(drafts_txt)
 ifneq (true,$(TRAVIS))
 	@git show-ref refs/heads/gh-pages > /dev/null 2>&1 || \
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
