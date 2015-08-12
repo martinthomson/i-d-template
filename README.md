@@ -30,8 +30,10 @@ $ cd unicorn-protocol
 $ git remote add i-d-template https://github.com/martinthomson/i-d-template.git
 $ git fetch i-d-template
 $ git reset i-d-template/master --hard
+$ git push -f origin master
 ```
-(Note that git reset is a sharp tool, especially with the `--hard` option.)
+(Note that git reset is a sharp tool, especially with the `--hard` option.
+So is push with the `-f` option.)
 
 Choose whether you want to use markdown, outline, or xml as your input form.
 If you already have a draft, then that decision is already made for you.
