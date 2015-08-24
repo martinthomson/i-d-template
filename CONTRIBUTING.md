@@ -1,7 +1,9 @@
 # Contributing
 
 Before submitting feedback, please familiarize yourself with our current issues
-list and review the [working group home page](|WG-HOMEPAGE|). If you're
+list and review the [working group
+documents](https://datatracker.ietf.org/wg/{WG_NAME}/documents/) and [mailing
+list discussion](https://mailarchive.ietf.org/arch/browse/{WG_NAME}/). If you're
 new to this, you may also want to read the [Tao of the
 IETF](https://www.ietf.org/tao.html).
 
@@ -9,8 +11,8 @@ Be aware that all contributions to the specification fall under the "NOTE WELL"
 terms outlined below.
 
 1. The best way to provide feedback (editorial or design) and ask questions is
-sending an e-mail to [our mailing
-list](https://www.ietf.org/mailman/listinfo/|WG-NAME|). This will ensure that
+sending an e-mail to our mailing list
+([info](https://www.ietf.org/mailman/listinfo/{WG_NAME})). This will ensure that
 the entire Working Group sees your input in a timely fashion.
 
 2. If you have **editorial** suggestions (i.e., those that do not change the
@@ -18,11 +20,11 @@ meaning of the specification), you can either:
 
   a) Fork this repository and submit a pull request; this is the lowest
   friction way to get editorial changes in.
-  
+
   b) Submit a new issue to Github, and mention that you believe it is editorial
   in the issue body. It is not necessary to notify the mailing list for
   editorial issues.
-  
+
   c) Make comments on individual commits in Github. Note that this feedback is
   processed only with best effort by the editors, so it should only be used for
   quick editorial suggestions or questions.
@@ -46,22 +48,22 @@ are addressed to:
 
  * The IETF plenary session
  * The IESG, or any member thereof on behalf of the IESG
- * Any IETF mailing list, including the IETF list itself, any working group 
+ * Any IETF mailing list, including the IETF list itself, any working group
    or design team list, or any other list functioning under IETF auspices
  * Any IETF working group or portion thereof
  * Any Birds of a Feather (BOF) session
  * The IAB or any member thereof on behalf of the IAB
  * The RFC Editor or the Internet-Drafts function
- * All IETF Contributions are subject to the rules of 
-   [RFC 5378](https://tools.ietf.org/html/rfc5378) and 
-   [RFC 3979](https://tools.ietf.org/html/rfc3979) 
+ * All IETF Contributions are subject to the rules of
+   [RFC 5378](https://tools.ietf.org/html/rfc5378) and
+   [RFC 3979](https://tools.ietf.org/html/rfc3979)
    (updated by [RFC 4879](https://tools.ietf.org/html/rfc4879)).
 
 Statements made outside of an IETF session, mailing list or other function,
 that are clearly not intended to be input to an IETF activity, group or
 function, are not IETF Contributions in the context of this notice.
 
-Please consult [RFC 5378](https://tools.ietf.org/html/rfc5378) and [RFC 
+Please consult [RFC 5378](https://tools.ietf.org/html/rfc5378) and [RFC
 3979](https://tools.ietf.org/html/rfc3979) for details.
 
 A participant in any IETF activity is deemed to accept all IETF rules of

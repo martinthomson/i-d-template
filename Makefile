@@ -135,10 +135,12 @@ $(foreach args,$(prev_versions),$(eval $(call makerule_prev,$(args))))
 
 ## Store a copy of any github issues
 
-GITHUB_REPO = $(shell git ls-remote --get-url | sed -e 's/^.*github\.com.//;s/\.git$$//')
+GITHUB_REPO_FULL := $(shell git ls-remote --get-url | sed -e 's/^.*github\.com.//;s/\.git$$//')
+GITHUB_USER := $(word 1,$(subst /, ,$(GITHUB_REPO_FULL)))
+GITHUB_REPO := $(word 2,$(subst /, ,$(GITHUB_REPO_FULL)))
 .PHONY: issues
 issues:
-	curl https://api.github.com/repos/$(GITHUB_REPO)/issues?state=open > $@.json
+	curl https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open > $@.json
 
 ## Cleanup
 
@@ -244,6 +246,33 @@ endif
 	-git checkout -qf "$(GIT_ORIG)"
 	-rm -rf $(GHPAGES_TMP)
 endif
+
+.PHONY: setup
+setup: setup-readme setup-ghpages
+
+.PHONY: setup-readme
+setup-readme: $(addsuffix .xml,$(drafts))
+ifneq (1,$(words $(drafts)))
+	@! echo "Error: This setup only works with a single draft"
+endif
+	git add $(addsuffix $(firstword $(draft_types)),$(basename $<))
+	git rm README.md WG-SETUP.md
+	-git rm template.md
+	-git rm template.xml
+	git mv README-template.md README.md
+	DRAFT_NAME=$$(echo $< | cut -f 1 -d . -); \
+	  AUTHOR_LABEL=$$(echo $< | cut -f 2 -d - -); \
+	  WG_NAME=$$(echo $< | cut -f 3 -d - -); \
+	  DRAFT_STATUS=$$(test "$$AUTHOR_LABEL" = ietf && echo Working Group || echo Individual); \
+	  GITHUB_USER=$(GITHUB_USER); GITHUB_REPO=$(GITHUB_REPO); \
+	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>[^<]*$$/{s/.*>//g;H};/<\/title>/{H;x;s/.*<title/</g;s/<[^>]*>//g;q};d' $<); \
+	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's/{$(label)}/'"$$$(label)"'/g') README.md CONTRIBUTING.md
+	git add README.md CONTRIBUTING.md
+ifneq (xml,$(firstword $(draft_types)))
+	echo $< >> .gitignore
+	git add .gitignore
+endif
+	git commit -m "Setup repository for $(basename $<)"
 
 .PHONY: setup-ghpages
 setup-ghpages:
