@@ -101,15 +101,18 @@ needs the `public_repo` privilege.  This will let it push updates to your
 
 You can add environment variables using the Travis interface.  Include a
 variable with the name `GH_TOKEN` and the value of your newly-created
-application token.
+application token.  Leave the value of "Display value in build log" disabled, or
+you will be making your token public.
 
-*WARNING*: You might want to use a dummy account for application tokens to
-minimize any problems from accidental leaks of your key.  Once you enable pushes
-from Travis, be very careful merging pull requests that alter `.travis.yml` or
-`Makefile`.  Those files can cause the value of the token to be published for
-all to see.  You don't want that to happen.  Even though tokens can be revoked
-easily, discovering a leak might take some time.  Only pushes to the main
-repository will be able to see the token, so don't worry about pull requests.
+**WARNING**: You might want to use a dummy account for application tokens to
+minimize any problems from accidental leaks of your key.
+
+Once you enable pushes from Travis, be very careful merging pull requests that
+alter `.travis.yml` or `Makefile`.  Those files can cause the value of the token
+to be published for all to see.  You don't want that to happen.  Even though
+tokens can be revoked easily, discovering a leak might take some time.  Only
+pushes to the main repository will be able to see the token, so don't worry
+about pull requests.
 
 As a side benefit, Travis will now also check pull requests for errors, letting
 you know if things didn't work out so that you don't merge anything suspect.
