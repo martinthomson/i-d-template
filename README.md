@@ -38,64 +38,43 @@ So is push with the `-f` option.)
 Choose whether you want to use markdown, outline, or xml as your input form.
 If you already have a draft, then that decision is already made for you.
 
-Move the template file into place.
-```sh
-$ git mv template.md draft-ietf-unicorn-protocol.md
-```
-Or add an existing file.
-```sh
-$ git add draft-ietf-unicorn-protocol.xml
-````
-Edit the draft so that it has the right name.  This template uses the
-`-latest` suffix in place of the usual number ('-00', or '-08').
+Make a draft file.  The name of the file is important, make it match the name of
+your draft.  You can take a copy of the template files if you are starting from
+scratch.
+
+Edit the draft so that it has both a title and the correct name.  This template
+uses the `-latest` suffix in place of the usual number ('-00', or '-08').  The
+number is generated automatically when you use `make submit`.
+
+In XML, you should have something like:
 ```xml
-   <rfc docName="draft-ietf-unicorn-protocol-latest" category="std">
+<rfc docName="draft-ietf-unicorn-protocol-latest"
+     ... other attributes ...>
+  <front>
+    <title abbrev="Unicorns!!!">The Unicorn Protocol</title>
 ```
-Or in markdown:
+
+Markdown is similar:
 ```yaml
 docname: draft-ietf-unicorn-protocol-latest
+title: The Unicorn Protocol
 ```
-And add it:
+
+The makefile has a `setup` target that you can now run.
 ```sh
-$ git add draft-ietf-unicorn-protocol.md
+$ make setup
 ```
-Remove the unnecessary template files.
+
+This removes unused templates, updates `README.md` with guesses about your
+draft, sets up a `gh-pages` branch for your editor's copy.
+
+Check that everything looks OK, then push.
 ```sh
-$ git rm template.md template.xml
-```
-Move the README.md template into place.
-```sh
-$ git rm README.md
-$ git mv README-template.md README.md
-```
-Edit the `README.md` and `CONTRIBUTING.md` files.  Note that `CONTRIBUTING.md`
-file is just the latter part of `README.md`.
-```sh
-$ vi README.md CONTRIBUTING.md
-# ...
-$ git add README.md CONTRIBUTING.md
-```
-Commit and push
-```sh
-$ git commit
 $ git push
 ```
 
-Optional: If you are using markdown, you might like to add the following line to your
-`.gitignore` to avoid committing the intermediate XML file that this might create.
-```
-draft-*.xml
-```
 
-
-### Setting Up The Editor's Copy
-
-GitHub uses the `gh-pages` branch as source for a project web page.  This branch
-needs to be initialized first.  The `setup-ghpages` make target does that:
-
-```sh
-$ make setup-ghpages
-```
+### Updating The Editor's Copy
 
 You can maintain `gh-pages` manually by running the following command
 occasionally.
@@ -104,7 +83,7 @@ occasionally.
 $ make ghpages
 ```
 
-Or, you can run an automatic commit after each checkin with Travis.
+Or, you can setup an automatic commit hook using Travis.
 
 
 ### Automatic Update for Editor's Copy
@@ -115,35 +94,22 @@ First enable builds for the new repository on the Travis site.  (Hit the button
 with a '+' on it once you are logged in.)  Note that Travis only synchronizes
 repositories with GitHub once a day, so you might have to force a refresh.
 
-You will need the Travis command line tool for the next step; this is available
-as a [Ruby](https://www.ruby-lang.org/) [gem](https://rubygems.org/):
-
-```sh
-$ sudo gem install travis
-```
-
-*WARNING*: You might want to use a dummy account for this next part to minimize
-any problems from accidental leaks of your key.  Once you enable pushes from
-Travis, be very careful accepting pull requests that alter `.travis.yml` or
-`Makefile`.  Those files can cause the value of the token to be published for
-all to see.  You don't want that to happen, even though tokens can be revoked
-easily.  Only pushes to the main repository will be able to see the token, so
-don't worry about pull requests.
-
 Then, you need to get yourself a [new GitHub application
 token](https://github.com/settings/tokens/new).  The application token only
 needs the `public_repo` privilege.  This will let it push updates to your
 `gh-pages` branch.
 
-Then, you update the Travis configuration file with an encrypted copy of that
-token, as follows:
+You can add environment variables using the Travis interface.  Include a
+variable with the name `GH_TOKEN` and the value of your newly-created
+application token.
 
-```sh
-$ travis encrypt GH_TOKEN=<YOUR TOKEN HERE> -a -p
-$ git add .travis.yml
-$ git commit
-$ git push
-```
+*WARNING*: You might want to use a dummy account for application tokens to
+minimize any problems from accidental leaks of your key.  Once you enable pushes
+from Travis, be very careful merging pull requests that alter `.travis.yml` or
+`Makefile`.  Those files can cause the value of the token to be published for
+all to see.  You don't want that to happen.  Even though tokens can be revoked
+easily, discovering a leak might take some time.  Only pushes to the main
+repository will be able to see the token, so don't worry about pull requests.
 
 As a side benefit, Travis will now also check pull requests for errors, letting
 you know if things didn't work out so that you don't merge anything suspect.
@@ -161,7 +127,8 @@ $ git commit
 ```
 
 This script is cunning enough to handle merging any simple changes that you
-might have made to the Makefile yourself, such as adding targets.
+might have made to the Makefile yourself, such as adding targets.  It doesn't
+deal well with more substantial changes that might introduce conflicts, sorry.
 
 
 ## Submitting Drafts
