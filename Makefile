@@ -80,8 +80,8 @@ pdf: $(addsuffix .pdf,$(drafts))
 ifeq (,$(TRAVIS_REPO_SLUG))
 	sed -f lib/addstyle.sed $< > $@
 else
-	sed -f lib/addstyle.sed $< \
-	  -f lib/addribbon.sed -e 's~{SLUG}~$(TRAVIS_REPO_SLUG)~' > $@
+	sed -f lib/addstyle.sed $< -f lib/addribbon.sed | \
+	  sed -e 's~{SLUG}~$(TRAVIS_REPO_SLUG)~' > $@
 endif
 
 %.pdf: %.txt
