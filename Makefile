@@ -63,7 +63,7 @@ html: $(drafts_html)
 pdf: $(addsuffix .pdf,$(drafts))
 
 ## Basic Recipes
-.INTERMEDIATE: $(addsuffix .xml,$(drafts))
+.INTERMEDIATE: $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
 %.xml: %.md
 	XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
 	  $(kramdown-rfc2629) $< > $@
@@ -77,7 +77,12 @@ pdf: $(addsuffix .pdf,$(drafts))
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
 %.html: %.htmltmp lib/addstyle.sed lib/style.css
+ifeq (,$(TRAVIS_REPO_SLUG))
 	sed -f lib/addstyle.sed $< > $@
+else
+	sed -f lib/addstyle.sed $< \
+	  -f lib/addribbon.sed -e 's~{SLUG}~$(TRAVIS_REPO_SLUG)~' > $@
+endif
 
 %.pdf: %.txt
 	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
@@ -150,7 +155,7 @@ clean:
 	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
 	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
 	-rm -f $(draft_diffs)
-	-$(foreach draft,$(drafts),[ -f $(draft).md -o -f $(draft).org ] && rm -f $(draft).xml;)true
+	-rm -f  $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
 
 ## Update this Makefile
 
