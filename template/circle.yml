@@ -4,6 +4,11 @@ machine:
   ruby:
     version: 2.2.3
 
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
+
 dependencies:
   pre:
     - pip install xml2rfc
