@@ -8,15 +8,12 @@ checkout:
   post:
     - git submodule sync
     - git submodule update --init
+    - git fetch origin gh-pages --depth 10
 
 dependencies:
   pre:
     - pip install xml2rfc
     - gem install kramdown-rfc2629
-
-checkout:
-  post:
-    - git fetch origin gh-pages --depth 10
 
 test:
   override:
