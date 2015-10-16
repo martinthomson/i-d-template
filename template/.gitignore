@@ -1,3 +1,4 @@
+/lib/
 *.redxml
 *.txt
 *.html
@@ -6,6 +7,5 @@
 *.swp
 /*-[0-9][0-9].xml
 .refcache
-.i-d-template
 venv/
 issues.json
