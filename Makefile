@@ -196,7 +196,7 @@ update: $(UPDATE_FILES)
 	[ -f .i-d-template ] && [ $$(git rev-parse i-d-template/master) = $$(cat .i-d-template) ] || \
 	  git checkout i-d-template/master $^
 	git diff --quiet -- $^ && rm -f .i-d-template.diff || \
-	  git commit -m "Update of $^ from i-d-template/$$(git rev-parse i-d-template/master)" $^
+	  git add $^ && git commit -m "Update of $^ from i-d-template/$$(git rev-parse i-d-template/master)" $^
 	if [ -f .i-d-template.diff ]; then \
 	  git apply .i-d-template.diff && \
 	  git commit -m "Restoring local changes to $$(git diff --name-only $^ | paste -s -d ' ' -)" $^; \
