@@ -320,7 +320,11 @@ setup-ghpages:
 	git checkout --orphan gh-pages
 	git rm -rf .
 	touch index.html
-	git add index.html
+	echo 'general:' >circle.yml
+	echo '  branches:' >>circle.yml
+	echo '    ignore:' >>circle.yml
+	echo '      - gh-pages' >>circle.yml
+	git add index.html circle.yml
 	git commit -m "Automatic setup of gh-pages."
 	git push --set-upstream origin gh-pages
 	git checkout -qf "$(GIT_ORIG)"
