@@ -180,7 +180,10 @@ clean:
 # The prerequisites here are what is updated
 .INTERMEDIATE: .i-d-template.diff
 .PHONY: update
-update: Makefile lib .gitignore SUBMITTING.md .travis.yml circle.yml
+UPDATE_FILES := Makefile lib .gitignore SUBMITTING.md .travis.yml circle.yml 
+$(UPDATE_FILES):
+	[ ! -f $@ ] && touch $@
+update: $(UPDATE_FILES)
 	git diff --quiet -- $^ || \
 	  (echo "You have uncommitted changes to:" $^ 1>&2; exit 1)
 	-if [ -f .i-d-template ]; then \
