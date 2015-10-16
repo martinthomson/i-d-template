@@ -1,3 +1,9 @@
+# Important Notice
+
+! Anyone using the Travis configuration with versions of this prior to 2015-10-16
+should delete any Github account tokens used.  Travis logs might contain
+your token.
+
 # Internet Draft Template Repository
 
 The contents of this repository can be used to get started with a new internet
