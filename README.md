@@ -29,17 +29,13 @@ When prompted, select the option to initialize the repository with a README.
 Clone that repository:
 ```sh
 $ git clone https://github.com/unicorn-wg/unicorn-protocol.git
-```
-Copy the contents of this respository in:
-```sh
 $ cd unicorn-protocol
-$ git remote add i-d-template https://github.com/martinthomson/i-d-template.git
-$ git fetch i-d-template
-$ git reset i-d-template/master --hard
-$ git push -f origin master
 ```
-(Note that git reset is a sharp tool, especially with the `--hard` option.
-So is push with the `-f` option.)
+
+Create a git submodule that references this respository:
+```sh
+$ git submodule add https://github.com/martinthomson/i-d-template lib
+```
 
 Choose whether you want to use markdown, outline, or xml as your input form.
 If you already have a draft, then that decision is already made for you.
@@ -48,7 +44,7 @@ Make a draft file.  The name of the file is important, make it match the name of
 your draft.  You can take a copy of the template files if you are starting from
 scratch.
 
-Edit the draft so that it has both a title and the correct name.  This template
+Edit the draft so that it has both a title and the correct name.  These tools
 uses the `-latest` suffix in place of the usual number ('-00', or '-08').  The
 number is generated automatically when you use `make submit`.
 
@@ -71,7 +67,7 @@ The makefile has a `setup` target that you can now run.
 $ make setup
 ```
 
-This removes unused templates, updates `README.md` with guesses about your
+This removes adds some files, updates `README.md` with the details of your
 draft, sets up a `gh-pages` branch for your editor's copy.
 
 Check that everything looks OK, then push.

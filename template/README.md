@@ -63,14 +63,12 @@ links to the software those tools might require.
 Mac users will need to install
 [XCode](https://itunes.apple.com/us/app/xcode/id497799835) to get `make`, see
 [this answer](http://stackoverflow.com/a/11494872/1375574) for instructions.
-Some of the makefile targets need GNU make 4.0, which Apple doesn't ship yet;
-sorry, but if you want those, you can
-[download](https://www.gnu.org/software/make/) and build a copy for yourself.
 
 Windows users will need to use [Cygwin](http://cygwin.org/) to get `make`.
 
-All systems require [xml2rfc](http://xml2rfc.ietf.org/).  This requires [Python
-2.7](https://www.python.org/).  The easiest way to get `xml2rfc` is with `pip`.
+All systems require [xml2rfc](http://xml2rfc.ietf.org/).  This
+requires [Python](https://www.python.org/).  The easiest way to get
+`xml2rfc` is with `pip`.
 
 Using a `virtualenv`:
 
@@ -98,12 +96,15 @@ xml2rfc depends on development versions of [libxml2](http://xmlsoft.org/) and
 `libxslt1-dev` (Debian, Ubuntu) or `libxml2-devel` and `libxslt1-devel` (RedHat,
 Fedora).
 
-If you use markdown, you will also need to install `kramdown-xml2rfc`, which
-requires Ruby and can be installed using the roby package manager, `gem`:
+If you use markdown, you will also need to install `kramdown-rfc2629`,
+which requires Ruby and can be installed using the roby package
+manager, `gem`:
 
 ```sh
-$ gem install kramdown-xml2rfc
+$ gem install kramdown-rfc2629
 ```
+
+Some other helpful tools are listed in `config.mk`.
 
 
 ## NOTE WELL
