@@ -88,11 +88,11 @@ pdf: $(addsuffix .pdf,$(drafts))
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
 %.html: %.htmltmp lib/addstyle.sed lib/style.css
-ifeq (,$(CI_FULL_REPO))
+ifeq (,$(CI_REPO_FULL))
 	sed -f lib/addstyle.sed $< > $@
 else
 	sed -f lib/addstyle.sed $< -f lib/addribbon.sed | \
-	  sed -e 's~{SLUG}~$(CI_FULL_REPO)~' > $@
+	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
 endif
 
 %.pdf: %.txt
