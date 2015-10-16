@@ -23,7 +23,9 @@ drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 CI_BRANCH = $(TRAVIS_BRANCH)$(CIRCLE_BRANCH)
 CI_USER = $(patsubst /%,,$(TRAVIS_BRANCH))$(CIRCLE_PROJECT_USERNAME)
 CI_REPO = $(patsubst %/,,$(TRAVIS_BRANCH))$(CIRCLE_PROJECT_REPONAME)
+ifeq (true,$(CI))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
+endif
 ifneq (,$(TRAVIS_PULL_REQUEST)$(CI_PULL_REQUESTS))
   CI_IS_PR = true
 else
