@@ -55,6 +55,17 @@ drafts_html := $(addsuffix .html,$(drafts))
 drafts_next_txt := $(addsuffix .txt,$(drafts_next))
 drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 
+# CI config
+CI_BRANCH = $(TRAVIS_BRANCH)$(CIRCLE_BRANCH)
+CI_USER = $(patsubst /%,,$(TRAVIS_BRANCH))$(CIRCLE_PROJECT_USERNAME)
+CI_REPO = $(patsubst %/,,$(TRAVIS_BRANCH))$(CIRCLE_PROJECT_REPONAME)
+CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
+ifneq (,$(TRAVIS_PULL_REQUEST)$(CI_PULL_REQUESTS))
+  CI_IS_PR = true
+else
+  CI_IS_PR = false
+endif
+
 ## Basic Targets
 .PHONY: latest txt html pdf
 latest: txt html
@@ -77,11 +88,11 @@ pdf: $(addsuffix .pdf,$(drafts))
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
 %.html: %.htmltmp lib/addstyle.sed lib/style.css
-ifeq (,$(TRAVIS_REPO_SLUG))
+ifeq (,$(CI_FULL_REPO))
 	sed -f lib/addstyle.sed $< > $@
 else
 	sed -f lib/addstyle.sed $< -f lib/addribbon.sed | \
-	  sed -e 's~{SLUG}~$(TRAVIS_REPO_SLUG)~' > $@
+	  sed -e 's~{SLUG}~$(CI_FULL_REPO)~' > $@
 endif
 
 %.pdf: %.txt
@@ -140,9 +151,16 @@ $(foreach args,$(prev_versions),$(eval $(call makerule_prev,$(args))))
 
 ## Store a copy of any github issues
 
+ifndef CI_REPO_FULL
 GITHUB_REPO_FULL := $(shell git ls-remote --get-url | sed -e 's/^.*github\.com.//;s/\.git$$//')
 GITHUB_USER := $(word 1,$(subst /, ,$(GITHUB_REPO_FULL)))
 GITHUB_REPO := $(word 2,$(subst /, ,$(GITHUB_REPO_FULL)))
+else
+GITHUB_REPO_FULL := $(CI_REPO_FULL)
+GITHUB_USER := $(CI_USER)
+GITHUB_REPO:= $(CI_REPO)
+endif
+
 .PHONY: issues
 issues:
 	curl https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open > $@.json
@@ -186,19 +204,19 @@ update: Makefile lib .gitignore SUBMITTING.md
 
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 .INTERMEDIATE: $(GHPAGES_TMP)
-ifeq (,$(TRAVIS_COMMIT))
+ifneq (,$(CI_BRANCH))
+GIT_ORIG := $(CI_BRANCH)
+else
 GIT_ORIG := $(shell git branch | grep '*' | cut -c 3-)
+endif
 ifneq (,$(findstring detached from,$(GIT_ORIG)))
 GIT_ORIG := $(shell git show -s --format='format:%H')
 endif
-else
-GIT_ORIG := $(TRAVIS_COMMIT)
-endif
 
 # Only run upload if we are local or on the master branch
-IS_LOCAL := $(if $(TRAVIS),,true)
-ifeq (master,$(TRAVIS_BRANCH))
-IS_MASTER := $(findstring false,$(TRAVIS_PULL_REQUEST))
+IS_LOCAL := $(if $(CI),,true)
+ifeq (master,$(CI_BRANCH))
+IS_MASTER := $(findstring false,$(CI_IS_PR))
 else
 IS_MASTER :=
 endif
@@ -222,7 +240,7 @@ endif
 
 .PHONY: ghpages
 ghpages: index.html $(drafts_html) $(drafts_txt)
-ifneq (true,$(TRAVIS))
+ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-pages > /dev/null 2>&1 || \
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
 endif
@@ -230,9 +248,9 @@ ifneq (,$(or $(IS_LOCAL),$(IS_MASTER)))
 	mkdir $(GHPAGES_TMP)
 	cp -f $^ $(GHPAGES_TMP)
 	git clean -qfdX
-ifeq (true,$(TRAVIS))
+ifeq (true,$(CI))
 	git config user.email "ci-bot@example.com"
-	git config user.name "Travis CI Bot"
+	git config user.name "CI Bot"
 	git checkout -q --orphan gh-pages
 	git rm -qr --cached .
 	git clean -qfd
@@ -245,8 +263,8 @@ endif
 	git add $^
 	if test `git status -s | wc -l` -gt 0; then git commit -m "Script updating gh-pages."; fi
 ifneq (,$(GH_TOKEN))
-	@echo git push https://github.com/$(TRAVIS_REPO_SLUG).git gh-pages
-	@git push https://$(GH_TOKEN)@github.com/$(TRAVIS_REPO_SLUG).git gh-pages
+	@echo git push -q https://github.com/$(CI_REPO_FULL).git gh-pages
+	@git push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL).git gh-pages
 endif
 	-git checkout -qf "$(GIT_ORIG)"
 	-rm -rf $(GHPAGES_TMP)
@@ -271,7 +289,7 @@ endif
 	  DRAFT_STATUS=$$(test "$$AUTHOR_LABEL" = ietf && echo Working Group || echo Individual); \
 	  GITHUB_USER=$(GITHUB_USER); GITHUB_REPO=$(GITHUB_REPO); \
 	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>[^<]*$$/{s/.*>//g;H};/<\/title>/{H;x;s/.*<title/</g;s/<[^>]*>//g;q};d' $<); \
-	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's/{$(label)}/'"$$$(label)"'/g') README.md CONTRIBUTING.md
+	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's~{$(label)}~'"$$$(label)"'~g') README.md CONTRIBUTING.md
 	git add README.md CONTRIBUTING.md
 ifneq (xml,$(firstword $(draft_types)))
 	echo $< >> .gitignore

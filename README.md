@@ -83,39 +83,42 @@ occasionally.
 $ make ghpages
 ```
 
-Or, you can setup an automatic commit hook using Travis.
+Or, you can setup an automatic commit hook using Travis or Circle CI.
 
 
 ### Automatic Update for Editor's Copy
 
-This requires that you sign in with [Travis](https://travis-ci.org/).
+This requires that you sign in with [Travis](https://travis-ci.org/) or
+[Circle](https://circleci.com/).
 
-First enable builds for the new repository on the Travis site.  (Hit the button
-with a '+' on it once you are logged in.)  Note that Travis only synchronizes
-repositories with GitHub once a day, so you might have to force a refresh.
+First enable builds for the new repository:
+[Travis](https://travis-ci.org/profile),
+[Circle](https://circleci.com/add-projects).  Travis might need to be refreshed
+before you can see your repository.
 
 Then, you need to get yourself a [new GitHub application
 token](https://github.com/settings/tokens/new).  The application token only
 needs the `public_repo` privilege.  This will let it push updates to your
 `gh-pages` branch.
 
-You can add environment variables using the Travis interface.  Include a
-variable with the name `GH_TOKEN` and the value of your newly-created
-application token.  Leave the value of "Display value in build log" disabled, or
-you will be making your token public.
+You can add environment variables using the Travis or Circle interface.  Include
+a variable with the name `GH_TOKEN` and the value of your newly-created
+application token.  On Travis, make sure to leave the value of "Display value in
+build log" disabled, or you will be making your token public.
 
 **WARNING**: You might want to use a dummy account for application tokens to
-minimize any problems from accidental leaks of your key.
+minimize the consequences of accidental leaks of your key.
 
-Once you enable pushes from Travis, be very careful merging pull requests that
-alter `.travis.yml` or `Makefile`.  Those files can cause the value of the token
-to be published for all to see.  You don't want that to happen.  Even though
-tokens can be revoked easily, discovering a leak might take some time.  Only
-pushes to the main repository will be able to see the token, so don't worry
+Once you enable pushes, be very careful merging pull requests that alter
+`.travis.yml`, `circle.yml` or `Makefile`.  Those files can cause the value of
+the token to be published for all to see.  You don't want that to happen.  Even
+though tokens can be revoked easily, discovering a leak might take some time.
+Only pushes to the main repository will be able to see the token, so don't worry
 about pull requests.
 
-As a side benefit, Travis will now also check pull requests for errors, letting
-you know if things didn't work out so that you don't merge anything suspect.
+As a side benefit, Travis and Circle will now also check pull requests for
+errors, letting you know if things didn't work out so that you don't merge
+anything suspect.
 
 
 ## Updating the Makefile
