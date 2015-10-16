@@ -123,20 +123,26 @@ errors, letting you know if things didn't work out so that you don't merge
 anything suspect.
 
 
-## Updating the Makefile
+## Updating the Support Files
 
-Occasionally improvements and changes are made to the Makefile or the support
-files in this repository.  The `update` make target looks after the update of
-the core files.
+Occasionally improvements and changes are made to the Makefile or the
+support files in this repository.  Just change to the `lib` directory,
+pull down the changes, and commit:
 
 ```sh
-$ make update
-$ git commit
+$ cd lib
+$ git pull
+$ cd ..
+$ git commit -a
+$ git push
 ```
 
-This script is cunning enough to handle merging any simple changes that you
-might have made to the Makefile yourself, such as adding targets.  It doesn't
-deal well with more substantial changes that might introduce conflicts, sorry.
+On other clones, you will need to update when you do this:
+
+```sh
+$ git pull
+$ git submodule update
+```
 
 
 ## Submitting Drafts
