@@ -62,9 +62,9 @@ docname: draft-ietf-unicorn-protocol-latest
 title: The Unicorn Protocol
 ```
 
-The makefile has a `setup` target that you can now run.
+Now, run the setup commands:
 ```sh
-$ make setup
+$ make -f lib/setup.mk
 ```
 
 This removes adds some files, updates `README.md` with the details of your
