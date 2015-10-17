@@ -6,6 +6,7 @@ ifeq (Darwin,$(shell uname -s))
 $(warning With homebrew (https://brew.sh) type:)
 $(warning $$ brew tap homebrew/dupes)
 $(warning $$ brew install homebrew/dupes/make)
+$(warning This installs `gmake`)
 endif
 $(warning =======================)
 endif
