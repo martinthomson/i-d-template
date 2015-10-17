@@ -1,6 +1,7 @@
 .PHONY: latest
 latest:: txt html
 
+include lib/compat.mk
 include lib/config.mk
 include lib/id.mk
 include lib/ghpages.mk
