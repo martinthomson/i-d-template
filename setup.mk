@@ -5,7 +5,7 @@ include lib/main.mk
 
 TEMPLATE_FILES := \
   Makefile .gitignore \
-  README.md CONTRIBUTING.md SUBMITTING.md \
+  README.md CONTRIBUTING.md \
   .travis.yml circle.yml
 
 .PHONY: setup-readme

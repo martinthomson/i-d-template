@@ -19,6 +19,8 @@ GitHub.
 Make a [new organization](https://github.com/organizations/new) for your working
 group.  This guide will use the name `unicorn-wg` for your working group.
 
+See the [more detailed guide](https://github.com/martinthomson/blob/master/doc/WG-SETUP.md).
+
 ### New Draft Setup
 
 [Make a new repository](https://github.com/new).  This guide will use the
@@ -147,4 +149,4 @@ $ git submodule update
 
 ## Submitting Drafts
 
-See `SUBMITTING.md`.
+See the [submission guide](https://github.com/martinthomson/i-d-template/blob/master/doc/SUBMITTING.md).
