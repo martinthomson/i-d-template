@@ -59,7 +59,7 @@ else
 endif
 	mv -f $(GHPAGES_TMP)/* $(CURDIR)
 	git add $^
-	if test `git status -s | wc -l` -gt 0; then git commit -m "Script updating gh-pages."; fi
+	if test `git status -s | wc -l` -gt 0; then git commit -m "Script updating gh-pages. [ci skip]"; fi
 ifneq (,$(GH_TOKEN))
 	@echo git push -q https://github.com/$(CI_REPO_FULL).git gh-pages
 	@git push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL).git gh-pages
