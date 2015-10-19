@@ -16,7 +16,9 @@ drafts_prev := $(foreach draft,$(drafts),$(draft)-$(f_prev_tag))
 
 drafts_txt := $(addsuffix .txt,$(drafts))
 drafts_html := $(addsuffix .html,$(drafts))
+drafts_xml := $(addsuffix .xml,$(drafts))
 drafts_next_txt := $(addsuffix .txt,$(drafts_next))
+drafts_next_xml := $(addsuffix .xml,$(drafts_next))
 drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 
 # CI config
