@@ -132,9 +132,7 @@ support files in this repository.  Just change to the `lib` directory,
 pull down the changes, and commit:
 
 ```sh
-$ cd lib
-$ git pull
-$ cd ..
+$ git -C lib pull origin master
 $ git commit -a
 $ git push
 ```
