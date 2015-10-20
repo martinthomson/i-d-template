@@ -62,7 +62,7 @@ endif
 	if test `git status -s | wc -l` -gt 0; then git commit -m "Script updating gh-pages. [ci skip]"; fi
 ifneq (,$(GH_TOKEN))
 	@echo git push -q https://github.com/$(CI_REPO_FULL).git gh-pages
-	@git push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL).git gh-pages
+	@git push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL).git gh-pages >/dev/null 2>&1
 endif
 	-git checkout -qf "$(GIT_ORIG)"
 	-rm -rf $(GHPAGES_TMP)
