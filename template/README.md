@@ -60,9 +60,13 @@ links to the software those tools might require.
 
 ## Installation and Setup
 
-Mac users will need to install
-[XCode](https://itunes.apple.com/us/app/xcode/id497799835) to get `make`, see
-[this answer](http://stackoverflow.com/a/11494872/1375574) for instructions.
+Mac users will need to install [Homebrew](https://brew.sh) to get a version of
+`make` that works properly (the version shipped in XCode is subtly broken).
+
+```sh
+brew tap homebrew/dupes && brew install homebrew/dupes/make
+ln -s /usr/local/gmake /usr/local/make
+```
 
 Windows users will need to use [Cygwin](http://cygwin.org/) to get `make`.
 
