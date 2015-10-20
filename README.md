@@ -12,7 +12,7 @@ draft.
 ## Getting Started
 
 This all assumes that you have an [account](https://github.com/join) with
-GitHub.
+GitHub and that you have your [machine setup](https://github.com/martinthomson/i-d-template/blob/master/doc/SETUP.md).
 
 ### Working Group Setup
 
