@@ -60,9 +60,13 @@ endif
 	mv -f $(GHPAGES_TMP)/* $(CURDIR)
 	git add $^
 	if test `git status -s | wc -l` -gt 0; then git commit -m "Script updating gh-pages. [ci skip]"; fi
+ifneq (,$(CI_HAS_WRITE_KEY))
+	git push https://github.com/$(CI_REPO_FULL).git gh-pages
+else
 ifneq (,$(GH_TOKEN))
 	@echo git push -q https://github.com/$(CI_REPO_FULL).git gh-pages
 	@git push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL).git gh-pages >/dev/null 2>&1
+endif
 endif
 	-git checkout -qf "$(GIT_ORIG)"
 	-rm -rf $(GHPAGES_TMP)
