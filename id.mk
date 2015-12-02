@@ -28,10 +28,10 @@ CI_REPO = $(patsubst %/,,$(TRAVIS_REPO_SLUG))$(CIRCLE_PROJECT_REPONAME)
 ifeq (true,$(CI))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
 endif
-ifneq (,$(TRAVIS_PULL_REQUEST)$(CI_PULL_REQUESTS))
+ifneq (,$(CI_PULL_REQUESTS))
   CI_IS_PR = true
 else
-  CI_IS_PR = false
+  CI_IS_PR = $(TRAVIS_PULL_REQUEST)
 endif
 
 # Github guesses
@@ -44,4 +44,3 @@ GITHUB_REPO_FULL := $(CI_REPO_FULL)
 GITHUB_USER := $(CI_USER)
 GITHUB_REPO:= $(CI_REPO)
 endif
-
