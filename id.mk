@@ -23,8 +23,8 @@ drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 
 # CI config
 CI_BRANCH = $(TRAVIS_BRANCH)$(CIRCLE_BRANCH)
-CI_USER = $(patsubst /%,,$(TRAVIS_REPO_SLUG))$(CIRCLE_PROJECT_USERNAME)
-CI_REPO = $(patsubst %/,,$(TRAVIS_REPO_SLUG))$(CIRCLE_PROJECT_REPONAME)
+CI_USER = $(word 1,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_USERNAME)
+CI_REPO = $(word 2,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_REPONAME)
 ifeq (true,$(CI))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
 endif
