@@ -30,7 +30,7 @@ pdf:: $(addsuffix .pdf,$(drafts))
 ifeq (,$(CI_REPO_FULL))
 	sed -f lib/addstyle.sed $< > $@
 else
-	sed -f lib/addstyle.sed $< -f lib/addribbon.sed | \
+	sed -f lib/addstyle.sed -f lib/addribbon.sed $< | \
 	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
 endif
 

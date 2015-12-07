@@ -1,3 +1,4 @@
+ifeq (false,$(CI))
 ifeq (3,$(word 1,$(subst ., ,$(MAKE_VERSION))))
 $(warning =================================================)
 $(warning GNU Make version $(MAKE_VERSION) isn't supported)
@@ -10,4 +11,5 @@ $(warning $$ brew install homebrew/dupes/make)
 $(warning Note: This installs make as `gmake`)
 endif
 $(warning =================================================)
+endif
 endif

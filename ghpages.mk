@@ -11,13 +11,14 @@ ifneq (,$(findstring detached from,$(GIT_ORIG)))
 GIT_ORIG := $(shell git show -s --format='format:%H')
 endif
 
-# Only run upload if we are local or on the master branch
-IS_LOCAL := $(if $(CI),,true)
 ifeq (master,$(CI_BRANCH))
-IS_MASTER := $(findstring false,$(CI_IS_PR))
+IS_MASTER = $(if $(findstring false,$(CI_IS_PR)),true,false)
 else
-IS_MASTER :=
+IS_MASTER = false
 endif
+# Only run upload if we are local or on the master branch
+BUILD_GHPAGES := $(if $(or $(findstring false,$(CI)), \
+                           $(findstring true,$(IS_MASTER))),true,false)
 
 define INDEX_HTML =
 <!DOCTYPE html>\n\
@@ -42,7 +43,7 @@ ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-pages > /dev/null 2>&1 || \
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
 endif
-ifneq (,$(or $(IS_LOCAL),$(IS_MASTER)))
+ifeq (true,$(BUILD_GHPAGES))
 	mkdir $(GHPAGES_TMP)
 	cp -f $^ $(GHPAGES_TMP)
 	git clean -qfdX
