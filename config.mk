@@ -29,5 +29,5 @@ enscript ?= enscript
 ps2pdf ?= ps2pdf
 
 # Where to get references
-# Use http://xml2rfc.tools.ietf.org/public/rfc/bibxml/ if this fails.
+# Use http://xml2rfc.tools.ietf.org/public/rfc if this fails.
 XML_RESOURCE_ORG_PREFIX ?= http://unicorn-wg.github.io/idrefs
