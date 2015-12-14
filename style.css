@@ -122,6 +122,10 @@ pre {
   padding: 5px;
   margin: 5px;
 }
+.figure {
+  font-style: italic;
+  margin: 0 1.5em;
+}
 
 address {
   margin: 10px 0 0;
