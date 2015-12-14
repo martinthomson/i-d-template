@@ -118,10 +118,9 @@ samp, tt, code, pre {
 pre {
   background-color: #eee;
   border: 1px solid #ddd;
-}
-
-pre.text, pre.text2 {
-  width: 90%;
+  overflow-x: auto;
+  padding: 0.5em;
+  margin: 0.5em;
 }
 
 address {
