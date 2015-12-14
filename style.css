@@ -52,20 +52,18 @@ body {
 h1 { font-size: 30px; }
 h2 { font-size: 24px; }
 h3, h4 { font-size: 18px; }
-h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
+h1 a:link, h2 a:link, h3 a:link, h4 a:link {
   color: #333;
 }
 
 ul.toc li {
   list-style: none;
+  text-indent: -2.5em;
+  padding-left: 2.5em;
   padding-bottom: 5px;
 }
 ul.toc, ul.toc ul {
   margin: 0 0 0 1.5em;
-}
-ul.toc a:first-child {
-  display: inline-block;
-  min-width: 1.2em;
 }
 
 table {
@@ -179,10 +177,10 @@ hr {
 a {
   text-decoration: none;
 }
-a[href] {
+a:link {
   color: #2a6496;
 }
-a[href]:hover {
+a:link:hover {
   background-color: #eee;
 }
 
@@ -215,8 +213,8 @@ ol, ul {
     transform: rotate(45deg);
   }
 
-  .github-fork-ribbon a[href],
-  .github-fork-ribbon a[href]:hover {
+  .github-fork-ribbon a:link,
+  .github-fork-ribbon a:link:hover {
     color: #fff;
     background-color: transparent;
     text-decoration: none;
