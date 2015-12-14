@@ -7,7 +7,7 @@
   zoom: 1.0;
 }
 
-@media screen and (min-width: 1000px) {
+@media screen and (min-width: 1024px) {
   ul.toc, #rfc\.toc {
     position: fixed;
     bottom: 0;
@@ -37,7 +37,7 @@ body {
   font-size-adjust: 0.5;
   line-height: 130%;
   margin: 2.5em auto;
-  max-width: 700px;
+  max-width: 724px;
 }
 
 .title, .filename, h1, h2, h3, h4 {
@@ -52,7 +52,7 @@ body {
 h1 { font-size: 30px; }
 h2 { font-size: 24px; }
 h3, h4 { font-size: 18px; }
-h1 a:link, h2 a:link, h3 a:link, h4 a:link {
+h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
   color: #333;
 }
 
@@ -119,8 +119,8 @@ pre {
   background-color: #eee;
   border: 1px solid #ddd;
   overflow-x: auto;
-  padding: 0.5em;
-  margin: 0.5em;
+  padding: 5px;
+  margin: 5px;
 }
 
 address {
@@ -181,7 +181,7 @@ hr {
 a {
   text-decoration: none;
 }
-a:link {
+a:link, a:link:visited {
   color: #2a6496;
 }
 a:link:hover {
