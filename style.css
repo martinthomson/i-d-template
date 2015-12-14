@@ -124,6 +124,9 @@ pre.text, pre.text2 {
   width: 90%;
 }
 
+address {
+  margin: 10px 0 0;
+}
 .vcard {
   font-style: normal;
 }
@@ -206,39 +209,36 @@ ol, ul {
     box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.5);
     font: 700 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-    z-index: 2;
     pointer-events: auto;
 
-    top: 40px;
-    right: -41px;
+    top: 38px;
+    right: -45px;
 
     transform: rotate(45deg);
   }
 
-  .github-fork-ribbon a:link,
-  .github-fork-ribbon a:link:hover {
+  .github-fork-ribbon a[href],
+  .github-fork-ribbon a[href]:hover {
     color: #fff;
     background-color: transparent;
     text-decoration: none;
     text-shadow: 0 -1px rgba(0, 0, 0, 0.5);
     text-align: center;
 
-    width: 180px;
+    width: 190px;
     line-height: 18px;
 
     display: inline-block;
     padding: 2px 0;
 
-    border-width: 1px 0;
-    border-style: dotted;
-    border-color: #fff;
-    border-color: rgba(255, 255, 255, 0.7);
+    border: 1.5px dotted #fff;
+    border-color: rgba(255, 255, 255, 0.6);
   }
 
   .github-fork-ribbon-wrapper {
     display: block;
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
     position: absolute;
     overflow: hidden;
     top: 0; right: 0;
