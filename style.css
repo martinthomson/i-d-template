@@ -2,70 +2,63 @@
   zoom: 1.0;
   width: extend-to-zoom;
 }
-
 @-ms-viewport {
   width: extend-to-zoom;
   zoom: 1.0;
 }
 
+@media screen and (min-width: 1000px) {
+  ul.toc, #rfc\.toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 500px);
+    width: 300px;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #rfc\.toc {
+    top: 16px;
+  }
+  ul.toc {
+    top: 80px;
+    overflow: auto;
+  }
+
+  body {
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+}
+
 body {
-  font: 11pt cambria, helvetica, arial, sans-serif;
+  font: 15px "Helvetica Neue",Helvetica,Arial,sans-serif;
+  color: #333;
   font-size-adjust: 0.5;
   line-height: 130%;
-  margin: 1em auto;
+  margin: 2.5em auto;
   max-width: 700px;
 }
 
 .title, .filename, h1, h2, h3, h4 {
-  font-family: candara, helvetica, arial, sans-serif;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size-adjust: 0.5;
+  font-weight: 500;
+  color: #333;
+  line-height: 100%;
+  margin: 0.8em 0 0.3em;
 }
-.title { font-size: 150%; }
-h1 { font-size: 130%; }
-h2 { font-size: 120%; }
-h3, h4 { font-size: 110%; }
-
-table {
-  margin-left: 0em;
-}
-table.header {
-  width: 100%;
-}
-
-table.header td {
-  background-color: inherit;
-  color: black;
+.title { font-size: 36px; }
+h1 { font-size: 30px; }
+h2 { font-size: 24px; }
+h3, h4 { font-size: 18px; }
+h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
+  color: #333;
 }
 
-samp, tt, code, pre {
-  font: 11pt consolas, monospace;
-  font-size-adjust: none;
-}
-
-pre.text, pre.text2 {
-  width: 90%;
-}
-
-dt {
-  float: left; clear: left;
-  margin: 0.5em 0.5em 0 0;
-}
-dt:first-child {
-  margin-top: 0;
-}
-dd {
-  margin: 0.5em 0 0 2em;
-}
-dd p, dd ul {
-  margin-top: 0; margin-bottom: 0;
-}
-dd *+p {
-  margin-top: 0.5em;
-}
-
-ol, ul {
-  padding: 0;
-  margin: 0.5em 0 0.5em 2em;
+ul.toc li {
+  list-style: none;
+  padding-bottom: 5px;
 }
 ul.toc, ul.toc ul {
   margin: 0 0 0 1.5em;
@@ -74,3 +67,186 @@ ul.toc a:first-child {
   display: inline-block;
   min-width: 1.2em;
 }
+
+table {
+  margin-left: 0em;
+  border-collapse: collapse;
+}
+table > thead > th {
+  border-bottom: 2px solid #ddd;
+}
+table > tbody > tr > td, table > tbody > tr > th {
+  border-top: 1px solid #ddd;
+}
+table > tbody > tr:nth-child(2n+1) > td,
+table > tbody > tr:nth-child(2n+1) > th {
+  background-color: #f9f9f9;
+}
+td.right {
+  text-align: right;
+}
+td.reference {
+  max-width: 200px;
+}
+td.right, td.left, td.reference, td.top {
+  border-top: none;
+}
+
+
+table.header {
+  width: 100%;
+}
+table.header > tbody > tr > td {
+  background-color: transparent;
+  color: black;
+}
+.filename {
+  color: rgb(119, 119, 119);
+  font-size: 23px;
+  font-weight: normal;
+  height: auto;
+  line-height: 100%;
+}
+#rfc\.abstract+p, #rfc\.abstract +p {
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 130%;
+}
+
+samp, tt, code, pre {
+  font: 11pt consolas, monospace;
+  font-size-adjust: none;
+}
+
+pre.text, pre.text2 {
+  background-color: #eee;
+  border: 1px solid #ddd;
+  width: 90%;
+}
+
+.vcard {
+  font-style: normal;
+}
+.vcardline {
+  display: block;
+}
+.vcardline .fn {
+  font-weight: bold;
+}
+.vcardline .hidden {
+  display: none;
+}
+
+dl {
+  margin-left: 1em;
+}
+dl.dl-horizontal: {
+  margin-left: 0;
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.nohang > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .5em;
+}
+dl.compact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+ul.empty {
+  list-style-type: none;
+}
+ul.empty li {
+  margin-top: .5em;
+}
+td.reference {
+  padding-right: 1em;
+  vertical-align: top;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #2a6496;
+}
+a[href]:hover {
+  background-color: #eee;
+}
+
+ol, ul {
+  padding: 0;
+  margin: 0.5em 0 0.5em 2em;
+}
+
+.github-fork-ribbon-wrapper {
+  display: none;
+}
+@media screen and (min-width: 800px) {
+  /* "Fork me on GitHub" CSS ribbon based on
+   * https://github.com/simonwhitaker/github-fork-ribbon-css
+   */
+  .github-fork-ribbon {
+    position: absolute;
+    padding: 2px 0;
+    background-color: #a00;
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.5);
+    font: 700 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+    z-index: 2;
+    pointer-events: auto;
+
+    top: 40px;
+    right: -41px;
+
+    transform: rotate(45deg);
+  }
+
+  .github-fork-ribbon a[href],
+  .github-fork-ribbon a[href]:hover {
+    color: #fff;
+    background-color: transparent;
+    text-decoration: none;
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.5);
+    text-align: center;
+
+    width: 180px;
+    line-height: 18px;
+
+    display: inline-block;
+    padding: 2px 0;
+
+    border-width: 1px 0;
+    border-style: dotted;
+    border-color: #fff;
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .github-fork-ribbon-wrapper {
+    display: block;
+    width: 150px;
+    height: 150px;
+    position: absolute;
+    overflow: hidden;
+    top: 0; right: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+}
+@media screen and (min-width: 1000px) {
+  .github-fork-ribbon-wrapper {
+    position: fixed;
+  }
