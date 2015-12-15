@@ -71,29 +71,32 @@ table {
   border-collapse: collapse;
 }
 th {
+  text-align: left;
   border-bottom: 2px solid #ddd;
 }
 td {
   border-top: 1px solid #ddd;
   vertical-align: top;
 }
-table > tbody > tr:nth-child(2n+1) > td,
-table > tbody > tr:nth-child(2n+1) > th {
+tr:nth-child(2n+1) > td,
+tr:nth-child(2n+1) > th {
   background-color: #f9f9f9;
-}
-td.right {
-  text-align: right;
 }
 td.reference {
   max-width: 200px;
   border-top: none;
+  padding-right: 1em;
+}
+.right {
+  text-align: right;
 }
 
 
 table.header {
   width: 100%;
 }
-table.header > tbody > tr > td {
+table.header td {
+  border: none;
   background-color: transparent;
   color: black;
 }
@@ -104,7 +107,7 @@ table.header > tbody > tr > td {
   height: auto;
   line-height: 100%;
 }
-#rfc\.abstract+p, #rfc\.abstract +p {
+#rfc\.abstract+p {
   font-size: 20px;
   font-weight: 300;
   line-height: 130%;
@@ -171,10 +174,6 @@ ul.empty {
 ul.empty li {
   margin-top: .5em;
 }
-td.reference {
-  padding-right: 1em;
-  vertical-align: top;
-}
 
 hr {
   border: 0;
@@ -184,10 +183,10 @@ hr {
 a {
   text-decoration: none;
 }
-a:link, a:link:visited {
+a[href] {
   color: #2a6496;
 }
-a:link:hover {
+a[href]:hover {
   background-color: #eee;
 }
 
