@@ -70,10 +70,10 @@ table {
   margin-left: 0em;
   border-collapse: collapse;
 }
-table > thead > th {
+th {
   border-bottom: 2px solid #ddd;
 }
-table > tbody > tr > td, table > tbody > tr > th {
+td {
   border-top: 1px solid #ddd;
   vertical-align: top;
 }
@@ -86,8 +86,6 @@ td.right {
 }
 td.reference {
   max-width: 200px;
-}
-td.right, td.left, td.reference, td.top {
   border-top: none;
 }
 
