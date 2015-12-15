@@ -22,6 +22,10 @@ endif
 	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>[^<]*$$/{s/.*>//g;H;};/<\/title>/{H;x;s/.*<title/</g;s/<[^>]*>//g;q;};d' $<); \
 	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's~{$(label)}~'"$$$(label)"'~g') $(filter %.md,$(TEMPLATE_FILES))
 	git add $(TEMPLATE_FILES)
+ifeq (,$(shell git submodule status lib 2>/dev/null))
+	echo lib >> .gitignore
+	git add .gitignore
+endif
 ifneq (xml,$(firstword $(draft_types)))
 	echo $< >> .gitignore
 	git add .gitignore
