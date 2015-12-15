@@ -75,6 +75,7 @@ table > thead > th {
 }
 table > tbody > tr > td, table > tbody > tr > th {
   border-top: 1px solid #ddd;
+  vertical-align: top;
 }
 table > tbody > tr:nth-child(2n+1) > td,
 table > tbody > tr:nth-child(2n+1) > th {
