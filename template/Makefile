@@ -1,7 +1,7 @@
 include lib/main.mk
 
 lib/main.mk:
-ifneq(,$(shell git submodule status lib 2>/dev/null))
+ifneq (,$(shell git submodule status lib 2>/dev/null))
 	git submodule sync
 	git submodule update --init
 else
