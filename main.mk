@@ -14,7 +14,16 @@ pdf:: $(addsuffix .pdf,$(drafts))
 
 ## Basic Recipes
 .INTERMEDIATE: $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
+
+ifdef MD_PREPROCESSOR
+.INTERMEDIATE: $(addsuffix .mdtmp,$(drafts))
+%.mdtmp: %.md
+	$(MD_PREPROCESSOR) < $< > $@
+
+%.xml: %.mdtmp
+else
 %.xml: %.md
+endif
 	XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
 	  $(kramdown-rfc2629) $< > $@
 
