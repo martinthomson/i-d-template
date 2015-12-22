@@ -12,4 +12,10 @@ $(warning Note: This installs make as `gmake`)
 endif
 $(warning =================================================)
 endif
+else
+ifndef GH_TOKEN
+$(warning =================================================)
+$(warning No GH_TOKEN value set, github pages won't be updated)
+$(warning =================================================)
+endif
 endif
