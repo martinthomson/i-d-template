@@ -1,4 +1,4 @@
-ifeq (false,$(CI))
+ifneq (true,$(CI))
 ifeq (3,$(word 1,$(subst ., ,$(MAKE_VERSION))))
 $(warning =================================================)
 $(warning GNU Make version $(MAKE_VERSION) isn't supported)
@@ -9,10 +9,10 @@ $(warning With homebrew (https://brew.sh) type:)
 $(warning $$ brew tap homebrew/dupes)
 $(warning $$ brew install homebrew/dupes/make)
 $(warning Note: This installs make as `gmake`)
-endif
+endif # Darwin
 $(warning =================================================)
 endif
-else
+else # not on CI
 ifndef GH_TOKEN
 $(warning =================================================)
 $(warning No GH_TOKEN value set, github pages won't be updated)
