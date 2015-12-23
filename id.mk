@@ -1,5 +1,9 @@
 ## Identify drafts, types and versions
 
+ifneq (,$(shell git submodule status $(LIBDIR) 2>/dev/null))
+SUBMODULE = true
+endif
+
 drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
 
 ifeq (,$(drafts))

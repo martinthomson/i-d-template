@@ -1,10 +1,12 @@
 .PHONY: latest
 latest:: txt html
 
-include lib/compat.mk
-include lib/config.mk
-include lib/id.mk
-include lib/ghpages.mk
+LIBDIR ?= lib
+include $(LIBDIR)/compat.mk
+include $(LIBDIR)/config.mk
+include $(LIBDIR)/id.mk
+include $(LIBDIR)/ghpages.mk
+include $(LIBDIR)/update.mk
 
 ## Basic Targets
 .PHONY: txt html pdf
@@ -35,11 +37,11 @@ endif
 
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
-%.html: %.htmltmp lib/addstyle.sed lib/style.css
+%.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
 ifeq (,$(CI_REPO_FULL))
-	sed -f lib/addstyle.sed $< > $@
+	sed -f $(LIBDIR)/addstyle.sed $< > $@
 else
-	sed -f lib/addstyle.sed -f lib/addribbon.sed $< | \
+	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed $< | \
 	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
 endif
 

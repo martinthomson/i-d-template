@@ -1,7 +1,8 @@
 .PHONY: setup
 setup: setup-readme setup-ghpages
 
-include lib/main.mk
+LIBDIR ?= lib
+include $(LIBDIR)/main.mk
 
 TEMPLATE_FILES := \
   Makefile .gitignore \
@@ -22,8 +23,8 @@ endif
 	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>[^<]*$$/{s/.*>//g;H;};/<\/title>/{H;x;s/.*<title/</g;s/<[^>]*>//g;q;};d' $<); \
 	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's~{$(label)}~'"$$$(label)"'~g') $(filter %.md,$(TEMPLATE_FILES))
 	git add $(TEMPLATE_FILES)
-ifeq (,$(shell git submodule status lib 2>/dev/null))
-	echo lib >> .gitignore
+ifndef SUBMODULE
+	echo $(LIBDIR) >> .gitignore
 	git add .gitignore
 endif
 ifneq (xml,$(firstword $(draft_types)))
@@ -33,7 +34,7 @@ endif
 	git commit -m "Setup repository for $(basename $<)"
 
 define template_rule =
-$(1): $$(addprefix lib/template/,$(1))
+$(1): $$(addprefix $(LIBDIR)/template/,$(1))
 	cp $$< $$@
 endef
 submit_deps := $(join $(addsuffix .xml: ,$(drafts_next)),$(addsuffix .xml,$(drafts)))
