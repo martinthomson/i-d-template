@@ -34,22 +34,13 @@ $ git clone https://github.com/unicorn-wg/unicorn-protocol.git
 $ cd unicorn-protocol
 ```
 
-Two options here:
-
-A) If you want a stable version of the template, create a git submodule that
-references this respository:
-
-```sh
-$ git submodule add https://github.com/martinthomson/i-d-template lib
-```
-
-B) If you want to always use the latest version of the template, just clone a
-copy of this respository into place:
+Clone a copy of this respository into place:
 
 ```sh
 $ git clone https://github.com/martinthomson/i-d-template lib
 ```
 
+Alternatively, you can use `git submodule` to get a stable version.
 
 Choose whether you want to use markdown, outline, or xml as your input form.
 If you already have a draft, then that decision is already made for you.
@@ -140,20 +131,11 @@ anything suspect.
 ## Updating the Support Files
 
 Occasionally improvements and changes are made to the Makefile or the
-support files in this repository.  Just change to the `lib` directory,
-pull down the changes, and commit:
+support files in this repository.  Just update the `lib/` directory with
+`git pull`:
 
 ```sh
 $ git -C lib pull origin master
-$ git commit -a
-$ git push
-```
-
-On other clones, you will need to update when you do this:
-
-```sh
-$ git pull
-$ git submodule update
 ```
 
 
