@@ -8,7 +8,7 @@ UPDATE_TIME = 1209600 # 2 weeks
 .PHONY: update_check update
 update_check:
 	@[ $$(($(shell date '+%s') - $(LAST_UPDATE))) -gt $(UPDATE_TIME) ] && \
-	  $(UPDATE_COMMAND)
+	  $(UPDATE_COMMAND) || true
 update:
 	git -C $(LIBDIR) pull
 
