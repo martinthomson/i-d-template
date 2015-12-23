@@ -5,16 +5,20 @@ else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
 endif
 
-LAST_UPDATE = $(shell stat $(if $(filter Darwin,$(shell uname -s)),-f '%m',-c '%Y') $(LIBDIR)/.git/FETCH_HEAD)
-UPDATE_TIME = 1209600 # 2 weeks
+NOW = $$(date '+%s')
+UPDATE_TIME = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(LIBDIR)/.git/FETCH_HEAD)
+UPDATE_INTERVAL = 1209600 # 2 weeks
+UPDATE_NEEDED = $(shell [ $$(($(NOW) - $(UPDATE_TIME))) -gt $(UPDATE_INTERVAL) ] && echo true)
 
-.PHONY: update_check update
-update_check:
-	@[ $$(($(shell date '+%s') - $(LAST_UPDATE))) -gt $(UPDATE_TIME) ] && \
-	  $(UPDATE_COMMAND) || true
+ifeq (true, $(UPDATE_NEEDED))
+latest submit:: auto_update
+endif
 
+auto_update:
+	@$(UPDATE_COMMAND)
+
+.PHONY: update
 update:
 	git -C $(LIBDIR) pull
 
-latest submit:: update_check
 endif # CI
