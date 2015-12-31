@@ -19,5 +19,6 @@ test:
 
 deployment:
   production:
+    branch: /.*/
     commands:
       - make ghpages
