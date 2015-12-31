@@ -15,7 +15,7 @@ TARGET_DIR := $(filter-out master/,$(SOURCE_BRANCH)/)
 PUSH_GHPAGES_BRANCHES ?= true
 
 # Don't upload if we are on CI and this is a PR
-ifneq (true true,$(CI) $(CI_IS_PR))
+ifeq (true true,$(CI) $(CI_IS_PR))
 PUSH_GHPAGES := false
 else
 # Otherwise, respect the value of PUSH_GHPAGES_BRANCHES
