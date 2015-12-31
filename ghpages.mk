@@ -3,22 +3,28 @@
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 .INTERMEDIATE: $(GHPAGES_TMP)
 ifneq (,$(CI_BRANCH))
-GIT_ORIG := $(CI_BRANCH)
+SOURCE_BRANCH := $(CI_BRANCH)
 else
-GIT_ORIG := $(shell git branch | grep '*' | cut -c 3-)
+SOURCE_BRANCH := $(shell git branch | grep '*' | cut -c 3-)
 endif
-ifneq (,$(findstring detached from,$(GIT_ORIG)))
-GIT_ORIG := $(shell git show -s --format='format:%H')
+ifneq (,$(findstring detached from,$(SOURCE_BRANCH)))
+SOURCE_BRANCH := $(shell git show -s --format='format:%H')
 endif
 
-ifeq (master,$(CI_BRANCH))
-IS_MASTER = $(if $(findstring false,$(CI_IS_PR)),true,false)
+TARGET_DIR := $(filter-out master/,$(SOURCE_BRANCH)/)
+PUSH_GHPAGES_BRANCHES ?= true
+
+# Don't upload if we are on CI and this is a PR
+ifeq (true true,$(CI) $(CI_IS_PR))
+PUSH_GHPAGES := false
 else
-IS_MASTER = false
+# Otherwise, respect the value of PUSH_GHPAGES_BRANCHES
+ifeq (false,$(PUSH_GHPAGES_BRANCHES))
+PUSH_GHPAGES := $(if $(TARGET_DIR),false,true)
+else
+PUSH_GHPAGES := true
 endif
-# Only run upload if we are local or on the master branch
-BUILD_GHPAGES := $(if $(or $(findstring false,$(CI)), \
-                           $(findstring true,$(IS_MASTER))),true,false)
+endif
 
 define INDEX_HTML =
 <!DOCTYPE html>\n\
@@ -40,10 +46,12 @@ endif
 .PHONY: ghpages
 ghpages: index.html $(drafts_html) $(drafts_txt)
 ifneq (true,$(CI))
-	@git show-ref refs/heads/gh-pages > /dev/null 2>&1 || \
+	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
+	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
+	    git branch -t gh-pages origin/gh-pages) || \
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
 endif
-ifeq (true,$(BUILD_GHPAGES))
+ifeq (true,$(PUSH_GHPAGES))
 	mkdir $(GHPAGES_TMP)
 	cp -f $^ $(GHPAGES_TMP)
 	git clean -qfdX
@@ -58,9 +66,13 @@ else
 	git checkout gh-pages
 	git pull
 endif
-	mv -f $(GHPAGES_TMP)/* $(CURDIR)
-	git add $^
-	if test `git status -s | wc -l` -gt 0; then git commit -m "Script updating gh-pages. [ci skip]"; fi
+ifneq (,$(TARGET_DIR))
+	mkdir -p $(CURDIR)/$(TARGET_DIR)
+endif
+	mv -f $(GHPAGES_TMP)/* $(CURDIR)/$(TARGET_DIR)
+	git add $(addprefix $(TARGET_DIR),$^)
+	if test `git status -s | wc -l` -gt 0; then \
+	  git commit -m "Script updating gh-pages. [ci skip]"; fi
 ifneq (,$(CI_HAS_WRITE_KEY))
 	git push https://github.com/$(CI_REPO_FULL).git gh-pages
 else
@@ -69,6 +81,6 @@ ifneq (,$(GH_TOKEN))
 	@git push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL).git gh-pages >/dev/null 2>&1
 endif
 endif
-	-git checkout -qf "$(GIT_ORIG)"
+	-git checkout -qf "$(SOURCE_BRANCH)"
 	-rm -rf $(GHPAGES_TMP)
-endif
+endif # PUSH_GHPAGES
