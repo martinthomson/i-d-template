@@ -77,3 +77,4 @@ setup-ghpages:
 	git commit -m "Automatic setup of gh-pages."
 	git push --set-upstream origin gh-pages
 	git checkout -qf "$(GIT_ORIG)"
+	git clean -qfdX
