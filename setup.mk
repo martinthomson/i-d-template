@@ -47,6 +47,11 @@ general:\n\
       - gh-pages\n
 endef
 
+GIT_ORIG := $(shell git branch | grep '*' | cut -c 3-)
+ifneq (1,$(words $(GIT_ORIG)))
+$(error Unable to work from non-branch: $(GIT_ORIG))
+endif
+
 .PHONY: setup-ghpages
 setup-ghpages:
 # Abort if there are local changes
