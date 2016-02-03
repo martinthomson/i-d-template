@@ -6,9 +6,14 @@ UPDATE_COMMAND = echo Your template is old, please run `make update`
 endif
 
 NOW = $$(date '+%s')
-UPDATE_TIME = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(LIBDIR)/.git/FETCH_HEAD)
+FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
+ifeq (,$(FETCH_HEAD))
+UPDATE_NEEDED = true
+else
+UPDATE_TIME = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(FETCH_HEAD))
 UPDATE_INTERVAL = 1209600 # 2 weeks
 UPDATE_NEEDED = $(shell [ $$(($(NOW) - $(UPDATE_TIME))) -gt $(UPDATE_INTERVAL) ] && echo true)
+endif
 
 ifeq (true, $(UPDATE_NEEDED))
 latest submit:: auto_update
