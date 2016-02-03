@@ -7,4 +7,5 @@ $(warning $$ brew tap homebrew/dupes)
 $(warning $$ brew install homebrew/dupes/make)
 $(warning Note: This installs make as `gmake`)
 $(warning =================================================)
+$(error Aborting)
 endif
