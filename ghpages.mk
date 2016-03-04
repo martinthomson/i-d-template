@@ -61,7 +61,7 @@ ifeq (true,$(CI))
 	git checkout -q --orphan gh-pages
 	git rm -qr --cached .
 	git clean -qfd
-	git pull -qf origin gh-pages --depth=5
+	git pull -qf origin gh-pages
 else
 	git checkout gh-pages
 	git pull
@@ -70,7 +70,7 @@ ifneq (,$(TARGET_DIR))
 	mkdir -p $(CURDIR)/$(TARGET_DIR)
 endif
 	mv -f $(GHPAGES_TMP)/* $(CURDIR)/$(TARGET_DIR)
-	git add $(addprefix $(TARGET_DIR),$^)
+	git add -f $(addprefix $(TARGET_DIR),$^)
 	if test `git status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git commit -m "Script updating gh-pages. [ci skip]"; fi
 ifneq (,$(CI_HAS_WRITE_KEY))
