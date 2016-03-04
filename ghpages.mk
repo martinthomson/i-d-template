@@ -61,7 +61,7 @@ ifeq (true,$(CI))
 	git checkout -q --orphan gh-pages
 	git rm -qr --cached .
 	git clean -qfd
-	git pull -qf origin gh-pages --depth=5
+	git pull -qf origin gh-pages
 else
 	git checkout gh-pages
 	git pull
