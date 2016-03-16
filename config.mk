@@ -4,7 +4,7 @@
 
 # Mandatory:
 #   https://pypi.python.org/pypi/xml2rfc
-xml2rfc ?= xml2rfc
+xml2rfc ?= xml2rfc -q
 
 # If you are using markdown files:
 #   https://github.com/cabo/kramdown-rfc2629
