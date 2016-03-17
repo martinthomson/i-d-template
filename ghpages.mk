@@ -26,21 +26,19 @@ PUSH_GHPAGES := true
 endif
 endif
 
-define INDEX_HTML =
-<!DOCTYPE html>\n\
-<html>\n\
-<head><title>$(GITHUB_REPO) drafts</title></head>\n\
-<body><ul>\n\
-$(foreach draft,$(drafts),<li><a href="$(draft).html">$(draft)</a> (<a href="$(draft).txt">txt</a>)</li>\n)\
-</ul></body>\n\
-</html>
-endef
-
 index.html: $(drafts_html) $(drafts_txt)
 ifeq (1,$(words $(drafts)))
 	cp $< $@
 else
-	echo -e '$(INDEX_HTML)' >$@
+	@echo '<!DOCTYPE html>' >$@
+	@echo '<html>' >>$@
+	@echo '<head><title>$(GITHUB_REPO) drafts</title></head>' >>$@
+	@echo '<body><ul>' >>$@
+	@for draft in $(drafts); do \
+	  echo '<li><a href="'"$${draft}"'.html">'"$${draft}"'</a> (<a href="'"$${draft}"'.txt">txt</a>)</li>' >>$@; \
+	done
+	@echo '</ul></body>' >>$@
+	@echo '</html>' >>$@
 endif
 
 .PHONY: ghpages
