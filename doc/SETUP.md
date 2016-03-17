@@ -24,7 +24,7 @@ on most distributions.
 On Cygwin, you'll need to install `pip` directly:
 
 ```sh
-$ lynx -source https://bootstrap.pypa.io/get-pip.py | python
+$ curl https://bootstrap.pypa.io/get-pip.py | python
 ```
 
 Once pip is installed, you can install xml2rfc.
