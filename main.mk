@@ -79,7 +79,7 @@ argcat5 = $(call argcat3,$(1),$(2),$(call argcat3,$(3),$(4),$(5)))
 
 .INTERMEDIATE: $(join $(drafts_prev),$(draft_types))
 define makerule_diff =
-$$(call arg,1,$(1)): $$(call arg,2,$(1)) $$(call arg,3,$(1))
+$$(call arg,1,$(1)): $$(call arg,3,$(1)) $$(call arg,2,$(1))
 	-$(rfcdiff) --html --stdout $$^ > $$@
 endef
 diff_deps := $(call argcat3,$(draft_diffs),$(drafts_next_txt),$(drafts_prev_txt))
