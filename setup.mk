@@ -22,6 +22,7 @@ endif
 	  GITHUB_USER=$(GITHUB_USER); GITHUB_REPO=$(GITHUB_REPO); \
 	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>[^<]*$$/{s/.*>//g;H;};/<\/title>/{H;x;s/.*<title/</g;s/<[^>]*>//g;q;};d' $<); \
 	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's~{$(label)}~'"$$$(label)"'~g') $(filter %.md,$(TEMPLATE_FILES))
+	@-rm -f $(addsuffix ~,$(TEMPLATE_FILES))
 	git add $(TEMPLATE_FILES)
 ifndef SUBMODULE
 	echo $(LIBDIR) >> .gitignore
@@ -33,19 +34,8 @@ ifneq (xml,$(firstword $(draft_types)))
 endif
 	git commit -m "Setup repository for $(basename $<)"
 
-define template_rule =
-$(1): $$(addprefix $(LIBDIR)/template/,$(1))
-	cp $$< $$@
-endef
-submit_deps := $(join $(addsuffix .xml: ,$(drafts_next)),$(addsuffix .xml,$(drafts)))
-$(foreach rule,$(TEMPLATE_FILES),$(eval $(call template_rule,$(rule))))
-
-define CIRCLE_YML =
-general:\n\
-  branches:\n\
-    ignore:\n\
-      - gh-pages\n
-endef
+$(TEMPLATE_FILES): $(addprefix $(LIBDIR)/template/,$(TEMPLATE_FILES))
+	cp -u $? .
 
 GIT_ORIG := $(shell git branch | grep '*' | cut -c 3-)
 ifneq (1,$(words $(GIT_ORIG)))
@@ -72,7 +62,10 @@ setup-ghpages:
 	git checkout --orphan gh-pages
 	git rm -rf .
 	touch index.html
-	echo -e '$(CIRCLE_YML)' >circle.yml
+	echo 'general:' >circle.yml
+	echo '  branches:' >>circle.yml
+	echo '    ignore:' >>circle.yml
+	echo '      - gh-pages' >>circle.yml
 	git add index.html circle.yml
 	git commit -m "Automatic setup of gh-pages."
 	git push --set-upstream origin gh-pages
