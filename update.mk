@@ -20,7 +20,7 @@ latest submit:: auto_update
 endif
 
 auto_update:
-	@$(UPDATE_COMMAND)
+	@-$(UPDATE_COMMAND)
 
 .PHONY: update
 update:
