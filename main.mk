@@ -29,6 +29,12 @@ endif
 	XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
 	  $(kramdown-rfc2629) $< > $@
 
+ifdef REFCACHEDIR
+%.xml: .refcache
+.refcache: $(REFCACHEDIR)
+	ln -s $< $@
+endif
+
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
 

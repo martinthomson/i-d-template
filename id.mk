@@ -6,14 +6,15 @@ endif
 
 drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
 
-ifeq (,$(drafts))
+ifeq (0,$(words $(drafts)))
 $(warning No file named draft-*.md or draft-*.xml or draft-*.org)
-$(error Read README.md for setup instructions)
+$(error Create a draft file before running make)
 endif
 
-draft_types := $(foreach draft,$(drafts),$(suffix $(firstword $(wildcard $(draft).md $(draft).org $(draft).xml))))
+draft_types := $(foreach draft,$(drafts),\
+		   $(suffix $(firstword $(wildcard $(draft).md $(draft).org $(draft).xml))))
 
-f_prev_tag = $(shell git tag | grep '$(draft)-[0-9][0-9]' | tail -1 | sed -e"s/.*-//")
+f_prev_tag = $(shell git tag 2>/dev/null | grep '$(draft)-[0-9][0-9]' | tail -1 | sed -e"s/.*-//")
 f_next_tag = $(if $(f_prev_tag),$(shell printf "%.2d" $$(( 1$(f_prev_tag) - 99)) ),00)
 drafts_next := $(foreach draft,$(drafts),$(draft)-$(f_next_tag))
 drafts_prev := $(foreach draft,$(drafts),$(draft)-$(f_prev_tag))
@@ -36,8 +37,10 @@ endif
 CI_IS_PR = $(if $(CI_PULL_REQUESTS),true,$(if $(TRAVIS_PULL_REQUEST),$(TRAVIS_PULL_REQUEST),false))
 
 # Github guesses
+GIT_REMOTE ?= origin
 ifndef CI_REPO_FULL
-GITHUB_REPO_FULL := $(shell git ls-remote --get-url | sed -e 's/^.*github\.com.//;s/\.git$$//')
+GITHUB_REPO_FULL := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
+			sed -e 's/^.*github\.com.//;s/\.git$$//')
 GITHUB_USER := $(word 1,$(subst /, ,$(GITHUB_REPO_FULL)))
 GITHUB_REPO := $(word 2,$(subst /, ,$(GITHUB_REPO_FULL)))
 else
