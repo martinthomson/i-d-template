@@ -72,9 +72,10 @@ setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
 	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>[^<]*$$/{s/.*>//g;H;};/<\/title>/{H;x;s/.*<title/</g;s/<[^>]*>//g;q;};d' $<); \
 	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's~{$(label)}~'"$$$(label)"'~g') $(MARKDOWN_FILES)
 	@-rm -f $(addsuffix ~,$(MARKDOWN_FILES))
+	git add $(MARKDOWN_FILES)
 
 .PHONY: setup-master
-setup-master: setup-markdown setup-gitignore
+setup-master: setup-files setup-markdown setup-gitignore
 	git commit -m "Setup repository for $(firstword $(drafts))"
 
 # Check if the gh-pages branch already exists either remotely or locally
@@ -96,7 +97,10 @@ setup-ghpages:
 	@echo '  branches:' >>circle.yml
 	@echo '    ignore:' >>circle.yml
 	@echo '      - gh-pages' >>circle.yml
-	git add index.html circle.yml
+	@echo lib > .gitignore
+	@echo venv >> .gitignore
+	@echo .refcache >> .gitignore
+	git add index.html circle.yml .gitignore
 	git commit -m "Automatic setup of gh-pages."
 	git push --set-upstream $(GIT_REMOTE) gh-pages
 	git checkout -qf "$(GIT_ORIG)"
