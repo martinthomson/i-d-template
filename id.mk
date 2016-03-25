@@ -34,7 +34,12 @@ CI_REPO = $(word 2,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_REPONAME)
 ifeq (true,$(CI))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
 endif
-CI_IS_PR = $(if $(CI_PULL_REQUESTS),true,$(if $(TRAVIS_PULL_REQUEST),$(TRAVIS_PULL_REQUEST),false))
+ifeq (false,$(TRAVIS_PULL_REQUEST))
+CI_TRAVIS_PR = false
+else
+CI_TRAVIS_PR = true
+endif
+CI_IS_PR = $(if $(CI_PULL_REQUESTS),true,$(CI_TRAVIS_PR))
 
 # Github guesses
 GIT_REMOTE ?= origin
