@@ -50,6 +50,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 
 .PHONY: setup-files
 setup-files: $(TEMPLATE_FILES)
+	cp -f $(LIBDIR)/template/README.md README.md
 	git add $(join $(drafts),$(draft_types))
 	git add $^
 
