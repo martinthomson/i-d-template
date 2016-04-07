@@ -20,7 +20,7 @@ Make your you have the [necessary software installed](https://github.com/martint
 Make a [new organization](https://github.com/organizations/new) for your working
 group.  This guide will use the name `unicorn-wg` for your working group.
 
-See the [more detailed guide](https://github.com/martinthomson/blob/master/doc/WG-SETUP.md).
+See the [more detailed guide](https://github.com/martinthomson/i-d-template/blob/master/doc/WG-SETUP.md).
 
 ### New Draft Setup
 
