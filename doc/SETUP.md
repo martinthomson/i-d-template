@@ -13,6 +13,7 @@ ln -s /usr/local/gmake /usr/local/make
 ```
 
 Windows users will need to use [Cygwin](http://cygwin.org/) to get `make`.
+The fearless can use [bash](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide).
 
 ## xml2rfc
 
