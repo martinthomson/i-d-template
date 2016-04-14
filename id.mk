@@ -34,7 +34,20 @@ CI_REPO = $(word 2,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_REPONAME)
 ifeq (true,$(CI))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
 endif
-CI_IS_PR = $(if $(CI_PULL_REQUESTS),true,$(if $(TRAVIS_PULL_REQUEST),true,false))
+ifdef CI_PULL_REQUESTS
+CI_IS_PR = true
+else
+# Circle makes this easy
+ifdef TRAVIS_PULL_REQUEST
+ifeq (false,$(TRAVIS_PULL_REQUEST))
+# If $TRAVIS_PULL_REQUEST is the word 'false', it's a branch build.
+CI_IS_PR = false
+else
+CI_IS_PR = true
+endif
+else
+CI_IS_PR = false
+endif
 
 # Github guesses
 GIT_REMOTE ?= origin
