@@ -48,6 +48,7 @@ endif
 else
 CI_IS_PR = false
 endif
+endif
 
 # Github guesses
 GIT_REMOTE ?= origin
