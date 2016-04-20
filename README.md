@@ -76,6 +76,8 @@ $ make -f lib/setup.mk
 This removes adds some files, updates `README.md` with the details of your
 draft, sets up a `gh-pages` branch for your editor's copy.
 
+__Note:__ if you see a `kramdown-rfc2629: command not found` error this is because `kramdown-rfc2629` isn't in your path. Run `gem install kramdown-rfc2629` to fix. If this command doesn't run check that you have ruby installed. 
+
 Check that everything looks OK, then push.
 ```sh
 $ git push
