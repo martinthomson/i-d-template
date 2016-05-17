@@ -57,7 +57,7 @@ ifeq (true,$(CI))
 	git config user.email "ci-bot@example.com"
 	git config user.name "CI Bot"
 	git checkout -q --orphan gh-pages
-	git rm -qr --cached .
+	git rm -qrf --cached .
 	git clean -qfd
 	git pull -qf origin gh-pages
 else
