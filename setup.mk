@@ -26,7 +26,7 @@ LATEST_WARNING := $(strip $(foreach draft,$(join $(drafts),$(draft_types)),\
 ifneq (,$(LATEST_WARNING))
 $(warning Check names: $(LATEST_WARNING))
 endif
-ifneq (0,$(strip $(shell git status -s --porcelain 2>/dev/null | grep -v '^.. lib$$' | wc -l)))
+ifneq (0,$(strip $(shell git status -s --porcelain 2>/dev/null | grep -v '^.. $(LIBDIR)/\?$$' | wc -l)))
 $(error You have uncommitted changes, please commit them before running setup)
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
