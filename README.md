@@ -1,28 +1,22 @@
-# Important Notice
-
-! Anyone using the Travis configuration with versions of this prior to 2015-10-16
-should delete any Github account tokens used.  Travis logs might contain
-your token.
-
 # Internet Draft Template Repository
 
 The contents of this repository can be used to get started with a new internet
 draft.
 
-## Getting Started
+# Getting Started
 
 You need a [GitHub account](https://github.com/join).
 
 Make your you have the [necessary software installed](https://github.com/martinthomson/i-d-template/blob/master/doc/SETUP.md).
 
-### Working Group Setup
+## Working Group Setup
 
 Make a [new organization](https://github.com/organizations/new) for your working
 group.  This guide will use the name `unicorn-wg` for your working group.
 
 See the [more detailed guide](https://github.com/martinthomson/i-d-template/blob/master/doc/WG-SETUP.md).
 
-### New Draft Setup
+## New Draft Setup
 
 [Make a new repository](https://github.com/new).  This guide will use the
 name name `unicorn-protocol` here.
@@ -34,14 +28,6 @@ Clone that repository:
 $ git clone https://github.com/unicorn-wg/unicorn-protocol.git
 $ cd unicorn-protocol
 ```
-
-Clone a copy of this respository into place:
-
-```sh
-$ git clone https://github.com/martinthomson/i-d-template lib
-```
-
-Alternatively, you can use `git submodule` to get a stable version.
 
 Choose whether you want to use markdown, outline, or xml as your input form.
 If you already have a draft, then that decision is already made for you.
@@ -68,22 +54,32 @@ docname: draft-ietf-unicorn-protocol-latest
 title: The Unicorn Protocol
 ```
 
-Push your changes, then run the setup commands:
+Commit and push your changes:
 ```sh
+$ git commit -a
 $ git push
+```
+
+Clone a copy of this respository into place and run the setup:
+
+```sh
+$ git clone https://github.com/martinthomson/i-d-template lib
 $ make -f lib/setup.mk
 ```
 
-This removes adds some files, updates `README.md` with the details of your
-draft, sets up a `gh-pages` branch for your editor's copy.
+If you prefer a stable version of this code, you can use `git submodule`
+instead.
 
-Check that everything looks OK, then push.
+The setup removes adds some files, updates `README.md` with the details of
+your draft, sets up a `gh-pages` branch for your editor's copy.
+
+Finally, push:
 ```sh
 $ git push
 ```
 
 
-### Updating The Editor's Copy
+## Updating The Editor's Copy
 
 You can maintain `gh-pages` manually by running the following command
 occasionally.
@@ -95,7 +91,7 @@ $ make ghpages
 Or, you can setup an automatic commit hook using Travis or Circle CI.
 
 
-### Automatic Update for Editor's Copy
+## Automatic Update for Editor's Copy
 
 This requires that you sign in with [Travis](https://travis-ci.org/) or
 [Circle](https://circleci.com/).
@@ -125,22 +121,10 @@ though tokens can be revoked easily, discovering a leak might take some time.
 Only pushes to the main repository will be able to see the token, so don't worry
 about pull requests.
 
-As a side benefit, Travis and Circle will now also check pull requests for
-errors, letting you know if things didn't work out so that you don't merge
-anything suspect.
+Travis and Circle will now also check pull requests for errors, letting you
+know if things didn't work out so that you don't merge anything suspect.
 
 
-## Updating the Support Files
-
-Occasionally improvements and changes are made to the Makefile or the
-support files in this repository.  Just update the `lib/` directory with
-`git pull`:
-
-```sh
-$ git -C lib pull origin master
-```
-
-
-## Submitting Drafts
+# Submitting Drafts
 
 See the [submission guide](https://github.com/martinthomson/i-d-template/blob/master/doc/SUBMITTING.md).
