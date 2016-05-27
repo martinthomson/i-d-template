@@ -68,8 +68,9 @@ docname: draft-ietf-unicorn-protocol-latest
 title: The Unicorn Protocol
 ```
 
-Now, run the setup commands:
+Push your changes, then run the setup commands:
 ```sh
+$ git push
 $ make -f lib/setup.mk
 ```
 
