@@ -49,6 +49,7 @@ else
 CI_IS_PR = false
 endif
 endif
+CI_ARTIFACTS := $(CIRCLE_ARTIFACTS)
 
 # Github guesses
 GIT_REMOTE ?= origin

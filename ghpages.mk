@@ -1,7 +1,15 @@
 ## Update the gh-pages branch with useful files
 
+ifeq (,$(CI_ARTIFACTS))
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
+ghpages: $(GHPAGES_TMP)
 .INTERMEDIATE: $(GHPAGES_TMP)
+$(GHPAGES_TMP):
+	mkdir $(GHPAGES_TMP)
+else
+GHPAGES_TMP := $(CI_ARTIFACTS)
+endif
+
 ifneq (,$(CI_BRANCH))
 SOURCE_BRANCH := $(CI_BRANCH)
 else
@@ -50,7 +58,6 @@ ifneq (true,$(CI))
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
 endif
 ifeq (true,$(PUSH_GHPAGES))
-	mkdir $(GHPAGES_TMP)
 	cp -f $^ $(GHPAGES_TMP)
 	git clean -qfdX
 ifeq (true,$(CI))
@@ -67,7 +74,7 @@ endif
 ifneq (,$(TARGET_DIR))
 	mkdir -p $(CURDIR)/$(TARGET_DIR)
 endif
-	mv -f $(GHPAGES_TMP)/* $(CURDIR)/$(TARGET_DIR)
+	cp -f $(GHPAGES_TMP)/* $(CURDIR)/$(TARGET_DIR)
 	git add -f $(addprefix $(TARGET_DIR),$^)
 	if test `git status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git commit -m "Script updating gh-pages. [ci skip]"; fi
@@ -80,5 +87,4 @@ ifneq (,$(GH_TOKEN))
 endif
 endif
 	-git checkout -qf "$(SOURCE_BRANCH)"
-	-rm -rf $(GHPAGES_TMP)
 endif # PUSH_GHPAGES
