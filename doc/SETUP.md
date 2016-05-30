@@ -9,7 +9,12 @@ Mac users will need to install [Homebrew](https://brew.sh) to get a version of
 
 ```sh
 brew tap homebrew/dupes && brew install homebrew/dupes/make
-ln -s /usr/local/bin/gmake /usr/local/bin/make
+```
+
+Add an alias to your `.profile` so that typing 'make' uses `gmake`:
+
+```sh
+alias make=gmake
 ```
 
 Windows users will need to use [Cygwin](http://cygwin.org/) to get `make`.
