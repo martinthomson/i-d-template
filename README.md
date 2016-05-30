@@ -33,7 +33,7 @@ Choose whether you want to use markdown, outline, or xml as your input form.
 If you already have a draft, then that decision is already made for you.
 
 Make a draft file.  The name of the file is important, make it match the name of
-your draft.  You can take a copy of the [example](https://github.com/martinthomson/i-d-template/blob/master/example.md) [files](https://github.com/martinthomson/i-d-template/blob/master/example.xml) if you are starting from
+your draft.  You can take a copy of the [example](https://github.com/martinthomson/i-d-template/blob/master/doc/example.md) [files](https://github.com/martinthomson/i-d-template/blob/master/doc/example.xml) if you are starting from
 scratch.
 
 Edit the draft so that it has both a title and the correct name.  These tools
