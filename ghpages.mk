@@ -58,7 +58,7 @@ ifneq (true,$(CI))
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
 endif
 ifeq (true,$(PUSH_GHPAGES))
-	cp -f $^ $(GHPAGES_TMP)
+	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)
 	git clean -qfdX
 ifeq (true,$(CI))
 	git config user.email "ci-bot@example.com"
