@@ -87,4 +87,7 @@ ifneq (,$(GH_TOKEN))
 endif
 endif
 	-git checkout -qf "$(SOURCE_BRANCH)"
+ifeq (,$(CI_ARTIFACTS))
+	-rm -rf $(GHPAGES_TMP)
+endif
 endif # PUSH_GHPAGES
