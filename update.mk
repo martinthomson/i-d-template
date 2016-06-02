@@ -1,12 +1,13 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull
+FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
+FETCH_HEAD = $(wildcard .git/modules/$(LIBDIR)/FETCH_HEAD)
 endif
 
 NOW = $$(date '+%s')
-FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 ifeq (,$(FETCH_HEAD))
 UPDATE_NEEDED = true
 else
