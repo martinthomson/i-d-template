@@ -75,7 +75,7 @@ ifneq (,$(TARGET_DIR))
 	mkdir -p $(CURDIR)/$(TARGET_DIR)
 endif
 	cp -f $(GHPAGES_TMP)/* $(CURDIR)/$(TARGET_DIR)
-	git add -f $(addprefix $(TARGET_DIR),$^)
+	git add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
 	if test `git status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git commit -m "Script updating gh-pages. [ci skip]"; fi
 ifneq (,$(CI_HAS_WRITE_KEY))
