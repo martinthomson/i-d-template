@@ -41,6 +41,14 @@ endif
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
 
+%.html: %.jrxml rfc2629xslt/rfc2629.xslt
+    $(xsltproc) rfc2629xslt/rfc2629.xslt $< > $@
+
+%.txt: %.jrxml rfc2629xslt/clean-for-DTD.xslt
+    $(xsltproc) rfc2629xslt/clean-for-DTD.xslt $< > $@.cleaned.xml
+    $(xml2rfc) $@.cleaned.xml -o $@ --text
+    rm $@.cleaned.xml
+
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
