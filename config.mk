@@ -26,6 +26,10 @@ rfcdiff ?= rfcdiff
 #   https://greenbytes.de/tech/webdav/rfc2629xslt.html
 xsltproc ?= xsltproc
  
+# When using rfc2629.xslt extensions:
+#   https://greenbytes.de/tech/webdav/rfc2629xslt.html
+xsltproc ?= xsltproc
+ 
 # For generating PDF:
 #   https://www.gnu.org/software/enscript/
 enscript ?= enscript
