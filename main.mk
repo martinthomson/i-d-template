@@ -52,12 +52,12 @@ else
 endif
 
 %.html: %.jrxml rfc2629xslt/rfc2629.xslt
-       $(xsltproc) rfc2629xslt/rfc2629.xslt $< > $@
+	$(xsltproc) rfc2629xslt/rfc2629.xslt $< > $@
 
 %.txt: %.jrxml rfc2629xslt/clean-for-DTD.xslt
-       $(xsltproc) rfc2629xslt/clean-for-DTD.xslt $< > $@.cleaned.xml
-       $(xml2rfc) $@.cleaned.xml -o $@ --text
-       rm $@.cleaned.xml
+	$(xsltproc) rfc2629xslt/clean-for-DTD.xslt $< > $@.cleaned.xml
+	$(xml2rfc) $@.cleaned.xml -o $@ --text
+	rm $@.cleaned.xml
 
 %.pdf: %.txt
 	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
