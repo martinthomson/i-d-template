@@ -1,5 +1,6 @@
 *~
 *.swp
 lib
+rfc2629xslt
 .template-files.mk
 draft-*
