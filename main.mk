@@ -35,20 +35,26 @@ ifdef REFCACHEDIR
 	ln -s $< $@
 endif
 
+$(LIBDIR)/rfc2629.xslt:	$(LIBDIR)/rfc2629xslt/rfc2629.xslt
+	$(xsltproc) $(LIBDIR)/rfc2629xslt/to-1.0-xslt.xslt $(LIBDIR)/rfc2629xslt/rfc2629.xslt > $@
+
+$(LIBDIR)/clean-for-DTD.xslt:	$(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
+	$(xsltproc) $(LIBDIR)/rfc2629xslt/to-1.0-xslt.xslt $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt > $@
+
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
 
 $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt:
 	git clone https://github.com/reschke/xml2rfc $(LIBDIR)/rfc2629xslt
 
-%.cleanxml: %.xml $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
-	$(xsltproc) --novalid $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt $< > $@
+%.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt
+	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
 
 %.txt: %.cleanxml
 	$(xml2rfc) $< -o $@ --text
 
-%.html: %.xml rfc2629xslt/rfc2629.xslt
-	$(xsltproc) --novalid $(LIBDIR)/rfc2629xslt/rfc2629.xslt $< > $@
+%.html: %.xml $(LIBDIR)/rfc2629.xslt
+	$(xsltproc) --novalid $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.pdf: %.txt
 	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
