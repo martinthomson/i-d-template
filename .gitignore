@@ -4,3 +4,5 @@ lib
 rfc2629xslt
 .template-files.mk
 draft-*
+clean-for-DTD.xslt
+rfc2629.xslt
