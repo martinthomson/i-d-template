@@ -38,13 +38,16 @@ endif
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
 
-%.txt: %.xml rfc2629xslt/clean-for-DTD.xslt
-	$(xsltproc) rfc2629xslt/clean-for-DTD.xslt $< > $@.cleaned.xml
+$(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt:
+	git clone https://github.com/reschke/xml2rfc $(LIBDIR)/rfc2629xslt
+
+%.txt: %.xml $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
+	$(xsltproc) $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt $< > $@.cleaned.xml
 	$(xml2rfc) $@.cleaned.xml -o $@ --text
 	rm $@.cleaned.xml
 
 %.html: %.xml rfc2629xslt/rfc2629.xslt
-	$(xsltproc) rfc2629xslt/rfc2629.xslt $< > $@
+	$(xsltproc) $(LIBDIR)/rfc2629xslt/rfc2629.xslt $< > $@
 
 %.pdf: %.txt
 	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
