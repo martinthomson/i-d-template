@@ -42,13 +42,13 @@ $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt:
 	git clone https://github.com/reschke/xml2rfc $(LIBDIR)/rfc2629xslt
 
 %.cleanxml: %.xml $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
-	$(xsltproc) $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt $< > $@
+	$(xsltproc) --novalid $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt $< > $@
 
 %.txt: %.cleanxml
 	$(xml2rfc) $< -o $@ --text
 
 %.html: %.xml rfc2629xslt/rfc2629.xslt
-	$(xsltproc) $(LIBDIR)/rfc2629xslt/rfc2629.xslt $< > $@
+	$(xsltproc) --novalid $(LIBDIR)/rfc2629xslt/rfc2629.xslt $< > $@
 
 %.pdf: %.txt
 	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
