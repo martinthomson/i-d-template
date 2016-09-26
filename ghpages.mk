@@ -22,15 +22,11 @@ endif
 TARGET_DIR := $(filter-out master/,$(SOURCE_BRANCH)/)
 
 ifeq (true,$(CI))
-# If this is a PR, then only push if TARGET_DIR is set
-ifeq (true,$(CI_IS_PR))
-PUSH_GHPAGES := $(if $(TARGET_DIR),false,true)
+# If we have the write key or a token, we can push
+ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY))
+PUSH_GHPAGES := false
 else
 PUSH_GHPAGES := true
-endif
-# If we don't have the write key or a token, no point
-ifeq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY))
-PUSH_GHPAGES := false
 endif
 else # !CI
 PUSH_GHPAGES := true
