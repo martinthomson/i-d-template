@@ -20,18 +20,20 @@ SOURCE_BRANCH := $(shell git show -s --format='format:%H')
 endif
 
 TARGET_DIR := $(filter-out master/,$(SOURCE_BRANCH)/)
-PUSH_GHPAGES_BRANCHES ?= true
 
-# Don't upload if we are on CI and this is a PR
-ifeq (true true,$(CI) $(CI_IS_PR))
-PUSH_GHPAGES := false
-else
-# Otherwise, respect the value of PUSH_GHPAGES_BRANCHES
-ifeq (false,$(PUSH_GHPAGES_BRANCHES))
+ifeq (true,$(CI))
+# If this is a PR, then only push if TARGET_DIR is set
+ifeq (true,$(CI_IS_PR))
 PUSH_GHPAGES := $(if $(TARGET_DIR),false,true)
 else
 PUSH_GHPAGES := true
 endif
+# If we don't have the write key or a token, no point
+ifeq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY))
+PUSH_GHPAGES := false
+endif
+else # !CI
+PUSH_GHPAGES := true
 endif
 
 index.html: $(drafts_html) $(drafts_txt)
