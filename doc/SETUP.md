@@ -24,7 +24,8 @@ The fearless can use [bash](https://msdn.microsoft.com/en-us/commandline/wsl/ins
 
 All systems require [xml2rfc](http://xml2rfc.ietf.org/).  This
 requires [Python](https://www.python.org/).  The easiest way to get
-`xml2rfc` is with `pip`, which is part of the `python-pip` package
+`xml2rfc` is with [pip](https://pip.pypa.io/en/stable/installing/), which
+is either installed with python, or part of the `python-pip` package
 on most distributions.
 
 On Cygwin, you'll need to install `pip` directly:

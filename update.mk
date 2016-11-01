@@ -9,7 +9,7 @@ endif
 
 NOW = $$(date '+%s')
 ifeq (,$(FETCH_HEAD))
-UPDATE_NEEDED = true
+UPDATE_NEEDED = false
 else
 UPDATE_TIME = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(FETCH_HEAD))
 UPDATE_INTERVAL = 1209600 # 2 weeks

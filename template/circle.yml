@@ -1,8 +1,8 @@
 machine:
   python:
-    version: 2.7.6
+    version: 2.7.11
   ruby:
-    version: 2.2.3
+    version: 2.3.1
 
 checkout:
   post:
@@ -11,7 +11,7 @@ checkout:
 dependencies:
   pre:
     - pip install xml2rfc
-    - gem install kramdown-rfc2629
+    - gem install --no-doc kramdown-rfc2629
 
 test:
   override:
