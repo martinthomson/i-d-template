@@ -58,12 +58,13 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-define makerule_submit_xml =
-$(1)
-	sed -e"s/$$(basename $$<)-latest/$$(basename $$@)/" $$< > $$@
-endef
-submit_deps := $(join $(addsuffix :,$(drafts_next_xml)),$(drafts_xml))
-$(foreach rule,$(submit_deps),$(eval $(call makerule_submit_xml,$(rule))))
+include $(LIBDIR)/.submit-targets
+$(LIBDIR)/.submit-targets: $(LIBDIR)/main.mk
+	echo > $@
+	for f in $(drafts_next_xml); do \
+	    echo "$$f: $${f%-[0-9][0-9].xml}.xml" >> $@; \
+	    echo "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
+	done
 
 ## Check for validity
 .PHONY: check idnits

@@ -2,4 +2,5 @@
 *.swp
 lib
 .template-files.mk
+.submit-targets
 draft-*
