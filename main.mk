@@ -58,8 +58,8 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-include $(LIBDIR)/.submit-targets
-$(LIBDIR)/.submit-targets: $(LIBDIR)/main.mk
+include .targets
+.targets: $(LIBDIR)/main.mk
 	echo > $@
 	for f in $(drafts_next_xml); do \
 	    echo "$$f: $${f%-[0-9][0-9].xml}.xml" >> $@; \
