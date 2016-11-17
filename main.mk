@@ -55,9 +55,9 @@ endif
 	$(xml2rfc) $< -o $@ --html
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
 ifeq (,$(CI_REPO_FULL))
-	sed -f $(LIBDIR)/addstyle.sed $< > $@
+	sed -e '\~<style ~,\~</style>~d' -e '\~</title>~ r $(LIBDIR)/style.css' $< > $@
 else
-	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed $< | \
+	sed -e '\~<style ~,\~</style>~d' -e '\~</title>~ r $(LIBDIR)/style.css' -f $(LIBDIR)/addribbon.sed $< | \
 	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
 endif
 
