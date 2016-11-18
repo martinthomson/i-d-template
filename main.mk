@@ -53,12 +53,12 @@ endif
 
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
-%.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
+%.html: %.htmltmp $(LIBDIR)/style.css
 ifeq (,$(CI_REPO_FULL))
 	sed -e '\~<style ~,\~</style>~d' -e '\~</title>~ r $(LIBDIR)/style.css' $< > $@
 else
-	sed -e '\~<style ~,\~</style>~d' -e '\~</title>~ r $(LIBDIR)/style.css' -f $(LIBDIR)/addribbon.sed $< | \
-	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
+	sed -e '\~<style ~,\~</style>~d' -e '\~</title>~ r $(LIBDIR)/style.css' \
+	    -f $(LIBDIR)/addribbon.sed -e 's~{SLUG}~$(CI_REPO_FULL)~' $< > $@
 endif
 
 %.pdf: %.txt
@@ -68,12 +68,13 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-define makerule_submit_xml =
-$(1)
-	sed -e"s/$$(basename $$<)-latest/$$(basename $$@)/" $$< > $$@
-endef
-submit_deps := $(join $(addsuffix :,$(drafts_next_xml)),$(drafts_xml))
-$(foreach rule,$(submit_deps),$(eval $(call makerule_submit_xml,$(rule))))
+include .targets
+.targets: $(LIBDIR)/main.mk
+	@echo > $@
+	@for f in $(drafts_next_xml); do \
+	    echo "$$f: $${f%-[0-9][0-9].xml}.xml" >> $@; \
+	    echo -e "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
+	done
 
 ## Check for validity
 .PHONY: check idnits
