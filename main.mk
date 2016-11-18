@@ -123,6 +123,7 @@ issues.json:
 COMMA := ,
 .PHONY: clean
 clean::
+	-rm -f .targets
 	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
 	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
 	-rm -f $(draft_diffs)
