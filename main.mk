@@ -26,8 +26,18 @@ ifdef MD_PREPROCESSOR
 else
 %.xml: %.md
 endif
-	XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
-	  $(kramdown-rfc2629) $< > $@
+	@h=$$(head -1 $< | cut -c 1-3 -); \
+	if [ "$$h" = '---' ]; then \
+	  echo XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
+	    $(kramdown-rfc2629) $< > $@; \
+	  XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
+	    $(kramdown-rfc2629) $< > $@; \
+	elif [ "$$h" = '%%%' ]; then \
+	  echo $(mmark) -xml2 -page $< $@; \
+	  $(mmark) -xml2 -page $< $@; \
+	else \
+	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
+	fi
 
 ifdef REFCACHEDIR
 %.xml: .refcache

@@ -6,9 +6,12 @@
 #   https://pypi.python.org/pypi/xml2rfc
 xml2rfc ?= xml2rfc -q
 
-# If you are using markdown files:
+# If you are using markdown files use either kramdown-rfc2629 or mmark
 #   https://github.com/cabo/kramdown-rfc2629
 kramdown-rfc2629 ?= kramdown-rfc2629
+
+#  mmark (https://github.com/miekg/mmark)
+mmark ?= mmark
 
 # If you are using outline files:
 #   https://github.com/Juniper/libslax/tree/master/doc/oxtradoc
