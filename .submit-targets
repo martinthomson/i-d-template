@@ -1,5 +1,0 @@
-
-draft-bishop-httpbis-extended-settings-01.xml: draft-bishop-httpbis-extended-settings.xml
-	sed -e 's/draft-bishop-httpbis-extended-settings-latest/draft-bishop-httpbis-extended-settings-01/' $< > $@
-draft-bishop-quic-http-and-qpack-00.xml: draft-bishop-quic-http-and-qpack.xml
-	sed -e 's/draft-bishop-quic-http-and-qpack-latest/draft-bishop-quic-http-and-qpack-00/' $< > $@
