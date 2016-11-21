@@ -114,8 +114,9 @@ $(foreach args,$(prev_versions_args),$(eval $(call makerule_prev,$(args))))
 
 ## Store a copy of any github issues
 .PHONY: issues
-issues::
-	curl https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open > $@.json
+issues:: issues.json
+issues.json:
+	curl https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open > $@
 
 ## Cleanup
 COMMA := ,
