@@ -70,7 +70,7 @@ setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
 	  WG_NAME=$$(echo $< | cut -f 3 -d - -); \
 	  DRAFT_STATUS=$$(test "$$AUTHOR_LABEL" = ietf && echo Working Group || echo Individual); \
 	  GITHUB_USER=$(GITHUB_USER); GITHUB_REPO=$(GITHUB_REPO); \
-	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>[^<]*$$/{s/.*>//g;H;};/<\/title>/{H;x;s/.*<title/</g;s/<[^>]*>//g;q;};d' $<); \
+	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q};H;};d' $<); \
 	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's~{$(label)}~'"$$$(label)"'~g') $(MARKDOWN_FILES)
 	@-rm -f $(addsuffix ~,$(MARKDOWN_FILES))
 	git add $(MARKDOWN_FILES)
