@@ -62,14 +62,39 @@ xml2rfc depends on development versions of [libxml2](http://xmlsoft.org/) and
 `libxslt1-dev` (Debian, Ubuntu); `libxml2-devel` and `libxslt1-devel` (RedHat,
 Fedora); or `libxml2-devel` and `libxslt-devel` (Cygwin).
 
+## Markdown
+
+If you use markdown, you will also need to install `kramdown-rfc2629` or `mmark`.
+
+The template stuff tries to work out which of these you are working with based
+on the first line of the file:
+
+* `kramdown-rfc2629` files must start with '---'
+
+* `mmark` files must start with '%%%'
+
 ## kramdown-rfc2629
 
-If you use markdown, you will also need to install `kramdown-rfc2629`,
-which requires Ruby and can be installed using the Ruby package
+`kramdown-rfc2629` requires Ruby and can be installed using the Ruby package
 manager, `gem`:
 
 ```sh
 $ gem install kramdown-rfc2629
+```
+
+
+## mmark
+
+`mmark` requires go, and that comes with its own complications.  You will need
+to set aside a directory for your go code, and find a directory that is on the
+path where you can install `mmark`.  For these, I use `~/gocode` and `~/bin`
+respectively:
+
+```sh
+export GOPATH=~/gocode
+cd ~/bin
+go get github.com/miekg/mmark/mmark
+go build github.com/miekg/mmark/mmark
 ```
 
 ## Other tools
