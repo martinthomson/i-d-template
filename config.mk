@@ -25,6 +25,10 @@ idnits ?= idnits
 #   https://tools.ietf.org/tools/rfcdiff/
 rfcdiff ?= rfcdiff
 
+# When using rfc2629.xslt extensions:
+#   https://greenbytes.de/tech/webdav/rfc2629xslt.html
+xsltproc ?= xsltproc
+
 # For generating PDF:
 #   https://www.gnu.org/software/enscript/
 enscript ?= enscript

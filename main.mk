@@ -45,21 +45,26 @@ ifdef REFCACHEDIR
 	ln -s $< $@
 endif
 
+$(LIBDIR)/rfc2629.xslt:	$(LIBDIR)/rfc2629xslt/rfc2629.xslt
+	$(xsltproc) $(LIBDIR)/rfc2629xslt/to-1.0-xslt.xslt $(LIBDIR)/rfc2629xslt/rfc2629.xslt > $@
+
+$(LIBDIR)/clean-for-DTD.xslt:	$(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
+	$(xsltproc) $(LIBDIR)/rfc2629xslt/to-1.0-xslt.xslt $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt > $@
+
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
 
-%.txt: %.xml
+$(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt:
+	git clone https://github.com/reschke/xml2rfc $(LIBDIR)/rfc2629xslt
+
+%.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
+	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
+
+%.txt: %.cleanxml
 	$(xml2rfc) $< -o $@ --text
 
-%.htmltmp: %.xml
-	$(xml2rfc) $< -o $@ --html
-%.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
-ifeq (,$(CI_REPO_FULL))
-	sed -f $(LIBDIR)/addstyle.sed $< > $@
-else
-	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed $< | \
-	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
-endif
+%.html: %.xml $(LIBDIR)/rfc2629.xslt
+	$(xsltproc) --novalid $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.pdf: %.txt
 	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
