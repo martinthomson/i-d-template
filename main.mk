@@ -127,4 +127,4 @@ clean::
 	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
 	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
 	-rm -f $(draft_diffs)
-	-rm -f  $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
+	-rm -f $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
