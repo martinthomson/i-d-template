@@ -51,8 +51,28 @@ endif
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
 
+ifeq (1,$(USE_XSLT))
+XSLTDIR ?= $(LIBDIR)/rfc2629xslt
+$(LIBDIR)/rfc2629.xslt:	$(XSLTDIR)/rfc2629.xslt
+	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
+
+$(LIBDIR)/clean-for-DTD.xslt: $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
+	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
+
+$(XSLTDIR)/clean-for-DTD.xslt $(XSLTDIR)/rfc2629.xslt: $(XSLTDIR)
+$(XSLTDIR):
+	git clone --depth 10 -b master https://github.com/reschke/xml2rfc $@
+
+%.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt
+	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
+
+%.htmltmp: %.cleanxml $(LIBDIR)/rfc2629.xslt
+	$(xsltproc) --novalid $(LIBDIR)/rfc2629.xslt $< > $@
+else
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
+endif
+
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
 ifeq (,$(CI_REPO_FULL))
 	sed -f $(LIBDIR)/addstyle.sed $< > $@

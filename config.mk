@@ -17,6 +17,10 @@ mmark ?= mmark
 #   https://github.com/Juniper/libslax/tree/master/doc/oxtradoc
 oxtradoc ?= oxtradoc.in
 
+# When using rfc2629.xslt extensions:
+#   https://greenbytes.de/tech/webdav/rfc2629xslt.html
+xsltproc ?= xsltproc
+
 # For sanity checkout your draft:
 #   https://tools.ietf.org/tools/idnits/
 idnits ?= idnits
