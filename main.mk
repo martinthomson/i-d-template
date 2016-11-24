@@ -29,7 +29,7 @@ endif
 	@h=$$(head -1 $< | cut -c 1-3 -); \
 	if [ "$$h" = '---' ]; then \
 	  echo XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
-	    $(kramdown-rfc2629) $< > $@; \
+	    $(kramdown-rfc2629) $< \> $@; \
 	  XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
 	    $(kramdown-rfc2629) $< > $@; \
 	elif [ "$$h" = '%%%' ]; then \
