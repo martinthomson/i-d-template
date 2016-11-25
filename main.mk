@@ -63,7 +63,7 @@ $(XSLTDIR)/clean-for-DTD.xslt $(XSLTDIR)/rfc2629.xslt: $(XSLTDIR)
 $(XSLTDIR):
 	git clone --depth 10 -b master https://github.com/reschke/xml2rfc $@
 
-%.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt
+%.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
 	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
 
 %.htmltmp: %.cleanxml $(LIBDIR)/rfc2629.xslt
