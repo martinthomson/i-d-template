@@ -88,8 +88,8 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-include .targets
-.targets: $(LIBDIR)/main.mk
+include .targets.mk
+.targets.mk: $(LIBDIR)/main.mk
 	@echo > $@
 	@for f in $(drafts_next_xml); do \
 	    echo "$$f: $${f%-[0-9][0-9].xml}.xml" >> $@; \
@@ -143,7 +143,7 @@ issues.json:
 COMMA := ,
 .PHONY: clean
 clean::
-	-rm -f .targets
+	-rm -f .targets.mk
 	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
 	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
 	-rm -f $(draft_diffs)
