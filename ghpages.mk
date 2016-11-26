@@ -1,15 +1,5 @@
 ## Update the gh-pages branch with useful files
 
-ifeq (,$(CI_ARTIFACTS))
-GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
-ghpages: $(GHPAGES_TMP)
-.INTERMEDIATE: $(GHPAGES_TMP)
-$(GHPAGES_TMP):
-	mkdir $(GHPAGES_TMP)
-else
-GHPAGES_TMP := $(CI_ARTIFACTS)
-endif
-
 ifneq (,$(CI_BRANCH))
 SOURCE_BRANCH := $(CI_BRANCH)
 else
@@ -47,6 +37,21 @@ else
 	@echo '</html>' >>$@
 endif
 
+ifeq (true,$(CI))
+FETCH_SHALLOW := --depth=5
+else
+FETCH_SHALLOW :=
+endif
+.PHONY: fetch-ghpages
+fetch-ghpages:
+	-git fetch $(FETCH_SHALLOW) origin gh-pages:gh-pages
+
+GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
+ghpages: $(GHPAGES_TMP)
+.INTERMEDIATE: $(GHPAGES_TMP)
+$(GHPAGES_TMP): fetch-ghpages
+	git clone -ql -b gh-pages . $@
+
 .PHONY: ghpages
 ghpages: index.html $(drafts_html) $(drafts_txt)
 ifneq (true,$(CI))
@@ -54,38 +59,30 @@ ifneq (true,$(CI))
 	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
 	    git branch -t gh-pages origin/gh-pages) || \
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
+else
+	git config user.email "ci-bot@example.com"
+	git config user.name "CI Bot"
 endif
 ifeq (true,$(PUSH_GHPAGES))
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)
-	git clean -qfdX
-ifeq (true,$(CI))
-	git config user.email "ci-bot@example.com"
-	git config user.name "CI Bot"
-	git checkout -q --orphan gh-pages
-	git rm -qrf --cached .
-	git clean -qfd
-	git pull -qf origin gh-pages
-else
-	git checkout gh-pages
-	git pull
+ifneq (,$(CI_ARTIFACTS))
+	cp -f $(filter-out $(GHPAGES_TMP),$^) $(CI_ARTIFACTS)
 endif
 ifneq (,$(TARGET_DIR))
-	mkdir -p $(CURDIR)/$(TARGET_DIR)
+	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
-	cp -f $(GHPAGES_TMP)/* $(CURDIR)/$(TARGET_DIR)
-	git add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
-	if test `git status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
-	  git commit -m "Script updating gh-pages. [ci skip]"; fi
+	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
+	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
+	  git -C $(GHPAGES_TMP) commit -m "Script updating gh-pages. [ci skip]"; fi
 ifneq (,$(CI_HAS_WRITE_KEY))
-	git push https://github.com/$(CI_REPO_FULL).git gh-pages
+	git -C $(GHPAGES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-pages
 else
 ifneq (,$(GH_TOKEN))
-	@echo git push -q https://github.com/$(CI_REPO_FULL).git gh-pages
-	@git push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL).git gh-pages >/dev/null 2>&1
+	@echo -C $(GHPAGES_TMP) git push -q https://github.com/$(CI_REPO_FULL) gh-pages
+	@git -C $(GHPAGES_TMP) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
+else
+	git -C $(GHPAGES_TMP) push origin gh-pages
 endif
 endif
-	-git checkout -qf "$(SOURCE_BRANCH)"
-ifeq (,$(CI_ARTIFACTS))
 	-rm -rf $(GHPAGES_TMP)
-endif
 endif # PUSH_GHPAGES
