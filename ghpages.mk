@@ -46,11 +46,16 @@ endif
 fetch-ghpages:
 	-git fetch $(FETCH_SHALLOW) origin gh-pages:gh-pages
 
+ifeq (true,$(CI))
+CLONE_LOCAL :=
+else
+CLONE_LOCAL := --local
+endif
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_TMP)
 .INTERMEDIATE: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
-	git clone -ql -b gh-pages . $@
+	git clone -q $(CLONE_LOCAL) -b gh-pages . $@
 
 .PHONY: ghpages
 ghpages: index.html $(drafts_html) $(drafts_txt)
