@@ -3,7 +3,7 @@
 * The unit of Github is a repository.
 * Repositories are owned by individuals or organizations
 * The mapping to IETF concepts is:
-    * repository <-> draft
+    * repository <-> draft(s)
     * organization <-> WG
 * There an [IETF organization](https://github.com/ietf), but it's just a shell that maintains pointers to WGs
 
@@ -15,7 +15,7 @@ The starting point for setting up a WG / I-D is here:
 * A web browser
 * A Github account
 * A git client.  Command-line is best, and we'll assume that below.  You can probably accomplish the same thing with a GUI git client, but it will be much harder.  You can get a client at <http://git-scm.com/downloads>
-* Tools to "compile" your draft, for which there are instructions here: <https://github.com/martinthomson/i-d-template/blob/master/README-template.md#installation-and-setup>
+* Tools to "compile" your draft, for which there are instructions here: <https://github.com/martinthomson/i-d-template/blob/master/SETUP.md>
 
 # Setting up an organization
 
@@ -50,7 +50,7 @@ Since we're talking about a WG document here, we'll assume you've already got an
 
 WARNING: THIS IS THE PART THAT REQUIRES A COMMAND LINE.
 
-Full instructions for initializing the repository are in the [README file](https://github.com/martinthomson/i-d-template#new-draft-setup) in the template repository.
+Full instructions for initializing the repository are [here](https://github.com/martinthomson/i-d-template/blob/master/REPO.md).
 
 In essence, what you're doing is copying over the tooling from a template repository, and then creating the Internet-Draft either from your existing source file, or from a template.  Both XML and Markdown are supported as the draft source.  (There is also experimental support for the [outline2xml](https://github.com/martinthomson/i-d-template/pull/2) format, which has been used for netconf drafts.)
 
