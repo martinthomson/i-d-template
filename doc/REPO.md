@@ -94,7 +94,10 @@ occasionally.
 $ make ghpages
 ```
 
-Or, you can setup an automatic commit hook using Travis or Circle CI.
+When you do that, you will need to push the `gh-pages` branch yourself.
+
+Or, you can setup an automatic commit hook using Circle or Travis CI, as described
+in the next section.
 
 
 # Automatic Update for Editor's Copy
