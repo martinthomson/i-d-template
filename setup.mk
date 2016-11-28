@@ -50,9 +50,23 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 
 .PHONY: setup-files
 setup-files: $(TEMPLATE_FILES)
-	cp -f $(LIBDIR)/template/README.md README.md
 	git add $(join $(drafts),$(draft_types))
 	git add $^
+
+ifeq (true,$(USE_XSLT))
+setup-master: setup-makefile setup-circle
+.PHONY: setup-makefile
+setup-makefile: Makefile
+	sed -i~ -e '1{h;s/^.*$$/USE_XSLT := true/;p;x}' $<
+	@-rm -f $<~
+	git add $<
+
+.PHONY: setup-circle
+setup-circle: circle.yml
+	sed -i~ -e '/^dependencies:/,/^  pre:$$/{p;s/^  pre:$$/    - sudo apt-get -qq update; sudo apt-get -q install xsltproc/;t;d}' $<
+	@-rm -f $<~
+	git add $<
+endif # USE_XSLT
 
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore
