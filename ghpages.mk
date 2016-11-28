@@ -57,7 +57,8 @@ ghpages: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
 	git clone -q $(CLONE_LOCAL) -b gh-pages . $@
 
-.PHONY: ghpages
+.PHONY: ghpages gh-pages
+gh-pages: ghpages
 ghpages: index.html $(drafts_html) $(drafts_txt)
 ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
