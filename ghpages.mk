@@ -65,8 +65,8 @@ ifneq (true,$(CI))
 	    git branch -t gh-pages origin/gh-pages) || \
 	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
 else
-	git config user.email "ci-bot@example.com"
-	git config user.name "CI Bot"
+	git -C $(GHPAGES_TMP) config user.email "ci-bot@example.com"
+	git -C $(GHPAGES_TMP) config user.name "CI Bot"
 endif
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(TARGET_DIR))
