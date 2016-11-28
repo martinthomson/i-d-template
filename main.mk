@@ -51,7 +51,7 @@ endif
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
 
-ifeq (1,$(USE_XSLT))
+ifeq (true,$(USE_XSLT))
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 $(LIBDIR)/rfc2629.xslt:	$(XSLTDIR)/rfc2629.xslt
 	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
