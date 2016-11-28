@@ -69,12 +69,12 @@ else
 	git config user.name "CI Bot"
 endif
 ifeq (true,$(PUSH_GHPAGES))
-	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)
-ifneq (,$(CI_ARTIFACTS))
-	cp -f $(filter-out $(GHPAGES_TMP),$^) $(CI_ARTIFACTS)
-endif
 ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
+endif
+	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
+ifneq (,$(CI_ARTIFACTS))
+	cp -f $(filter-out $(GHPAGES_TMP),$^) $(CI_ARTIFACTS)
 endif
 	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
