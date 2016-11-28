@@ -56,7 +56,7 @@ Clone a copy of this respository into place:
 $ git clone https://github.com/martinthomson/i-d-template lib
 ```
 
-Option: If you prefer a stable version of this code, you can use `git submodule`
+*Option:* If you prefer a stable version of this code, you can use `git submodule`
 instead.
 
 Run the setup command:
@@ -65,7 +65,7 @@ Run the setup command:
 $ make -f lib/setup.mk
 ```
 
-Option: If you prefer to use [Julian Reschke's
+*Option:* If you prefer to use [Julian Reschke's
 XSLT](https://github.com/reschke/xml2rfc) for generating HTML, add
 `USE_XSLT=true` to the setup command line.
 
