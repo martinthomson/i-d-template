@@ -44,7 +44,7 @@ FETCH_SHALLOW :=
 endif
 .PHONY: fetch-ghpages
 fetch-ghpages:
-	-git fetch $(FETCH_SHALLOW) origin gh-pages:gh-pages
+	-git fetch -q $(FETCH_SHALLOW) origin gh-pages:gh-pages
 
 ifeq (true,$(CI))
 CLONE_LOCAL :=
