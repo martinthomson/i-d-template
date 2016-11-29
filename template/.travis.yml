@@ -10,9 +10,9 @@ addons:
 
 env:
   global:
-   - GOPATH: "${TRAVIS_BUILD_DIR}/.go_workspace"
-   - mmark_src: github.com/miekg/mmark/mmark
-   - mmark: ./mmark
+   - GOPATH="${TRAVIS_BUILD_DIR}/.go_workspace"
+   - mmark_src=github.com/miekg/mmark/mmark
+   - mmark=./mmark
 
 install:
  - pip install xml2rfc
