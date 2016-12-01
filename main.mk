@@ -105,7 +105,8 @@ idnits:: $(drafts_next_txt)
 ## Build diffs between the current draft versions and any previous version
 # This is makefile magic that requires Make 4.0
 
-draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts)))
+drafts_with_prev := $(foreach draft,$(drafts),$(if $(f_prev_tag),$(draft)))
+draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
 
