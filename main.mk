@@ -122,8 +122,7 @@ check:: idnits
 idnits:: $(drafts_next_txt)
 	echo $^ | xargs -n 1 sh -c '$(idnits) $$0'
 
-## Build diffs between the current draft versions and any previous version
-
+## Build diffs between the current draft versions and the most recent version
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
@@ -132,8 +131,8 @@ diff: $(draft_diffs)
 COMMA := ,
 .PHONY: clean
 clean::
-	-rm -f .targets.mk issues.json
-	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
-	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
-	-rm -f $(draft_diffs)
-	-rm -f $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
+	-rm -f .targets.mk issues.json \
+	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
+	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
+	    $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts))) \
+	    $(draft_diffs)
