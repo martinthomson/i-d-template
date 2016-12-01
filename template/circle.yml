@@ -22,4 +22,4 @@ deployment:
   production:
     branch: /.*/
     commands:
-      - make ghpages
+      - make ghpages artifacts
