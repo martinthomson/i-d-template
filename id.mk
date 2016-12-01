@@ -18,6 +18,7 @@ f_prev_tag = $(shell git tag 2>/dev/null | grep '$(draft)-[0-9][0-9]' | tail -1 
 f_next_tag = $(if $(f_prev_tag),$(shell printf "%.2d" $$(( 1$(f_prev_tag) - 99)) ),00)
 drafts_next := $(foreach draft,$(drafts),$(draft)-$(f_next_tag))
 drafts_prev := $(foreach draft,$(drafts),$(draft)-$(f_prev_tag))
+drafts_with_prev := $(foreach draft,$(drafts),$(if $(f_prev_tag),$(draft)))
 
 drafts_txt := $(addsuffix .txt,$(drafts))
 drafts_html := $(addsuffix .html,$(drafts))
