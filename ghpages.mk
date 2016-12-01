@@ -84,7 +84,7 @@ ifneq (,$(CI_HAS_WRITE_KEY))
 	git -C $(GHPAGES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-pages
 else
 ifneq (,$(GH_TOKEN))
-	@echo -C $(GHPAGES_TMP) git push -q https://github.com/$(CI_REPO_FULL) gh-pages
+	@echo git -C $(GHPAGES_TMP) push -q https://github.com/$(CI_REPO_FULL) gh-pages
 	@git -C $(GHPAGES_TMP) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
 else
 	git -C $(GHPAGES_TMP) push origin gh-pages
