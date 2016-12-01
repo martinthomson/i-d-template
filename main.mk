@@ -105,7 +105,7 @@ idnits:: $(drafts_next_txt)
 ## Build diffs between the current draft versions and any previous version
 # This is makefile magic that requires Make 4.0
 
-draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts)))
+draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
 
@@ -120,7 +120,8 @@ $$(call arg,1,$(1)): $$(call arg,3,$(1)) $$(call arg,2,$(1))
 	-$(rfcdiff) --html --stdout $$^ > $$@
 endef
 diff_deps := $(call argcat3,$(draft_diffs),$(drafts_next_txt),$(drafts_prev_txt))
-$(foreach rule,$(diff_deps),$(eval $(call makerule_diff,$(rule))))
+is_diffable = $(filter $(draft_diffs),$(call arg,1,$(rule)))
+$(foreach rule,$(diff_deps),$(if $(is_diffable),$(eval $(call makerule_diff,$(rule)))))
 
 define makerule_prev =
 .INTERMEDIATE: $$(call arg,1,$(1)) $$(call arg,4,$(1)) $$(call arg,5,$(1))
