@@ -119,14 +119,14 @@ define makerule_diff =
 $$(call arg,1,$(1)): $$(call arg,3,$(1)) $$(call arg,2,$(1))
 	-$(rfcdiff) --html --stdout $$^ > $$@
 endef
-diff_deps := $(call argcat3,$(draft_diffs),$(drafts_next_txt),$(drafts_prev_txt))
+diff_deps := $(call argcat3,$(draft_diffs),$(drafts_txt),$(drafts_prev_txt))
 is_diffable = $(filter $(draft_diffs),$(call arg,1,$(rule)))
 $(foreach rule,$(diff_deps),$(if $(is_diffable),$(eval $(call makerule_diff,$(rule)))))
 
 define makerule_prev =
 .INTERMEDIATE: $$(call arg,1,$(1)) $$(call arg,4,$(1)) $$(call arg,5,$(1))
 $$(call arg,1,$(1)):
-	git show $$(call arg,2,$(1)):$$(call arg,3,$(1)) > $$@
+	git show $$(call arg,2,$(1)):$$(call arg,3,$(1)) | sed -e"s/$$(basename $$(call arg,3,$(1)))-latest/$$(basename $$@)/" > $$@
 endef
 drafts_prev_out := $(join $(drafts_prev),$(draft_types))
 drafts_prev_in := $(join $(drafts),$(draft_types))
