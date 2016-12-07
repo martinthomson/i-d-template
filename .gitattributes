@@ -1,0 +1,2 @@
+# Force *.sed files to use LF for EOL -- CRLF breaks
+*.sed text eol=lf
