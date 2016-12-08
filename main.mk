@@ -91,9 +91,23 @@ submit:: $(drafts_next_txt) $(drafts_next_xml)
 include .targets.mk
 .targets.mk: $(LIBDIR)/main.mk
 	@echo > $@
+	# Submit targets
 	@for f in $(drafts_next_xml); do \
 	    echo "$$f: $${f%-[0-9][0-9].xml}.xml" >> $@; \
 	    echo -e "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
+	done
+	# Diff targets
+	@p=($(drafts_prev_txt)); n=($(drafts_txt)); i=$${#p[@]}; \
+	while [ $$i -gt 0 ]; do i=$$($$i-1); \
+	    echo "diff-$${p[$$i]%-[0-9][0-9].txt}.html: $${p[$$i]} $${n[$$i]}" >> $@; \
+	    echo -e "\t-\$$(rfcdiff) --html --stdout \$$^ > \$$@" >> $@; \
+	done
+	# Pre-requisite files for diff
+	@for t in $$(git tag); do \
+	    b=$${t%-[0-9][0-9]}; f=$$(git diff-tree --no-commit-id --name-only -r $$t | head -1); \
+	    echo ".INTERMEDIATE: $$t.$${f##*.}" >> $@; \
+	    echo "$$t.$${f##*.}:" >> $@; \
+	    echo -e "\t git show $$t:$$f | sed -e 's/$$b-latest/$$t/' > \$$@" >> $@; \
 	done
 
 ## Check for validity
@@ -108,31 +122,6 @@ idnits:: $(drafts_next_txt)
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
-
-arg = $(word $(1),$(subst ~, ,$(2)))
-argcat = $(join $(1),$(addprefix ~,$(2)))
-argcat3 = $(call argcat,$(1),$(call argcat,$(2),$(3)))
-argcat5 = $(call argcat3,$(1),$(2),$(call argcat3,$(3),$(4),$(5)))
-
-.INTERMEDIATE: $(join $(drafts_prev),$(draft_types))
-define makerule_diff =
-$$(call arg,1,$(1)): $$(call arg,3,$(1)) $$(call arg,2,$(1))
-	-$(rfcdiff) --html --stdout $$^ > $$@
-endef
-diff_deps := $(call argcat3,$(draft_diffs),$(drafts_next_txt),$(drafts_prev_txt))
-is_diffable = $(filter $(draft_diffs),$(call arg,1,$(rule)))
-$(foreach rule,$(diff_deps),$(if $(is_diffable),$(eval $(call makerule_diff,$(rule)))))
-
-define makerule_prev =
-.INTERMEDIATE: $$(call arg,1,$(1)) $$(call arg,4,$(1)) $$(call arg,5,$(1))
-$$(call arg,1,$(1)):
-	git show $$(call arg,2,$(1)):$$(call arg,3,$(1)) > $$@
-endef
-drafts_prev_out := $(join $(drafts_prev),$(draft_types))
-drafts_prev_in := $(join $(drafts),$(draft_types))
-drafts_prev_xml := $(addsuffix .xml,$(drafts_prev))
-prev_versions_args := $(call argcat5,$(drafts_prev_out),$(drafts_prev),$(drafts_prev_in),$(drafts_prev_txt),$(drafts_prev_xml))
-$(foreach args,$(prev_versions_args),$(eval $(call makerule_prev,$(args))))
 
 ## Store a copy of any github issues
 .PHONY: issues
