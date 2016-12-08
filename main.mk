@@ -97,7 +97,7 @@ include .targets.mk
 	    echo -e "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
 	done
 	# Diff targets
-	@p=($(drafts_prev_txt)); n=($(drafts_next_txt)); i=$${#p[@]}; \
+	@p=($(drafts_prev_txt)); n=($(drafts_txt)); i=$${#p[@]}; \
 	while [ $$i -gt 0 ]; do i=$$($$i-1); \
 	    echo "diff-$${p[$$i]%-[0-9][0-9].txt}.html: $${p[$$i]} $${n[$$i]}" >> $@; \
 	    echo -e "\t-\$$(rfcdiff) --html --stdout \$$^ > \$$@" >> $@; \
