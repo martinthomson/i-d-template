@@ -27,7 +27,7 @@ auto_update:
 update:
 	git -C $(LIBDIR) pull
 	@for i in Makefile .travis.yml circle.yml; do \
-	  diff -q $$i $(LIBDIR)/template/$$i >/dev/null || \
+	  diff -qw $$i $(LIBDIR)/template/$$i >/dev/null || \
 	    echo $$i is out of date, run '``'cp -f $(LIBDIR)/template/$$i $$i"''" to update.; \
 	done
 
