@@ -91,18 +91,18 @@ submit:: $(drafts_next_txt) $(drafts_next_xml)
 include .targets.mk
 .targets.mk: $(LIBDIR)/main.mk
 	@echo > $@
-	# Submit targets
+# Submit targets
 	@for f in $(drafts_next_xml); do \
 	    echo "$$f: $${f%-[0-9][0-9].xml}.xml" >> $@; \
 	    echo -e "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
 	done
-	# Diff targets
+# Diff targets
 	@p=($(drafts_prev_txt)); n=($(drafts_txt)); i=$${#p[@]}; \
-	while [ $$i -gt 0 ]; do i=$$($$i-1); \
+	while [ $$i -gt 0 ]; do i=$$(($$i-1)); \
 	    echo "diff-$${p[$$i]%-[0-9][0-9].txt}.html: $${p[$$i]} $${n[$$i]}" >> $@; \
 	    echo -e "\t-\$$(rfcdiff) --html --stdout \$$^ > \$$@" >> $@; \
 	done
-	# Pre-requisite files for diff
+# Pre-requisite files for diff
 	@for t in $$(git tag); do \
 	    b=$${t%-[0-9][0-9]}; f=$$(git diff-tree --no-commit-id --name-only -r $$t | head -1); \
 	    echo ".INTERMEDIATE: $$t.$${f##*.}" >> $@; \
