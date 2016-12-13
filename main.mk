@@ -77,8 +77,8 @@ endif
 ifeq (,$(CI_REPO_FULL))
 	sed -f $(LIBDIR)/addstyle.sed $< > $@
 else
-	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed \
-	  -e 's~{SLUG}~$(CI_REPO_FULL)~' $< > $@
+	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed $< | \
+	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
 endif
 
 %.pdf: %.txt
