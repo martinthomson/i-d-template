@@ -104,7 +104,7 @@ include .targets.mk
 	done
 # Pre-requisite files for diff
 	@for t in $$(git tag); do \
-	    b=$${t%-[0-9][0-9]}; f=$$(git diff-tree --no-commit-id --name-only -r $$t | head -1); \
+	    b=$${t%-[0-9][0-9]}; f=$$(git ls-tree --name-only $$t | grep $$b | head -1); \
 	    echo ".INTERMEDIATE: $$t.$${f##*.}" >> $@; \
 	    echo "$$t.$${f##*.}:" >> $@; \
 	    echo -e "\t git show $$t:$$f | sed -e 's/$$b-latest/$$t/' > \$$@" >> $@; \
