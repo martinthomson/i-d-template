@@ -46,14 +46,14 @@ endif
 fetch-ghpages:
 	-git fetch -q $(FETCH_SHALLOW) origin gh-pages:gh-pages
 
-GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ifeq (true,$(CI))
 CLONE_LOCAL :=
-else ifeq($(shell stat . -c %d),$(shell stat $(GHPAGES_TMP) -c %d))
-CLONE_LOCAL :=
-else
+else ifeq ($(shell stat . -c %d),$(shell stat /tmp -c %d))
 CLONE_LOCAL := --local
+else
+CLONE_LOCAL := --local --no-hardlink
 endif
+GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_TMP)
 .INTERMEDIATE: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
