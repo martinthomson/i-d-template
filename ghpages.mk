@@ -48,10 +48,17 @@ fetch-ghpages:
 
 ifeq (true,$(CI))
 CLONE_LOCAL :=
-else ifeq ($(shell stat . -c %d),$(shell stat /tmp -c %d))
+else
+ifeq (Darwin,$(shell uname -s))
+stat_fs := stat -f %d
+else
+stat_fs := stat -c %d
+endif
+ifeq ($(shell $(stat_fs) .),$(shell $(stat_fs) /tmp))
 CLONE_LOCAL := --local
 else
 CLONE_LOCAL := --local --no-hardlink
+endif
 endif
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_TMP)
