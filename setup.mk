@@ -36,7 +36,8 @@ endif
 TEMPLATE_FILES := \
   Makefile .gitignore \
   README.md CONTRIBUTING.md \
-  .travis.yml circle.yml
+  .travis.yml circle.yml \
+	pre-commit.sh
 
 MARKDOWN_FILES := $(filter %.md,$(TEMPLATE_FILES))
 
@@ -67,6 +68,11 @@ setup-circle: circle.yml
 	@-rm -f $<~
 	git add $<
 endif # USE_XSLT
+
+.PHONY: setup-hook
+setup-hook: pre-commit.sh
+  git add $<
+  ln -s ../../pre-commit.sh .git/hooks/pre-commit
 
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore
