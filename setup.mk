@@ -36,8 +36,7 @@ endif
 TEMPLATE_FILES := \
   Makefile .gitignore \
   README.md CONTRIBUTING.md \
-  .travis.yml circle.yml \
-	pre-commit.sh
+  .travis.yml circle.yml
 
 MARKDOWN_FILES := $(filter %.md,$(TEMPLATE_FILES))
 
@@ -69,11 +68,6 @@ setup-circle: circle.yml
 	git add $<
 endif # USE_XSLT
 
-.PHONY: setup-hook
-setup-hook: pre-commit.sh
-  git add $<
-  ln -s ../../pre-commit.sh .git/hooks/pre-commit
-
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore
 ifndef SUBMODULE
@@ -98,6 +92,7 @@ setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
 .PHONY: setup-master
 setup-master: setup-files setup-markdown setup-gitignore
 	git commit -m "Setup repository for $(firstword $(drafts))"
+	-ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
 
 # Check if the gh-pages branch already exists either remotely or locally
 GHPAGES_COMMITS := $(shell git show-ref -s gh-pages 2>/dev/null)

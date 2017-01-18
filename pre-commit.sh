@@ -1,5 +1,5 @@
 #!/bin/bash
-git stash save -q --keep-index
+git stash save -k -q
 make
 RESULT=$?
 git stash pop -q
