@@ -92,6 +92,7 @@ setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
 .PHONY: setup-master
 setup-master: setup-files setup-markdown setup-gitignore
 	git commit -m "Setup repository for $(firstword $(drafts))"
+	-ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
 
 # Check if the gh-pages branch already exists either remotely or locally
 GHPAGES_COMMITS := $(shell git show-ref -s gh-pages 2>/dev/null)
