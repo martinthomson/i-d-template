@@ -1,4 +1,4 @@
-from behave import then
+from behave import *
 
 @then('it succeeds')
 def step_impl(context):
