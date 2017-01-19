@@ -2,7 +2,6 @@
 latest:: txt html
 
 LIBDIR ?= lib
-include $(LIBDIR)/compat.mk
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/ghpages.mk
