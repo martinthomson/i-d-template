@@ -7,5 +7,12 @@ git stash save -k -q
 make
 RESULT=$?
 git stash pop -q
-[ $RESULT -ne 0 ] && exit 1
+
+if [ $RESULT -ne 0 ]
+then
+  echo "Commit refused -- documents don't build successfully."
+  echo "To commit anyway, run \"git commit --no-verify\""
+  exit 1
+fi
+
 exit 0
