@@ -4,6 +4,8 @@ machine:
     mmark_src: github.com/miekg/mmark/mmark
     mmark: ./mmark
     PATH: ${PATH}:~/bats/bin
+  python:
+    version: 3.5.2
 
 checkout:
   post:

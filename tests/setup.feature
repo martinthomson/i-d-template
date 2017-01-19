@@ -1,11 +1,12 @@
 Feature: Initial setup
 
-#  Scenario:  Run setup script on correctly-set-up directory
-#	  Given a git repo with a Kramdown draft
-#		  and lib is cloned in
-#		 when the setup script is run
-#		 then it succeeds
-#
+  Scenario:  Run setup script on correctly-set-up directory
+	  Given an empty git repo
+		  and lib is cloned in
+			and a Kramdown draft is created
+		 when the setup script is run
+		 then it succeeds
+
 	Scenario:  Run setup script on directory with no draft
 	  Given an empty git repo
 		  and lib is cloned in
