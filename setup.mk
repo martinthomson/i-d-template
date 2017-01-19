@@ -35,7 +35,7 @@ endif
 
 TEMPLATE_FILES := \
   Makefile .gitignore \
-  README.md CONTRIBUTING.md \
+  README.md CONTRIBUTING.md LICENSE.md \
   .travis.yml circle.yml
 
 MARKDOWN_FILES := $(filter %.md,$(TEMPLATE_FILES))
