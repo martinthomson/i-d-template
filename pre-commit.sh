@@ -1,7 +1,10 @@
 #!/bin/bash
+
+exec 1>&2
+
 # No tests to update gh-pages
-BRANCH=$(git symbolic-ref HEAD 2>/dev/null)
-[ $BRANCH = "refs/heads/gh-pages" ] && exit 0
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+[ "$BRANCH" = "gh-pages" ] && exit 0
 
 git stash save -k -q
 make
@@ -14,5 +17,3 @@ then
   echo "To commit anyway, run \"git commit --no-verify\""
   exit 1
 fi
-
-exit 0
