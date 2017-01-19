@@ -30,6 +30,6 @@ update:
 	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
 	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
 	done
-	@[ -L .git/hooks/pre-commit ] || ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit; \
+	@[ -L .git/hooks/pre-commit ] || ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
 
 endif # CI
