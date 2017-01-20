@@ -83,7 +83,7 @@ ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
-ifneq (,$(SELF_TEST))
+ifeq (,$(SELF_TEST))
 ifneq (,$(CI_ARTIFACTS))
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(CI_ARTIFACTS)
 endif
