@@ -22,6 +22,8 @@ def step_impl(context):
       call(["git","init"])
     with cd(context.working_dir):
       call(["git","clone",context.origin_dir,"."])
+      call(["git","config","user.name","\"Behave Tests\""])
+      call(["git","config","user.email","\"behave@example.com\""])
 
 @given('lib is cloned in')
 def step_impl(context):
@@ -53,5 +55,3 @@ def step_impl(context):
     context.execute_steps('''
         Given a git repo with a single Kramdown draft
         and a Kramdown draft is created''')
-
-#@given('a git repo with no origin')
