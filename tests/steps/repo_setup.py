@@ -3,6 +3,8 @@ from subprocess import call
 from tempfile import mkdtemp,NamedTemporaryFile
 from contextlib import contextmanager
 import os
+import random
+import string
 
 @contextmanager
 def cd(newdir):
@@ -43,11 +45,10 @@ def step_impl(context):
 @given('a Kramdown draft is created')
 def step_impl(context):
     with cd(context.working_dir):
-        file_name = "TBD.md"
-        draft_name = "draft-TBD"
-        with NamedTemporaryFile(suffix=".md", prefix="draft-behave-", dir=context.working_dir,delete=False) as newFile:
-            file_name = os.path.basename(newFile.name)
-            draft_name = os.path.splitext(file_name)[0]
+        random_string = ''.join(random.SystemRandom().choice(string.ascii_lowercase) for n in range (8))
+        draft_name = "draft-behave-" + random_string
+        file_name = draft_name + ".md"
+        with open(file_name,"wb") as newFile:
             call(["sed","-e","s/draft-hartke-xmpp-stupid/{}/".format(draft_name),"lib/doc/example.md"],stdout=newFile)
         call(["git","add",file_name])
         call(["git","commit","-am","Initial commit of {}".format(draft_name)])
