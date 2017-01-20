@@ -37,7 +37,7 @@ def step_impl(context):
         with NamedTemporaryFile(suffix=".md", prefix="draft-behave-", dir=context.working_dir,delete=False) as newFile:
             file_name = os.path.basename(newFile.name)
             draft_name = os.path.splitext(file_name)[0]
-            call(["sed","-e","s/draft-hartke-xmpp-stupid.md/{}/".format(draft_name),"lib/doc/example.md"],stdout=newFile)
+            call(["sed","-e","s/draft-hartke-xmpp-stupid/{}/".format(draft_name),"lib/doc/example.md"],stdout=newFile)
         call(["git","add",file_name])
         call(["git","commit","-am","Initial commit of {}".format(draft_name)])
 
