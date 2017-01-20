@@ -40,7 +40,7 @@ def step_impl(context):
     with cd(context.working_dir):
         md_files = glob("draft-*.md")
         ghpages_files = check_output( \
-            ["git","ls-tree","gh-pages","--name-only"] ) \
+            ["git","ls-tree","gh-pages","--name-only","-r"] ) \
             .decode("utf-8")
         for md in md_files:
             txt_file = md.replace(".md",".txt")
