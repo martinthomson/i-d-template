@@ -31,14 +31,12 @@ def step_impl(context):
 
 @given('a Kramdown draft is created')
 def step_impl(context):
-    context.execute_steps('''
-        Given an empty git repo
-        and lib is cloned in''')
     with cd(context.working_dir):
         call(["cp","lib/doc/example.md","draft-hartke-xmpp-stupid.md"])
         call(["git","add","draft-hartke-xmpp-stupid.md"])
+        call(["git","config","user.name","\"Behave\""])
+        call(["git","config","user.email","\"behave@example.com\""])
         call(["git","commit", "-m", "\"Initial\""])
 
-#@given('a git repo with multiple drafts')
 #@given('a git repo with multiple Kramdown drafts')
 #@given('a git repo with no origin')
