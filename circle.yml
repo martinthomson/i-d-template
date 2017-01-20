@@ -4,6 +4,7 @@ machine:
     mmark_src: github.com/miekg/mmark/mmark
     mmark: ./mmark
     PATH: ${PATH}:~/bats/bin
+    FORCE_PUSH: TRUE
   python:
     version: 3.5.2
 
@@ -18,4 +19,4 @@ dependencies:
 
 test:
   override:
-    - behave tests/ --no-capture
+    - behave tests/ --junit --out $CIRCLE_TEST_REPORTS/cucumber/junit.xml
