@@ -1,10 +1,17 @@
 Feature: Building drafts
 
-#	Scenario: Kramdown draft can build
-#		Given a configured git repo with a Kramdown doc
-#		 when we run make
-#		 then make succeeds and generates documents
-#
+	Scenario: Single Kramdown draft can build
+		Given a configured git repo with a Kramdown draft
+		 when make is run
+		 then it succeeds
+     and generates documents
+
+     Scenario: Multiple Kramdown drafts can build
+   		Given a configured git repo with multiple Kramdown drafts
+   		 when make is run
+   		 then it succeeds
+        and generates documents
+
 #	 Scenario: Incorrect Kramdown draft fails
 #  	 Given a configured git repo with a Kramdown doc
 #  		when we break the draft
