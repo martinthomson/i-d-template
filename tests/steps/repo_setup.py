@@ -25,6 +25,13 @@ def step_impl(context):
       call(["git","config","user.name","\"Behave Tests\""])
       call(["git","config","user.email","\"behave@example.com\""])
 
+@given('a git repo with no origin')
+def step_impl(context):
+    context.test_dir = os.getcwd()
+    context.working_dir = mkdtemp()
+    with cd(context.working_dir):
+      call(["git","init"])
+
 @given('lib is cloned in')
 def step_impl(context):
     with cd(context.working_dir):
