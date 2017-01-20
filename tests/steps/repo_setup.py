@@ -1,6 +1,6 @@
 from behave import *
 from subprocess import call
-from tempfile import mkdtemp
+from tempfile import mkdtemp,NamedTemporaryFile
 from contextlib import contextmanager
 import os
 
@@ -32,11 +32,26 @@ def step_impl(context):
 @given('a Kramdown draft is created')
 def step_impl(context):
     with cd(context.working_dir):
-        call(["cp","lib/doc/example.md","draft-hartke-xmpp-stupid.md"])
-        call(["git","add","draft-hartke-xmpp-stupid.md"])
-        call(["git","config","user.name","\"Behave\""])
-        call(["git","config","user.email","\"behave@example.com\""])
-        call(["git","commit", "-m", "\"Initial\""])
+        file_name = "TBD.md"
+        draft_name = "draft-TBD"
+        with NamedTemporaryFile(suffix=".md", prefix="draft-behave-", dir=context.working_dir,delete=False) as newFile:
+            file_name = os.path.basename(newFile.name)
+            draft_name = os.path.splitext(file_name)[0]
+            call(["sed","-e","s/draft-hartke-xmpp-stupid.md/{}/".format(draft_name),"lib/doc/example.md"],stdout=newFile)
+        call(["git","add",file_name])
+        call(["git","commit","-am","Initial commit of {}".format(draft_name)])
 
-#@given('a git repo with multiple Kramdown drafts')
+@given('a git repo with a single Kramdown draft')
+def step_impl(context):
+    context.execute_steps('''
+        Given an empty git repo
+        and lib is cloned in
+        and a Kramdown draft is created''')
+
+@given('a git repo with multiple Kramdown drafts')
+def step_impl(context):
+    context.execute_steps('''
+        Given a git repo with a single Kramdown draft
+        and a Kramdown draft is created''')
+
 #@given('a git repo with no origin')
