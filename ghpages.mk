@@ -66,9 +66,11 @@ ghpages: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
 	git clone -q $(CLONE_LOCAL) -b gh-pages . $@
 
+PUBLISHED := index.html $(drafts_html) $(drafts_txt)
+
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
-ghpages: index.html $(drafts_html) $(drafts_txt)
+ghpages: $(PUBLISHED)
 ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
@@ -83,11 +85,6 @@ ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
-ifeq (,$(SELF_TEST))
-ifneq (,$(CI_ARTIFACTS))
-	cp -f $(filter-out $(GHPAGES_TMP),$^) $(CI_ARTIFACTS)
-endif
-endif
 	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_TMP) commit -m "Script updating gh-pages. [ci skip]"; fi
@@ -103,3 +100,13 @@ endif
 endif
 	-rm -rf $(GHPAGES_TMP)
 endif # PUSH_GHPAGES
+
+## Save published documents to the CI_ARTIFACTS directory
+ifneq (,$(CI_ARTIFACTS))
+.PHONY: artifacts
+ifeq (true,$(SAVE_ISSUES_ARTIFACT))
+artifacts: issues.json
+endif
+artifacts: $(PUBLISHED)
+	cp -f $^ $(CI_ARTIFACTS)
+endif

@@ -126,13 +126,23 @@ diff: $(draft_diffs)
 .PHONY: issues
 issues:: issues.json
 issues.json:
-	curl https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open > $@
+	@echo '[' > $@
+	@tmp=$$(mktemp /tmp/issues.XXXXXX); \
+	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open; \
+	while [ "$$url" != "" ]; do \
+	   echo curl -s $$url -D $$tmp; \
+	   curl -s $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
+	   url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
+	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
+	done; \
+	rm -f $$tmp
+	@echo ']' >> $@
 
 ## Cleanup
 COMMA := ,
 .PHONY: clean
 clean::
-	-rm -f .targets.mk
+	-rm -f .targets.mk issues.json
 	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
 	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
 	-rm -f $(draft_diffs)
