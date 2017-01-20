@@ -19,4 +19,4 @@ dependencies:
 
 test:
   override:
-    - behave tests/ --no-capture
+    - behave tests/ --junit --junit-directory $CIRCLE_TEST_REPORTS/cucumber/
