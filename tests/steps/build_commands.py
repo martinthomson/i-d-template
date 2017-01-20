@@ -48,4 +48,21 @@ def step_impl(context):
         with fileinput.input(files=break_this_file,inplace=True) as inFile:
             for line in inFile:
                 if "RFC2119:" not in line:
-                    print(line)
+                    print(line),
+        context.broken_file = break_this_file
+
+@when('git commit is run')
+def step_impl(context):
+    with cd(context.working_dir):
+        run_with_capture(context,["git","commit","-am","Committing broken draft"])
+
+@when('a non-broken draft is committed')
+def step_impl(context):
+    with cd(context.working_dir):
+        drafts = glob("draft-*.md")
+        drafts.remove(context.broken_file)
+        commit_this_file = drafts[0]
+        with open(commit_this_file, "a") as update:
+            update.write("# One more appendix\n\nCan you see me?\n");
+        call(["git","add",commit_this_file])
+        run_with_capture(context,["git","commit","-m","Only the non-broken file"])
