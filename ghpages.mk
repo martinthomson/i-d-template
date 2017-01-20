@@ -13,7 +13,7 @@ TARGET_DIR := $(filter-out master/,$(SOURCE_BRANCH)/)
 
 ifeq (true,$(CI))
 # If we have the write key or a token, we can push
-ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY)$(FORCE_PUSH))
+ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY)$(SELF_TEST))
 PUSH_GHPAGES := true
 else
 PUSH_GHPAGES := false
@@ -83,8 +83,10 @@ ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
+ifneq (,$(SELF_TEST))
 ifneq (,$(CI_ARTIFACTS))
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(CI_ARTIFACTS)
+endif
 endif
 	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \

@@ -4,7 +4,7 @@ machine:
     mmark_src: github.com/miekg/mmark/mmark
     mmark: ./mmark
     PATH: ${PATH}:~/bats/bin
-    FORCE_PUSH: TRUE
+    SELF_TEST: TRUE
   python:
     version: 3.5.2
 
