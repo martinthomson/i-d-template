@@ -31,6 +31,8 @@ def step_impl(context):
     context.working_dir = mkdtemp()
     with cd(context.working_dir):
       call(["git","init"])
+      call(["git","config","user.name","\"Behave Tests\""])
+      call(["git","config","user.email","\"behave@example.com\""])
 
 @given('lib is cloned in')
 def step_impl(context):
