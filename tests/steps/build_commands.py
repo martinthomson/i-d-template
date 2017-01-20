@@ -14,12 +14,11 @@ def cd(newdir):
     finally:
         os.chdir(prevdir)
 
-@when('the setup script is run')
-def step_impl(context):
+def run_with_capture(context,command):
     with cd(context.working_dir), \
       TemporaryFile(mode='w+') as outFile, \
       TemporaryFile(mode='w+') as errFile:
-        context.result = call(["make","-f","lib/setup.mk"], \
+        context.result = call(command, \
             stdout=outFile,stderr=errFile)
         outFile.seek(0)
         context.out = outFile.read()
@@ -28,15 +27,14 @@ def step_impl(context):
     print(context.out)
     print(context.error, file=sys.stderr)
 
+@when('the setup script is run')
+def step_impl(context):
+    run_with_capture(context,["make","-f","lib/setup.mk"])
+
 @when('make is run')
 def step_impl(context):
-    with cd(context.working_dir), \
-      TemporaryFile(mode='w+') as outFile, \
-      TemporaryFile(mode='w+') as errFile:
-        context.result = call(["make"], stdout=outFile,stderr=errFile)
-        outFile.seek(0)
-        context.out = outFile.read()
-        errFile.seek(0)
-        context.error = errFile.read()
-    print(context.out)
-    print(context.error, file=sys.stderr)
+    run_with_capture(context,["make"])
+
+@when('make ghpages is run')
+def step_impl(context):
+    run_with_capture(context,["make","ghpages"])

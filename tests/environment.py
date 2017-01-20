@@ -2,5 +2,7 @@ from behave import *
 from shutil import rmtree
 
 def after_scenario(context,scenario):
-    rmtree(context.working_dir)
-    rmtree(context.origin_dir)
+    if 'working_dir' in context:
+        rmtree(context.working_dir)
+    if 'origin_dir' in context:
+        rmtree(context.origin_dir)
