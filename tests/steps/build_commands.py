@@ -2,8 +2,10 @@ from behave import *
 from subprocess import call
 from contextlib import contextmanager
 from tempfile import TemporaryFile
+from glob import glob
 import os
 import sys
+import fileinput
 
 @contextmanager
 def cd(newdir):
@@ -38,3 +40,12 @@ def step_impl(context):
 @when('make ghpages is run')
 def step_impl(context):
     run_with_capture(context,["make","ghpages"])
+
+@when('the draft is broken')
+def step_impl(context):
+    with cd(context.working_dir):
+        break_this_file = glob("draft-*.md")[0]
+        with fileinput.input(files=break_this_file,inplace=True) as inFile:
+            for line in inFile:
+                if "RFC2119:" not in line:
+                    print(line)
