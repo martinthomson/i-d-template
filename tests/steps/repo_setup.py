@@ -55,3 +55,15 @@ def step_impl(context):
     context.execute_steps('''
         Given a git repo with a single Kramdown draft
         and a Kramdown draft is created''')
+
+@given('a configured git repo with a Kramdown draft')
+def step_impl(context):
+    context.execute_steps('Given a git repo with a single Kramdown draft')
+    with cd(context.working_dir):
+        context.result = call(["make","-f","lib/setup.mk"])
+
+@given('a configured git repo with multiple Kramdown drafts')
+def step_impl(context):
+    context.execute_steps('Given a git repo with multiple Kramdown drafts')
+    with cd(context.working_dir):
+        context.result = call(["make","-f","lib/setup.mk"])
