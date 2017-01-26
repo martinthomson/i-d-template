@@ -1,3 +1,4 @@
+from __future__ import print_function
 from behave import *
 from subprocess import call
 from contextlib import contextmanager
@@ -54,7 +55,7 @@ def step_impl(context):
         with fileinput.input(files=break_this_file, inplace=True) as inFile:
             for line in inFile:
                 if "RFC2119:" not in line:
-                    print(line)
+                    print(line, end='')
         context.broken_file = break_this_file
 
 

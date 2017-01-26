@@ -43,7 +43,6 @@ def step_impl(context):
 @given(u'lib is cloned in')
 def step_impl(context):
     with cd(context.working_dir):
-        print("Cloning", context.test_dir, "into", context.working_dir)
         call(["git", "clone", context.test_dir, "lib"])
 
 
