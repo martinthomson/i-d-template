@@ -7,6 +7,7 @@ import os
 import sys
 import fileinput
 
+
 @contextmanager
 def cd(newdir):
     prevdir = os.getcwd()
@@ -16,12 +17,13 @@ def cd(newdir):
     finally:
         os.chdir(prevdir)
 
-def run_with_capture(context,command):
+
+def run_with_capture(context, command):
     with cd(context.working_dir), \
-      TemporaryFile(mode='w+') as outFile, \
-      TemporaryFile(mode='w+') as errFile:
-        context.result = call(command, \
-            stdout=outFile,stderr=errFile)
+            TemporaryFile(mode='w+') as outFile, \
+            TemporaryFile(mode='w+') as errFile:
+        context.result = call(command,
+                              stdout=outFile, stderr=errFile)
         outFile.seek(0)
         context.out = outFile.read()
         errFile.seek(0)
@@ -29,40 +31,48 @@ def run_with_capture(context,command):
     print(context.out)
     print(context.error, file=sys.stderr)
 
-@when('the setup script is run')
-def step_impl(context):
-    run_with_capture(context,["make","-f","lib/setup.mk"])
 
-@when('make is run')
+@when(u'the setup script is run')
 def step_impl(context):
-    run_with_capture(context,["make"])
+    run_with_capture(context, ["make", "-f", "lib/setup.mk"])
 
-@when('make ghpages is run')
+
+@when(u'make is run')
 def step_impl(context):
-    run_with_capture(context,["make","ghpages"])
+    run_with_capture(context, ["make"])
 
-@when('the draft is broken')
+
+@when(u'make ghpages is run')
+def step_impl(context):
+    run_with_capture(context, ["make", "ghpages"])
+
+
+@when(u'the draft is broken')
 def step_impl(context):
     with cd(context.working_dir):
         break_this_file = glob("draft-*.md")[0]
-        with fileinput.input(files=break_this_file,inplace=True) as inFile:
+        with fileinput.input(files=break_this_file, inplace=True) as inFile:
             for line in inFile:
                 if "RFC2119:" not in line:
-                    print(line),
+                    print(line)
         context.broken_file = break_this_file
 
-@when('git commit is run')
+
+@when(u'git commit is run')
 def step_impl(context):
     with cd(context.working_dir):
-        run_with_capture(context,["git","commit","-am","Committing broken draft"])
+        run_with_capture(
+            context, ["git", "commit", "-am", "Committing broken draft"])
 
-@when('a non-broken draft is committed')
+
+@when(u'a non-broken draft is committed')
 def step_impl(context):
     with cd(context.working_dir):
         drafts = glob("draft-*.md")
         drafts.remove(context.broken_file)
         commit_this_file = drafts[0]
         with open(commit_this_file, "a") as update:
-            update.write("# One more appendix\n\nCan you see me?\n");
-        call(["git","add",commit_this_file])
-        run_with_capture(context,["git","commit","-m","Only the non-broken file"])
+            update.write("# One more appendix\n\nCan you see me?\n")
+        call(["git", "add", commit_this_file])
+        run_with_capture(
+            context, ["git", "commit", "-m", "Only the non-broken file"])
