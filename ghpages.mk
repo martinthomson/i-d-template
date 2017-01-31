@@ -71,6 +71,7 @@ PUBLISHED := index.html $(drafts_html) $(drafts_txt)
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
 ghpages: $(PUBLISHED)
+
 ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
@@ -84,6 +85,9 @@ ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
+	@EXCESS_FILES="$(addprefix $(TARGET_DIR),$(filter-out $^,$(notdir $(foreach ext,*.html *.txt,$(wildcard $(GHPAGES_TMP)/$(TARGET_DIR)/$(ext))))))"; \
+	[ -n "$$EXCESS_FILES" ] && git -C $(GHPAGES_TMP) rm -f --ignore-unmatch -- $$EXCESS_FILES
+
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
 	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
