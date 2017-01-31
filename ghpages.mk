@@ -110,7 +110,7 @@ ifneq (0,$(words $(OBSOLETE_DIRECTORIES)))
 	for item in $(OBSOLETE_DIRECTORIES); do \
 		if [ -d "$(GHPAGES_TMP)/$$item" ] && \
 			[ "`git -C $(GHPAGES_TMP) log -r -t -n 1 --format=%ct $$item`" -lt "$$CUTOFF" ]; \
-			then git -C $(GHPAGES_TMP) rm -f -r -n $$item; \
+			then git -C $(GHPAGES_TMP) rm -f -r $$item; \
 		fi \
 	done;
 endif
