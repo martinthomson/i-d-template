@@ -4,7 +4,10 @@ exec 1>&2
 
 # No tests to update gh-pages
 BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
-[ "$BRANCH" = "gh-pages" ] && exit 0
+if [ "$BRANCH" = "gh-pages" ] ||
+   [ -e .git/MERGE_HEAD ]; then
+     exit 0
+fi
 
 git stash save -k -q
 make
