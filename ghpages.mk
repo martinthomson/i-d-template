@@ -37,11 +37,14 @@ else
 	@echo '</html>' >>$@
 endif
 
+# Can't do a shallow fetch for master; need history to check ages
 ifeq (true,$(CI))
+ifneq (master,$(SOURCE_BRANCH))
 FETCH_SHALLOW := --depth=5
-else
-FETCH_SHALLOW :=
 endif
+endif
+FETCH_SHALLOW ?=
+
 .PHONY: fetch-ghpages
 fetch-ghpages:
 	-git fetch -q $(FETCH_SHALLOW) origin gh-pages:gh-pages
@@ -68,6 +71,17 @@ $(GHPAGES_TMP): fetch-ghpages
 
 PUBLISHED := index.html $(drafts_html) $(drafts_txt)
 
+ifeq (master,$(SOURCE_BRANCH))
+ifeq (true,$(PUSH_GHPAGES))
+EXTANT_BRANCHES := $(subst refs/heads/,,$(foreach remote,$(shell git remote),$(shell git ls-remote --heads $(remote) | cut -f 2)))
+OBSOLETE_DIRECTORIES := $(shell git ls-tree -t --name-only gh-pages)
+OBSOLETE_DIRECTORIES := $(filter-out circle.yml .gitignore,$(OBSOLETE_DIRECTORIES))
+OBSOLETE_DIRECTORIES := $(filter-out $(EXTANT_BRANCHES),$(OBSOLETE_DIRECTORIES))
+OBSOLETE_DIRECTORIES := $(filter-out $(PUBLISHED),$(OBSOLETE_DIRECTORIES))
+endif
+endif
+OBSOLETE_DIRECTORIES ?=
+
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
 ghpages: $(PUBLISHED)
@@ -85,8 +99,21 @@ ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
+
 	@EXCESS_FILES="$(addprefix $(TARGET_DIR),$(filter-out $^,$(notdir $(foreach ext,*.html *.txt,$(wildcard $(GHPAGES_TMP)/$(TARGET_DIR)/$(ext))))))"; \
-	[ -n "$$EXCESS_FILES" ] && git -C $(GHPAGES_TMP) rm -f --ignore-unmatch -- $$EXCESS_FILES
+	if [ -n "$$EXCESS_FILES" ]; \
+		then git -C $(GHPAGES_TMP) rm -f --ignore-unmatch -- $$EXCESS_FILES; \
+	fi
+
+ifneq (0,$(words $(OBSOLETE_DIRECTORIES)))
+	@CUTOFF=`date +%s -d '-30 days'`; \
+	for item in $(OBSOLETE_DIRECTORIES); do \
+		if [ -d "$(GHPAGES_TMP)/$$item" ] && \
+			[ "`git -C $(GHPAGES_TMP) log -r -t -n 1 --format=%ct $$item`" -lt "$$CUTOFF" ]; \
+			then git -C $(GHPAGES_TMP) rm -f -r -n $$item; \
+		fi \
+	done;
+endif
 
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
 	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
