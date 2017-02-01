@@ -116,7 +116,6 @@ idnits:: $(drafts_next_txt)
 	echo $^ | xargs -n 1 sh -c '$(idnits) $$0'
 
 ## Build diffs between the current draft versions and any previous version
-# This is makefile magic that requires Make 4.0
 
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
