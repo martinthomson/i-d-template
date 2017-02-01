@@ -65,7 +65,7 @@ $(XSLTDIR):
 %.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
 	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
 
-%.htmltmp: %.cleanxml $(LIBDIR)/rfc2629.xslt
+%.htmltmp: %.xml $(LIBDIR)/rfc2629.xslt
 	$(xsltproc) --novalid $(LIBDIR)/rfc2629.xslt $< > $@
 else
 %.htmltmp: %.xml
