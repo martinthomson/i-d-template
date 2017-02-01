@@ -87,12 +87,18 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
+ifeq (true,$(USE_XSLT))
+NEXT_XML_SOURCE_EXT := cleanxml
+else
+NEXT_XML_SOURCE_EXT := xml
+endif
+
 include .targets.mk
 .targets.mk: $(LIBDIR)/main.mk
 	@echo > $@
 # Submit targets
 	@for f in $(drafts_next_xml); do \
-	    echo "$$f: $${f%-[0-9][0-9].xml}.xml" >> $@; \
+	    echo "$$f: $${f%-[0-9][0-9].xml}.$(NEXT_XML_SOURCE_EXT)" >> $@; \
 	    echo -e "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
 	done
 # Diff targets
