@@ -71,17 +71,6 @@ $(GHPAGES_TMP): fetch-ghpages
 
 PUBLISHED := index.html $(drafts_html) $(drafts_txt)
 
-ifeq (master,$(SOURCE_BRANCH))
-ifeq (true,$(PUSH_GHPAGES))
-EXTANT_BRANCHES := $(subst refs/heads/,,$(foreach remote,$(shell git remote),$(shell git ls-remote --heads $(remote) | cut -f 2)))
-OBSOLETE_DIRECTORIES := $(shell git ls-tree -t --name-only gh-pages)
-OBSOLETE_DIRECTORIES := $(filter-out circle.yml .gitignore,$(OBSOLETE_DIRECTORIES))
-OBSOLETE_DIRECTORIES := $(filter-out $(EXTANT_BRANCHES),$(OBSOLETE_DIRECTORIES))
-OBSOLETE_DIRECTORIES := $(filter-out $(PUBLISHED),$(OBSOLETE_DIRECTORIES))
-endif
-endif
-OBSOLETE_DIRECTORIES ?=
-
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
 ghpages: $(PUBLISHED)
@@ -96,24 +85,29 @@ else
 	git -C $(GHPAGES_TMP) config user.name "CI Bot"
 endif
 ifeq (true,$(PUSH_GHPAGES))
+
+	-@for branch in `git remote`; do \
+		git remote prune $$branch; \
+	done;
+
+# Clean up obsolete directories
+	@CUTOFF=`date +%s -d '-30 days'`; \
+	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_TMP) | sed -e 's,.*/,,')`; \
+	for item in $$MAYBE_OBSOLETE; do \
+		if [ -d "$(GHPAGES_TMP)/$$item" ] && \
+			 [ `git -C $(GHPAGES_TMP) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; \
+			 then echo "Remove obsolete '$$item'" && \
+					git -C $(GHPAGES_TMP) rm -rfq -- $$item; \
+		fi \
+	done;
+
+# Create target directory if needed
 ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
 
-	@EXCESS_FILES="$(addprefix $(TARGET_DIR),$(filter-out $^,$(notdir $(foreach ext,*.html *.txt,$(wildcard $(GHPAGES_TMP)/$(TARGET_DIR)/$(ext))))))"; \
-	if [ -n "$$EXCESS_FILES" ]; \
-		then git -C $(GHPAGES_TMP) rm -f --ignore-unmatch -- $$EXCESS_FILES; \
-	fi
-
-ifneq (0,$(words $(OBSOLETE_DIRECTORIES)))
-	@CUTOFF=`date +%s -d '-30 days'`; \
-	for item in $(OBSOLETE_DIRECTORIES); do \
-		if [ -d "$(GHPAGES_TMP)/$$item" ] && \
-			[ "`git -C $(GHPAGES_TMP) log -r -t -n 1 --format=%ct $$item`" -lt "$$CUTOFF" ]; \
-			then git -C $(GHPAGES_TMP) rm -f -r $$item; \
-		fi \
-	done;
-endif
+# Clean up contents of target directory
+	@git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(GHPAGES_TMP)/$(TARGET_DIR)/*.html $(GHPAGES_TMP)/$(TARGET_DIR)/*.txt
 
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
 	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
