@@ -18,7 +18,7 @@ dependencies:
     - gem install --no-doc kramdown-rfc2629
     - go get "$mmark_src" && go build "$mmark_src"
   cache_directories:
-    - "${KRAMDOWN_REFCACHEDIR}"
+    - .refcache
 
 test:
   override:
