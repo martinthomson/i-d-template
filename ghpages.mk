@@ -37,17 +37,9 @@ else
 	@echo '</html>' >>$@
 endif
 
-# Can't do a shallow fetch for master; need history to check ages
-ifeq (true,$(CI))
-ifneq (master,$(SOURCE_BRANCH))
-FETCH_SHALLOW := --depth=5
-endif
-endif
-FETCH_SHALLOW ?=
-
 .PHONY: fetch-ghpages
 fetch-ghpages:
-	-git fetch -q $(FETCH_SHALLOW) origin gh-pages:gh-pages
+	-git fetch -q origin gh-pages:gh-pages
 
 ifeq (true,$(CI))
 CLONE_LOCAL :=
