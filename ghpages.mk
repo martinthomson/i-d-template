@@ -13,7 +13,7 @@ TARGET_DIR := $(filter-out master/,$(SOURCE_BRANCH)/)
 
 ifeq (true,$(CI))
 # If we have the write key or a token, we can push
-ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY))
+ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY)$(SELF_TEST))
 PUSH_GHPAGES := true
 else
 PUSH_GHPAGES := false
