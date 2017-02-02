@@ -78,8 +78,8 @@ else
 endif
 ifeq (true,$(PUSH_GHPAGES))
 
-	-@for branch in `git remote`; do \
-		git remote prune $$branch; \
+	-@for remote in `git remote`; do \
+		git remote prune $$remote; \
 	done;
 
 # Clean up obsolete directories
