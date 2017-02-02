@@ -37,14 +37,9 @@ else
 	@echo '</html>' >>$@
 endif
 
-ifeq (true,$(CI))
-FETCH_SHALLOW := --depth=5
-else
-FETCH_SHALLOW :=
-endif
 .PHONY: fetch-ghpages
 fetch-ghpages:
-	-git fetch -q $(FETCH_SHALLOW) origin gh-pages:gh-pages
+	-git fetch -q origin gh-pages:gh-pages
 
 ifeq (true,$(CI))
 CLONE_LOCAL :=
@@ -71,6 +66,7 @@ PUBLISHED := index.html $(drafts_html) $(drafts_txt)
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
 ghpages: $(PUBLISHED)
+
 ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
@@ -81,9 +77,30 @@ else
 	git -C $(GHPAGES_TMP) config user.name "CI Bot"
 endif
 ifeq (true,$(PUSH_GHPAGES))
+
+	-@for remote in `git remote`; do \
+		git remote prune $$remote; \
+	done;
+
+# Clean up obsolete directories
+	@CUTOFF=`date +%s -d '-30 days'`; \
+	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_TMP) | sed -e 's,.*/,,')`; \
+	for item in $$MAYBE_OBSOLETE; do \
+		if [ -d "$(GHPAGES_TMP)/$$item" ] && \
+			 [ `git -C $(GHPAGES_TMP) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; \
+			 then echo "Remove obsolete '$$item'" && \
+					git -C $(GHPAGES_TMP) rm -rfq -- $$item; \
+		fi \
+	done;
+
+# Create target directory if needed
 ifneq (,$(TARGET_DIR))
 	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
 endif
+
+# Clean up contents of target directory
+	@git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(GHPAGES_TMP)/$(TARGET_DIR)/*.html $(GHPAGES_TMP)/$(TARGET_DIR)/*.txt
+
 	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
 	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
