@@ -7,7 +7,7 @@ ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/issues.XXXXXX); \
 	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open; \
 	while [ "$$url" != "" ]; do \
-	   echo curl -s $$url -D $$tmp; \
+	   echo Fetching issues from $$url; \
 	   curl -s $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
 	   url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
 	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
