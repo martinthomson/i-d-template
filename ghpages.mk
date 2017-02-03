@@ -43,25 +43,11 @@ fetch-ghpages:
 	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	-git fetch -q origin gh-pages:gh-pages
 
-ifeq (true,$(CI))
-CLONE_LOCAL :=
-else
-ifeq (Darwin,$(shell uname -s))
-stat_fs := stat -f %d
-else
-stat_fs := stat -c %d
-endif
-ifeq ($(shell $(stat_fs) .),$(shell $(stat_fs) /tmp))
-CLONE_LOCAL := --local
-else
-CLONE_LOCAL := --local --no-hardlink
-endif
-endif
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_TMP)
 .INTERMEDIATE: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
-	git clone -q $(CLONE_LOCAL) -b gh-pages . $@
+	git clone -q -b gh-pages . $@
 
 TARGET_DIR := $(GHPAGES_TMP)$(filter-out /master,/$(SOURCE_BRANCH))
 ifneq ($(TARGET_DIR),$(GHPAGES_TMP))

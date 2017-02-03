@@ -29,7 +29,7 @@ fetch-ghissues:
 GHISSUES_TMP := /tmp/ghissues$(shell echo $$$$)
 .INTERMEDIATE: $(GHISSUES_TMP)
 $(GHISSUES_TMP): fetch-ghissues
-	git clone -q $(CLONE_LOCAL) -b gh-issues . $@
+	git clone -q -b gh-issues . $@
 
 $(GHISSUES_TMP)/issues.json: issues.json $(GHISSUES_TMP)
 	cp -f $< $@
