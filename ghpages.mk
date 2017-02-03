@@ -9,8 +9,6 @@ ifneq (,$(findstring detached from,$(SOURCE_BRANCH)))
 SOURCE_BRANCH := $(shell git show -s --format='format:%H')
 endif
 
-TARGET_DIR := $(filter-out master/,$(SOURCE_BRANCH)/)
-
 ifeq (true,$(CI))
 # If we have the write key or a token, we can push
 ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY)$(SELF_TEST))
@@ -61,23 +59,21 @@ ghpages: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
 	git clone -q $(CLONE_LOCAL) -b gh-pages . $@
 
-PUBLISHED := index.html $(drafts_html) $(drafts_txt)
-
-.PHONY: ghpages gh-pages
-gh-pages: ghpages
-ghpages: $(PUBLISHED)
-
-ifneq (true,$(CI))
-	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
-	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
-	    git branch -t gh-pages origin/gh-pages) || \
-	  ! echo 'Error: No gh-pages branch, run `make setup-ghpages` to initialize it.'
-else
-	git -C $(GHPAGES_TMP) config user.email "ci-bot@example.com"
-	git -C $(GHPAGES_TMP) config user.name "CI Bot"
+TARGET_DIR := $(GHPAGES_TMP)$(filter-out /master,/$(SOURCE_BRANCH))
+ifneq ($(TARGET_DIR),$(GHPAGES_TMP))
+$(TARGET_DIR): $(GHPAGES_TMP)
+	mkdir -p $@
 endif
-ifeq (true,$(PUSH_GHPAGES))
 
+PUBLISHED := index.html $(drafts_html) $(drafts_txt)
+$(addprefix $(TARGET_DIR)/,$(PUBLISHED)): $(PUBLISHED) $(TARGET_DIR)
+	cp -f $(notdir $@) $@
+
+.PHONY: cleanup-ghpages
+ifeq (true,$(PUSH_GHPAGES))
+ghpages: cleanup-ghpages
+endif
+cleanup-ghpages:
 	-@for remote in `git remote`; do \
 		git remote prune $$remote; \
 	done;
@@ -93,16 +89,25 @@ ifeq (true,$(PUSH_GHPAGES))
 		fi \
 	done;
 
-# Create target directory if needed
-ifneq (,$(TARGET_DIR))
-	mkdir -p $(GHPAGES_TMP)/$(TARGET_DIR)
-endif
-
 # Clean up contents of target directory
-	@git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(GHPAGES_TMP)/$(TARGET_DIR)/*.html $(GHPAGES_TMP)/$(TARGET_DIR)/*.txt
+	@git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt
 
-	cp -f $(filter-out $(GHPAGES_TMP),$^) $(GHPAGES_TMP)/$(TARGET_DIR)
-	git -C $(GHPAGES_TMP) add -f $(addprefix $(TARGET_DIR),$(filter-out $(GHPAGES_TMP),$^))
+
+.PHONY: ghpages gh-pages
+gh-pages: ghpages
+ghpages: $(addprefix $(TARGET_DIR)/,$(PUBLISHED))
+
+ifneq (true,$(CI))
+	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
+	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
+	    git branch -t gh-pages origin/gh-pages) || \
+	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
+else
+	git -C $(GHPAGES_TMP) config user.email "ci-bot@example.com"
+	git -C $(GHPAGES_TMP) config user.name "CI Bot"
+endif
+ifeq (true,$(PUSH_GHPAGES))
+	git -C $(GHPAGES_TMP) add -f $(TARGET_DIR)
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_TMP) commit -m "Script updating gh-pages. [ci skip]"; fi
 ifneq (,$(CI_HAS_WRITE_KEY))
@@ -121,9 +126,6 @@ endif # PUSH_GHPAGES
 ## Save published documents to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))
 .PHONY: artifacts
-ifeq (true,$(SAVE_ISSUES_ARTIFACT))
-artifacts: issues.json
-endif
 artifacts: $(PUBLISHED)
 	cp -f $^ $(CI_ARTIFACTS)
 endif

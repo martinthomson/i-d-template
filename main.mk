@@ -6,6 +6,7 @@ include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/ghpages.mk
 include $(LIBDIR)/update.mk
+include $(LIBDIR)/issues.mk
 
 ## Basic Targets
 .PHONY: txt html pdf
@@ -126,22 +127,6 @@ idnits:: $(drafts_next_txt)
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
-
-## Store a copy of any github issues
-.PHONY: issues
-issues:: issues.json
-issues.json:
-	@echo '[' > $@
-	@tmp=$$(mktemp /tmp/issues.XXXXXX); \
-	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open; \
-	while [ "$$url" != "" ]; do \
-	   echo curl -s $$url -D $$tmp; \
-	   curl -s $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
-	   url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
-	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
-	done; \
-	rm -f $$tmp
-	@echo ']' >> $@
 
 ## Cleanup
 COMMA := ,

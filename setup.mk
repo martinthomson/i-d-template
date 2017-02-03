@@ -105,19 +105,49 @@ endif
 .PHONY: setup-ghpages
 setup-ghpages:
 	@echo "Initializing gh-pages branch"
-	git checkout --orphan gh-pages
-	git rm -rf .
+	git clone -n . $(GHPAGES_TMP)
+	git -C $(GHPAGES_TMP) checkout -q --orphan gh-pages
+	git -C $(GHPAGES_TMP) rm -rfq .
 	@echo Creating index.html and circle.yml
-	@touch index.html
-	@echo 'general:' >circle.yml
-	@echo '  branches:' >>circle.yml
-	@echo '    ignore:' >>circle.yml
-	@echo '      - gh-pages' >>circle.yml
-	@echo lib > .gitignore
-	@echo venv >> .gitignore
-	@echo .refcache >> .gitignore
-	git add index.html circle.yml .gitignore
-	git commit -m "Automatic setup of gh-pages."
-	git clean -qfdX
+	@touch $(GHPAGES_TMP)/index.html
+	@echo 'general:' >$(GHPAGES_TMP)/circle.yml
+	@echo '  branches:' >>$(GHPAGES_TMP)/circle.yml
+	@echo '    ignore:' >>$(GHPAGES_TMP)/circle.yml
+	@echo '      - gh-pages' >>$(GHPAGES_TMP)/circle.yml
+	@echo lib > $(GHPAGES_TMP)/.gitignore
+	@echo venv >> $(GHPAGES_TMP)/.gitignore
+	@echo .refcache >> $(GHPAGES_TMP)/.gitignore
+	git -C $(GHPAGES_TMP) add index.html circle.yml .gitignore
+	git -C $(GHPAGES_TMP) commit -m "Automatic setup of gh-pages."
+	git -C $(GHPAGES_TMP) push origin gh-pages
 	git push --set-upstream $(GIT_REMOTE) gh-pages
-	git checkout -qf "$(GIT_ORIG)"
+	-rm -rf $(GHPAGES_TMP)
+
+
+GHISSUES_COMMITS := $(shell git show-ref -s gh-issues 2>/dev/null)
+ifeq (,$(strip $(GHISSUES_COMMITS)))
+setup: setup-ghissues
+else
+$(warning The gh-issues branch already exists, skipping setup for that.)
+endif
+
+.PHONY: setup-ghissues
+setup-ghissues:
+	@echo "Initializing gh-issues branch"
+	git clone -n . $(GHISSUES_TMP)
+	git -C $(GHISSUES_TMP) checkout -q --orphan gh-issues
+	git -C $(GHISSUES_TMP) rm -rfq .
+	@echo Creating issues.json and circle.yml
+	touch $(GHISSUES_TMP)/issues.json
+	@echo 'general:' >$(GHISSUES_TMP)/circle.yml
+	@echo '  branches:' >>$(GHISSUES_TMP)/circle.yml
+	@echo '    ignore:' >>$(GHISSUES_TMP)/circle.yml
+	@echo '      - gh-issues' >>$(GHISSUES_TMP)/circle.yml
+	@echo lib > $(GHISSUES_TMP)/.gitignore
+	@echo venv >> $(GHISSUES_TMP)/.gitignore
+	@echo .refcache >> $(GHISSUES_TMP)/.gitignore
+	git -C $(GHISSUES_TMP) add issues.json circle.yml .gitignore
+	git -C $(GHISSUES_TMP) commit -m "Automatic setup of gh-issues."
+	git -C $(GHISSUES_TMP) push origin gh-issues
+	git push --set-upstream $(GIT_REMOTE) gh-issues
+	-rm -rf $(GHISSUES_TMP)

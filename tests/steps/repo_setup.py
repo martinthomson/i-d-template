@@ -43,7 +43,7 @@ def step_impl(context):
 @given(u'lib is cloned in')
 def step_impl(context):
     with cd(context.working_dir):
-        call(["git", "clone", context.test_dir, "lib"])
+        call(["ln", "-s", context.test_dir, "lib"])
 
 
 @given(u'a Kramdown draft is created')

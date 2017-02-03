@@ -4,6 +4,8 @@ Feature: Initial setup
     Given a git repo with a single Kramdown draft
      when the setup script is run
      then it succeeds
+     and a branch is created called "gh-pages" containing "index.html"
+     and a branch is created called "gh-issues" containing "issues.json"
 
   Scenario:  Run setup script on directory with no draft
     Given an empty git repo

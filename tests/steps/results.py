@@ -53,3 +53,11 @@ def step_impl(context):
             html_file = md.replace(".md", ".html")
             assert ghpages_files.find(txt_file) != -1
             assert ghpages_files.find(html_file) != -1
+
+@then(u'a branch is created called "{branch}" containing "{filename}"')
+def step_impl(context, branch, filename):
+    with cd(context.working_dir):
+        files = check_output(
+            ["git", "ls-tree", branch, "--name-only", "-r"] ) \
+            .decode("utf-8")
+        assert filename in files
