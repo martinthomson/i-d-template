@@ -36,19 +36,14 @@ $(GHISSUES_TMP)/issues.json: issues.json $(GHISSUES_TMP)
 gh-issues: ghissues
 ghissues: $(GHISSUES_TMP)/issues.json
 
-ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-issues >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-issues >/dev/null 2>&1 && \
 	    git branch -t gh-issues origin/gh-issues) || \
 	  ! echo 'Error: No gh-issues branch, run `make -f $(LIBDIR)/setup.mk setup-issues` to initialize it.'
-else
-	git -C $(GHISSUES_TMP) config user.email "ci-bot@example.com"
-	git -C $(GHISSUES_TMP) config user.name "CI Bot"
-endif
 
 	git -C $(GHISSUES_TMP) add -f issues.json
 	if test `git -C $(GHISSUES_TMP) status --porcelain issues.json | wc -l` -gt 0; then \
-	  git -C $(GHISSUES_TMP) commit -m "Script updating gh-issues. [ci skip]"; fi
+	  git -C $(GHISSUES_TMP) commit $(CI_AUTHOR) -m "Script updating gh-issues. [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
 	git -C $(GHISSUES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-issues

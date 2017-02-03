@@ -35,7 +35,9 @@ CI_USER ?= $(word 1,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_USERNAME)
 CI_REPO ?= $(word 2,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_REPONAME)
 ifeq (true,$(CI))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
+CI_AUTHOR = --author="ID Bot <idbot@example.com>"
 endif
+CI_AUTHOR ?=
 ifdef CI_PULL_REQUESTS
 CI_IS_PR = true
 else

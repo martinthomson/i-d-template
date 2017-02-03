@@ -91,7 +91,7 @@ setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
 
 .PHONY: setup-master
 setup-master: setup-files setup-markdown setup-gitignore
-	git commit -m "Setup repository for $(firstword $(drafts))"
+	git commit $(CI_AUTHOR) -m "Setup repository for $(firstword $(drafts))"
 	-ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
 
 # Check if the gh-pages branch already exists either remotely or locally
@@ -106,8 +106,6 @@ endif
 setup-ghpages:
 	@echo "Initializing gh-pages branch"
 	git clone -n . $(GHPAGES_TMP)
-	git -C $(GHPAGES_TMP) config user.email "id-bot@example.com"
-	git -C $(GHPAGES_TMP) config user.name "I-D Bot"
 	git -C $(GHPAGES_TMP) checkout -q --orphan gh-pages
 	git -C $(GHPAGES_TMP) rm -rfq .
 	@echo Creating index.html and circle.yml
@@ -120,7 +118,7 @@ setup-ghpages:
 	@echo venv >> $(GHPAGES_TMP)/.gitignore
 	@echo .refcache >> $(GHPAGES_TMP)/.gitignore
 	git -C $(GHPAGES_TMP) add index.html circle.yml .gitignore
-	git -C $(GHPAGES_TMP) commit -m "Automatic setup of gh-pages."
+	git -C $(GHPAGES_TMP) commit $(CI_AUTHOR) -m "Automatic setup of gh-pages."
 	git -C $(GHPAGES_TMP) push origin gh-pages
 	git push --set-upstream $(GIT_REMOTE) gh-pages
 	-rm -rf $(GHPAGES_TMP)
@@ -137,8 +135,6 @@ endif
 setup-ghissues:
 	@echo "Initializing gh-issues branch"
 	git clone -n . $(GHISSUES_TMP)
-	git -C $(GHISSUES_TMP) config user.email "id-bot@example.com"
-	git -C $(GHISSUES_TMP) config user.name "I-D Bot"
 	git -C $(GHISSUES_TMP) checkout -q --orphan gh-issues
 	git -C $(GHISSUES_TMP) rm -rfq .
 	@echo Creating issues.json and circle.yml
@@ -151,7 +147,7 @@ setup-ghissues:
 	@echo venv >> $(GHISSUES_TMP)/.gitignore
 	@echo .refcache >> $(GHISSUES_TMP)/.gitignore
 	git -C $(GHISSUES_TMP) add issues.json circle.yml .gitignore
-	git -C $(GHISSUES_TMP) commit -m "Automatic setup of gh-issues."
+	git -C $(GHISSUES_TMP) commit $(CI_AUTHOR) -m "Automatic setup of gh-issues."
 	git -C $(GHISSUES_TMP) push origin gh-issues
 	git push --set-upstream $(GIT_REMOTE) gh-issues
 	-rm -rf $(GHISSUES_TMP)
