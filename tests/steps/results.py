@@ -51,8 +51,8 @@ def step_impl(context):
         for md in md_files:
             txt_file = md.replace(".md", ".txt")
             html_file = md.replace(".md", ".html")
-            assert ghpages_files.find(txt_file) != -1
-            assert ghpages_files.find(html_file) != -1
+            assert txt_file in ghpages_files
+            assert html_file in ghpages_files
 
 @then(u'a branch is created called "{branch}" containing "{filename}"')
 def step_impl(context, branch, filename):

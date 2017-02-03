@@ -70,23 +70,20 @@ $(addprefix $(TARGET_DIR)/,$(PUBLISHED)): $(PUBLISHED) $(TARGET_DIR)
 	cp -f $(notdir $@) $@
 
 .PHONY: cleanup-ghpages
-ifeq (true,$(PUSH_GHPAGES))
-ghpages: cleanup-ghpages
-endif
-cleanup-ghpages:
+cleanup-ghpages: $(GHPAGES_TMP)
 	-@for remote in `git remote`; do \
-		git remote prune $$remote; \
+	  git remote prune $$remote; \
 	done;
 
 # Clean up obsolete directories
 	@CUTOFF=`date +%s -d '-30 days'`; \
 	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_TMP) | sed -e 's,.*/,,')`; \
 	for item in $$MAYBE_OBSOLETE; do \
-		if [ -d "$(GHPAGES_TMP)/$$item" ] && \
-			 [ `git -C $(GHPAGES_TMP) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; \
-			 then echo "Remove obsolete '$$item'" && \
-					git -C $(GHPAGES_TMP) rm -rfq -- $$item; \
-		fi \
+	  if [ -d "$(GHPAGES_TMP)/$$item" ] && \
+	     [ `git -C $(GHPAGES_TMP) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; then \
+	    echo "Remove obsolete '$$item'"; \
+	    git -C $(GHPAGES_TMP) rm -rfq -- $$item; \
+	  fi \
 	done;
 
 # Clean up contents of target directory
@@ -95,7 +92,7 @@ cleanup-ghpages:
 
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
-ghpages: $(addprefix $(TARGET_DIR)/,$(PUBLISHED))
+ghpages: cleanup-ghpages $(addprefix $(TARGET_DIR)/,$(PUBLISHED))
 
 ifneq (true,$(CI))
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
@@ -106,10 +103,10 @@ else
 	git -C $(GHPAGES_TMP) config user.email "ci-bot@example.com"
 	git -C $(GHPAGES_TMP) config user.name "CI Bot"
 endif
-ifeq (true,$(PUSH_GHPAGES))
 	git -C $(GHPAGES_TMP) add -f $(TARGET_DIR)
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_TMP) commit -m "Script updating gh-pages. [ci skip]"; fi
+ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
 	git -C $(GHPAGES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-pages
 else

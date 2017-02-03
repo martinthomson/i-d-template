@@ -43,9 +43,9 @@ def step_impl(context):
     run_with_capture(context, ["make"])
 
 
-@when(u'make ghpages is run')
-def step_impl(context):
-    run_with_capture(context, ["make", "ghpages"])
+@when(u'make "{target}" is run')
+def step_impl(context, target):
+    run_with_capture(context, ["make", target])
 
 
 @when(u'the draft is broken')

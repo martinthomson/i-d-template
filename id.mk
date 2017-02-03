@@ -13,6 +13,7 @@ endif
 
 draft_types := $(foreach draft,$(drafts),\
 		   $(suffix $(firstword $(wildcard $(draft).md $(draft).org $(draft).xml))))
+drafts_source := $(join $(drafts),$(draft_types))
 
 f_prev_tag = $(shell git tag 2>/dev/null | grep '$(draft)-[0-9][0-9]' | tail -1 | sed -e"s/.*-//")
 f_next_tag = $(if $(f_prev_tag),$(shell printf "%.2d" $$(( 1$(f_prev_tag) - 99)) ),00)
@@ -56,7 +57,7 @@ CI_ARTIFACTS := $(CIRCLE_ARTIFACTS)
 GIT_REMOTE ?= origin
 ifndef CI_REPO_FULL
 GITHUB_REPO_FULL := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
-			sed -e 's/^.*github\.com.//;s/\.git$$//')
+		      sed -e 's/^.*github\.com.//;s/\.git$$//')
 GITHUB_USER := $(word 1,$(subst /, ,$(GITHUB_REPO_FULL)))
 GITHUB_REPO := $(word 2,$(subst /, ,$(GITHUB_REPO_FULL)))
 else

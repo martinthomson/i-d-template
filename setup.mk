@@ -106,6 +106,8 @@ endif
 setup-ghpages:
 	@echo "Initializing gh-pages branch"
 	git clone -n . $(GHPAGES_TMP)
+	git -C $(GHPAGES_TMP) config user.email "id-bot@example.com"
+	git -C $(GHPAGES_TMP) config user.name "I-D Bot"
 	git -C $(GHPAGES_TMP) checkout -q --orphan gh-pages
 	git -C $(GHPAGES_TMP) rm -rfq .
 	@echo Creating index.html and circle.yml
@@ -135,6 +137,8 @@ endif
 setup-ghissues:
 	@echo "Initializing gh-issues branch"
 	git clone -n . $(GHISSUES_TMP)
+	git -C $(GHISSUES_TMP) config user.email "id-bot@example.com"
+	git -C $(GHISSUES_TMP) config user.name "I-D Bot"
 	git -C $(GHISSUES_TMP) checkout -q --orphan gh-issues
 	git -C $(GHISSUES_TMP) rm -rfq .
 	@echo Creating issues.json and circle.yml

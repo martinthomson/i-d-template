@@ -1,8 +1,9 @@
 ## Store a copy of any github issues
 .PHONY: issues
 issues: issues.json
-issues.json:
+issues.json: $(drafts_source)
 	@echo '[' > $@
+ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/issues.XXXXXX); \
 	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open; \
 	while [ "$$url" != "" ]; do \
@@ -12,6 +13,9 @@ issues.json:
 	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
 	done; \
 	rm -f $$tmp
+else
+	echo '{}' >> $@
+endif
 	@echo ']' >> $@
 
 .PHONY: fetch-ghissues
@@ -42,10 +46,10 @@ else
 	git -C $(GHISSUES_TMP) config user.name "CI Bot"
 endif
 
-ifeq (true,$(PUSH_GHPAGES))
 	git -C $(GHISSUES_TMP) add -f issues.json
 	if test `git -C $(GHISSUES_TMP) status --porcelain issues.json | wc -l` -gt 0; then \
 	  git -C $(GHISSUES_TMP) commit -m "Script updating gh-issues. [ci skip]"; fi
+ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
 	git -C $(GHISSUES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-issues
 else
