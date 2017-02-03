@@ -42,7 +42,7 @@ ghissues: $(GHISSUES_TMP)/issues.json
 
 	git -C $(GHISSUES_TMP) add -f issues.json
 	if test `git -C $(GHISSUES_TMP) status --porcelain issues.json | wc -l` -gt 0; then \
-	  git -C $(GHISSUES_TMP) commit $(CI_AUTHOR) -m "Script updating gh-issues. [ci skip]"; fi
+	  git -C $(GHISSUES_TMP) $(CI_AUTHOR) commit -m "Script updating gh-issues. [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
 	git -C $(GHISSUES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-issues

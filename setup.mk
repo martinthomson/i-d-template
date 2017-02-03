@@ -6,7 +6,7 @@ include $(LIBDIR)/main.mk
 
 # Check that everything is ready
 ifeq (,$(wildcard .git))
-$(error Please make sure that this is a git repository)
+$(error Please make sure that this is a git repository by running "git init")
 endif
 GIT_ORIG := $(shell git branch 2>/dev/null | grep '*' | cut -c 3-)
 ifneq (1,$(words $(GIT_ORIG)))
@@ -91,7 +91,7 @@ setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
 
 .PHONY: setup-master
 setup-master: setup-files setup-markdown setup-gitignore
-	git commit $(CI_AUTHOR) -m "Setup repository for $(firstword $(drafts))"
+	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts))"
 	-ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
 
 # Check if the gh-pages branch already exists either remotely or locally
@@ -118,7 +118,7 @@ setup-ghpages:
 	@echo venv >> $(GHPAGES_TMP)/.gitignore
 	@echo .refcache >> $(GHPAGES_TMP)/.gitignore
 	git -C $(GHPAGES_TMP) add index.html circle.yml .gitignore
-	git -C $(GHPAGES_TMP) commit $(CI_AUTHOR) -m "Automatic setup of gh-pages."
+	git -C $(GHPAGES_TMP) $(CI_AUTHOR) commit -m "Automatic setup of gh-pages."
 	git -C $(GHPAGES_TMP) push origin gh-pages
 	git push --set-upstream $(GIT_REMOTE) gh-pages
 	-rm -rf $(GHPAGES_TMP)
@@ -147,7 +147,7 @@ setup-ghissues:
 	@echo venv >> $(GHISSUES_TMP)/.gitignore
 	@echo .refcache >> $(GHISSUES_TMP)/.gitignore
 	git -C $(GHISSUES_TMP) add issues.json circle.yml .gitignore
-	git -C $(GHISSUES_TMP) commit $(CI_AUTHOR) -m "Automatic setup of gh-issues."
+	git -C $(GHISSUES_TMP) $(CI_AUTHOR) commit -m "Automatic setup of gh-issues."
 	git -C $(GHISSUES_TMP) push origin gh-issues
 	git push --set-upstream $(GIT_REMOTE) gh-issues
 	-rm -rf $(GHISSUES_TMP)

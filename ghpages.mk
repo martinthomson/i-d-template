@@ -85,7 +85,7 @@ gh-pages: ghpages
 ghpages: cleanup-ghpages $(addprefix $(TARGET_DIR)/,$(PUBLISHED))
 	git -C $(GHPAGES_TMP) add -f $(TARGET_DIR)
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
-	  git -C $(GHPAGES_TMP) commit $(CI_AUTHOR) -m "Script updating gh-pages. [ci skip]"; fi
+	  git -C $(GHPAGES_TMP) $(CI_AUTHOR) commit -m "Script updating gh-pages. [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
 	git -C $(GHPAGES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-pages

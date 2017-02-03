@@ -53,8 +53,8 @@ def step_impl(context):
             call(["sed", "-e", "s/draft-hartke-xmpp-stupid/{}/".format(draft_name),
                   "lib/doc/example.md"], stdout=newFile)
         call(["git", "add", file_name])
-        call(["git", "commit", "-am", "Initial commit of {}".format(draft_name),
-              "--author=Behave Tests <behave@example.com>"])
+        call(["git", "-c", "user.name=Behave Tests", "-c", "user.email=behave@example.com",
+              "commit", "-am", "Initial commit of {}".format(draft_name)])
 
 
 @given(u'a git repo with a single Kramdown draft')
