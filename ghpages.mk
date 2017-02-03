@@ -37,6 +37,10 @@ endif
 
 .PHONY: fetch-ghpages
 fetch-ghpages:
+	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
+	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
+	    git branch -t gh-pages origin/gh-pages) || \
+	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	-git fetch -q origin gh-pages:gh-pages
 
 ifeq (true,$(CI))
@@ -93,12 +97,6 @@ cleanup-ghpages: $(GHPAGES_TMP)
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
 ghpages: cleanup-ghpages $(addprefix $(TARGET_DIR)/,$(PUBLISHED))
-
-	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
-	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
-	    git branch -t gh-pages origin/gh-pages) || \
-	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
-
 	git -C $(GHPAGES_TMP) add -f $(TARGET_DIR)
 	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_TMP) commit $(CI_AUTHOR) -m "Script updating gh-pages. [ci skip]"; fi
