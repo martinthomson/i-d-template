@@ -26,6 +26,8 @@ def step_impl(context):
         call(["git", "init"])
     with cd(context.working_dir):
         call(["git", "clone", context.origin_dir, "."])
+        call(["git", "config", "user.name", "Behave Tests"])
+        call(["git", "config", "user.email", "behave@example.com"])
 
 
 @given(u'a git repo with no origin')
@@ -34,6 +36,8 @@ def step_impl(context):
     context.working_dir = mkdtemp()
     with cd(context.working_dir):
         call(["git", "init"])
+        call(["git", "config", "user.name", "Behave Tests"])
+        call(["git", "config", "user.email", "behave@example.com"])
 
 
 @given(u'lib is cloned in')
@@ -53,8 +57,7 @@ def step_impl(context):
             call(["sed", "-e", "s/draft-hartke-xmpp-stupid/{}/".format(draft_name),
                   "lib/doc/example.md"], stdout=newFile)
         call(["git", "add", file_name])
-        call(["git", "-c", "user.name=Behave Tests", "-c", "user.email=behave@example.com",
-              "commit", "-am", "Initial commit of {}".format(draft_name)])
+        call(["git", "commit", "-am", "Initial commit of {}".format(draft_name)])
 
 
 @given(u'a git repo with a single Kramdown draft')
