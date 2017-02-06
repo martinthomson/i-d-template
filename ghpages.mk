@@ -37,16 +37,16 @@ endif
 
 .PHONY: fetch-ghpages
 fetch-ghpages:
-	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
-	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
-	    git branch -t gh-pages origin/gh-pages) || \
-	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	-git fetch -q origin gh-pages:gh-pages
 
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_TMP)
 .INTERMEDIATE: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
+	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
+	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
+	    git branch -t gh-pages origin/gh-pages) || \
+	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	git clone -q -b gh-pages . $@
 
 TARGET_DIR := $(GHPAGES_TMP)$(filter-out /master,/$(SOURCE_BRANCH))

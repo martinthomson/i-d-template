@@ -20,15 +20,15 @@ endif
 
 .PHONY: fetch-ghissues
 fetch-ghissues:
-	@git show-ref refs/heads/gh-issues >/dev/null 2>&1 || \
-	  (git show-ref refs/remotes/origin/gh-issues >/dev/null 2>&1 && \
-	    git branch -t gh-issues origin/gh-issues) || \
-	  ! echo 'Error: No gh-issues branch, run `make -f $(LIBDIR)/setup.mk setup-issues` to initialize it.'
 	-git fetch -q origin gh-issues:gh-issues
 
 GHISSUES_TMP := /tmp/ghissues$(shell echo $$$$)
 .INTERMEDIATE: $(GHISSUES_TMP)
 $(GHISSUES_TMP): fetch-ghissues
+	@git show-ref refs/heads/gh-issues >/dev/null 2>&1 || \
+	  (git show-ref refs/remotes/origin/gh-issues >/dev/null 2>&1 && \
+	    git branch -t gh-issues origin/gh-issues) || \
+	  ! echo 'Error: No gh-issues branch, run `make -f $(LIBDIR)/setup.mk setup-issues` to initialize it.'
 	git clone -q -b gh-issues . $@
 
 $(GHISSUES_TMP)/issues.json: issues.json $(GHISSUES_TMP)
