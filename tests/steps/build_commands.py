@@ -8,6 +8,9 @@ import os
 import sys
 import fileinput
 
+git_commit = ["git", "-c", "user.name=Behave Tests", "-c",
+              "user.email=behave@example.com", "commit"]
+
 
 @contextmanager
 def cd(newdir):
@@ -62,8 +65,8 @@ def step_impl(context):
 @when(u'git commit is run')
 def step_impl(context):
     with cd(context.working_dir):
-        run_with_capture(
-            context, ["git", "commit", "-am", "Committing broken draft"])
+        run_with_capture(context, git_commit +
+                         ["-am", "Committing broken draft"])
 
 
 @when(u'a non-broken draft is committed')
@@ -75,5 +78,5 @@ def step_impl(context):
         with open(commit_this_file, "a") as update:
             update.write("# One more appendix\n\nCan you see me?\n")
         call(["git", "add", commit_this_file])
-        run_with_capture(
-            context, ["git", "commit", "-m", "Only the non-broken file"])
+        run_with_capture(context, git_commit +
+                         ["-m", "Only the non-broken file"])
