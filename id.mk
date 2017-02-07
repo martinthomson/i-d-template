@@ -53,10 +53,10 @@ endif
 endif
 CI_ARTIFACTS := $(CIRCLE_ARTIFACTS)
 
-ifeq (,$(shell git config --get user.name))
+ifeq (,$(shell git config --global --get user.name))
 CI_AUTHOR = -c user.name="ID Bot"
 endif
-ifeq (,$(shell git config --get user.email))
+ifeq (,$(shell git config --global --get user.email))
 CI_AUTHOR += -c user.email="idbot@example.com"
 endif
 
