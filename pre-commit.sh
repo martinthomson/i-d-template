@@ -11,7 +11,7 @@ if [ "$BRANCH" = "gh-pages" ] ||
 fi
 
 STASHED=0
-if test `git status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then
+if [ `git status --porcelain | grep '^[A-Z]' | wc -l` -gt 0 ]; then
   git stash save -k -q
   STASHED=1
 fi
