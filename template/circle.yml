@@ -6,7 +6,8 @@ machine:
 
 checkout:
   post:
-    - git fetch origin gh-pages --depth 10
+    - if [ -e .git/shallow ]; then git fetch origin --unshallow; fi
+    - git fetch origin gh-pages
 
 dependencies:
   pre:
