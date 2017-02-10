@@ -13,7 +13,7 @@ tmpfiles=()
 txtfiles=()
 trap 'rm -f "${tmpfiles[@]}" "${txtfiles[@]}"' ERR EXIT
 for f in "${files[@]}"; do
-    tmp=$(mktemp -p "$PWD" -t "${f%.*}"-XXXXX."${f##*.}")
+    tmp="${f%.*}"-tmp$$."${f##*.}"
     tmpfiles+=("$tmp")
     txtfiles+=("${tmp%.*}.txt")
     # This makes a copy of the staged file.
