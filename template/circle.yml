@@ -3,6 +3,9 @@ machine:
     GOPATH: "${HOME}/${CIRCLE_PROJECT_REPONAME}/.go_workspace"
     mmark_src: github.com/miekg/mmark/mmark
     mmark: ./mmark
+  python:
+    version: 3.5.2
+
 
 checkout:
   post:
@@ -14,6 +17,8 @@ dependencies:
     - pip install xml2rfc
     - if head -1 -q *.md | grep '^\-\-\-' >/dev/null 2>&1; then gem install --no-doc kramdown-rfc2629; fi
     - if head -1 -q *.md | grep '^%%%' >/dev/null 2>&1; then go get "$mmark_src" && go build "$mmark_src"; fi
+  cache_directories:
+    - "/opt/circleci/.rvm/gems"
 
 test:
   override:
