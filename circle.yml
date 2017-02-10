@@ -17,6 +17,9 @@ dependencies:
     - pip install xml2rfc behave
     - gem install --no-doc kramdown-rfc2629
     - go get "$mmark_src" && go build "$mmark_src"
+  cache_directories:
+    - "~/.cache"
+    - "/opt/circleci/.rvm/gems"
 
 test:
   override:
