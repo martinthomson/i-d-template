@@ -18,7 +18,6 @@ dependencies:
     - gem install --no-doc kramdown-rfc2629
     - go get "$mmark_src" && go build "$mmark_src"
   cache_directories:
-    - "~/.cache"
     - "/opt/circleci/.rvm/gems"
 
 test:
