@@ -6,7 +6,6 @@ machine:
   python:
     version: 3.5.2
 
-
 checkout:
   post:
     - if [ -e .git/shallow ]; then git fetch origin --unshallow; fi
@@ -28,4 +27,5 @@ deployment:
   production:
     branch: /.*/
     commands:
-      - make ghpages artifacts
+      - make artifacts
+      - make ghpages
