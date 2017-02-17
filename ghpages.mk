@@ -41,7 +41,6 @@ fetch-ghpages:
 
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_TMP)
-.INTERMEDIATE: $(GHPAGES_TMP)
 $(GHPAGES_TMP): fetch-ghpages
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
@@ -74,10 +73,10 @@ cleanup-ghpages: $(GHPAGES_TMP)
 	    echo "Remove obsolete '$$item'"; \
 	    git -C $(GHPAGES_TMP) rm -rfq -- $$item; \
 	  fi \
-	done;
+	done
 
 # Clean up contents of target directory
-	@git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt
+	git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt
 
 
 .PHONY: ghpages gh-pages
