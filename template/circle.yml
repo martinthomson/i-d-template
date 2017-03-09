@@ -22,6 +22,8 @@ dependencies:
 test:
   override:
     - make
+  post:
+    - make report
 
 deployment:
   production:
