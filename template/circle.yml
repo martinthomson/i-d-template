@@ -9,7 +9,7 @@ machine:
 checkout:
   post:
     - if [ -e .git/shallow ]; then git fetch origin --unshallow; fi
-    - git fetch origin gh-pages
+    - git fetch -qf origin gh-pages:gh-pages
 
 dependencies:
   pre:
