@@ -20,7 +20,7 @@ endif
 
 .PHONY: fetch-ghissues
 fetch-ghissues:
-	-git fetch -qf origin gh-issues:gh-issues
+	-git fetch -q origin gh-issues:gh-issues
 
 GHISSUES_TMP := /tmp/ghissues$(shell echo $$$$)
 .INTERMEDIATE: $(GHISSUES_TMP)

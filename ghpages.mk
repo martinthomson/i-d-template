@@ -37,7 +37,7 @@ endif
 
 .PHONY: fetch-ghpages
 fetch-ghpages:
-	-git fetch -qf origin gh-pages:gh-pages
+	-git fetch -q origin gh-pages:gh-pages
 
 GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_TMP)
