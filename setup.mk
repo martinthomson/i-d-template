@@ -13,10 +13,10 @@ ifneq (1,$(words $(GIT_ORIG)))
 $(error If you are just starting out, please commit something before starting)
 endif
 ifneq (master,$(GIT_ORIG))
-$(warning Using a branch called 'master' is recommended.)
+$(warning Using a branch called 'master' is recommended)
 endif
 ifneq (1,$(words $(drafts)))
-$(warning Sorry, but the setup works best with just one draft.)
+$(warning Sorry, but the setup works best with just one draft)
 $(warning This will use $(firstword $(drafts)).)
 endif
 
@@ -31,6 +31,9 @@ $(error You have uncommitted changes, please commit them before running setup)
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
 $(error Please configure a remote called '$(GIT_REMOTE)' before running setup)
+endif
+ifeq (,$(shell git show-ref origin/$(GIT_ORIG)))
+$(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push $(GIT_REMOTE) $(GIT_ORIG)")
 endif
 
 TEMPLATE_FILES := \

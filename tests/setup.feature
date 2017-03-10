@@ -27,3 +27,12 @@ Feature: Initial setup
      when the setup script is run
      then it fails
      and generates a message "remote"
+
+  Scenario:  Run setup script on directory without pushing to master
+    Given a git repo with no origin
+     and an empty origin remote is added
+     and lib is cloned in
+     and a Kramdown draft is created
+     when the setup script is run
+     then it fails
+     and generates a message "push"
