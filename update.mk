@@ -1,14 +1,15 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull
+FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
+FETCH_HEAD = $(wildcard .git/modules/$(LIBDIR)/FETCH_HEAD)
 endif
 
 NOW = $$(date '+%s')
-FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 ifeq (,$(FETCH_HEAD))
-UPDATE_NEEDED = true
+UPDATE_NEEDED = false
 else
 UPDATE_TIME = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(FETCH_HEAD))
 UPDATE_INTERVAL = 1209600 # 2 weeks
@@ -26,8 +27,9 @@ auto_update:
 update:
 	git -C $(LIBDIR) pull
 	@for i in Makefile .travis.yml circle.yml; do \
-	  diff -q $$i $(LIBDIR)/template/$$i >/dev/null || \
-	    echo $$i is out of date, run '``'cp -f $(LIBDIR)/template/$$i $$i"''" to update.; \
+	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
+	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
 	done
+	@[ -L .git/hooks/pre-commit ] || ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
 
 endif # CI

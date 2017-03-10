@@ -2,11 +2,11 @@
 latest:: txt html
 
 LIBDIR ?= lib
-include $(LIBDIR)/compat.mk
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/ghpages.mk
 include $(LIBDIR)/update.mk
+include $(LIBDIR)/issues.mk
 
 ## Basic Targets
 .PHONY: txt html pdf
@@ -26,8 +26,24 @@ ifdef MD_PREPROCESSOR
 else
 %.xml: %.md
 endif
-	XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
-	  $(kramdown-rfc2629) $< > $@
+	@h=$$(head -1 $< | cut -c 1-3 -); \
+	if [ "$$h" = '---' ]; then \
+	  echo XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
+	    $(kramdown-rfc2629) $< \> $@; \
+	  XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
+	    $(kramdown-rfc2629) $< > $@; \
+	elif [ "$$h" = '%%%' ]; then \
+	  echo $(mmark) -xml2 -page $< $@; \
+	  $(mmark) -xml2 -page $< $@; \
+	else \
+	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
+	fi
+
+ifdef REFCACHEDIR
+%.xml: .refcache
+.refcache: $(REFCACHEDIR)
+	ln -s $< $@
+endif
 
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
@@ -35,8 +51,28 @@ endif
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
 
+ifeq (true,$(USE_XSLT))
+XSLTDIR ?= $(LIBDIR)/rfc2629xslt
+$(LIBDIR)/rfc2629.xslt:	$(XSLTDIR)/rfc2629.xslt
+	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
+
+$(LIBDIR)/clean-for-DTD.xslt: $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
+	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
+
+$(XSLTDIR)/clean-for-DTD.xslt $(XSLTDIR)/rfc2629.xslt: $(XSLTDIR)
+$(XSLTDIR):
+	git clone --depth 10 -b master https://github.com/reschke/xml2rfc $@
+
+%.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
+	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
+
+%.htmltmp: %.xml $(LIBDIR)/rfc2629.xslt
+	$(xsltproc) --novalid $(LIBDIR)/rfc2629.xslt $< > $@
+else
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
+endif
+
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
 ifeq (,$(CI_REPO_FULL))
 	sed -f $(LIBDIR)/addstyle.sed $< > $@
@@ -52,12 +88,33 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-define makerule_submit_xml =
-$(1)
-	sed -e"s/$$(basename $$<)-latest/$$(basename $$@)/" $$< > $$@
-endef
-submit_deps := $(join $(addsuffix :,$(drafts_next_xml)),$(drafts_xml))
-$(foreach rule,$(submit_deps),$(eval $(call makerule_submit_xml,$(rule))))
+ifeq (true,$(USE_XSLT))
+NEXT_XML_SOURCE_EXT := cleanxml
+else
+NEXT_XML_SOURCE_EXT := xml
+endif
+
+include .targets.mk
+.targets.mk: $(LIBDIR)/main.mk
+	@echo > $@
+# Submit targets
+	@for f in $(drafts_next_xml); do \
+	    echo "$$f: $${f%-[0-9][0-9].xml}.$(NEXT_XML_SOURCE_EXT)" >> $@; \
+	    echo -e "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
+	done
+# Diff targets
+	@p=($(drafts_prev_txt)); n=($(drafts_txt)); i=$${#p[@]}; \
+	while [ $$i -gt 0 ]; do i=$$(($$i-1)); \
+	    echo "diff-$${p[$$i]%-[0-9][0-9].txt}.html: $${p[$$i]} $${n[$$i]}" >> $@; \
+	    echo -e "\t-\$$(rfcdiff) --html --stdout \$$^ > \$$@" >> $@; \
+	done
+# Pre-requisite files for diff
+	@for t in $$(git tag); do \
+	    b=$${t%-[0-9][0-9]}; f=$$(git ls-tree --name-only $$t | grep $$b | head -1); \
+	    echo ".INTERMEDIATE: $$t.$${f##*.}" >> $@; \
+	    echo "$$t.$${f##*.}:" >> $@; \
+	    echo -e "\t git show $$t:$$f | sed -e 's/$$b-latest/$$t/' > \$$@" >> $@; \
+	done
 
 ## Check for validity
 .PHONY: check idnits
@@ -65,47 +122,44 @@ check:: idnits
 idnits:: $(drafts_next_txt)
 	echo $^ | xargs -n 1 sh -c '$(idnits) $$0'
 
-## Build diffs between the current draft versions and any previous version
-# This is makefile magic that requires Make 4.0
-
-draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts)))
+## Build diffs between the current draft versions and the most recent version
+draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
 
-arg = $(word $(1),$(subst ~, ,$(2)))
-argcat = $(join $(1),$(addprefix ~,$(2)))
-argcat3 = $(call argcat,$(1),$(call argcat,$(2),$(3)))
-argcat5 = $(call argcat3,$(1),$(2),$(call argcat3,$(3),$(4),$(5)))
-
-.INTERMEDIATE: $(join $(drafts_prev),$(draft_types))
-define makerule_diff =
-$$(call arg,1,$(1)): $$(call arg,3,$(1)) $$(call arg,2,$(1))
-	-$(rfcdiff) --html --stdout $$^ > $$@
-endef
-diff_deps := $(call argcat3,$(draft_diffs),$(drafts_next_txt),$(drafts_prev_txt))
-$(foreach rule,$(diff_deps),$(eval $(call makerule_diff,$(rule))))
-
-define makerule_prev =
-.INTERMEDIATE: $$(call arg,1,$(1)) $$(call arg,4,$(1)) $$(call arg,5,$(1))
-$$(call arg,1,$(1)):
-	git show $$(call arg,2,$(1)):$$(call arg,3,$(1)) > $$@
-endef
-drafts_prev_out := $(join $(drafts_prev),$(draft_types))
-drafts_prev_in := $(join $(drafts),$(draft_types))
-drafts_prev_xml := $(addsuffix .xml,$(drafts_prev))
-prev_versions_args := $(call argcat5,$(drafts_prev_out),$(drafts_prev),$(drafts_prev_in),$(drafts_prev_txt),$(drafts_prev_xml))
-$(foreach args,$(prev_versions_args),$(eval $(call makerule_prev,$(args))))
-
-## Store a copy of any github issues
-.PHONY: issues
-issues::
-	curl https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open > $@.json
+## Generate a test report
+ifneq (,$(CIRCLE_TEST_REPORTS))
+TEST_REPORT := $(CIRCLE_TEST_REPORTS)/report/drafts.xml
+else
+TEST_REPORT := report.xml
+endif
+.PHONY: report
+report: $(TEST_REPORT)
+$(TEST_REPORT): $(drafts_html) $(drafts_txt)
+	@echo build_report $^
+	@mkdir -p $(dir $@)
+	@echo '<?xml version="1.0" encoding="UTF-8"?>' >$@
+	@passed=();failed=();for i in $^; do \
+	  if [ -f "$$i" ]; then passed+=("$$i"); else failed+=("$$i"); fi; \
+	done; echo '<testsuite' >>$@; \
+	echo '    tests="'"$$(($${#passed[@]} + $${#failed[@]}))"'"' >>$@; \
+	echo '    failures="'"$${#failed[@]}"'">' >>$@; \
+	for i in "$${passed[@]}"; do \
+	  echo '  <testcase name="'"$$i"'" classname="build.'"$${i%.*}"'"/>' >>$@; \
+	done; \
+	for i in "$${failed[@]}"; do \
+	  echo '  <testcase name="'"$$i"'" classname="build.'"$${i%.*}"'">' >>$@; \
+	  echo '    <failure message="Error building file"/>' >>$@; \
+	  echo '  </testcase>' >>$@; \
+	done; \
+	echo '</testsuite>' >>$@
 
 ## Cleanup
 COMMA := ,
 .PHONY: clean
 clean::
-	-rm -f $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html
-	-rm -f $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts))
-	-rm -f $(draft_diffs)
-	-rm -f  $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
+	-rm -f .targets.mk issues.json \
+	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
+	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
+	    $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts))) \
+	    $(draft_diffs)

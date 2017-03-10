@@ -1,0 +1,28 @@
+machine:
+  environment:
+    GOPATH: "${HOME}/${CIRCLE_PROJECT_REPONAME}/.go_workspace"
+    mmark_src: github.com/miekg/mmark/mmark
+    mmark: ./mmark
+    PATH: ${PATH}:~/bats/bin
+    SELF_TEST: TRUE
+    KRAMDOWN_REFCACHEDIR: "${HOME}/${CIRCLE_PROJECT_REPONAME}/.refcache"
+  python:
+    version: 3.5.2
+
+checkout:
+  post:
+
+dependencies:
+  pre:
+    - pip install xml2rfc behave
+    - gem install --no-doc kramdown-rfc2629
+    - go get "$mmark_src" && go build "$mmark_src"
+  cache_directories:
+    - "/opt/circleci/.rvm/gems"
+
+test:
+  override:
+    - behave --junit --junit-directory $CIRCLE_TEST_REPORTS/cucumber/:
+        parallel: true
+        files:
+          - tests/*.feature

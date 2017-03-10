@@ -6,13 +6,20 @@
 #   https://pypi.python.org/pypi/xml2rfc
 xml2rfc ?= xml2rfc -q
 
-# If you are using markdown files:
+# If you are using markdown files use either kramdown-rfc2629 or mmark
 #   https://github.com/cabo/kramdown-rfc2629
 kramdown-rfc2629 ?= kramdown-rfc2629
+
+#  mmark (https://github.com/miekg/mmark)
+mmark ?= mmark
 
 # If you are using outline files:
 #   https://github.com/Juniper/libslax/tree/master/doc/oxtradoc
 oxtradoc ?= oxtradoc.in
+
+# When using rfc2629.xslt extensions:
+#   https://greenbytes.de/tech/webdav/rfc2629xslt.html
+xsltproc ?= xsltproc
 
 # For sanity checkout your draft:
 #   https://tools.ietf.org/tools/idnits/
@@ -30,4 +37,7 @@ ps2pdf ?= ps2pdf
 
 # Where to get references
 # Use http://xml2rfc.tools.ietf.org/public/rfc if this fails.
-XML_RESOURCE_ORG_PREFIX ?= http://unicorn-wg.github.io/idrefs
+XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
+
+# This is for people running macs
+SHELL := bash

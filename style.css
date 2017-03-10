@@ -63,7 +63,11 @@ ul.toc li {
   padding-bottom: 5px;
   margin: 0;
 }
-ul.toc, ul.toc ul {
+ul.toc ul {
+  margin: 0;
+}
+/* xml2rfc nests ul directly inside ul which messes with the style badly */
+ul.toc, ul.toc>ul, ul.toc ul>ul {
   margin: 0 0 0 1.5em;
 }
 
@@ -197,6 +201,9 @@ ol, ul, li, p {
 }
 li, p {
   margin-left: 0;
+}
+address {
+  font-style: normal;
 }
 
 .github-fork-ribbon-wrapper {
