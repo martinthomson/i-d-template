@@ -19,7 +19,7 @@ for f in "${files[@]}"; do
     # This makes a copy of the staged file.
     git show :"$f" > "$tmp"
 done
-hash gmake && MAKE=gmake || MAKE=make
+hash gmake 2> /dev/null && MAKE=gmake || MAKE=make
 [ "${#txtfiles[@]}" -eq 0 ] || "$MAKE" "${txtfiles[@]}"
 RESULT=$?
 
