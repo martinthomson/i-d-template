@@ -34,13 +34,13 @@ $(GHISSUES_TMP): fetch-ghissues
 $(GHISSUES_TMP)/%.json: %.json $(GHISSUES_TMP)
 	cp -f $< $@
 
-
 ## Commit and push the changes to gh-issues
 .PHONY: ghissues gh-issues
 gh-issues: ghissues
 ghissues: $(GHISSUES_TMP)/issues.json $(GHISSUES_TMP)/pulls.json
 
-	git -C $(GHISSUES_TMP) add -f issues.json
+	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_TMP)
+	git -C $(GHISSUES_TMP) add -f issues.json pulls.json issues.html issues.js
 	if test `git -C $(GHISSUES_TMP) status --porcelain issues.json | wc -l` -gt 0; then \
 	  git -C $(GHISSUES_TMP) $(CI_AUTHOR) commit -m "Script updating gh-issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
