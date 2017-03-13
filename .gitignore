@@ -5,3 +5,5 @@ rfc2629xslt
 *.xslt
 .template-files.mk
 draft-*
+issues.json
+pulls.json
