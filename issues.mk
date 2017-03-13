@@ -1,13 +1,13 @@
 ## Store a copy of any github issues
 .PHONY: issues
-issues: issues.json
-issues.json: $(drafts_source)
+issues: issues.json pulls.json
+issues.json pulls.json: $(drafts_source)
 	@echo '[' > $@
 ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/issues.XXXXXX); \
-	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/issues?state=open; \
+	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/$(basename $(notdir $@))?state=all; \
 	while [ "$$url" != "" ]; do \
-	   echo Fetching issues from $$url; \
+	   echo Fetching $(basename $(notdir $@)) from $$url; \
 	   curl -s $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
 	   url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
 	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
@@ -31,14 +31,14 @@ $(GHISSUES_TMP): fetch-ghissues
 	  ! echo 'Error: No gh-issues branch, run `make -f $(LIBDIR)/setup.mk setup-issues` to initialize it.'
 	git clone -q -b gh-issues . $@
 
-$(GHISSUES_TMP)/issues.json: issues.json $(GHISSUES_TMP)
+$(GHISSUES_TMP)/%.json: %.json $(GHISSUES_TMP)
 	cp -f $< $@
 
 
 ## Commit and push the changes to gh-issues
 .PHONY: ghissues gh-issues
 gh-issues: ghissues
-ghissues: $(GHISSUES_TMP)/issues.json
+ghissues: $(GHISSUES_TMP)/issues.json $(GHISSUES_TMP)/pulls.json
 
 	git -C $(GHISSUES_TMP) add -f issues.json
 	if test `git -C $(GHISSUES_TMP) status --porcelain issues.json | wc -l` -gt 0; then \
