@@ -86,6 +86,14 @@ var issueFilters = {
     }
   },
 
+  merged: {
+    args: [],
+    h: 'a merged pull request',
+    f: function(issue) {
+      return issue.pull_request && issue.pull_request.merged_at;
+    }
+  },
+
   n: {
     args: ['integer'],
     h: 'issue by number',
@@ -153,27 +161,28 @@ var issueFilters = {
     }
   },
 
-  merged: {
-    args: [],
-    h: 'a merged pull request',
-    f: function(issue) {
-      return issue.pull_request && issue.pull_request.merged_at;
-    }
-  },
-
   or: {
-    args: ['filter', 'filter'],
+    args: ['filter', '...filter'],
     h: 'union',
-    f: function(a, b) {
-      return x => a(x) || b(x);
+    f: function(...filters) {
+      return x => filters.some(filter => filter(x));
     }
   },
 
   and: {
-    args: ['filter', 'filter'],
+    args: ['filter', '...filter'],
     h: 'intersection',
-    f: function(a, b) {
-      return x => a(x) && b(x);
+    f: function(...filters) {
+      return x => filters.every(filter => filter(x));
+    }
+  },
+
+
+  xor: {
+    args: ['filter', '...filter'],
+    h: 'for the insane',
+    f: function(...filters) {
+      return x => filters.slice(1).reduce((a, filter) => a ^ filter(x), filters[0](x));
     }
   },
 
@@ -236,12 +245,19 @@ class Parser {
   }
 
   parseString() {
-    let i = this.str.indexOf(')');
-    if (i < 0) {
+    let end = -1;
+    for (let i = 0; i < this.str.length; ++i) {
+      let v = this.str.charAt(i);
+      if (v === ')' || v === ',') {
+        end = i;
+        break;
+      }
+    }
+    if (end < 0) {
       throw new Error(`Unterminated string`);
     }
-    let s = this.str.slice(0, i).trim();
-    this.jump(i);
+    let s = this.str.slice(0, end).trim();
+    this.jump(end);
     return s;
   }
 
@@ -271,8 +287,14 @@ class Parser {
       return f.f;
     }
     let args = [];
-    f.args.forEach((arg, idx) => {
-      this.parseSeparator((idx === 0) ? '(' : ',');
+    for (let i = 0; i < f.args.length; ++i) {
+      let arg = f.args[i];
+      let ellipsis = arg.slice(0, 3) === '...';
+      if (ellipsis) {
+        arg = arg.slice(3);
+      }
+
+      this.parseSeparator((i === 0) ? '(' : ',');
       if (arg === 'string') {
         args.push(this.parseString());
       } else if (arg === 'integer') {
@@ -282,7 +304,10 @@ class Parser {
       } else {
         throw new Error(`Error in filter ${name} definition`);
       }
-    });
+      if (ellipsis && this.next === ',') {
+        --i;
+      }
+    }
     this.parseSeparator(')');
     return f.f.apply(null, args);
   }
@@ -379,7 +404,17 @@ function makeRow(issue) {
 
   function cellState() {
     let td = document.createElement('td');
-    td.innerText = issue.state;
+    if (issue.pull_request) {
+      if (issue.pull_request.merged_at) {
+        td.innerText = 'merged';
+      } else if (issue.pull_request.closed_at) {
+        td.innerText = 'discarded';
+      } else {
+        td.innerText = 'pr';
+      }
+    } else {
+      td.innerText = issue.state;
+    }
     return td;
   }
 
