@@ -313,19 +313,23 @@ class Parser {
   }
 }
 
+var subset = [];
 function filterIssues(str) {
-  let output = issues;
+  subset = issues;
   let parser = new Parser(str);
   let f = parser.parseFilter();
   while (f) {
-    output = output.filter(f);
+    subset = subset.filter(f);
     f = parser.parseFilter();
   }
-  return output;
 }
 
 function shortDesc(x) {
   return `${x.title} (#${x.number})`;
+}
+
+function dumpShown() {
+  console.log('* ' + subset.map(shortDesc).join('\n* ') + '\n');
 }
 
 var debounces = {};
@@ -498,7 +502,7 @@ function redraw(now) {
   d.classList.remove('hidden');
 
   try {
-    let subset = filterIssues(filter.value);
+    filterIssues(filter.value);
     let tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
     subset.forEach(issue => {
