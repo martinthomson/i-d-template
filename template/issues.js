@@ -406,28 +406,26 @@ function makeRow(issue) {
 }
 
 function redraw(now) {
-  let v = document.getElementById('filter');
+  let filter = document.getElementById('filter');
   let h = document.getElementById('help');
   let d = document.getElementById('display');
   let status = document.getElementById('status');
 
-  if (v.value.charAt(0) == '/') {
+  if (filter.value.charAt(0) == '/') {
     if (!now) {
       return;
     }
-    v = v.value.slice(1).split(' ').map(x => x.trim());
-    v.value = '';
+    v = filter.value.slice(1).split(' ').map(x => x.trim());
+    filter.value = '';
 
     let cmd = v[0].toLowerCase();
     if (cmd === 'help') {
       status.innerText = 'help shown';
       h.classList.remove('hidden');
     } else if (cmd === 'local') {
-      local = true;
       status.innerText = 'retrieving local JSON files';
       get().then(redraw);
     } else if (cmd === 'remote') {
-      local = false;
       if (v.length < 3) {
         status.innerText = `need to specify github repo`;
       } else {
@@ -436,6 +434,16 @@ function redraw(now) {
             _ => status.innerText = `successfully loaded ${v[1]}/${v[2]} from GitHub`,
             e => status.innerText = `Error: ${e.message}`);
         status.innerText = `fetching from GitHub for ${v[1]}/${v[2]}`;
+      }
+    } else if (cmd  === 'sort') {
+      if (v[1] === 'id') {
+        issues.sort((x, y) => x.number - y.number);
+        status.innerText = 'sorted by ID';
+      } else if (v[1] === 'recent') {
+        issues.sort((x, y) => Date.parse(y.updated_at) - Date.parse(x.updated_at));
+        status.innerText = 'sorted by last modified';
+      } else {
+        status.innerText = 'no idea how to sort like that';
       }
     } else {
       status.innerText = 'unknown command: /' + v.join(' ');
@@ -455,7 +463,7 @@ function redraw(now) {
   d.classList.remove('hidden');
 
   try {
-    let subset = filterIssues(v.value);
+    let subset = filterIssues(filter.value);
     let tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
     subset.forEach(issue => {
