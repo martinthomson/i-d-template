@@ -30,4 +30,4 @@ deployment:
     branch: /.*/
     commands:
       - make artifacts
-      - make ghpages
+      - make ghpages || make ghpages
