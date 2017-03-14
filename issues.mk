@@ -23,7 +23,6 @@ fetch-ghissues:
 	-git fetch -q origin gh-issues:gh-issues
 
 GHISSUES_TMP := /tmp/ghissues$(shell echo $$$$)
-.INTERMEDIATE: $(GHISSUES_TMP)
 $(GHISSUES_TMP): fetch-ghissues
 	@git show-ref refs/heads/gh-issues >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-issues >/dev/null 2>&1 && \
