@@ -93,9 +93,8 @@ follow.  Make a new repository on GitHub, but don't initialize it with a
 README.  Then:
 
 ```sh
-$ mkdir unicorn-protocol
+$ git init unicorn-protocol
 $ cd unicorn-protocol
-$ git init
 $ git remote add origin https://github.com/unicorn-wg/unicorn-protocol
 # Make the draft
 $ git commit -m "Initial version blah blah blah" draft-*.{md,xml}
