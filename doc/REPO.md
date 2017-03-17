@@ -130,8 +130,8 @@ in the next section.
 Manual maintenance of `gh-pages` means that it will always be out of date.  You can
 use an integrated continuous integration system to maintain a copy.
 
-This requires that you sign in with [Circle](https://circleci.com/).
-[Travis](https://travis-ci.org/) is also partially supported.
+This requires that you sign in with [Circle](https://circleci.com/) or
+[Travis](https://travis-ci.org/).
 
 First [enable builds for the new repository](https://circleci.com/add-projects)
 (or on [Travis](https://travis-ci.org/profile), though Travis might need to be
@@ -142,7 +142,7 @@ token](https://github.com/settings/tokens/new).  The application token only
 needs the `public_repo` privilege.  This will let it push updates to your
 `gh-pages` branch.
 
-You can add environment variables using the Travis or Circle interface.  Include
+You can add environment variables using the Travis or Circle interface.  Make
 a variable with the name `GH_TOKEN` and the value of your newly-created
 application token.  On Travis, make sure to leave the value of "Display value in
 build log" disabled, or you will be making your token public.
