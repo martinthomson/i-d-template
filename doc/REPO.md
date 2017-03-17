@@ -84,6 +84,26 @@ $ git push
 ```
 
 
+# Fast Setup
+
+For the brave, or those who are more familiar with git.  This is the process I
+follow.  Make a new repository on GitHub, but don't initialize it.  Then:
+
+```sh
+$ mkdir unicorn-protocol
+$ cd unicorn-protocol
+$ git init
+$ git remote add origin https://github.com/unicorn-wg/unicorn-protocol
+# Make the draft
+$ git add draft-*.{md,xml}
+$ git commit -m "Initial version blah blah blah" draft-*.{md,xml}
+$ git push -u origin master
+$ git clone https://github.com/martinthomson/i-d-template lib
+$ make -f lib/setup.mk
+$ git push
+```
+
+
 # Updating The Editor's Copy
 
 Github will serve any HTML you check in on the `gh-pages` branch.  This can be
