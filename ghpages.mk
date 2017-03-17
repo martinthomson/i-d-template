@@ -1,12 +1,8 @@
 ## Update the gh-pages branch with useful files
 
-ifneq (,$(CI_BRANCH))
-SOURCE_BRANCH := $(CI_BRANCH)
-else
-SOURCE_BRANCH := $(shell git branch | grep '*' | cut -c 3-)
-endif
-ifneq (,$(findstring detached from,$(SOURCE_BRANCH)))
-SOURCE_BRANCH := $(shell git show -s --format='format:%H')
+SOURCE_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+ifeq (HEAD,$(SOURCE_BRANCH))
+SOURCE_BRANCH := $(shell git rev-parse --short HEAD)
 endif
 
 ifeq (true,$(CI))

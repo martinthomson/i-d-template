@@ -30,7 +30,6 @@ drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 
 # CI config
 CI ?= false
-CI_BRANCH = $(TRAVIS_BRANCH)$(CIRCLE_BRANCH)
 CI_USER ?= $(word 1,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_USERNAME)
 CI_REPO ?= $(word 2,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_REPONAME)
 ifeq (true,$(CI))
