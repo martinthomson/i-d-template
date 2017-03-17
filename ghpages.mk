@@ -72,7 +72,10 @@ cleanup-ghpages: $(GHPAGES_TMP)
 	done
 
 # Clean up contents of target directory
-	git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt
+	@if [ -d $(TARGET_DIR) ]; then \
+	  echo git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt; \
+	  git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt; \
+	fi
 
 
 .PHONY: ghpages gh-pages
