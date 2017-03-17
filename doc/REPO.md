@@ -7,6 +7,8 @@ See the [more detailed guide](https://github.com/martinthomson/i-d-template/blob
 
 # New Draft Setup
 
+If you are more familiar with git and GitHub, try the [fast setup](#fast-setup).
+
 [Make a new repository](https://github.com/new).  This guide will use the
 name `unicorn-protocol` in examples.
 
@@ -87,7 +89,8 @@ $ git push
 # Fast Setup
 
 For the brave, or those who are more familiar with git.  This is the process I
-follow.  Make a new repository on GitHub, but don't initialize it.  Then:
+follow.  Make a new repository on GitHub, but don't initialize it with a
+README.  Then:
 
 ```sh
 $ mkdir unicorn-protocol
@@ -95,7 +98,6 @@ $ cd unicorn-protocol
 $ git init
 $ git remote add origin https://github.com/unicorn-wg/unicorn-protocol
 # Make the draft
-$ git add draft-*.{md,xml}
 $ git commit -m "Initial version blah blah blah" draft-*.{md,xml}
 $ git push -u origin master
 $ git clone https://github.com/martinthomson/i-d-template lib
