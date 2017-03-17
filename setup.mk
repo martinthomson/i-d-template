@@ -94,7 +94,7 @@ setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
 
 .PHONY: setup-master
 setup-master: setup-files setup-markdown setup-gitignore
-	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts))"
+	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts)) using https://github.com/martinthomson/i-d-template"
 	-ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
 
 # Check if the gh-pages branch already exists either remotely or locally
