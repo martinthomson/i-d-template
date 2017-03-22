@@ -100,7 +100,7 @@ include .targets.mk
 # Submit targets
 	@for f in $(drafts_next_xml); do \
 	    echo "$$f: $${f%-[0-9][0-9].xml}.$(NEXT_XML_SOURCE_EXT)" >> $@; \
-	    echo -e "\tsed -e 's/$${f%-[0-9][0-9].xml}-latest/$${f%.xml}/' \$$< > \$$@" >> $@; \
+	    echo -e "\tsed -e '\$$(join \$$(addprefix s/,\$$(addsuffix -latest/,\$$(drafts))), \$$(addsuffix /g;,\$$(drafts_next)))' \$$< > \$$@" >> $@; \
 	done
 # Diff targets
 	@p=($(drafts_prev_txt)); n=($(drafts_txt)); i=$${#p[@]}; \
