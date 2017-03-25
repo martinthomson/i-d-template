@@ -1,8 +1,18 @@
 ## Update the gh-pages branch with useful files
 
+ifeq (true,$(TRAVIS))
+# Travis is a nightmare.  It doesn't actually include the branch name in the
+# repo at all.  Also, it doesn't consistently set the current branch name.
+ifneq (,$(TRAVIS_PULL_REQUEST_BRANCH))
+SOURCE_BRANCH := $(TRAVIS_PULL_REQUEST_BRANCH)
+else
+SOURCE_BRANCH := $(TRAVIS_BRANCH)
+endif
+else
 SOURCE_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 ifeq (HEAD,$(SOURCE_BRANCH))
 SOURCE_BRANCH := $(shell git rev-parse --short HEAD)
+endif
 endif
 
 ifeq (true,$(CI))
