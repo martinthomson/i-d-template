@@ -25,11 +25,13 @@ auto_update:
 
 .PHONY: update
 update:
-	git -C $(LIBDIR) pull
+	-git -C $(LIBDIR) pull
 	@for i in Makefile .travis.yml circle.yml; do \
 	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
 	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
 	done
-	@[ -L .git/hooks/pre-commit ] || ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
+	@dotgit=$$(git rev-parse --git-dir); \
+	  [ -L "$$dotgit"/hooks/pre-commit ] || \
+	  ln -s ../../$(LIBDIR)/pre-commit.sh "$$dotgit"/hooks/pre-commit
 
 endif # CI
