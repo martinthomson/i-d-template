@@ -1,6 +1,6 @@
 from behave import *
 from contextlib import contextmanager
-from subprocess import check_output
+from subprocess import check_output,check_call
 import os
 from glob import glob
 
@@ -28,6 +28,14 @@ def step_impl(context):
 @then(u'generates a message "{text}"')
 def step_impl(context, text):
     assert context.error.find(text) != -1
+
+
+@then(u'gitignore lists the xml file')
+def step_impl(context):
+    with cd(context.working_dir):
+        md_files = glob("draft-*.md")
+        for md in md_files:
+            check_call(["grep", "-q", md.replace(".md", ".xml"), ".gitignore"])
 
 
 @then(u'generates documents')

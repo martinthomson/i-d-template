@@ -6,6 +6,7 @@ Feature: Initial setup
      then it succeeds
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-issues" containing "issues.json"
+     and gitignore lists the xml file
 
   Scenario:  Run setup script on directory with no draft
     Given an empty git repo

@@ -77,7 +77,7 @@ ifndef SUBMODULE
 	echo $(LIBDIR) >>$<
 endif
 	$(foreach x,$(filter-out .xml,$(join $(drafts),$(draft_types))),\
-	  echo $(x) >>$<;)
+	  echo $(basename $(x)).xml >>$<;)
 	git add $<
 
 .PHONY: setup-markdown
