@@ -17,24 +17,26 @@ pdf:: $(addsuffix .pdf,$(drafts))
 ## Basic Recipes
 .INTERMEDIATE: $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
 
-ifdef MD_PREPROCESSOR
-.INTERMEDIATE: $(addsuffix .mdtmp,$(drafts))
-%.mdtmp: %.md
-	$(MD_PREPROCESSOR) < $< > $@
-
-%.xml: %.mdtmp
-else
-%.xml: %.md
+NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
+ifneq (,$(MD_PREPROCESSOR))
+MD_PREPROCESSOR := | $(MD_PREPROCESSOR)
 endif
+ifneq (1,$(words $(drafts)))
+REMOVE_LATEST = | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
+		$(addsuffix /g;,$(NOT_CURRENT)))'
+else
+REMOVE_LATEST =
+endif
+export XML_RESOURCE_ORG_PREFIX
+
+%.xml: %.md
 	@h=$$(head -1 $< | cut -c 1-3 -); \
 	if [ "$$h" = '---' ]; then \
-	  echo XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
-	    $(kramdown-rfc2629) $< \> $@; \
-	  XML_RESOURCE_ORG_PREFIX=$(XML_RESOURCE_ORG_PREFIX) \
-	    $(kramdown-rfc2629) $< > $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $< > $@)'; \
+	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $< > $@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  echo $(mmark) -xml2 -page $< $@; \
-	  $(mmark) -xml2 -page $< $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page > $@)'; \
+	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page > $@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi
