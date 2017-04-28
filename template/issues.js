@@ -70,6 +70,10 @@ async function get(wg, repo) {
     }
   });
   sort();
+  let m = issues[0].html_url.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\//);
+  if (m) {
+    document.title = m[1] + '/' + m[2] + ' Issues';
+  }
   console.log('loaded all issues and pulls');
 }
 
