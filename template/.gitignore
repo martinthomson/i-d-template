@@ -9,3 +9,4 @@
 .targets.mk
 venv/
 issues.json
+pulls.json

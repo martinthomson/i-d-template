@@ -1,14 +1,24 @@
+GH_ISSUES := gh-issues
+
 ## Store a copy of any github issues
 .PHONY: issues
 issues: issues.json pulls.json
 issues.json pulls.json: $(drafts_source)
 	@echo '[' > $@
 ifeq (,$(SELF_TEST))
-	@tmp=$$(mktemp /tmp/issues.XXXXXX); \
+	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
+	if [ $(CI) = true -a $$(($$(git show -s --pretty='%at' $(GH_ISSUES)) + 3600)) -gt $$(date '+%s') ]; then \
+	    echo 'Skipping update of $@ (most recent update was less than an hour ago)'; \
+	    git show $(GH_ISSUES):$@ | head -n -1 | tail -n +2 >> $@; \
+	    exit; \
+	fi; \
 	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/$(basename $(notdir $@))?state=all; \
 	while [ "$$url" != "" ]; do \
 	   echo Fetching $(basename $(notdir $@)) from $$url; \
 	   curl -s $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
+	   if ! head -1 $$tmp | grep -q ' 200 OK'; then \
+	       echo "Error loading $$url:"; cat $$tmp; exit 1; \
+	   fi; \
 	   url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
 	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
 	done; \
@@ -20,37 +30,37 @@ endif
 
 .PHONY: fetch-ghissues
 fetch-ghissues:
-	-git fetch -q origin gh-issues:gh-issues
+	-git fetch -q origin $(GH_ISSUES):$(GH_ISSUES)
 
 GHISSUES_TMP := /tmp/ghissues$(shell echo $$$$)
 $(GHISSUES_TMP): fetch-ghissues
-	@git show-ref refs/heads/gh-issues >/dev/null 2>&1 || \
-	  (git show-ref refs/remotes/origin/gh-issues >/dev/null 2>&1 && \
-	    git branch -t gh-issues origin/gh-issues) || \
-	  ! echo 'Error: No gh-issues branch, run `make -f $(LIBDIR)/setup.mk setup-issues` to initialize it.'
-	git clone -q -b gh-issues . $@
+	@git show-ref refs/heads/$(GH_ISSUES) >/dev/null 2>&1 || \
+	  (git show-ref refs/remotes/origin/$(GH_ISSUES) >/dev/null 2>&1 && \
+	    git branch -t $(GH_ISSUES) origin/$(GH_ISSUES)) || \
+	  ! echo 'Error: No $(GH_ISSUES) branch, run `make -f $(LIBDIR)/setup.mk setup-issues` to initialize it.'
+	git clone -q -b $(GH_ISSUES) . $@
 
 $(GHISSUES_TMP)/%.json: %.json $(GHISSUES_TMP)
 	cp -f $< $@
 
-## Commit and push the changes to gh-issues
-.PHONY: ghissues gh-issues
-gh-issues: ghissues
+## Commit and push the changes to $(GH_ISSUES)
+.PHONY: ghissues $(GH_ISSUES)
+$(GH_ISSUES): ghissues
 ghissues: $(GHISSUES_TMP)/issues.json $(GHISSUES_TMP)/pulls.json
 
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_TMP)
 	git -C $(GHISSUES_TMP) add -f issues.json pulls.json issues.html issues.js
 	if test `git -C $(GHISSUES_TMP) status --porcelain issues.json | wc -l` -gt 0; then \
-	  git -C $(GHISSUES_TMP) $(CI_AUTHOR) commit -m "Script updating gh-issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
+	  git -C $(GHISSUES_TMP) $(CI_AUTHOR) commit -m "Script updating $(GH_ISSUES) at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
-	git -C $(GHISSUES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-issues
+	git -C $(GHISSUES_TMP) push https://github.com/$(CI_REPO_FULL).git $(GH_ISSUES)
 else
 ifneq (,$(GH_TOKEN))
-	@echo git -C $(GHISSUES_TMP) push -q https://github.com/$(CI_REPO_FULL) gh-issues
-	@git -C $(GHISSUES_TMP) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-issues >/dev/null 2>&1
+	@echo git -C $(GHISSUES_TMP) push -q https://github.com/$(CI_REPO_FULL) $(GH_ISSUES)
+	@git -C $(GHISSUES_TMP) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) $(GH_ISSUES) >/dev/null 2>&1
 else
-	git -C $(GHISSUES_TMP) push origin gh-issues
+	git -C $(GHISSUES_TMP) push origin $(GH_ISSUES)
 endif
 endif
 	-rm -rf $(GHISSUES_TMP)
