@@ -7,7 +7,7 @@ issues.json pulls.json: $(drafts_source)
 	@echo '[' > $@
 ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
-	if [ $(CI) = true -a $$(($$(git show -s --pretty='%at' $(GH_ISSUES)) + 3600)) -gt $$(date '+%s') ]; then \
+	if [ $(CI) = true -a $$(($$(git show -s --pretty='%at' $(GH_ISSUES) --) + 3600)) -gt $$(date '+%s') ]; then \
 	    echo 'Skipping update of $@ (most recent update was less than an hour ago)'; \
 	    git show $(GH_ISSUES):$@ | head -n -1 | tail -n +2 >> $@; \
 	    exit; \
