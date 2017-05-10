@@ -1,9 +1,12 @@
 GH_ISSUES := gh-issues
+.PHONY: fetch-ghissues
+fetch-ghissues:
+	-git fetch -q origin $(GH_ISSUES):$(GH_ISSUES)
 
 ## Store a copy of any github issues
 .PHONY: issues
 issues: issues.json pulls.json
-issues.json pulls.json: $(drafts_source)
+issues.json pulls.json: fetch-ghissues $(drafts_source)
 	@echo '[' > $@
 ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
@@ -27,10 +30,6 @@ else
 	echo '{}' >> $@
 endif
 	@echo ']' >> $@
-
-.PHONY: fetch-ghissues
-fetch-ghissues:
-	-git fetch -q origin $(GH_ISSUES):$(GH_ISSUES)
 
 GHISSUES_TMP := /tmp/ghissues$(shell echo $$$$)
 $(GHISSUES_TMP): fetch-ghissues
