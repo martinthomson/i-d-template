@@ -41,6 +41,50 @@ else
 	@echo '</html>' >>$@
 endif
 
+branches.html:
+	@echo '<!DOCTYPE html>' >$@
+	@echo '<html>' >>$@
+	@echo '<head><title>$(GITHUB_REPO) branches</title>' >> $@
+	@echo '<style>li:target { background-color: lightgrey; }</style>' >>$@
+	@echo '</head>' >>$@
+	@echo '<body><ul>' >>$@
+	for BRANCH in `git branch | cut -b3-`; do \
+	  [ x"$${BRANCH}" = x"gh-issues" ] || [ x"$${BRANCH}" == x"gh-pages" ] && continue; \
+	  [ x"$${BRANCH}" = x"master" ] && BRANCH_LINK="./" || BRANCH_LINK="$${BRANCH}/" ;\
+	    echo '<li id="branch-'"$${BRANCH}"'">'"$${BRANCH} branch<ul>" >> $@; \
+	    for DRAFT in $(drafts); do \
+	      echo '<li>' >>@; \
+	      [ 1 -eq $(words $(drafts)) ] || echo "$${DRAFT}: " >>$@; \
+	      echo '<a href="'"$${BRANCH_LINK}$${DRAFT}"'.html" class="html">HTML version</a>, <a href="'"$${BRANCH_LINK}$${DRAFT}"'.txt">plain text</a>, <a href="'"https://tools.ietf.org/rfcdiff?url1=https://tools.ietf.org/id/$${DRAFT}.txt&url2=https://${GITHUB_USER}.github.io/${GITHUB_REPO}/$${BRANCH_LINK}$${DRAFT}.txt"'" class="diff">Compare to published draft</a></li>' >>$@; \
+	    done ; \
+	    echo '</ul></li>' >> $@; \
+	done
+	@echo '</ul>' >>$@
+	@echo '<script>/* @licstart  The following is the entire license notice for the' \
+	                ' JavaScript code in this page.' \
+	                '' \
+	                ' Any copyright is dedicated to the Public Domain.' \
+	                ' http://creativecommons.org/publicdomain/zero/1.0/' \
+	                '' \
+	                ' @licend  The above is the entire license notice' \
+	                ' for the JavaScript code in this page. */' \
+	  'var referrer_branch;' \
+	  'var chunks = document.referrer.split("/"); /* eg "https://github.com/my-user/my-reponame/tree/master" */' \
+	  'if (chunks[2] == "github.com" && chunks[5] == "tree") referrer_branch = chunks[6];' \
+	  'if (referrer_branch) {' \
+	    'if (document.location.hash == "#show") {' \
+	      'document.location.hash = "#branch-" + referrer_branch;' \
+	    '}' \
+	    'if (document.location.hash == "#go-html") {' \
+	      'document.location = document.getElementById("branch-" + referrer_branch).getElementsByClassName("html")[0].href;' \
+	    '}' \
+	    'if (document.location.hash == "#go-diff") {' \
+	      'document.location = document.getElementById("branch-" + referrer_branch).getElementsByClassName("diff")[0].href;' \
+	    '}' \
+	  '}' \
+	  '</script>' >>$@
+	@echo '</body></html>' >>$@
+
 .PHONY: fetch-ghpages
 fetch-ghpages:
 	-git fetch -q origin gh-pages:gh-pages
@@ -60,7 +104,7 @@ $(TARGET_DIR): $(GHPAGES_TMP)
 	mkdir -p $@
 endif
 
-PUBLISHED := index.html $(drafts_html) $(drafts_txt)
+PUBLISHED := index.html branches.html $(drafts_html) $(drafts_txt)
 $(addprefix $(TARGET_DIR)/,$(PUBLISHED)): $(PUBLISHED) $(TARGET_DIR)
 	cp -f $(notdir $@) $@
 
