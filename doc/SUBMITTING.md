@@ -19,6 +19,6 @@ Then you can tag your repository and upload the tags.  The tag you should
 use is your draft name with the usual number in place of `-latest`.
 
 ```sh
-$ git tag draft-ietf-unicorn-protocol-03
+$ git tag -a draft-ietf-unicorn-protocol-03
 $ git push --tags
 ```
