@@ -74,8 +74,8 @@ endif
 	  echo $(basename $(x)).xml >>$<;)
 	git add $<
 
-README.md: $(LIBDIR)/init-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
-	$(LIBDIR)/init-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
+README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
+	$(LIBDIR)/setup-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
 	git add $@ $(filter %.md, $(TEMPLATE_FILES))
 
 .PHONY: setup-master
@@ -85,8 +85,8 @@ setup-master: setup-files README.md setup-gitignore
 
 .PHONY: setup-ghpages
 setup-ghpages:
-	$(LIBDIR)/init-branch.sh gh-pages index.html
+	$(LIBDIR)/setup-branch.sh gh-pages index.html
 
 .PHONY: setup-ghissues
 setup-ghissues:
-	$(LIBDIR)/init-branch.sh gh-issues issues.json pulls.json
+	$(LIBDIR)/setup-branch.sh gh-issues issues.json pulls.json
