@@ -47,7 +47,7 @@ function githubio() {
 }
 
 function list_dir() {
-    pi '<ul id="'"$2"'">'
+    pi '<ul id="branch-'"$(basename "$1")"'">'
     for file in "$1"/*.txt; do
         pi '<li>'
         dir=$(dirname "$file")
@@ -72,13 +72,13 @@ function list_dir() {
     po '</ul>'
 }
 
-list_dir "${root}" master
+list_dir "${root}"
 
 pi '<ul>'
 for dir in "${root}"/*; do
     if [ -d "${dir}" ]; then
         pi '<li>'"$(basename "$dir")"' branch:'
-	list_dir "$dir" "branch-$(basename "$dir")"
+	list_dir "$dir"
         po '</li>'
     fi
 done
