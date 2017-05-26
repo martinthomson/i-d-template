@@ -32,14 +32,12 @@ function rfcdiff() {
 }
 
 function rel() {
-    d="${1/$root/}"
-    [ -n "$d" ] && d="$d/"
-    echo "$d"
+    [ "$1" = "$root" ] && return
+    echo "${1/$root\//}/"
 }
 
 function reldot() {
-    d="${1/$root/}"
-    echo "${d:-.}"
+    [ "$1" = "$root" ] && echo '.' || echo "${1/$root\//}"
 }
 
 function githubio() {
