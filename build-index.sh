@@ -74,7 +74,7 @@ function list_dir() {
     po '</ul>'
 }
 
-p "<h2>Editors Drafts for ${user}/${repo}</h2>"
+p "<h2>Editor's drafts for ${user}/${repo}</h2>"
 list_dir "${root}" master
 
 for dir in "${root}"/*; do
