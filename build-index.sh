@@ -28,7 +28,7 @@ po '</head>'
 pi '<body>'
 
 function rfcdiff() {
-    echo "https://tools.ietf.org/rfcdiff?url1=${1}&url2=${2}"
+    echo "https://tools.ietf.org/rfcdiff?url1=${1}&amp;url2=${2}"
 }
 
 function rel() {

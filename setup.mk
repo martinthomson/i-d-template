@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: setup-master
+setup: setup-master setup-ghpages setup-ghissues
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
@@ -14,10 +14,6 @@ $(error If you are just starting out, please commit something before starting)
 endif
 ifneq (master,$(GIT_ORIG))
 $(warning Using a branch called 'master' is recommended)
-endif
-ifneq (1,$(words $(drafts)))
-$(warning Sorry, but the setup works best with just one draft)
-$(warning This will use $(firstword $(drafts)).)
 endif
 
 LATEST_WARNING := $(strip $(foreach draft,$(join $(drafts),$(draft_types)),\
@@ -38,10 +34,8 @@ endif
 
 TEMPLATE_FILES := \
   Makefile .gitignore \
-  README.md CONTRIBUTING.md LICENSE.md \
+  CONTRIBUTING.md LICENSE.md \
   .travis.yml circle.yml
-
-MARKDOWN_FILES := $(filter %.md,$(TEMPLATE_FILES))
 
 TEMPLATE_FILE_MK := $(LIBDIR)/.template-files.mk
 include $(TEMPLATE_FILE_MK)
@@ -80,42 +74,18 @@ endif
 	  echo $(basename $(x)).xml >>$<;)
 	git add $<
 
-.PHONY: setup-markdown
-setup-markdown: $(firstword $(drafts)).xml $(MARKDOWN_FILES)
-	DRAFT_NAME=$$(echo $< | cut -f 1 -d . -); \
-	  AUTHOR_LABEL=$$(echo $< | cut -f 2 -d - -); \
-	  WG_NAME=$$(echo $< | cut -f 3 -d - -); \
-	  DRAFT_STATUS=$$(test "$$AUTHOR_LABEL" = ietf && echo Working Group || echo Individual); \
-	  GITHUB_USER=$(GITHUB_USER); GITHUB_REPO=$(GITHUB_REPO); \
-	  DRAFT_TITLE=$$(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' $< | xargs echo); \
-	  sed -i~ $(foreach label,DRAFT_NAME DRAFT_TITLE DRAFT_STATUS GITHUB_USER GITHUB_REPO WG_NAME,-e 's~{$(label)}~'"$$$(label)"'~g') $(MARKDOWN_FILES)
-	@-rm -f $(addsuffix ~,$(MARKDOWN_FILES))
-	git add $(MARKDOWN_FILES)
+README.md: $(LIBDIR)/init-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
+	$(LIBDIR)/init-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
+	git add $@ $(filter %.md, $(TEMPLATE_FILES))
 
 .PHONY: setup-master
-setup-master: setup-files setup-markdown setup-gitignore
+setup-master: setup-files README.md setup-gitignore
 	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts)) using https://github.com/martinthomson/i-d-template"
 	-ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
-
-# Check if the gh-pages branch already exists either remotely or locally
-GHPAGES_COMMITS := $(shell git show-ref -s gh-pages 2>/dev/null)
-ifeq (,$(strip $(GHPAGES_COMMITS)))
-setup: setup-ghpages
-else
-$(warning The gh-pages branch already exists, skipping setup for that.)
-endif
 
 .PHONY: setup-ghpages
 setup-ghpages:
 	$(LIBDIR)/init-branch.sh gh-pages index.html
-
-
-GHISSUES_COMMITS := $(shell git show-ref -s gh-issues 2>/dev/null)
-ifeq (,$(strip $(GHISSUES_COMMITS)))
-setup: setup-ghissues
-else
-$(warning The gh-issues branch already exists, skipping setup for that.)
-endif
 
 .PHONY: setup-ghissues
 setup-ghissues:

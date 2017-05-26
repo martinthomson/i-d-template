@@ -4,6 +4,12 @@ set -e
 
 branch="$1"
 shift
+
+if git show-ref -s "$branch" >/dev/null 2>&1; then
+    echo "The $branch branch already exists, skipping setup."
+    exit
+fi
+
 tmp=$(mktemp -d /tmp/init-branch-"$branch"-XXXXX)
 function cleanup() {
     rm -rf "$tmp"
