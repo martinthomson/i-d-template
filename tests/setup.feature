@@ -19,7 +19,6 @@ Feature: Initial setup
     Given a git repo with multiple Kramdown drafts
      when the setup script is run
      then it succeeds
-      but generates a message "best with just one draft"
 
   Scenario:  Run setup script on directory with no origin remote
     Given a git repo with no origin
