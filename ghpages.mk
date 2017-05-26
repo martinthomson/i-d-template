@@ -41,115 +41,82 @@ else
 	@echo '</html>' >>$@
 endif
 
-branches.html:
-	@echo '<!DOCTYPE html>' >$@
-	@echo '<html>' >>$@
-	@echo '<head><title>$(GITHUB_REPO) branches</title>' >> $@
-	@echo '<style>li:target { background-color: lightgrey; }</style>' >>$@
-	@echo '</head>' >>$@
-	@echo '<body><ul>' >>$@
-	for BRANCH in `git branch | cut -b3-`; do \
-	  [ x"$${BRANCH}" = x"gh-issues" ] || [ x"$${BRANCH}" == x"gh-pages" ] && continue; \
-	  [ x"$${BRANCH}" = x"master" ] && BRANCH_LINK="./" || BRANCH_LINK="$${BRANCH}/" ;\
-	    echo '<li id="branch-'"$${BRANCH}"'">'"$${BRANCH} branch<ul>" >> $@; \
-	    for DRAFT in $(drafts); do \
-	      echo '<li>' >>@; \
-	      [ 1 -eq $(words $(drafts)) ] || echo "$${DRAFT}: " >>$@; \
-	      echo '<a href="'"$${BRANCH_LINK}$${DRAFT}"'.html" class="html">HTML version</a>, <a href="'"$${BRANCH_LINK}$${DRAFT}"'.txt">plain text</a>, <a href="'"https://tools.ietf.org/rfcdiff?url1=https://tools.ietf.org/id/$${DRAFT}.txt&url2=https://${GITHUB_USER}.github.io/${GITHUB_REPO}/$${BRANCH_LINK}$${DRAFT}.txt"'" class="diff">Compare to published draft</a></li>' >>$@; \
-	    done ; \
-	    echo '</ul></li>' >> $@; \
-	done
-	@echo '</ul>' >>$@
-	@echo '<script>/* @licstart  The following is the entire license notice for the' \
-	                ' JavaScript code in this page.' \
-	                '' \
-	                ' Any copyright is dedicated to the Public Domain.' \
-	                ' http://creativecommons.org/publicdomain/zero/1.0/' \
-	                '' \
-	                ' @licend  The above is the entire license notice' \
-	                ' for the JavaScript code in this page. */' \
-	  'var referrer_branch;' \
-	  'var chunks = document.referrer.split("/"); /* eg "https://github.com/my-user/my-reponame/tree/master" */' \
-	  'if (chunks[2] == "github.com" && chunks[5] == "tree") referrer_branch = chunks[6];' \
-	  'if (referrer_branch) {' \
-	    'if (document.location.hash == "#show") {' \
-	      'document.location.hash = "#branch-" + referrer_branch;' \
-	    '}' \
-	    'if (document.location.hash == "#go-html") {' \
-	      'document.location = document.getElementById("branch-" + referrer_branch).getElementsByClassName("html")[0].href;' \
-	    '}' \
-	    'if (document.location.hash == "#go-diff") {' \
-	      'document.location = document.getElementById("branch-" + referrer_branch).getElementsByClassName("diff")[0].href;' \
-	    '}' \
-	  '}' \
-	  '</script>' >>$@
-	@echo '</body></html>' >>$@
-
 .PHONY: fetch-ghpages
 fetch-ghpages:
 	-git fetch -q origin gh-pages:gh-pages
 
-GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
-ghpages: $(GHPAGES_TMP)
-$(GHPAGES_TMP): fetch-ghpages
+GHPAGES_ROOT := /tmp/ghpages$(shell echo $$$$)
+ghpages: $(GHPAGES_ROOT)
+$(GHPAGES_ROOT): fetch-ghpages
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
 	    git branch -t gh-pages origin/gh-pages) || \
 	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	git clone -q -b gh-pages . $@
 
-TARGET_DIR := $(GHPAGES_TMP)$(filter-out /master,/$(SOURCE_BRANCH))
-ifneq ($(TARGET_DIR),$(GHPAGES_TMP))
-$(TARGET_DIR): $(GHPAGES_TMP)
+GHPAGES_TARGET := $(GHPAGES_ROOT)$(filter-out /master,/$(SOURCE_BRANCH))
+ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
+$(GHPAGES_TARGET): $(GHPAGES_ROOT)
 	mkdir -p $@
 endif
 
-PUBLISHED := index.html branches.html $(drafts_html) $(drafts_txt)
-$(addprefix $(TARGET_DIR)/,$(PUBLISHED)): $(PUBLISHED) $(TARGET_DIR)
+GHPAGES_PUBLISHED := $(drafts_html) $(drafts_txt)
+GHPAGES_INSTALLED := $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_PUBLISHED))
+$(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
+GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.html
+$(GHPAGES_TARGET)/index.html: $(GHPAGES_INSTALLED)
+	build-index.sh $(dirname $@) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+
+ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
+GHPAGES_ALL += $(GHPAGES_ROOT)/index.html
+$(GHPAGES_ROOT)/index.html: $(GHPAGES_INSTALLED)
+	build-index.sh $(dirname $@) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+endif
+
 .PHONY: cleanup-ghpages
-cleanup-ghpages: $(GHPAGES_TMP)
+cleanup-ghpages: $(GHPAGES_ROOT)
 	-@for remote in `git remote`; do \
 	  git remote prune $$remote; \
 	done;
 
 # Clean up obsolete directories
 	@CUTOFF=`date +%s -d '-30 days'`; \
-	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_TMP) | sed -e 's,.*/,,')`; \
+	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_ROOT) | sed -e 's,.*/,,')`; \
 	for item in $$MAYBE_OBSOLETE; do \
-	  if [ -d "$(GHPAGES_TMP)/$$item" ] && \
-	     [ `git -C $(GHPAGES_TMP) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; then \
+	  if [ -d "$(GHPAGES_ROOT)/$$item" ] && \
+	     [ `git -C $(GHPAGES_ROOT) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; then \
 	    echo "Remove obsolete '$$item'"; \
-	    git -C $(GHPAGES_TMP) rm -rfq -- $$item; \
+	    git -C $(GHPAGES_ROOT) rm -rfq -- $$item; \
 	  fi \
 	done
 
 # Clean up contents of target directory
-	@if [ -d $(TARGET_DIR) ]; then \
-	  echo git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt; \
-	  git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt; \
+	@if [ -d $(GHPAGES_TARGET) ]; then \
+	  echo git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/*.html $(GHPAGES_TARGET)/*.txt; \
+	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/*.html $(GHPAGES_TARGET)/*.txt; \
 	fi
 
 
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
-ghpages: cleanup-ghpages $(addprefix $(TARGET_DIR)/,$(PUBLISHED))
-	git -C $(GHPAGES_TMP) add -f $(TARGET_DIR)
-	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
-	  git -C $(GHPAGES_TMP) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
+ghpages: cleanup-ghpages $(GHPAGES_ALL)
+	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
+	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
+	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
-	git -C $(GHPAGES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-pages
+	git -C $(GHPAGES_ROOT) push https://github.com/$(CI_REPO_FULL).git gh-pages
 else
 ifneq (,$(GH_TOKEN))
-	@echo git -C $(GHPAGES_TMP) push -q https://github.com/$(CI_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_TMP) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
+	@echo git -C $(GHPAGES_ROOT) push -q https://github.com/$(CI_REPO_FULL) gh-pages
+	@git -C $(GHPAGES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
 else
-	git -C $(GHPAGES_TMP) push origin gh-pages
+	git -C $(GHPAGES_ROOT) push origin gh-pages
 endif
 endif
-	-rm -rf $(GHPAGES_TMP)
+	-rm -rf $(GHPAGES_ROOT)
 endif # PUSH_GHPAGES
 
 ## Save published documents to the CI_ARTIFACTS directory
