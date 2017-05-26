@@ -67,12 +67,12 @@ $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 
 GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.html
 $(GHPAGES_TARGET)/index.html: $(GHPAGES_INSTALLED)
-	build-index.sh $(dirname $@) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+	$(LIBDIR)/build-index.sh $(dirname $@) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
 GHPAGES_ALL += $(GHPAGES_ROOT)/index.html
 $(GHPAGES_ROOT)/index.html: $(GHPAGES_INSTALLED)
-	build-index.sh $(dirname $@) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+	$(LIBDIR)/build-index.sh $(dirname $@) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 endif
 
 .PHONY: cleanup-ghpages
