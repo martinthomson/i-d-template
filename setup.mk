@@ -119,4 +119,4 @@ endif
 
 .PHONY: setup-ghissues
 setup-ghissues:
-	$(LIBDIR)/init-branch gh-issues issues.json pulls.json
+	$(LIBDIR)/init-branch.sh gh-issues issues.json pulls.json
