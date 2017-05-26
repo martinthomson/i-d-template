@@ -47,7 +47,7 @@ function githubio() {
 }
 
 function list_dir() {
-    pi '<ul>'
+    pi '<ul id="'"$2"'">'
     for file in "$1"/*.txt; do
         pi '<li>'
         dir=$(dirname "$file")
@@ -72,13 +72,13 @@ function list_dir() {
     po '</ul>'
 }
 
-list_dir "${root}"
+list_dir "${root}" master
 
 pi '<ul>'
 for dir in "${root}"/*; do
     if [ -d "${dir}" ]; then
-        pi '<li id="branch-'"$(basename "${dir}")"'">'"$(basename "${dir}")"' branch:'
-        list_dir "$dir"
+        pi '<li>'"$(basename "$dir")"' branch:'
+	list_dir "$dir" "branch-$(basename "$dir")"
         po '</li>'
     fi
 done
@@ -91,22 +91,20 @@ cat <<EOJS
 //  http://creativecommons.org/publicdomain/zero/1.0/
 // @licend */
 window.onload = function() {
-  var referrer_branch;
+  var referrer_branch = 'master';
   // e.g., "https://github.com/user/repo/tree/master"
   var chunks = document.referrer.split("/");
   if (chunks[2] == 'github.com' && chunks[5] == 'tree') {
     referrer_branch = chunks[6];
   }
-  if (referrer_branch) {
-    let branch = document.querySelector('#branch-' + referrer_branch);
-    let h = document.location.hash.substring(1);
-    if (h === 'show') {
-      document.location.hash = '#' + branch.id;
-    } else if (h.startsWith('go')) {
-      let e = branch.querySelector(h.substring(2));
-      if (e && e.href) {
-        document.location = e.href;
-      }
+  let branch = document.querySelector('#branch-' + referrer_branch);
+  let h = document.location.hash.substring(1);
+  if (h === 'show') {
+    document.location.hash = '#' + branch.id;
+  } else if (h.startsWith('go')) {
+    let e = branch.querySelector(h.substring(2));
+    if (e && e.href) {
+      document.location = e.href;
     }
   }
 };
