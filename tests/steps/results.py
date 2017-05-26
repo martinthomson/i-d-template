@@ -1,6 +1,6 @@
 from behave import *
 from contextlib import contextmanager
-from subprocess import check_output,check_call
+from subprocess import check_output, check_call
 import os
 from glob import glob
 

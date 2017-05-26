@@ -54,6 +54,7 @@ def step_impl(context):
     with cd(context.working_dir):
         call(["git", "remote", "add", "origin", mkdtemp()])
 
+
 @given(u'a Kramdown draft is created')
 def step_impl(context):
     with cd(context.working_dir):
