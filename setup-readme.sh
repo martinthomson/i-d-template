@@ -51,9 +51,9 @@ for d in "$@"; do
         echo "## $title"
     fi
     echo
-    echo "* [Editor's Copy](${githubio}.html.${fullname})"
+    echo "* [Editor's Copy](${githubio}.${fullname}.html)"
     echo "* [Working Group Draft](https://tools.ietf.org/html/${fullname})"
-    echo "* [Compare Editor's Copy to Working Group Draft](${githubio}.diff.${fullname})"
+    echo "* [Compare Editor's Copy to Working Group Draft](${githubio}.${fullname}.diff)"
 done
 
 cat <<EOF
