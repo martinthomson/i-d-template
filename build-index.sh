@@ -32,13 +32,13 @@ function rfcdiff() {
 }
 
 function rel() {
-    d="${1/$root\//}"
+    d="${1/$root/}"
     [ -n "$d" ] && d="$d/"
     echo "$d"
 }
 
 function reldot() {
-    d="${1/$root\//}"
+    d="${1/$root/}"
     echo "${d:-.}"
 }
 
@@ -47,11 +47,12 @@ function githubio() {
 }
 
 function list_dir() {
-    pi '<ul id="branch-'"$(basename "$1")"'">'
+    pi '<ul id="branch-'"$2"'">'
     for file in "$1"/*.txt; do
-        pi '<li>'
         dir=$(dirname "$file")
         file=$(basename "$file" .txt)
+
+        pi '<li>'
         p "${file}: "
         p '<a href="'"$(reldot "$dir")/${file}"'.html"'
         p '   class="html '"$file"'">html</a>, '
@@ -72,13 +73,13 @@ function list_dir() {
     po '</ul>'
 }
 
-list_dir "${root}"
+list_dir "${root}" master
 
 pi '<ul>'
 for dir in "${root}"/*; do
     if [ -d "${dir}" ]; then
         pi '<li>'"$(basename "$dir")"' branch:'
-	list_dir "$dir"
+        list_dir "$dir" "$(basename "$dir")"
         po '</li>'
     fi
 done
@@ -101,7 +102,7 @@ window.onload = function() {
   let h = document.location.hash.substring(1);
   if (h === 'show') {
     document.location.hash = '#' + branch.id;
-  } else if (h.startsWith('go')) {
+  } else if (branch && h.startsWith('go')) {
     let e = branch.querySelector(h.substring(2));
     if (e && e.href) {
       document.location = e.href;
