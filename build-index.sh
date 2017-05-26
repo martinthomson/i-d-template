@@ -2,7 +2,7 @@
 
 # Usage: $0 [dir] [gh-user] [gh-repo] > index.html
 
-root="${1:-.}"
+root=$(realpath "${1:-.}")
 user="${2:-<user>}"
 repo="${3:-<repo>}"
 
