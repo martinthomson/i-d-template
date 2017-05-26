@@ -23,7 +23,11 @@ p '<!DOCTYPE html>'
 pi '<html>'
 pi '<head>'
 p '<title>'"$user/$repo"' branches</title>'
-p '<style>li:target { background-color: lightgrey; }</style>'
+pi '<style>'
+p 'body { font-family: sans-serif; }'
+p 'h2 { font-size: 130%; }'
+p 'h3 { font-size: 120%; color: #222; }'
+po '</style>'
 po '</head>'
 pi '<body>'
 
@@ -56,13 +60,12 @@ function list_dir() {
         p '   class="html '"$file"'">html</a>, '
         p '<a href="'"$(reldot "$dir")/${file}"'.txt"'
         p '   class="txt '"$file"'">plain text</a>, '
-        parent="$dir"
-        while [ "$parent" != "$root" ]; do
-            parent=$(dirname "$parent")
+        if [ "$dir" != "$root" ]; then
+            parent=$(dirname "$dir")
             p '<a href="'"$(rfcdiff $(githubio "$parent" "$file") $(githubio "$dir" "$file"))"'">'
             [ "$parent" = "$root" ] && pbranch=master || pbranch=$(rel "$parent")
             p "  diff with ${pbranch}</a>, "
-        done
+        fi
         p '<a href="'"$(rfcdiff "https://tools.ietf.org/id/${file}.txt" $(githubio "$dir" "$file"))"'"'
         p '   class="diff '"$file"'">'
         p "  diff with last submission</a>"
@@ -71,17 +74,15 @@ function list_dir() {
     po '</ul>'
 }
 
+p "<h2>Editors Drafts for ${user}/${repo}</h2>"
 list_dir "${root}" master
 
-pi '<ul>'
 for dir in "${root}"/*; do
     if [ -d "${dir}" ]; then
-        pi '<li>'"$(basename "$dir")"' branch:'
+        p "<h3>Preview for branch $(basename "$dir")</h3>"
         list_dir "$dir" "$(basename "$dir")"
-        po '</li>'
     fi
 done
-po '</ul>'
 
 pi '<script>'
 cat <<EOJS
@@ -93,7 +94,7 @@ window.onload = function() {
   var referrer_branch = 'master';
   // e.g., "https://github.com/user/repo/tree/master"
   var chunks = document.referrer.split("/");
-  if (chunks[2] == 'github.com' && chunks[5] == 'tree') {
+  if (chunks[2] === 'github.com' && chunks[5] === 'tree') {
     referrer_branch = chunks[6];
   }
   let branch = document.querySelector('#branch-' + referrer_branch);
