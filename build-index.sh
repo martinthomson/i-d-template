@@ -2,6 +2,8 @@
 
 # Usage: $0 [dir] [gh-user] [gh-repo] > index.html
 
+hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
+
 root=$(realpath "${1:-.}")
 user="${2:-<user>}"
 repo="${3:-<repo>}"
