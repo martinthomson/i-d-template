@@ -23,19 +23,20 @@ first=true
 for d in "$@"; do
     fullname="${d%.xml}"
     author=$(echo "${fullname}" | cut -f 2 -d - -)
-    wg=$(echo "${fullname}" | cut -f 3 -d - - | tr 'a-z' 'A-Z')
+    wg=$(echo "${fullname}" | cut -f 3 -d - -)
+    wgupper=$(echo "${wg}" | tr 'a-z' 'A-Z')
     title=$(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$d" | xargs echo)
 
     if "$first"; then
         fixup_other_md "$wg"
 
         if [ "$author" = "ietf" ]; then
-            status="IETF ${wg} Working Group Internet-Draft"
+            status="IETF ${wgupper} Working Group Internet-Draft"
         else
             status="individual Internet-Draft"
         fi
         if [ $# -gt 1 ]; then
-            echo "# $wg Drafts"
+            echo "# ${wgupper} Drafts"
             status="${status}s"
         else
             echo "# $title"
