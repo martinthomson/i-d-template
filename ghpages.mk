@@ -45,67 +45,78 @@ endif
 fetch-ghpages:
 	-git fetch -q origin gh-pages:gh-pages
 
-GHPAGES_TMP := /tmp/ghpages$(shell echo $$$$)
-ghpages: $(GHPAGES_TMP)
-$(GHPAGES_TMP): fetch-ghpages
+GHPAGES_ROOT := /tmp/ghpages$(shell echo $$$$)
+ghpages: $(GHPAGES_ROOT)
+$(GHPAGES_ROOT): fetch-ghpages
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
 	    git branch -t gh-pages origin/gh-pages) || \
 	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	git clone -q -b gh-pages . $@
 
-TARGET_DIR := $(GHPAGES_TMP)$(filter-out /master,/$(SOURCE_BRANCH))
-ifneq ($(TARGET_DIR),$(GHPAGES_TMP))
-$(TARGET_DIR): $(GHPAGES_TMP)
+GHPAGES_TARGET := $(GHPAGES_ROOT)$(filter-out /master,/$(SOURCE_BRANCH))
+ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
+$(GHPAGES_TARGET): $(GHPAGES_ROOT)
 	mkdir -p $@
 endif
 
-PUBLISHED := index.html $(drafts_html) $(drafts_txt)
-$(addprefix $(TARGET_DIR)/,$(PUBLISHED)): $(PUBLISHED) $(TARGET_DIR)
+GHPAGES_PUBLISHED := $(drafts_html) $(drafts_txt)
+GHPAGES_INSTALLED := $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_PUBLISHED))
+$(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
+GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.html
+$(GHPAGES_TARGET)/index.html: $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index.sh "$(dir $@)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+
+ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
+GHPAGES_ALL += $(GHPAGES_ROOT)/index.html
+$(GHPAGES_ROOT)/index.html: $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index.sh "$(dir $@)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+endif
+
 .PHONY: cleanup-ghpages
-cleanup-ghpages: $(GHPAGES_TMP)
+cleanup-ghpages: $(GHPAGES_ROOT)
 	-@for remote in `git remote`; do \
 	  git remote prune $$remote; \
 	done;
 
 # Clean up obsolete directories
 	@CUTOFF=`date +%s -d '-30 days'`; \
-	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_TMP) | sed -e 's,.*/,,')`; \
+	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_ROOT) | sed -e 's,.*/,,')`; \
 	for item in $$MAYBE_OBSOLETE; do \
-	  if [ -d "$(GHPAGES_TMP)/$$item" ] && \
-	     [ `git -C $(GHPAGES_TMP) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; then \
+	  if [ -d "$(GHPAGES_ROOT)/$$item" ] && \
+	     [ `git -C $(GHPAGES_ROOT) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; then \
 	    echo "Remove obsolete '$$item'"; \
-	    git -C $(GHPAGES_TMP) rm -rfq -- $$item; \
+	    git -C $(GHPAGES_ROOT) rm -rfq -- $$item; \
 	  fi \
 	done
 
 # Clean up contents of target directory
-	@if [ -d $(TARGET_DIR) ]; then \
-	  echo git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt; \
-	  git -C $(GHPAGES_TMP) rm -fq --ignore-unmatch -- $(TARGET_DIR)/*.html $(TARGET_DIR)/*.txt; \
+	@if [ -d $(GHPAGES_TARGET) ]; then \
+	  echo git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/*.html $(GHPAGES_TARGET)/*.txt; \
+	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/*.html $(GHPAGES_TARGET)/*.txt; \
 	fi
 
 
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
-ghpages: cleanup-ghpages $(addprefix $(TARGET_DIR)/,$(PUBLISHED))
-	git -C $(GHPAGES_TMP) add -f $(TARGET_DIR)
-	if test `git -C $(GHPAGES_TMP) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
-	  git -C $(GHPAGES_TMP) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
+ghpages: cleanup-ghpages $(GHPAGES_ALL)
+	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
+	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
+	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
-	git -C $(GHPAGES_TMP) push https://github.com/$(CI_REPO_FULL).git gh-pages
+	git -C $(GHPAGES_ROOT) push https://github.com/$(CI_REPO_FULL).git gh-pages
 else
 ifneq (,$(GH_TOKEN))
-	@echo git -C $(GHPAGES_TMP) push -q https://github.com/$(CI_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_TMP) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
+	@echo git -C $(GHPAGES_ROOT) push -q https://github.com/$(CI_REPO_FULL) gh-pages
+	@git -C $(GHPAGES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
 else
-	git -C $(GHPAGES_TMP) push origin gh-pages
+	git -C $(GHPAGES_ROOT) push origin gh-pages
 endif
 endif
-	-rm -rf $(GHPAGES_TMP)
+	-rm -rf $(GHPAGES_ROOT)
 endif # PUSH_GHPAGES
 
 ## Save published documents to the CI_ARTIFACTS directory
