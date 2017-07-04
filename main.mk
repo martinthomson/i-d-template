@@ -156,6 +156,17 @@ $(TEST_REPORT): $(drafts_html) $(drafts_txt)
 	done; \
 	echo '</testsuite>' >>$@
 
+.PHONY: lint
+lint::
+	@err=0; for f in $(join $(drafts),$(draft_types)); do \
+          if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
+            echo "$$f has no newline on the last line"; err=1; \
+          fi; \
+          if grep -n ' $$' "$$f"; then \
+            echo "$$f contains trailing whitespace"; err=1; \
+          fi; \
+	done; [ "$$err" -eq 0 ]
+
 ## Cleanup
 COMMA := ,
 .PHONY: clean
