@@ -81,7 +81,7 @@ list_dir "${root}" master
 
 for dir in "${root}"/*; do
     if [ -d "${dir}" ]; then
-        p "<h3>Preview for branch $(basename "$dir")</h3>"
+        p '<h3>Preview for branch <a href="'$(basename "$dir")'">'$(basename "$dir")'</a></h3>'
         list_dir "$dir" "$(basename "$dir")"
     fi
 done
