@@ -30,4 +30,4 @@ done
 [ "${#txtfiles[@]}" -eq 0 ] && exit 0
 
 "$MAKE" "${txtfiles[@]}"
-"$MAKE" lint "drafts=${txtfiles[@]%.*}"
+"$MAKE" lint "drafts=${txtfiles[*]%.*}"
