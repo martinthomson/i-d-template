@@ -26,8 +26,8 @@ Choose whether you want to use markdown, outline, or xml as your input format.
 If you already have a draft, then that decision is already made for you.
 
 Make a draft file in the root of the repo.  The name of the file is important; make
-it match the name of your draft. Our example would be `draft-ietf-unicorn-protocol.md`
-in markdown.
+it match the name of your draft. Don't include a version number in the name.  Our
+example would be `draft-ietf-unicorn-protocol.md` in markdown.
 
 You can copy of one of the examples files
 ([markdown](https://github.com/martinthomson/i-d-template/blob/master/doc/example.md) or
@@ -53,7 +53,7 @@ title: The Unicorn Protocol
 
 Commit and push your changes:
 ```sh
-$ git commit -a
+$ git commit draft-ietf-unicorn-protocol.md
 $ git push
 ```
 
