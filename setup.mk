@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: setup-master setup-ghpages setup-ghissues
+setup: setup-master setup-ghpages setup-ghissues setup-precommit
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
@@ -81,7 +81,11 @@ README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FIL
 .PHONY: setup-master
 setup-master: setup-files README.md setup-gitignore
 	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts)) using https://github.com/martinthomson/i-d-template"
-	-ln -s ../../lib/pre-commit.sh .git/hooks/pre-commit
+
+.PHONY: setup-precommit
+setup-precommit: .git/hooks/pre-commit
+.git/hooks/pre-commit:
+	-ln -s ../../lib/pre-commit.sh $@
 
 .PHONY: setup-ghpages
 setup-ghpages:

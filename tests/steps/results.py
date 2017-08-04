@@ -70,3 +70,9 @@ def step_impl(context, branch, filename):
             ["git", "ls-tree", branch, "--name-only", "-r"] ) \
             .decode("utf-8")
         assert filename in files
+
+
+@then(u'a precommit hook is installed')
+def step_impl(context):
+    with cd(context.working_dir):
+        assert len(glob('.git/hooks/pre-commit')) == 1
