@@ -27,7 +27,7 @@ $ git fetch https://github.com/martinthomson/tls13-spec
 
 ## Cleaning Old Branches
 
-If you work on many pull requests over time, you will create many branches.  
+If you work on many pull requests over time, you will create many branches.
 Even if you delete the branch on GitHub, your local repository can have lots
 of dead branches.  The following creates a command, `git trim` that prunes
 branches that have been merged.
@@ -44,7 +44,7 @@ want to keep always.
 ## No Unnecessary Merges on Pull
 
 When you pull, git can decide to merge for you if your branch has diverged.
-This can be annoying to recover from.  Setting the following configuration 
+This can be annoying to recover from.  Setting the following configuration
 ensures that you don't create merge commits when you pull:
 
 ```sh
