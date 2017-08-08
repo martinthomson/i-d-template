@@ -46,7 +46,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 	  echo '	-cp $$< $$@' >>$@;)
 
 .PHONY: setup-files
-setup-files: $(TEMPLATE_FILES)
+setup-files: $(TEMPLATE_FILES) README.md
 	git add $(join $(drafts),$(draft_types))
 	git add $^
 
