@@ -6,15 +6,29 @@ are often not great.
 
 Firstly, **do not create a fork**.  There are better options.
 
-If you are an owner of both the source and target organization, you can move the
-repository.  That brings all the pull requests and issues with it.  That's nice
-if you can do that, but it's not often the case that people are comfortable with
-giving away temporary ownership privileges.
 
-## Recommended Procedure
+## Best Option - Transfer the Repository
+
+If you are an owner of the source repository and part of the target organization,
+you can transfer the repository.  That brings all the pull requests and issues
+with it.  That's nice if you can do that.
+
+To do this, make the current author/editor part of the working group organization.
+Then they can go to the settings tab for the repository and transfer.  This can
+be found at the very bottom of the page, in the "Danger Zone".
+
+**Note:** I don't know what the precise set of privileges need to be given to
+allow this to happen.  More testing is needed.
+
+
+## Alternative - Copying History
+
+In case you can't transfer, you can copy the history of the old repository into
+a new repository.  For this, you don't need any special roles, just the ability
+to push to the new repository.
 
 Make a new repository.  Make sure that it is empty when you make it (don't
-create a README when github asks).  Then make a new repository locally:
+create a README when GitHub asks).  Then make a new repository locally:
 
 ```sh
 $ git init new-repo
@@ -29,18 +43,25 @@ $ git pull https://github.com/old-owner/old-repo master
 $ git push
 ```
 
-You then need to setup the `gh-pages` and `gh-issues` branches:
+You then need to setup the `gh-pages` and `gh-issues` 
+branches:
 
 ```sh
 $ make
 $ make -f lib/setup.mk setup-ghpages setup-ghissues
 ```
 
-You might also want to redo the README:
+
+## Cleanup
+
+After transfering or copying rebuild the README:
 
 ```sh
-$ git rm README.md
-$ git commit -m "Remove old README"
 $ make -f lib/setup.mk README.md
-$ git commit --amend -m "Update README" README.md
+$ git commit -m "Update README" README.md
 ```
+
+ If you have made changes to this from the template, you can just update the
+ intro text and the links.
+ 
+ You might also need to redo and CI setup.
