@@ -36,8 +36,11 @@ enscript ?= enscript
 ps2pdf ?= ps2pdf
 
 # Where to get references
-# Use http://xml2rfc.tools.ietf.org/public/rfc if this fails.
 XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
 
 # This is for people running macs
 SHELL := bash
+
+# For uploading draft "releases" to the datatracker.
+curl ?= curl -sS
+DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit

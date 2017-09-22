@@ -31,3 +31,7 @@ deployment:
     commands:
       - make artifacts
       - make ghpages || make ghpages
+  release:
+    tag: /draft-.*/
+    commands:
+      - make upload

@@ -4,7 +4,6 @@ machine:
     mmark_src: github.com/miekg/mmark/mmark
     mmark: ./mmark
     PATH: ${PATH}:~/bats/bin
-    SELF_TEST: TRUE
     KRAMDOWN_REFCACHEDIR: "${HOME}/${CIRCLE_PROJECT_REPONAME}/.refcache"
   python:
     version: 3.5.2

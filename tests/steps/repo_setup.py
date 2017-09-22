@@ -1,4 +1,5 @@
 from behave import *
+from glob import glob
 from subprocess import call
 from tempfile import mkdtemp, NamedTemporaryFile
 from contextlib import contextmanager
@@ -47,6 +48,15 @@ def step_impl(context):
 def step_impl(context):
     with cd(context.working_dir):
         call(["ln", "-s", context.test_dir, "lib"])
+
+
+@given(u'the repo is tagged')
+def step_impl(context):
+    with cd(context.working_dir):
+        md_files = glob("draft-*.md")
+        for md in md_files:
+            tag = md.replace(".md", "-00")
+            call(["git", "tag", "-am", "testing", tag])
 
 
 @given(u'an empty origin remote is added')

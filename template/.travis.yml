@@ -22,3 +22,10 @@ install:
 script:
  - make
  - make ghpages || make ghpages
+
+deploy:
+  provider: script
+  script: make upload
+  skip_cleanup: true
+  on:
+    tags: true
