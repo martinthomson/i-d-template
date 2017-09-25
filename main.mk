@@ -30,7 +30,9 @@ endif
 export XML_RESOURCE_ORG_PREFIX
 
 %.xml: %.md
-	@h=$$(head -1 $< | cut -c 1-3 -); set -o pipefail; \
+	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
+	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
+	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
 	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) > $@)'; \
 	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) > $@; \
