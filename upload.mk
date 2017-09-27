@@ -6,7 +6,7 @@ else
 draft_releases := $(shell git tag --list --points-at HEAD --format '%(tag),%(taggeremail)' | grep '^draft-.*,<.*>$$' | cut -f 1 -d , -)
 endif
 
-ifneq ($(shell git describe --abbrev=0 $(draft_releases)),$(draft_releases))
+ifneq ($(foreach tag,$(draft_releases),$(shell git tag --list --format='%(tag)' $(tag))),$(draft_releases))
 $(warning Attempting upload for a lightweight tag: $(draft_releases))
 $(error Only annotated tags \(created with `git tag -a`\) are supported)
 endif
