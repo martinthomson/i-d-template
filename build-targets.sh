@@ -3,7 +3,7 @@
 # Usage: $0 <tagfile> <outputfile> [drafts ...]
 
 drafts=("$@")
-candidates=$(("${#drafts[@]}" * 5))
+candidates=$((${#drafts[@]} * 5))
 
 next() {
     printf "${1%-*}-%2.2d" $((1${1##*-} - 99))

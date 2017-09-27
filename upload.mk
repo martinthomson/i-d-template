@@ -7,6 +7,9 @@ draft_releases := $(shell git tag --list --points-at HEAD --format '%(tag),%(tag
 endif
 uploads := $(addprefix .,$(addsuffix .upload,$(draft_releases)))
 
+# Ensure that we build the XML files needed for upload during the main build (needed for travis).
+latest:: $(addsuffix .xml,$(draft_releases))
+
 .PHONY: upload
 upload: $(uploads)
 
