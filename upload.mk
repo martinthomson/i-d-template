@@ -5,6 +5,12 @@ draft_releases := $(CIRCLE_TAG)$(TRAVIS_TAG)
 else
 draft_releases := $(shell git tag --list --points-at HEAD --format '%(tag),%(taggeremail)' | grep '^draft-.*,<.*>$$' | cut -f 1 -d , -)
 endif
+
+ifneq ($(shell git describe --abbrev=0 $(draft_releases)),$(draft_releases))
+$(warning Attempting upload for a lightweight tag: $(draft_releases))
+$(error Only annotated tags \(created with `git tag -a`\) are supported)
+endif
+
 uploads := $(addprefix .,$(addsuffix .upload,$(draft_releases)))
 
 # Ensure that we build the XML files needed for upload during the main build (needed for travis).
