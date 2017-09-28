@@ -51,6 +51,11 @@ def step_impl(context, target):
     run_with_capture(context, ["make", target])
 
 
+@when(u'make "{target}" is run with "{option}"')
+def step_impl(context, target, option):
+    run_with_capture(context, ["make", target, option])
+
+
 @when(u'the draft is broken')
 def step_impl(context):
     with cd(context.working_dir):
