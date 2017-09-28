@@ -18,9 +18,10 @@ RUN ["bash", "/tmp/tool_install.sh", "rfcdiff", "1.45"]
 RUN ["rm", "-f", "/tmp/tool_install.sh"]
 
 RUN ["mkdir", "-p", "/usr/local/bin"]
-RUN tmp=$(mktemp -d); export GOPATH="$tmp"; trap 'rm -rf "$tmp"' EXIT; \
+RUN tmp=$(mktemp -d); export GOPATH="$tmp"; \
     go get github.com/miekg/mmark/mmark && \
-    go build -o /usr/local/bin/mmark github.com/miekg/mmark/mmark
+    go build -o /usr/local/bin/mmark github.com/miekg/mmark/mmark && \
+    rm -rf "$tmp"
 
 ENV USER idci
 ENV LOGNAME $USER
@@ -34,3 +35,4 @@ WORKDIR $HOME
 USER $USER
 
 ENV KRAMDOWN_REFCACHEDIR=$HOME/.cache/xml2rfc
+RUN git clone --mirror https://github.com/martinthomson/i-d-template $HOME/i-d-template
