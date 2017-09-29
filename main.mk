@@ -5,6 +5,7 @@ LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/ghpages.mk
+include $(LIBDIR)/upload.mk
 include $(LIBDIR)/update.mk
 include $(LIBDIR)/issues.mk
 
@@ -57,7 +58,7 @@ endif
 
 ifeq (true,$(USE_XSLT))
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
-$(LIBDIR)/rfc2629.xslt:	$(XSLTDIR)/rfc2629.xslt
+$(LIBDIR)/rfc2629.xslt: $(XSLTDIR)/rfc2629.xslt
 	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
 
 $(LIBDIR)/clean-for-DTD.xslt: $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
@@ -92,33 +93,9 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-ifeq (true,$(USE_XSLT))
-NEXT_XML_SOURCE_EXT := cleanxml
-else
-NEXT_XML_SOURCE_EXT := xml
-endif
-
 include .targets.mk
-.targets.mk: $(LIBDIR)/main.mk
-	@echo > $@
-# Submit targets
-	@for f in $(drafts_next_xml); do \
-	    echo "$$f: $${f%-[0-9][0-9].xml}.$(NEXT_XML_SOURCE_EXT)" >> $@; \
-	    echo -e "\tsed -e '\$$(join \$$(addprefix s/,\$$(addsuffix -latest/,\$$(drafts))), \$$(addsuffix /g;,\$$(drafts_next)))' \$$< > \$$@" >> $@; \
-	done
-# Diff targets
-	@p=($(drafts_prev_txt)); n=($(drafts_txt)); i=$${#p[@]}; \
-	while [ $$i -gt 0 ]; do i=$$(($$i-1)); \
-	    echo "diff-$${p[$$i]%-[0-9][0-9].txt}.html: $${p[$$i]} $${n[$$i]}" >> $@; \
-	    echo -e "\t-\$$(rfcdiff) --html --stdout \$$^ > \$$@" >> $@; \
-	done
-# Pre-requisite files for diff
-	@for t in $$(git tag); do \
-	    b=$${t%-[0-9][0-9]}; f=$$(git ls-tree --name-only $$t | grep $$b | head -1); \
-	    echo ".INTERMEDIATE: $$t.$${f##*.}" >> $@; \
-	    echo "$$t.$${f##*.}:" >> $@; \
-	    echo -e "\t git show $$t:$$f | sed -e 's/$$b-latest/$$t/' > \$$@" >> $@; \
-	done
+.targets.mk: $(LIBDIR)/build-targets.sh $(wildcard .git/refs/tags/*)
+	@$< $(drafts) >$@
 
 ## Check for validity
 .PHONY: check idnits
@@ -137,13 +114,14 @@ TEST_REPORT := $(CIRCLE_TEST_REPORTS)/report/drafts.xml
 else
 TEST_REPORT := report.xml
 endif
+all_outputs := $(drafts_html) $(drafts_txt)
 .PHONY: report
 report: $(TEST_REPORT)
-$(TEST_REPORT): $(drafts_html) $(drafts_txt)
+$(TEST_REPORT):
 	@echo build_report $^
 	@mkdir -p $(dir $@)
 	@echo '<?xml version="1.0" encoding="UTF-8"?>' >$@
-	@passed=();failed=();for i in $^; do \
+	@passed=();failed=();for i in $(all_outputs); do \
 	  if [ -f "$$i" ]; then passed+=("$$i"); else failed+=("$$i"); fi; \
 	done; echo '<testsuite' >>$@; \
 	echo '    tests="'"$$(($${#passed[@]} + $${#failed[@]}))"'"' >>$@; \
@@ -173,8 +151,8 @@ lint::
 COMMA := ,
 .PHONY: clean
 clean::
-	-rm -f .targets.mk issues.json \
+	-rm -f .tags .targets.mk issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts))) \
-	    $(draft_diffs)
+	    $(uploads) $(draft_diffs)

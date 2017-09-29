@@ -18,7 +18,7 @@ ifeq (,$(SELF_TEST))
 	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/$(basename $(notdir $@))?state=all; \
 	while [ "$$url" != "" ]; do \
 	   echo Fetching $(basename $(notdir $@)) from $$url; \
-	   curl -s $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
+	   $(curl) $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
 	   if ! head -1 $$tmp | grep -q ' 200 OK'; then \
 	       echo "Error loading $$url:"; cat $$tmp; exit 1; \
 	   fi; \
