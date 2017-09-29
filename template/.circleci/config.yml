@@ -44,7 +44,6 @@ jobs:
           name: "Update GitHub Pages"
           command: "make gh-pages"
 
-
       - run:
           name: "Save Issues"
           command: "make gh-issues || true"
