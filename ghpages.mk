@@ -121,7 +121,10 @@ endif # PUSH_GHPAGES
 
 ## Save published documents to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))
+$(CI_ARTIFACTS):
+	mkdir -p $@
+
 .PHONY: artifacts
-artifacts: $(GHPAGES_PUBLISHED)
-	cp -f $^ $(CI_ARTIFACTS)
+artifacts: $(GHPAGES_PUBLISHED) $(CI_ARTIFACTS)
+	cp -f $^
 endif
