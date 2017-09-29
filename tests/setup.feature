@@ -4,6 +4,13 @@ Feature: Initial setup
     Given a git repo with a single Kramdown draft
      when the setup script is run
      then it succeeds
+     and a file is created called "Makefile"
+     and a file is created called "README.md"
+     and a file is created called "CONTRIBUTING.md"
+     and a file is created called "LICENSE.md"
+     and a file is created called ".gitignore"
+     and a file is created called ".travis.yml"
+     and a file is created called ".circleci/config.yml"
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-issues" containing "issues.json"
      and gitignore lists the xml file

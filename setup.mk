@@ -35,7 +35,7 @@ endif
 TEMPLATE_FILES := \
   Makefile .gitignore \
   CONTRIBUTING.md LICENSE.md \
-  .travis.yml circle.yml
+  .travis.yml .circleci/config.yml
 
 TEMPLATE_FILE_MK := $(LIBDIR)/.template-files.mk
 include $(TEMPLATE_FILE_MK)
@@ -43,6 +43,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 	@echo '# Automatically generated setup rules' >$@
 	@$(foreach f,$(TEMPLATE_FILES),\
 	  echo $(f): $(LIBDIR)/template/$(f) >>$@;\
+	  echo '	mkdir -p $$(dir $$@)' >>$@;\
 	  echo '	-cp $$< $$@' >>$@;)
 
 .PHONY: setup-files

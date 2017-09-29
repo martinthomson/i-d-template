@@ -63,6 +63,12 @@ def step_impl(context):
             assert html_file in ghpages_files
 
 
+@then(u'a file is created called "{filename}"')
+def step_impl(context, filename):
+    context.execute_steps(
+        u'then a branch is created called "master" containing "%s"' % filename)
+
+
 @then(u'a branch is created called "{branch}" containing "{filename}"')
 def step_impl(context, branch, filename):
     with cd(context.working_dir):
