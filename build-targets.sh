@@ -22,7 +22,7 @@ build_target() {
         else
             # This is the last tag for the identified file at the tag we're
             # interested in.
-            prev_file_tag=$(git describe --candidates="$candidates" \
+            prev_file_tag=$(git describe --candidates="$candidates" --tags \
                                 --match "${file%.*}-*" --abbrev=0 "$tag" 2>/dev/null)
 
             # If we are building for HEAD, then we need to use the next tag.
