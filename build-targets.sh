@@ -57,7 +57,7 @@ for draft in "${drafts[@]}"; do
     done
 
     if [ "${#tags[@]}" -gt 0 ]; then
-        next_draft=$(next "${tags[-1]}")
+        next_draft=$(next "${tags[$((${#tags[@]}-1))]}")
     else
         next_draft="${draft}-00"
     fi
