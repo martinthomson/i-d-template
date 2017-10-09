@@ -65,7 +65,7 @@ for draft in "${drafts[@]}"; do
 
     if [ "${#tags[@]}" -gt 0 ]; then
         # Write out a diff target
-        echo "diff-${draft}.html: ${tags[-1]}.txt ${next_draft}.txt"
+        echo "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt"
         echo -e "\t-\$(rfcdiff) --html --stdout \$^ > \$@"
     fi
 done
