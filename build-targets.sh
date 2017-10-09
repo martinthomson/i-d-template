@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Build extra targets for make.  This includes targets that are a little tricky
+# to build.  This includes all versions of the draft other than the latest: all
+# tagged versions and the next version for submission.  As a result, it also
+# includes diffs.
 
 # Usage: $0 <tagfile> <outputfile> [drafts ...]
 
