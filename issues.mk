@@ -10,8 +10,8 @@ issues.json pulls.json: fetch-ghissues $(drafts_source)
 	@echo '[' > $@
 ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
-	if [ $(CI) = true -a $$(($$(git show -s --pretty='%at' $(GH_ISSUES) --) + 3600)) -gt $$(date '+%s') ]; then \
-	    echo 'Skipping update of $@ (most recent update was less than an hour ago)'; \
+	if [ $(CI) = true -a $$(($$(git show -s --pretty='%at' $(GH_ISSUES) --) + 28800)) -gt $$(date '+%s') ]; then \
+	    echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
 	    git show $(GH_ISSUES):$@ | head -n -1 | tail -n +2 >> $@; \
 	    exit; \
 	fi; \
