@@ -22,5 +22,5 @@ upload: $(uploads)
 .%.upload: %.xml
 	$(curl) -D $@ -F "user=$(shell git tag --list --format '%(taggeremail)' $(basename $<) | \
 	                         sed -e 's/^<//;s/>$$//')" -F "xml=@$<" \
-	        "$(DATATRACKER_UPLOAD_URL)"; echo; \
-	  (grep -q ' 200 OK' $@ >/dev/null 2>&1 || (cat $@ && ! rm -f $@))
+	        "$(DATATRACKER_UPLOAD_URL)" && echo && \
+	  (grep -q ' 200 OK' $@ >/dev/null 2>&1 || (cat $@ 1>&2 && ! rm -f $@))
