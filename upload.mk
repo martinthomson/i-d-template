@@ -20,4 +20,7 @@ latest:: $(addsuffix .xml,$(draft_releases))
 upload: $(uploads)
 
 .%.upload: %.xml
-	$(curl) -f -F "user=$(shell git tag --list --format '%(taggeremail)' $(basename $<) | sed -e 's/^<//;s/>$$//')" -F "xml=@$<" "$(DATATRACKER_UPLOAD_URL)" > "$@" || (cat "$@" 1>&2; exit 1)
+	$(curl) -D $@ -F "user=$(shell git tag --list --format '%(taggeremail)' $(basename $<) | \
+	                         sed -e 's/^<//;s/>$$//')" -F "xml=@$<" \
+	        "$(DATATRACKER_UPLOAD_URL)"; echo; \
+	  (grep -q ' 200 OK' $@ >/dev/null 2>&1 || (cat $@ && ! rm -f $@))
