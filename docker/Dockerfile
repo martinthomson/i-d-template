@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 LABEL maintainer="Martin Thomson <martin.thomson@gmail.com>"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates coreutils curl git make ssh \
+    ca-certificates coreutils curl git make ssh libxml2-utils \
     python-minimal python-lxml python-pip python-setuptools python-wheel \
     mmark ruby \
  && rm -rf /var/lib/apt/lists/* \
