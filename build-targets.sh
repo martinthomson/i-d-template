@@ -45,7 +45,9 @@ build_target() {
     fi
 
     target="${target_name}.${source_file##*.}"
-    echo ".INTERMEDIATE: ${target}"
+    if [ "$tag" != HEAD ]; then
+        echo ".INTERMEDIATE: ${target}"
+    fi
     echo "${target}:"
     if [ "$tag" = HEAD ]; then
         echo -e "\tsed ${subst[@]} "$source_file" >\$@"
