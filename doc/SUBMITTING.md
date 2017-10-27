@@ -34,6 +34,16 @@ temporary](https://trac.tools.ietf.org/tools/ietfdb/ticket/2390)).  The email
 address that git uses can be found by calling `git config --get user.email`, if
 you aren't certain.
 
+**Note**: Existing users will need to update their configuration to take
+advantage of this feature.  For Circle CI users, adding
+[.circleci/config.yml](https://github.com/martinthomson/i-d-template/blob/master/template/.circleci/config.yml)
+to your repository and removing any existing `circle.yml` file is recommended.
+[Travis
+support](https://github.com/martinthomson/i-d-template/blob/master/template/.travis.yml)
+is less well-tested (and slower).  Updating the
+[Makefile](https://github.com/martinthomson/i-d-template/blob/master/template/Makefile)
+provides a small additional speed improvement.
+
 Once the CI system has built the draft, it will upload it automatically and you
 will receive an email asking you to confirm submission.  You don't need to have
 a GitHub account token configured for this feature to be enabled.
