@@ -45,13 +45,12 @@ build_target() {
     fi
 
     target="${target_name}.${source_file##*.}"
-    if [ "$tag" != HEAD ]; then
-        echo ".INTERMEDIATE: ${target}"
-    fi
-    echo "${target}:"
-    if [ "$tag" = HEAD ]; then
-        echo -e "\tsed ${subst[@]} "$source_file" >\$@"
+    if [ "$tag" == HEAD ]; then
+        echo "${target}: ${source_file}"
+        echo -e "\tsed ${subst[@]} \$< >\$@"
     else
+        echo ".INTERMEDIATE: ${target}"
+        echo "${target}:"
         echo -e "\tgit show "$tag":"$source_file" | sed ${subst[@]} >\$@"
     fi
 }
