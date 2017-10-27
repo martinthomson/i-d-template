@@ -23,13 +23,14 @@ be either `draft-ietf-unicorn-protocol.md` or
 
 For this feature to work you also need to use an annotated tag (that's the `-a`
 option above).  Annotated tags require a comment (use `-m` to set this on the
-command line).  Annotated tags associate your email address with then
+command line).  An annotated tag associates your email address with the
 submission.  Lightweight tags don't have an email address and will be ignored
 by the CI build.
 
 **Note**: The email address you use for making this submission needs to match a
-valid datatracker account email address.  It also needs to be listed as an
-author (this condition [might be
+valid datatracker account email address ([create one
+here](https://datatracker.ietf.org/accounts/create/)).  The email address must
+also match one of the author addresses (this condition [might be
 temporary](https://trac.tools.ietf.org/tools/ietfdb/ticket/2390)).  The email
 address that git uses can be found by calling `git config --get user.email`, if
 you aren't certain.
