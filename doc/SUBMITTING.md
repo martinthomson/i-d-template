@@ -27,6 +27,10 @@ command line).  An annotated tag associates your email address with the
 submission.  Lightweight tags don't have an email address and will be ignored
 by the CI build.
 
+**Tip**: Push the commit that you intend to tag before you push the tag to
+check that the draft can be built correctly.  If the build fails, the draft
+submission will not complete.
+
 **Note**: The email address you use for making this submission needs to match a
 valid datatracker account email address ([create one
 here](https://datatracker.ietf.org/accounts/create/)).  The email address must
