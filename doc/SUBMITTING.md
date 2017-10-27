@@ -28,8 +28,11 @@ submission.  Lightweight tags don't have an email address and will be ignored
 by the CI build.
 
 **Note**: The email address you use for making this submission needs to match a
-valid datatracker account email address.  (The email address that git uses can
-be found by calling `git config --get user.email`, if you aren't certain.)
+valid datatracker account email address.  It also needs to be listed as an
+author (this condition [might be
+temporary](https://trac.tools.ietf.org/tools/ietfdb/ticket/2390)).  The email
+address that git uses can be found by calling `git config --get user.email`, if
+you aren't certain.
 
 Once the CI system has built the draft, it will upload it automatically and you
 will receive an email asking you to confirm submission.  You don't need to have
