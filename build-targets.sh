@@ -40,7 +40,7 @@ build_target() {
     done
 
     if [ -z "$source_file" ]; then
-        echo "warning: No file for found at revision $tag for $target_name" 1>&2
+        echo "warning: No file found at revision $tag for $target_name" 1>&2
         return
     fi
 
