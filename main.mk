@@ -142,7 +142,7 @@ lint::
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
 	    echo "$$f has no newline on the last line"; err=1; \
 	  fi; \
-	  if grep -n ' $$' "$$f"; then \
+	  if grep -n $$' \r*$$' "$$f"; then \
 	    echo "$$f contains trailing whitespace"; err=1; \
 	  fi; \
 	done; [ "$$err" -eq 0 ]
