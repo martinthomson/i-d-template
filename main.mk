@@ -145,7 +145,7 @@ lint::
 	  if grep -n $$' \r*$$' "$$f"; then \
 	    echo "$$f contains trailing whitespace"; err=1; \
 	  fi; \
-	done; [ "$$err" -eq 0 ]
+	done; [ "$$err" -eq 0 ] || ! echo "Run 'make fix-lint' to automatically fix some errors" 1>&2
 
 .PHONY: fix-lint
 fix-lint::
