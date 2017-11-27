@@ -29,11 +29,13 @@ build_target() {
             prev_file_tag=$(git describe --candidates="$candidates" --tags \
                                 --match "${file%.*}-*" --abbrev=0 "$tag" 2>/dev/null)
 
-            # If we are building for HEAD, then we need to use the next tag.
-            if [ "$tag" = HEAD ]; then
+            # No previous: -00, building for HEAD: next, otherwise use tag.
+            if [ -n "$prev_file_tag" ]; then
+                file_tag = "${file%.*}-00"
+            elif [ "$tag" = HEAD -a -n "$prev_file_tag" ]; then
                 file_tag=$(next "$prev_file_tag")
             else
-                file_tag="${prev_file_tag:-${file%.*}-00}"
+                file_tag="$prev_file_tag"
             fi
         fi
         subst+=(-e "s/${file%.*}-latest/${file_tag}/g")
@@ -55,7 +57,7 @@ build_target() {
     fi
 }
 
-for draft in "${drafts[@]}"; do
+for draft in "${drafts[@]%.*}"; do
     tags=($(git tag --list "${draft}-[0-9][0-9]"))
     for i in "${tags[@]}"; do
         build_target "$i" "$i"
