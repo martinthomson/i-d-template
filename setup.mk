@@ -28,7 +28,7 @@ endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
 $(error Please configure a remote called '$(GIT_REMOTE)' before running setup)
 endif
-ifeq (,$(shell git show-ref origin/$(GIT_ORIG)))
+ifeq (,$(shell git show-ref $(GIT_REMOTE)/$(GIT_ORIG)))
 $(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push $(GIT_REMOTE) $(GIT_ORIG)")
 endif
 
