@@ -30,7 +30,7 @@ build_target() {
                                 --match "${file%.*}-*" --abbrev=0 "$tag" 2>/dev/null)
 
             # No previous: -00, building for HEAD: next, otherwise use tag.
-            if [ -n "$prev_file_tag" ]; then
+            if [ -z "$prev_file_tag" ]; then
                 file_tag="${file%.*}-00"
             elif [ "$tag" = HEAD -a -n "$prev_file_tag" ]; then
                 file_tag=$(next "$prev_file_tag")
