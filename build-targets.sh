@@ -32,7 +32,7 @@ build_target() {
             # No previous: -00, building for HEAD: next, otherwise use tag.
             if [ -z "$prev_file_tag" ]; then
                 file_tag="${file%.*}-00"
-            elif [ "$tag" = HEAD -a -n "$prev_file_tag" ]; then
+            elif [ "$tag" = HEAD ]; then
                 file_tag=$(next "$prev_file_tag")
             else
                 file_tag="$prev_file_tag"
