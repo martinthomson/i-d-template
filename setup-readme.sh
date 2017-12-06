@@ -31,19 +31,21 @@ for d in "$@"; do
         fixup_other_md "$wg"
 
         if [ "$author" = "ietf" ]; then
-            status="IETF ${wgupper} Working Group Internet-Draft"
+	    status="Working Group"
+            status_full="IETF [${wgupper} Working Group](https://datatracker.ietf.org/wg/${wg}/documents/) Internet-Draft"
         else
-            status="individual Internet-Draft"
+	    status="Individual"
+            status_full="individual Internet-Draft"
         fi
         if [ $# -gt 1 ]; then
             echo "# ${wgupper} Drafts"
-            status="${status}s"
+            status_full="${status_full}s"
         else
             echo "# $title"
-            status="the ${status}, \"${title}\""
+            status_full="the ${status_full}, \"${title}\""
         fi
         echo
-        echo "This is the working area for ${status}."
+        echo "This is the working area for ${status_full}."
         first=false
     fi
 
@@ -53,8 +55,8 @@ for d in "$@"; do
     fi
     echo
     echo "* [Editor's Copy](${githubio}.${fullname}.html)"
-    echo "* [Working Group Draft](https://tools.ietf.org/html/${fullname})"
-    echo "* [Compare Editor's Copy to Working Group Draft](${githubio}.${fullname}.diff)"
+    echo "* [${status} Draft](https://tools.ietf.org/html/${fullname})"
+    echo "* [Compare Editor's Copy to ${status} Draft](${githubio}.${fullname}.diff)"
 done
 
 cat <<EOF
