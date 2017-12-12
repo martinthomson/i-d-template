@@ -44,3 +44,4 @@ ENV KRAMDOWN_REFCACHEDIR=$HOME/.cache/xml2rfc
 RUN mkdir -p $KRAMDOWN_REFCACHEDIR
 
 RUN git clone --mirror https://github.com/martinthomson/i-d-template $HOME/i-d-template
+RUN git clone --mirror https://github.com/reschke/xml2rfc $HOME/rfc2629xslt
