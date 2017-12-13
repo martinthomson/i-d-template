@@ -43,5 +43,8 @@ RUN gem install --no-doc --user-install --bindir $BINDIR \
 ENV KRAMDOWN_REFCACHEDIR=$HOME/.cache/xml2rfc
 RUN mkdir -p $KRAMDOWN_REFCACHEDIR
 
-RUN git clone --mirror https://github.com/martinthomson/i-d-template $HOME/i-d-template
-RUN git clone --mirror https://github.com/reschke/xml2rfc $HOME/rfc2629xslt
+ENV GIT_REFERENCE=$HOME/git-reference
+RUN git -C $GIT_REFERENCE init
+RUN git -C $GIT_REFERENCE remote add i-d-template https://github.com/martinthomson/i-d-template
+RUN git -C $GIT_REFERENCE remote add rfc2629xslt https://github.com/reschke/xml2rfc
+RUN git -C $GIT_REFERENCE fetch --all
