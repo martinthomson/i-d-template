@@ -31,14 +31,13 @@ else
 endif
 	@echo ']' >> $@
 
-GHISSUES_ROOT := /tmp/ghissues$(shell echo $$$$)
-
+GHISSUES_ROOT := $(GHPAGES_ROOT)
 $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
 	cp -f $< $@
 
-$(GHISSUES_ROOT)/issues.html: $(LIBDIR)/template/issues.html
+$(GHISSUES_ROOT)/issues.html: $(LIBDIR)/template/issues.html $(GHISSUES_ROOT)
 	cp -f $< $@
-$(GHISSUES_ROOT)/issues.js: $(LIBDIR)/template/issues.js
+$(GHISSUES_ROOT)/issues.js: $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
 	cp -f $< $@
 
 ## Commit and push the changes to $(GH_ISSUES)
