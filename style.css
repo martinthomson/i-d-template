@@ -12,7 +12,7 @@
     position: fixed;
     bottom: 0;
     right: 0;
-    right: calc(50vw - 525px);
+    right: calc(50vw - 550px);
     width: 300px;
     z-index: 1;
   }
