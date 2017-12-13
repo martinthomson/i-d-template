@@ -35,17 +35,13 @@ GHISSUES_ROOT := $(GHPAGES_ROOT)
 $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
 	cp -f $< $@
 
-$(GHISSUES_ROOT)/issues.html: $(LIBDIR)/template/issues.html $(GHISSUES_ROOT)
-	cp -f $< $@
-$(GHISSUES_ROOT)/issues.js: $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
-	cp -f $< $@
-
 ## Commit and push the changes to $(GH_ISSUES)
 .PHONY: ghissues $(GH_ISSUES)
 $(GH_ISSUES): ghissues
-ghissues: $(GHISSUES_ROOT)/issues.json $(GHISSUES_ROOT)/pulls.json $(GHISSUES_ROOT)/issues.html $(GHISSUES_ROOT)/issues.js
-	git -C $(GHISSUES_ROOT) add -f $^
-	if test `git -C $(GHISSUES_ROOT) status --porcelain $^ | wc -l` -gt 0; then \
+ghissues:  $(GHISSUES_ROOT)/issues.html $(GHISSUES_ROOT)/issues.js
+	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
+	git -C $(GHISSUES_ROOT) add -f $^ $(GHISSUES_ROOT)/issues.html $(GHISSUES_ROOT)/issues.js
+	if test `git -C $(GHISSUES_ROOT) status --porcelain $^ $(GHISSUES_ROOT)/issues.html $(GHISSUES_ROOT)/issues.js | wc -l` -gt 0; then \
 	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating $(GH_ISSUES) at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
