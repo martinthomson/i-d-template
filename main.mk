@@ -53,7 +53,7 @@ endif
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
 
-%.txt: %.xml
+%.txt: %.cleanxml
 	$(xml2rfc) $< -o $@ --text
 
 ifeq (true,$(USE_XSLT))
