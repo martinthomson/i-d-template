@@ -53,9 +53,6 @@ endif
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
 
-%.txt: %.xml
-	$(xml2rfc) $< -o $@ --text
-
 ifeq (true,$(USE_XSLT))
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 $(LIBDIR)/rfc2629.xslt: $(XSLTDIR)/rfc2629.xslt
@@ -73,9 +70,15 @@ $(XSLTDIR):
 
 %.htmltmp: %.xml $(LIBDIR)/rfc2629.xslt
 	$(xsltproc) --novalid $(LIBDIR)/rfc2629.xslt $< > $@
+
+%.txt: %.cleanxml
+	$(xml2rfc) $< -o $@ --text
 else
 %.htmltmp: %.xml
 	$(xml2rfc) $< -o $@ --html
+
+%.txt: %.xml
+	$(xml2rfc) $< -o $@ --text
 endif
 
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
