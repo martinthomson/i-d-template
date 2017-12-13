@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: setup-master setup-ghpages setup-ghissues setup-precommit
+setup: setup-master setup-ghpages setup-precommit
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
@@ -90,8 +90,4 @@ setup-precommit: .git/hooks/pre-commit
 
 .PHONY: setup-ghpages
 setup-ghpages:
-	$(LIBDIR)/setup-branch.sh gh-pages index.html
-
-.PHONY: setup-ghissues
-setup-ghissues:
-	$(LIBDIR)/setup-branch.sh gh-issues issues.json pulls.json
+	$(LIBDIR)/setup-branch.sh gh-pages index.html issues.json pulls.json
