@@ -17,7 +17,7 @@
     z-index: 1;
   }
   #rfc\.toc {
-    top: 15px;
+    top: 55px;
   }
   ul.toc, nav#rfc\.toc {
     overflow: auto;
@@ -37,7 +37,7 @@ body {
   color: #333;
   font-size-adjust: 0.5;
   line-height: 130%;
-  margin: 25px auto;
+  margin: 75px auto;
   max-width: 724px;
 }
 
