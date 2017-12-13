@@ -82,7 +82,7 @@ else
 endif
 
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
-ifeq (,$(CI_REPO_FULL)$(DISABLE_RIBBON))
+ifeq (,$(if $(DISABLE_RIBBON),,$(CI_REPO_FULL)))
 	sed -f $(LIBDIR)/addstyle.sed $< > $@
 else
 	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed $< | \
