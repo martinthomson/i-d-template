@@ -68,8 +68,8 @@ $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 ifneq (,$(SHORTNAME_PREFIX))
 define shortname_rule =
 $(dir $(1))$(subst $(SHORTNAME_PREFIX),,$(notdir $(1))): $(1)
-	rm -f $(dir $(1))$(subst $(SHORTNAME_PREFIX),,$(notdir $(1)))
-	ln -s $(notdir $(1)) $(dir $(1))$(subst $(SHORTNAME_PREFIX),,$(notdir $(1)))
+	rm -f $$@
+	ln -s $$< $$@
 endef
 
 GHPAGES_LINKED := $(subst $(SHORTNAME_PREFIX),,$(GHPAGES_INSTALLED))
