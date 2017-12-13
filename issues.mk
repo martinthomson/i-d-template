@@ -6,7 +6,7 @@ fetch-ghissues:
 ## Store a copy of any github issues
 .PHONY: issues
 issues: issues.json pulls.json
-issues.json pulls.json: fetch-ghpages $(drafts_source)
+issues.json pulls.json: fetch-ghissues $(drafts_source)
 	@echo '[' > $@
 ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
