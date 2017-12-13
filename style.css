@@ -113,7 +113,7 @@ table.header td {
   height: auto;
   line-height: 100%;
 }
-#rfc\.abstract+p {
+#rfc\.abstract+p, #rfc\.abstract p {
   font-size: 20px;
   font-weight: 300;
   line-height: 130%;
