@@ -65,7 +65,18 @@ GHPAGES_INSTALLED := $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_PUBLISHED))
 $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
-GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.html
+ifneq (,$(SHORTNAME_PREFIX))
+define shortname_rule =
+$(dir $(1))$(subst $(SHORTNAME_PREFIX),,$(notdir $(1))): $(1)
+	rm -f $(dir $(1))$(subst $(SHORTNAME_PREFIX),,$(notdir $(1)))
+	ln -s $(notdir $(1)) $(dir $(1))$(subst $(SHORTNAME_PREFIX),,$(notdir $(1)))
+endef
+
+GHPAGES_LINKED := $(subst $(SHORTNAME_PREFIX),,$(GHPAGES_INSTALLED))
+$(foreach _file,$(GHPAGES_INSTALLED),$(eval $(call shortname_rule,$(_file))))
+endif
+
+GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.html $(GHPAGES_LINKED)
 $(GHPAGES_TARGET)/index.html: $(GHPAGES_INSTALLED)
 	$(LIBDIR)/build-index.sh "$(dir $@)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 
