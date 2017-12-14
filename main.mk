@@ -1,6 +1,8 @@
 .PHONY: latest
 latest:: txt html
 
+.DELETE_ON_ERROR:
+
 LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
