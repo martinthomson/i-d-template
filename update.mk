@@ -1,11 +1,7 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
-ifeq (true,$(USE_XSLT))
-UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && git -C $(XSLTDIR) pull
-else
-UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull
-endif
-
+UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
+	([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull);
 FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
@@ -29,8 +25,7 @@ auto_update:
 	@-$(UPDATE_COMMAND)
 
 .PHONY: update
-update:
-	-git -C $(LIBDIR) pull
+update:  auto_update
 	@for i in Makefile .travis.yml circle.yml; do \
 	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
 	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
@@ -38,6 +33,5 @@ update:
 	@dotgit=$$(git rev-parse --git-dir); \
 	  [ -L "$$dotgit"/hooks/pre-commit ] || \
 	  ln -s ../../$(LIBDIR)/pre-commit.sh "$$dotgit"/hooks/pre-commit
-	-git -C $(XSLTDIR) pull
 
 endif # CI
