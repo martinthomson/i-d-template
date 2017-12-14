@@ -1,6 +1,7 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
-UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull
+UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
+	([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull);
 FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
@@ -24,8 +25,7 @@ auto_update:
 	@-$(UPDATE_COMMAND)
 
 .PHONY: update
-update:
-	-git -C $(LIBDIR) pull
+update:  auto_update
 	@[ ! -r circle.yml ] || \
 		echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
 	@for i in Makefile .travis.yml .circleci/config.yml; do \
