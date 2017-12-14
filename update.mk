@@ -26,7 +26,9 @@ auto_update:
 .PHONY: update
 update:
 	-git -C $(LIBDIR) pull
-	@for i in Makefile .travis.yml circle.yml; do \
+	@[ ! -r circle.yml ] || \
+		echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
+	@for i in Makefile .travis.yml .circleci/config.yml; do \
 	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
 	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
 	done
