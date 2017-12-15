@@ -21,8 +21,11 @@ ifeq (true, $(UPDATE_NEEDED))
 latest submit:: auto_update
 endif
 
+.PHONY: auto_update
+.SILENT: auto_update
+.IGNORE: auto_update
 auto_update:
-	@-$(UPDATE_COMMAND)
+	$(UPDATE_COMMAND)
 
 .PHONY: update
 update:  auto_update
