@@ -102,10 +102,9 @@ submit:: $(drafts_next_txt) $(drafts_next_xml)
 ifneq ($(drafts) $(drafts_tags),$(TARGETS_DRAFTS) $(TARGETS_TAGS))
 # Force an update of .targets.mk by setting a double-colon rule with no
 # prerequisites if the set of drafts or tags it contains is out of date.
-.targets.mk::
-else
-.targets.mk: $(LIBDIR)/build-targets.sh
+.PHONY: .targets.mk
 endif
+.targets.mk: $(LIBDIR)/build-targets.sh
 	echo "TARGETS_DRAFTS := $(drafts)" >$@
 	echo "TARGETS_TAGS := $(drafts_tags)" >>$@
 	$< $(drafts) >>$@

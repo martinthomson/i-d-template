@@ -52,10 +52,10 @@ def step_impl(context):
 @then(u'generates upload files')
 def step_impl(context):
     with cd(context.working_dir):
-        md_files = glob("draft-*.md")
-        for md in md_files:
-            upload_file = "." + md.replace(".md", "-00.upload")
-            assert os.path.isfile(upload_file)
+        for md in glob("draft-*.md"):
+            if not "-00.md" in md:
+                upload_file = "." + md.replace(".md", "-00.upload")
+                assert os.path.isfile(upload_file)
 
 
 @then(u'documents are added to gh-pages')

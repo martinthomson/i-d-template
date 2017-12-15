@@ -60,10 +60,7 @@ def step_impl(context, target, option):
 def step_impl(context):
     with cd(context.working_dir):
         break_this_file = glob("draft-*.md")[0]
-        with fileinput.input(files=break_this_file, inplace=True) as inFile:
-            for line in inFile:
-                if "RFC2119:" not in line:
-                    print(line, end='')
+        run_with_capture(context, ["sed", "-i", "-e", "/RFC2119:/d", break_this_file])
         context.broken_file = break_this_file
 
 
