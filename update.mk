@@ -1,7 +1,7 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
-	([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull);
+                 ([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull)
 FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
