@@ -51,8 +51,9 @@ docname: draft-ietf-unicorn-protocol-latest
 title: The Unicorn Protocol
 ```
 
-Commit and push your changes:
+Add, commit and push your changes:
 ```sh
+$ git add draft-ietf-unicorn-protocol.md
 $ git commit draft-ietf-unicorn-protocol.md
 $ git push
 ```
