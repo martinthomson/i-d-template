@@ -3,7 +3,7 @@ LABEL maintainer="Martin Thomson <martin.thomson@gmail.com>"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates coreutils curl git make ssh libxml2-utils xsltproc \
-    python-minimal python-lxml python-pip python-setuptools python-wheel \
+    python3-minimal python3-lxml python3-pip python3-setuptools python3-wheel \
     mmark ruby \
  && rm -rf /var/lib/apt/lists/* \
  && apt-get autoremove -y && apt-get clean -y
@@ -34,7 +34,7 @@ RUN set -e; tool_install() { \
     tool_install rfcdiff 1.45 \
     82e449b7ee887074302b2050e41fc60d4b3bbec8c20e05ce2d7fab81b332771e
 
-RUN pip install --user --compile xml2rfc && \
+RUN pip3 install --user --compile xml2rfc && \
     ln -s $HOME/.local/bin/xml2rfc $BINDIR
 RUN gem install --no-doc --user-install --bindir $BINDIR \
     certified kramdown-rfc2629 && \
