@@ -99,10 +99,14 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	fi
 
 
-.PHONY: ghpages gh-pages
+.PHONY: ghpages gh-pages stage-ghpages commit-ghpages
 gh-pages: ghpages
-ghpages: cleanup-ghpages $(GHPAGES_ALL)
+ghpages: cleanup-ghpages commit-ghpages
+
+stage-ghpages: $(GHPAGES_ALL)
 	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
+
+commit-ghpages: stage-ghpages
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
