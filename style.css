@@ -8,7 +8,7 @@
 }
 
 @media screen and (min-width: 1024px) {
-  ul.toc, #rfc\.toc {
+  body>ul.toc, body>#rfc\.toc {
     position: fixed;
     bottom: 0;
     right: 0;
@@ -19,10 +19,12 @@
   #rfc\.toc {
     top: 15px;
   }
-  ul.toc {
-    top: 80px;
+  ul.toc, nav#rfc\.toc {
     overflow: auto;
     overscroll-behavior: contain;
+  }
+  body>ul.toc {
+    top: 80px;
   }
 
   body {
