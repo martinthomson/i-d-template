@@ -16,6 +16,22 @@ Feature: Initial setup
      and gitignore lists the xml file
      and a precommit hook is installed
 
+  Scenario:  Run setup script with XSLT on correctly-set-up directory
+    Given a git repo with a single Kramdown draft
+     when the setup script is run with "USE_XSLT=true"
+     then it succeeds
+     and a file is created called "Makefile" which contains "USE_XSLT := true"
+     and a file is created called "README.md"
+     and a file is created called "CONTRIBUTING.md"
+     and a file is created called "LICENSE.md"
+     and a file is created called ".gitignore"
+     and a file is created called ".travis.yml"
+     and a file is created called ".circleci/config.yml"
+     and a branch is created called "gh-pages" containing "index.html"
+     and a branch is created called "gh-pages" containing "issues.json"
+     and gitignore lists the xml file
+     and a precommit hook is installed
+
   Scenario:  Run setup script on directory with no draft
     Given an empty git repo
       and lib is cloned in
