@@ -41,11 +41,6 @@ def step_impl(context):
     run_with_capture(context, ["make", "-f", "lib/setup.mk"])
 
 
-@when(u'the setup script is run with "{option}"')
-def step_impl(context,option):
-    run_with_capture(context, ["make", "-f", "lib/setup.mk", option])
-
-
 @when(u'make is run')
 def step_impl(context):
     run_with_capture(context, ["make"])
