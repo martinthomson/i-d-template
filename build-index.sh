@@ -77,6 +77,7 @@ function list_dir() {
 }
 
 p "<h2>Editor's drafts for ${user}/${repo}</h2>"
+p "<p><a href=\"issues.html\">Saved issues</a>.</p>"
 list_dir "${root}" master
 
 for dir in "${root}"/*; do

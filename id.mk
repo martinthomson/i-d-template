@@ -15,7 +15,8 @@ draft_types := $(foreach draft,$(drafts),\
 		   $(suffix $(firstword $(wildcard $(draft).md $(draft).org $(draft).xml))))
 drafts_source := $(join $(drafts),$(draft_types))
 
-f_prev_tag = $(shell git tag 2>/dev/null | grep '$(draft)-[0-9][0-9]' | tail -1 | sed -e"s/.*-//")
+drafts_tags := $(shell git tag 2>/dev/null | grep '^draft-')
+f_prev_tag = $(lastword $(subst -, ,$(lastword $(filter $(draft)-%,$(drafts_tags)))))
 f_next_tag = $(if $(f_prev_tag),$(shell printf "%.2d" $$(( 1$(f_prev_tag) - 99)) ),00)
 drafts_next := $(foreach draft,$(drafts),$(draft)-$(f_next_tag))
 drafts_prev := $(foreach draft,$(drafts),$(draft)-$(f_prev_tag))

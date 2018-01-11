@@ -11,7 +11,7 @@ Feature: git integration
     Given a configured git repo with a Kramdown draft
      when make "ghissues" is run with "SELF_TEST=true"
      then it succeeds
-     and a branch is created called "gh-issues" containing "issues.json"
+     and a branch is created called "gh-pages" containing "issues.json"
 
   Scenario:  git pre-commit hook blocks broken drafts
     Given a configured git repo with a Kramdown draft

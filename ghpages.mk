@@ -60,7 +60,7 @@ $(GHPAGES_TARGET): $(GHPAGES_ROOT)
 	mkdir -p $@
 endif
 
-GHPAGES_PUBLISHED := $(drafts_html) $(drafts_txt)
+GHPAGES_PUBLISHED := $(drafts_html) $(drafts_txt) $(GHPAGES_EXTRA)
 GHPAGES_INSTALLED := $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_PUBLISHED))
 $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@

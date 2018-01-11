@@ -1,4 +1,4 @@
-GH_ISSUES := gh-issues
+GH_ISSUES := gh-pages
 .PHONY: fetch-ghissues
 fetch-ghissues:
 	-git fetch -q origin $(GH_ISSUES):$(GH_ISSUES)
@@ -65,11 +65,10 @@ endif
 	-rm -rf $(GHISSUES_ROOT)
 endif # PUSH_GHPAGES
 
-
 ## Save issues.json to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))
 ifeq (true,$(SAVE_ISSUES_ARTIFACT))
 .PHONY: artifacts
-artifacts: issues.json
+artifacts: issues.json pulls.json
 endif
 endif

@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: setup-master setup-ghpages setup-ghissues setup-precommit
+setup: setup-master setup-ghpages setup-precommit
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
@@ -52,16 +52,10 @@ setup-files: $(TEMPLATE_FILES) README.md
 	git add $^
 
 ifeq (true,$(USE_XSLT))
-setup-master: setup-makefile setup-circle
+setup-master: setup-makefile
 .PHONY: setup-makefile
 setup-makefile: Makefile
 	sed -i~ -e '1{h;s/^.*$$/USE_XSLT := true/;p;x}' $<
-	@-rm -f $<~
-	git add $<
-
-.PHONY: setup-circle
-setup-circle: circle.yml
-	sed -i~ -e '/^dependencies:/,/^  pre:$$/{p;s/^  pre:$$/    - sudo apt-get -qq update; sudo apt-get -q install xsltproc/;t;d}' $<
 	@-rm -f $<~
 	git add $<
 endif # USE_XSLT
@@ -90,8 +84,4 @@ setup-precommit: .git/hooks/pre-commit
 
 .PHONY: setup-ghpages
 setup-ghpages:
-	$(LIBDIR)/setup-branch.sh gh-pages index.html
-
-.PHONY: setup-ghissues
-setup-ghissues:
-	$(LIBDIR)/setup-branch.sh gh-issues issues.json pulls.json
+	$(LIBDIR)/setup-branch.sh gh-pages index.html issues.json pulls.json

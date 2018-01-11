@@ -1,6 +1,8 @@
 .PHONY: latest
 latest:: txt html
 
+.DELETE_ON_ERROR:
+
 LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
@@ -63,7 +65,7 @@ $(LIBDIR)/clean-for-DTD.xslt: $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt
 
 $(XSLTDIR)/clean-for-DTD.xslt $(XSLTDIR)/rfc2629.xslt: $(XSLTDIR)
 $(XSLTDIR):
-	git clone --depth 10 -b master https://github.com/reschke/xml2rfc $@
+	git clone --depth 10 $(CLONE_ARGS) -b master https://github.com/reschke/xml2rfc $@
 
 %.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
 	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
@@ -96,9 +98,17 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
+.SILENT: .targets.mk
+ifneq ($(drafts) $(drafts_tags),$(TARGETS_DRAFTS) $(TARGETS_TAGS))
+# Force an update of .targets.mk by setting a double-colon rule with no
+# prerequisites if the set of drafts or tags it contains is out of date.
+.PHONY: .targets.mk
+endif
+.targets.mk: $(LIBDIR)/build-targets.sh
+	echo "TARGETS_DRAFTS := $(drafts)" >$@
+	echo "TARGETS_TAGS := $(drafts_tags)" >>$@
+	$< $(drafts) >>$@
 include .targets.mk
-.targets.mk: $(LIBDIR)/build-targets.sh $(wildcard .git/refs/tags/*)
-	@$< $(drafts) >$@
 
 ## Check for validity
 .PHONY: check idnits
