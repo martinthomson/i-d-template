@@ -43,8 +43,8 @@ $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
 	cp -f $< $@
 
 ## Commit and push the changes to $(GH_ISSUES)
-.PHONY: ghissues $(GH_ISSUES)
-$(GH_ISSUES): ghissues
+.PHONY: ghissues gh-issues $(GH_ISSUES)
+$(GH_ISSUES) gh-issues: ghissues
 ghissues: $(GHISSUES_ROOT)/issues.json $(GHISSUES_ROOT)/pulls.json
 
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
