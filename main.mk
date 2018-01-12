@@ -84,11 +84,11 @@ else
 endif
 
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
-ifeq (,$(if $(DISABLE_RIBBON),,$(CI_REPO_FULL)))
-	sed -f $(LIBDIR)/addstyle.sed $< > $@
-else
+ifeq (,$(if $(ENABLE_RIBBON),$(CI_REPO_FULL),))
 	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed $< | \
 	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
+else
+	sed -f $(LIBDIR)/addstyle.sed $< > $@
 endif
 
 %.pdf: %.txt
