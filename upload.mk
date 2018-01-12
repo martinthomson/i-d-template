@@ -13,8 +13,10 @@ endif
 
 uploads := $(addprefix .,$(addsuffix .upload,$(draft_releases)))
 
-# Ensure that we build the XML files needed for upload during the main build (needed for travis).
+ifneq (,$(TRAVIS))
+# Ensure that we build the XML files needed for upload during the main build.
 latest:: $(addsuffix .xml,$(draft_releases))
+endif
 
 .PHONY: upload
 upload: $(uploads)

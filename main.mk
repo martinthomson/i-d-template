@@ -7,9 +7,9 @@ LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/ghpages.mk
+include $(LIBDIR)/issues.mk
 include $(LIBDIR)/upload.mk
 include $(LIBDIR)/update.mk
-include $(LIBDIR)/issues.mk
 
 ## Basic Targets
 .PHONY: txt html pdf
@@ -100,9 +100,11 @@ submit:: $(drafts_next_txt) $(drafts_next_xml)
 
 .SILENT: .targets.mk
 ifneq ($(drafts) $(drafts_tags),$(TARGETS_DRAFTS) $(TARGETS_TAGS))
+ifneq (,$(wildcard .targets.mk))
 # Force an update of .targets.mk by setting a double-colon rule with no
 # prerequisites if the set of drafts or tags it contains is out of date.
 .PHONY: .targets.mk
+endif
 endif
 .targets.mk: $(LIBDIR)/build-targets.sh
 	echo "TARGETS_DRAFTS := $(drafts)" >$@
