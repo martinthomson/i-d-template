@@ -35,10 +35,10 @@
 }
 
 body {
-  font: 15px "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font: 16px "Helvetica Neue",Helvetica,Arial,sans-serif;
   color: #333;
   font-size-adjust: 0.5;
-  line-height: 23px;
+  line-height: 24px;
   margin: 75px auto;
   max-width: 724px;
   font-weight: 300;
