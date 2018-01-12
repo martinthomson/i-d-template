@@ -116,9 +116,8 @@ table.header td {
   line-height: 100%;
 }
 #rfc\.abstract+p, #rfc\.abstract p {
-  font-size: 20px;
-  font-weight: 300;
-  line-height: 130%;
+  font-size: 18px;
+  line-height: 27px%;
 }
 
 samp, tt, code, pre {
