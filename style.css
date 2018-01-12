@@ -21,15 +21,12 @@
     overflow: auto;
     overscroll-behavior: contain;
   }
-  #rfc\.toc ul.toc { /* override all the other rules we just added here. */
-      position: unset;
-  }
-  ul.toc {
+  ul.toc, #rfc\.toc {
     overflow: auto;
     overscroll-behavior: contain;
   }
   body>ul.toc {
-    top: 80px;
+    top: 140px;
   }
 
   body {
