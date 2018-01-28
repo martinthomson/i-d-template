@@ -41,9 +41,10 @@ else
 	@echo '</html>' >>$@
 endif
 
+.IGNORE: fetch-ghpages
 .PHONY: fetch-ghpages
 fetch-ghpages:
-	-git fetch -q origin gh-pages:gh-pages
+	git fetch -q origin gh-pages:gh-pages
 
 GHPAGES_ROOT := /tmp/ghpages$(shell echo $$$$)
 ghpages: $(GHPAGES_ROOT)

@@ -10,7 +10,7 @@ issues.json pulls.json: fetch-ghissues $(drafts_source)
 	@echo '[' > $@
 ifeq (,$(SELF_TEST))
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
-	if [ $(CI) = true -a $$(($$(git show -s --pretty='%at' $(GH_ISSUES) --) + 28800)) -gt $$(date '+%s') ]; then \
+	if [ $(CI) = true -a -n "$$(git rev-list -n 1 --since=$$(($$(date '+%s')-28800)) $(GH_ISSUES) $@)" ]; then \
 	    echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
 	    git show $(GH_ISSUES):$@ | head -n -1 | tail -n +2 >> $@; \
 	    exit; \
@@ -50,7 +50,7 @@ ghissues: $(GHISSUES_ROOT)/issues.json $(GHISSUES_ROOT)/pulls.json
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
 	git -C $(GHISSUES_ROOT) add -f issues.json pulls.json issues.html issues.js
 	if test `git -C $(GHISSUES_ROOT) status --porcelain issues.json issues.js issues.html | wc -l` -gt 0; then \
-	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating $(GH_ISSUES) at $(shell date -u +%FT%TZ). [ci skip]"; fi
+	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(CI_HAS_WRITE_KEY))
 	git -C $(GHISSUES_ROOT) push https://github.com/$(CI_REPO_FULL).git $(GH_ISSUES)
