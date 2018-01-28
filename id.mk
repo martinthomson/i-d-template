@@ -33,8 +33,10 @@ drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 CI ?= false
 CI_USER ?= $(word 1,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_USERNAME)
 CI_REPO ?= $(word 2,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_REPONAME)
-ifeq (true,$(CI))
+ifneq (,$(CI_USER))
+ifneq (,$(CI_REPO))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
+endif
 endif
 ifdef CI_PULL_REQUESTS
 CI_IS_PR = true
@@ -62,7 +64,7 @@ endif
 
 # Github guesses
 GIT_REMOTE ?= origin
-ifndef CI_REPO_FULL
+ifeq (,$(CI_REPO_FULL))
 GITHUB_REPO_FULL := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
 		      sed -e 's/^.*github\.com.//;s/\.git$$//')
 GITHUB_USER := $(word 1,$(subst /, ,$(GITHUB_REPO_FULL)))
