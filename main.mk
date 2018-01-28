@@ -55,8 +55,8 @@ endif
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
 
-ifeq (true,$(USE_XSLT))
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
+ifeq (true,$(USE_XSLT))
 $(LIBDIR)/rfc2629.xslt: $(XSLTDIR)/rfc2629.xslt
 	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
 
