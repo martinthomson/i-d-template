@@ -51,6 +51,10 @@ is less well-tested (and slower).  Updating the
 [Makefile](https://github.com/martinthomson/i-d-template/blob/master/template/Makefile)
 provides a small additional speed improvement.
 
+**Bug**: Circle CI has a [bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
+that prevents `git push --tags` from triggering builds.  Push each tag
+individually.
+
 Once the CI system has built the draft, it will upload it automatically and you
 will receive an email asking you to confirm submission.  You don't need to have
 a GitHub account token configured for this feature to be enabled.
