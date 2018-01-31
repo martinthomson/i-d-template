@@ -580,10 +580,10 @@ function generateHelp() {
 }
 
 function addFileHelp() {
+  setStatus('error loading file');
   if (window.location.protocol !== 'file:') {
     return;
   }
-  setStatus('error loading file');
   let h = document.getElementById('help');
   let p = document.createElement('p');
   p.className = 'warning';
