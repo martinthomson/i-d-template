@@ -77,6 +77,7 @@ async function get(wg, repo) {
   console.log('Raw data for issues can be found in:');
   console.log('  window.issues = all issues');
   console.log('  window.subset = just the subset of issues that are shown');
+  console.log('format(subset[, formatter]) to dump the current subset to the console');
 }
 
 var issueFilters = {
@@ -578,6 +579,21 @@ function generateHelp() {
   });
 }
 
+function addFileHelp() {
+  if (window.location.protocol !== 'file:') {
+    return;
+  }
+  setStatus('error loading file');
+  let h = document.getElementById('help');
+  let p = document.createElement('p');
+  p.className = 'warning';
+  p.innerHTML = 'Important: Browsers display files inconsistently.' +
+    ' You can work around this by running an HTTP server,' +
+    ' such as <code>python -m SimpleHTTPServer</code>,' +
+    ' then view this file using that server.';
+  h.insertBefore(p, h.firstChild);
+}
+
 window.onload = () => {
   let cmd = document.getElementById('cmd');
   cmd.onkeypress = debounce(redraw);
@@ -585,5 +601,5 @@ window.onload = () => {
     cmd.value = decodeURIComponent(window.location.hash.substring(1));
   }
   generateHelp();
-  get().then(redraw);
+  get().then(redraw).catch(addFileHelp);
 }
