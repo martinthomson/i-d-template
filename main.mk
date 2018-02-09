@@ -98,17 +98,19 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-.SILENT: .targets.mk
-ifneq ($(drafts) $(drafts_tags),$(TARGETS_DRAFTS) $(TARGETS_TAGS))
-ifneq (,$(wildcard .targets.mk))
+targets_drafts := TARGETS_DRAFTS := $(drafts)
+targets_tags := TARGETS_TAGS := $(drafts_tags)
+# Note that $(shell ) folds multiple lines into one, which is OK here.
+ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 .targets.mk 2>/dev/null))
+$(warning Forcing rebuild of .targets.mk)
 # Force an update of .targets.mk by setting a double-colon rule with no
 # prerequisites if the set of drafts or tags it contains is out of date.
 .PHONY: .targets.mk
 endif
-endif
+.SILENT: .targets.mk
 .targets.mk: $(LIBDIR)/build-targets.sh
-	echo "TARGETS_DRAFTS := $(drafts)" >$@
-	echo "TARGETS_TAGS := $(drafts_tags)" >>$@
+	echo "$(targets_drafts)" >$@
+	echo "$(targets_tags)" >>$@
 	$< $(drafts) >>$@
 include .targets.mk
 
