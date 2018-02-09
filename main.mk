@@ -99,19 +99,7 @@ endif
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
 .SILENT: .targets.mk
-
-MISSING_DRAFTS := $(shell \
-existing=`[ -r .targets.mk ] && head -1 .targets.mk`; \
-for term in $(drafts); do \
-  echo $$existing | grep -F -q $$term || (echo $$term && exit 1); \
-done;)
-MISSING_TAGS := $(shell \
-existing=`[ -r .targets.mk ] && head -2 .targets.mk | tail -1`; \
-for term in $(drafts_tags); do \
-  echo $$existing | grep -F -q $$term || (echo $$term && exit 1); \
-done;)
-
-ifneq (0,$(words $(MISSING_DRAFTS) $(MISSING_TAGS)))
+ifneq ($(drafts) $(drafts_tags),$(TARGETS_DRAFTS) $(TARGETS_TAGS))
 ifneq (,$(wildcard .targets.mk))
 # Force an update of .targets.mk by setting a double-colon rule with no
 # prerequisites if the set of drafts or tags it contains is out of date.
