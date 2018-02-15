@@ -30,13 +30,15 @@ auto_update:
 .PHONY: update
 update:  auto_update
 	@[ ! -r circle.yml ] || \
-		echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
+	  echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
 	@for i in Makefile .travis.yml .circleci/config.yml; do \
 	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
 	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
 	done
 	@dotgit=$$(git rev-parse --git-dir); \
 	  [ -L "$$dotgit"/hooks/pre-commit ] || \
-	  ln -s ../../$(LIBDIR)/pre-commit.sh "$$dotgit"/hooks/pre-commit
+	    ln -s ../../$(LIBDIR)/pre-commit.sh "$$dotgit"/hooks/pre-commit; \
+	  [ -L "$$dotgit"/hooks/pre-push ] || \
+	    ln -s ../../$(LIBDIR)/pre-push.sh "$$dotgit"/hooks/pre-push
 
 endif # CI
