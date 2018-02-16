@@ -7,8 +7,8 @@ fetch-ghissues:
 .PHONY: issues
 issues: issues.json pulls.json
 issues.json pulls.json: fetch-ghissues $(drafts_source)
-	@echo '[' > $@
 ifeq (,$(DISABLE_ISSUE_FETCH))
+	@echo '[' > $@
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
 	if [ $(CI) = true -a -n "$$(git rev-list -n 1 --since=$$(($$(date '+%s')-28800)) $(GH_ISSUES) -- $@)" ]; then \
 	    echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
@@ -26,10 +26,10 @@ ifeq (,$(DISABLE_ISSUE_FETCH))
 	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
 	done; \
 	rm -f $$tmp
-else
-	git show $(GH_ISSUES):$@ | head -n -1 | tail -n +2 >> $@
-endif
 	@echo ']' >> $@
+else
+	git show $(GH_ISSUES):$@ >> $@
+endif
 
 GHISSUES_ROOT := /tmp/ghissues$(shell echo $$$$)
 $(GHISSUES_ROOT): fetch-ghissues
