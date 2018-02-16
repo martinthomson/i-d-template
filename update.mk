@@ -8,8 +8,6 @@ UPDATE_COMMAND = echo Your template is old, please run `make update`
 FETCH_HEAD = $(wildcard .git/modules/$(LIBDIR)/FETCH_HEAD)
 endif
 
-last_modified = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(1))
-last_commit = $$(git rev-list -n 1 --timestamp $(1) -- $(2) | sed -e 's/ .*//')
 NOW = $$(date '+%s')
 ifeq (,$(FETCH_HEAD))
 UPDATE_NEEDED = false

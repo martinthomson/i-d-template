@@ -3,7 +3,7 @@ GH_ISSUES := gh-pages
 fetch-ghissues:
 	-git fetch -q origin $(GH_ISSUES):$(GH_ISSUES)
 
-ifneq (,$(GH_TOKEN)) 
+ifneq (,$(GH_TOKEN))
 GITHUB_OAUTH := -H "Authorization: token $(GH_TOKEN)"
 endif
 
@@ -11,32 +11,31 @@ endif
 .PHONY: issues
 issues: issues.json pulls.json
 issues.json pulls.json: fetch-ghissues $(drafts_source)
-ifeq (,$(DISABLE_ISSUE_FETCH))
-	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
-	if [ $(CI) = true -a -n "$$(git rev-list -n 1 --since=$$(($$(date '+%s')-28800)) $(GH_ISSUES) -- $@)" ]; then \
-	    echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
-	    git show $(GH_ISSUES):$@ > $@; \
-	    exit; \
+	@skip=$(DISABLE_ISSUE_FETCH); \
+	if [ $(CI) = true -a "$$skip" != true ]; then \
+	  if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ]; then \
+	    skip=true; \
+	  fi; \
+	  if [ -n "$$(git rev-list -n 1 --since=$$(($$(date '+%s')-28800)) $(GH_ISSUES) -- $@)" ]; then \
+	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
+	  fi; \
+	fi; \
+	if [ "$$skip" = true ]; then \
+	    git show $(GH_ISSUES):$@ > $@; exit; \
 	fi; \
 	echo '[' > $@; \
 	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/$(basename $(notdir $@))?state=all; \
-	while [ "$$url" != "" ]; do \
-	   echo Fetching $(basename $(notdir $@)) from $$url; \
-	   $(curl) $(GITHUB_OAUTH) $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
-	   if ! head -1 $$tmp | grep -q ' 200 OK'; then \
-	       echo "Error loading $$url:"; cat $$tmp; exit 1; \
-	   fi; \
-	   url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
-	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
+	tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); trap 'rm -f $$tmp' EXIT; \
+	while [ -n "$$url" ]; do \
+	  echo "Fetching $(basename $(notdir $@)) from $$url"; \
+	  $(curl) $(GITHUB_OAUTH) $$url -D $$tmp | sed -e '1s/^ *\[//;$$s/\] *$$//' >> $@; \
+	  if ! head -1 $$tmp | grep -q ' 200 OK'; then \
+	    echo "Error loading $$url:"; cat $$tmp; exit 1; \
+	  fi; \
+	  url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
+	  [ -n "$$url" ] && echo , >> $@; \
 	done; \
-	rm -f $$tmp; \
 	echo ']' >> $@
-else
-	@if [ ! -f $@ ] || [ "$(call last_modified,$@)" -lt "$(call last_commit,$(GH_ISSUES),$@)" ]; then \
-	  echo "git show $(GH_ISSUES):$@ > $@"; \
-	  git show $(GH_ISSUES):$@ > $@; \
-	fi
-endif
 
 GHISSUES_ROOT := /tmp/ghissues$(shell echo $$$$)
 $(GHISSUES_ROOT): fetch-ghissues

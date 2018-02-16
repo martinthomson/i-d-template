@@ -29,6 +29,9 @@ drafts_next_txt := $(addsuffix .txt,$(drafts_next))
 drafts_next_xml := $(addsuffix .xml,$(drafts_next))
 drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
 
+last_modified = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(1))
+last_commit = $$(git rev-list -n 1 --timestamp $(1) -- $(2) | sed -e 's/ .*//')
+
 # CI config
 CI ?= false
 CI_USER ?= $(word 1,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_USERNAME)
