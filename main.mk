@@ -168,7 +168,7 @@ lint::
 .PHONY: fix-lint
 fix-lint::
 	for f in $(join $(drafts),$(draft_types)); do \
-	  [  ! -z "$$(tail -c 1 "$$f")" ] && echo >>"$$f"; \
+	  [  -z "$$(tail -c 1 "$$f")" ] || echo >>"$$f"; \
 	done
 	sed -i~ -e 's/ *$$//' $(join $(drafts),$(draft_types))
 
