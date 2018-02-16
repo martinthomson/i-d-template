@@ -3,32 +3,39 @@ GH_ISSUES := gh-pages
 fetch-ghissues:
 	-git fetch -q origin $(GH_ISSUES):$(GH_ISSUES)
 
+ifneq (,$(GH_TOKEN)) 
+GITHUB_OAUTH := -H "Authorization: token $(GH_TOKEN)"
+endif
+
 ## Store a copy of any github issues
 .PHONY: issues
 issues: issues.json pulls.json
 issues.json pulls.json: fetch-ghissues $(drafts_source)
 ifeq (,$(DISABLE_ISSUE_FETCH))
-	@echo '[' > $@
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
 	if [ $(CI) = true -a -n "$$(git rev-list -n 1 --since=$$(($$(date '+%s')-28800)) $(GH_ISSUES) -- $@)" ]; then \
 	    echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
-	    git show $(GH_ISSUES):$@ | head -n -1 | tail -n +2 >> $@; \
+	    git show $(GH_ISSUES):$@ > $@; \
 	    exit; \
 	fi; \
+	echo '[' > $@; \
 	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/$(basename $(notdir $@))?state=all; \
 	while [ "$$url" != "" ]; do \
 	   echo Fetching $(basename $(notdir $@)) from $$url; \
-	   $(curl) $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
+	   $(curl) $(GITHUB_OAUTH) $$url -D $$tmp | head -n -1 | tail -n +2 >> $@; \
 	   if ! head -1 $$tmp | grep -q ' 200 OK'; then \
 	       echo "Error loading $$url:"; cat $$tmp; exit 1; \
 	   fi; \
 	   url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
 	   if [ "$$url" != "" ]; then echo , >> $@; fi; \
 	done; \
-	rm -f $$tmp
-	@echo ']' >> $@
+	rm -f $$tmp; \
+	echo ']' >> $@
 else
-	git show $(GH_ISSUES):$@ >> $@
+	@if [ ! -f $@ ] || [ "$(call last_modified,$@)" -lt "$(call last_commit,$(GH_ISSUES),$@)" ]; then \
+	  echo "git show $(GH_ISSUES):$@ > $@"; \
+	  git show $(GH_ISSUES):$@ > $@; \
+	fi
 endif
 
 GHISSUES_ROOT := /tmp/ghissues$(shell echo $$$$)
