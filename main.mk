@@ -98,21 +98,22 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
+targets_file ?= .targets.mk
 targets_drafts := TARGETS_DRAFTS := $(drafts)
 targets_tags := TARGETS_TAGS := $(drafts_tags)
 # Note that $(shell ) folds multiple lines into one, which is OK here.
-ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 .targets.mk 2>/dev/null))
-$(warning Forcing rebuild of .targets.mk)
+ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
+$(warning Forcing rebuild of $(targets_file))
 # Force an update of .targets.mk by setting a double-colon rule with no
 # prerequisites if the set of drafts or tags it contains is out of date.
-.PHONY: .targets.mk
+.PHONY: $(targets_file)
 endif
-.SILENT: .targets.mk
-.targets.mk: $(LIBDIR)/build-targets.sh
+.SILENT: $(targets_file)
+$(targets_file): $(LIBDIR)/build-targets.sh
 	echo "$(targets_drafts)" >$@
 	echo "$(targets_tags)" >>$@
 	$< $(drafts) >>$@
-include .targets.mk
+include $(targets_file)
 
 ## Check for validity
 .PHONY: check idnits
@@ -175,7 +176,7 @@ fix-lint::
 COMMA := ,
 .PHONY: clean
 clean::
-	-rm -f .tags .targets.mk issues.json \
+	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts))) \

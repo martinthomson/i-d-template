@@ -18,16 +18,16 @@ trap abort ERR
 
 files=($(git status --porcelain draft-* | sed '/^[MARCU]/{s/.*draft-/draft-/;p;};d' | sort))
 tmpfiles=()
-txtfiles=()
 trap 'rm -f "${tmpfiles[@]}" "${txtfiles[@]}"' EXIT
 for f in "${files[@]}"; do
     tmp="${f%.*}"-tmp$$."${f##*.}"
     tmpfiles+=("$tmp")
-    txtfiles+=("${tmp%.*}.txt")
+    tmpfiles+=("${tmp%.*}.txt")
     # This makes a copy of the staged file.
-    git show :"$f" > "$tmp"
+    (git show :"$f" 2>/dev/null || cat "$f") > "$tmp"
 done
-[ "${#txtfiles[@]}" -eq 0 ] && exit 0
+[ "${#files[@]}" -eq 0 ] && exit 0
 
-"$MAKE" "${txtfiles[@]}"
-"$MAKE" lint "drafts=${txtfiles[*]%.*}"
+export targets_file=.targets$$.mk
+tmpfiles+=("$targets_file")
+"$MAKE" txt lint "drafts=${files[*]%.*}"
