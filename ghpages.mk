@@ -15,16 +15,11 @@ SOURCE_BRANCH := $(shell git rev-parse --short HEAD)
 endif
 endif
 
-ifeq (true,$(CI))
-# If we have the write key or a token, we can push
-ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY)$(SELF_TEST))
-PUSH_GHPAGES := true
-else
-PUSH_GHPAGES := false
+# Default to pushing if a key or token is available.
+ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY))
+PUSH_GHPAGES ?= true
 endif
-else # !CI
-PUSH_GHPAGES := true
-endif
+PUSH_GHPAGES ?= false
 
 index.html: $(drafts_html) $(drafts_txt)
 ifeq (1,$(words $(drafts)))
@@ -107,18 +102,16 @@ ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
-ifneq (,$(CI_HAS_WRITE_KEY))
-	git -C $(GHPAGES_ROOT) push https://github.com/$(CI_REPO_FULL).git gh-pages
+ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
+	git -C $(GHPAGES_ROOT) push https://github.com/$(CI_REPO_FULL) gh-pages
 else
-ifneq (,$(GH_TOKEN))
 	@echo git -C $(GHPAGES_ROOT) push -q https://github.com/$(CI_REPO_FULL) gh-pages
 	@git -C $(GHPAGES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
+endif
 else
 	git -C $(GHPAGES_ROOT) push origin gh-pages
-endif
-endif
-	-rm -rf $(GHPAGES_ROOT)
 endif # PUSH_GHPAGES
+	-rm -rf $(GHPAGES_ROOT)
 
 ## Save published documents to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))

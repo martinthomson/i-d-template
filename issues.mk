@@ -8,7 +8,7 @@ fetch-ghissues:
 issues: issues.json pulls.json
 issues.json pulls.json: fetch-ghissues $(drafts_source)
 	@echo '[' > $@
-ifeq (,$(SELF_TEST))
+ifeq (,$(DISABLE_ISSUE_FETCH))
 	@tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); \
 	if [ $(CI) = true -a -n "$$(git rev-list -n 1 --since=$$(($$(date '+%s')-28800)) $(GH_ISSUES) -- $@)" ]; then \
 	    echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
@@ -27,7 +27,7 @@ ifeq (,$(SELF_TEST))
 	done; \
 	rm -f $$tmp
 else
-	echo '{}' >> $@
+	git show $(GH_ISSUES):$@ | head -n -1 | tail -n +2 >> $@
 endif
 	@echo ']' >> $@
 
@@ -43,27 +43,24 @@ $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
 	cp -f $< $@
 
 ## Commit and push the changes to $(GH_ISSUES)
-.PHONY: ghissues gh-issues $(GH_ISSUES)
-$(GH_ISSUES) gh-issues: ghissues
+.PHONY: ghissues gh-issues
+gh-issues: ghissues
 ghissues: $(GHISSUES_ROOT)/issues.json $(GHISSUES_ROOT)/pulls.json
-
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
 	git -C $(GHISSUES_ROOT) add -f issues.json pulls.json issues.html issues.js
 	if test `git -C $(GHISSUES_ROOT) status --porcelain issues.json issues.js issues.html | wc -l` -gt 0; then \
 	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
-ifneq (,$(CI_HAS_WRITE_KEY))
-	git -C $(GHISSUES_ROOT) push https://github.com/$(CI_REPO_FULL).git $(GH_ISSUES)
+ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
+	git -C $(GHISSUES_ROOT) push https://github.com/$(CI_REPO_FULL) $(GH_ISSUES)
 else
-ifneq (,$(GH_TOKEN))
 	@echo git -C $(GHISSUES_ROOT) push -q https://github.com/$(CI_REPO_FULL) $(GH_ISSUES)
 	@git -C $(GHISSUES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) $(GH_ISSUES) >/dev/null 2>&1
+endif
 else
 	git -C $(GHISSUES_ROOT) push origin $(GH_ISSUES)
-endif
-endif
-	-rm -rf $(GHISSUES_ROOT)
 endif # PUSH_GHPAGES
+	-rm -rf $(GHISSUES_ROOT)
 
 ## Save issues.json to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))

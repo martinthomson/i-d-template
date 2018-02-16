@@ -2,14 +2,14 @@ Feature: git integration
 
   Scenario:  make ghpages
     Given a configured git repo with a Kramdown draft
-     when make "ghpages" is run with "SELF_TEST=true"
+     when make "ghpages" is run with "PUSH_GHPAGES=false"
      then it succeeds
      and a branch is created called "gh-pages" containing "index.html"
      and documents are added to gh-pages
 
   Scenario:  make ghissues
     Given a configured git repo with a Kramdown draft
-     when make "ghissues" is run with "SELF_TEST=true"
+     when make "ghissues" is run with "DISABLE_ISSUE_FETCH=true"
      then it succeeds
      and a branch is created called "gh-pages" containing "issues.json"
 
