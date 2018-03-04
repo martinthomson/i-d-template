@@ -65,7 +65,7 @@ def step_impl(context, target, option):
 def step_impl(context):
     with cd(context.working_dir):
         break_this_file = glob("draft-*.md")[0]
-        run_with_capture(context, ["sed", "-i", "-e", "/RFC2119:/d", break_this_file])
+        run_with_capture(context, ["sed", "-i", "-e", "s/{{RFC2119}}/{{broken-reference}}/", break_this_file])
         context.broken_file = break_this_file
 
 
