@@ -98,9 +98,11 @@ endif
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
 
-targets_file ?= .targets.mk
+targets_file := .targets.mk
 targets_drafts := TARGETS_DRAFTS := $(drafts)
 targets_tags := TARGETS_TAGS := $(drafts_tags)
+
+ifneq (,$(DISABLE_TARGETS_UPDATE))
 # Note that $(shell ) folds multiple lines into one, which is OK here.
 ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
 $(warning Forcing rebuild of $(targets_file))
@@ -108,6 +110,8 @@ $(warning Forcing rebuild of $(targets_file))
 # prerequisites if the set of drafts or tags it contains is out of date.
 .PHONY: $(targets_file)
 endif
+endif # DISABLE_TARGETS_UPDATE
+
 .SILENT: $(targets_file)
 $(targets_file): $(LIBDIR)/build-targets.sh
 	echo "$(targets_drafts)" >$@

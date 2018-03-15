@@ -28,6 +28,5 @@ for f in "${files[@]}"; do
 done
 [ "${#files[@]}" -eq 0 ] && exit 0
 
-export targets_file=.targets$$.mk
 tmpfiles+=("$targets_file")
-"$MAKE" txt lint "drafts=${files[*]%.*}"
+"$MAKE" txt lint "drafts=${files[*]%.*}" DISABLE_TARGETS_UPDATE=true
