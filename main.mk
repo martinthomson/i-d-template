@@ -102,7 +102,7 @@ targets_file := .targets.mk
 targets_drafts := TARGETS_DRAFTS := $(drafts)
 targets_tags := TARGETS_TAGS := $(drafts_tags)
 
-ifneq (,$(DISABLE_TARGETS_UPDATE))
+ifeq (,$(DISABLE_TARGETS_UPDATE))
 # Note that $(shell ) folds multiple lines into one, which is OK here.
 ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
 $(warning Forcing rebuild of $(targets_file))
