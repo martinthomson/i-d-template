@@ -25,6 +25,12 @@
     overflow: auto;
     overscroll-behavior: contain;
   }
+  ul.toc li, #rfc\.toc li {
+    font-size: 15px;
+    line-height: 20px;
+    text-indent: 0;
+    padding-left: 1em;
+  }
   body>ul.toc {
     top: 140px;
   }
