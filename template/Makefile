@@ -1,8 +1,14 @@
 LIBDIR := lib
 include $(LIBDIR)/main.mk
 
+ifneq (,$(wildcard .gitmodules))
+ifneq (,$(shell grep "path = $(LIBDIR)" .gitmodules))
+SUBMODULE = true
+endif
+endif
+
 $(LIBDIR)/main.mk:
-ifneq (,$(shell git submodule status $(LIBDIR) 2>/dev/null))
+ifeq (true,$(SUBMODULE))
 	git submodule sync
 	git submodule update $(CLONE_ARGS) --init
 else
