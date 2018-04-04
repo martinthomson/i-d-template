@@ -26,24 +26,10 @@ body {
 }
 .title { font-size: 32px; }
 h1 { font-size: 32px; }
-h2 { font-size: 20px; }
+h2, h1 ~ #rfc\.toc { font-size: 20px; }
 h3, h4 { font-size: 18px; }
 h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
   color: #333;
-}
-
-ul.toc li {
-  list-style: none;
-  text-indent: -2.5em;
-  padding-left: 2.5em;
-  margin: 0;
-}
-ul.toc ul {
-  margin: 0;
-}
-/* xml2rfc nests ul directly inside ul which messes with the style badly */
-ul.toc, ul.toc>ul, ul.toc ul>ul {
-  padding-left: 1.5em;
 }
 
 table {
@@ -185,7 +171,18 @@ address {
   font-style: normal;
 }
 
+ul.toc ul {
+  margin: 0 0 0 2em;
+}
+ul.toc li {
+  list-style: none;
+  margin: 0;
+}
+
 @media screen and (min-width: 1024px) {
+  body {
+    padding-right: 350px;
+  }
   body>ul.toc, body>#rfc\.toc {
     position: fixed;
     bottom: 0;
@@ -196,29 +193,20 @@ address {
     overflow: auto;
     overscroll-behavior: contain;
   }
-  #rfc\.toc {
+  body>#rfc\.toc {
     top: 55px;
-  }
-  h1#rfc\.toc {
-    font-size: 20px;
   }
   body>ul.toc {
     top: 100px;
   }
 
-  body>ul.toc, #rfc\.toc>ul {
-    padding: 0;
-    margin: 0;
-  }
-  ul.toc li, #rfc\.toc li {
+  ul.toc {
+    margin: 0 0 0 4px;
     font-size: 12px;
     line-height: 20px;
-    padding-left: 15px;
-    text-indent: 0;
   }
-
-  body {
-    padding-right: 350px;
+  ul.toc ul {
+    margin-left: 1.2em;
   }
 }
 
