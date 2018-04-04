@@ -69,6 +69,16 @@ def step_impl(context):
         context.broken_file = break_this_file
 
 
+@when(u'the lib dir is removed')
+def step_impl(context):
+    run_with_capture(context, ["rm", "-rf", "lib"])
+
+
+@when(u'lib is added as a submodule')
+def step_impl(context):
+    run_with_capture(context, ["git", "submodule", "add", "-f", os.getcwd(), "lib"])
+
+
 @when(u'git commit is run')
 def step_impl(context):
     with cd(context.working_dir):
