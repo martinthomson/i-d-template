@@ -7,42 +7,6 @@
   zoom: 1.0;
 }
 
-@media screen and (min-width: 1024px) {
-  body>ul.toc, body>#rfc\.toc {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    right: calc(50vw - 550px);
-    width: 300px;
-    z-index: 1;
-  }
-  #rfc\.toc {
-    top: 55px;
-    overflow: auto;
-    overscroll-behavior: contain;
-  }
-  ul.toc, #rfc\.toc {
-    overflow: auto;
-    overscroll-behavior: contain;
-  }
-  ul.toc li, #rfc\.toc li {
-    font-size: 12px;
-    line-height: 20px;
-    text-indent: 0;
-    padding-left: 1.75em;
-  }
-  #rfc\.toc > ul.toc > li {
-      padding-left: 0;
-  }
-  body>ul.toc {
-    top: 140px;
-  }
-
-  body {
-    padding-right: 350px;
-  }
-}
-
 body {
   font: 16px "Helvetica Neue",Helvetica,Arial,sans-serif;
   color: #333;
@@ -60,8 +24,8 @@ body {
   line-height: 100%;
   margin: 0.8em 0 0.3em;
 }
-.title { font-size: 36px; }
-h1 { font-size: 36px; }
+.title { font-size: 32px; }
+h1 { font-size: 32px; }
 h2 { font-size: 20px; }
 h3, h4 { font-size: 18px; }
 h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
@@ -79,7 +43,7 @@ ul.toc ul {
 }
 /* xml2rfc nests ul directly inside ul which messes with the style badly */
 ul.toc, ul.toc>ul, ul.toc ul>ul {
-  margin: 0;
+  padding-left: 1.5em;
 }
 
 table {
@@ -108,24 +72,26 @@ td.reference {
 }
 
 
-table.header {
+table.header, table#rfc\.headerblock {
   width: 100%;
 }
-table.header td {
+table.header td, table#rfc\.headerblock td {
   border: none;
   background-color: transparent;
   color: black;
+  padding: 0;
 }
 .filename {
+  display: block;
   color: rgb(119, 119, 119);
-  font-size: 23px;
+  font-size: 20px;
   font-weight: normal;
-  height: auto;
   line-height: 100%;
+  margin: 10px 0 32px;
 }
 #rfc\.abstract+p, #rfc\.abstract p {
   font-size: 18px;
-  line-height: 27px%;
+  line-height: 27px;
 }
 
 samp, tt, code, pre {
@@ -217,6 +183,43 @@ li, p {
 }
 address {
   font-style: normal;
+}
+
+@media screen and (min-width: 1024px) {
+  body>ul.toc, body>#rfc\.toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 550px);
+    width: 300px;
+    z-index: 1;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  #rfc\.toc {
+    top: 55px;
+  }
+  h1#rfc\.toc {
+    font-size: 20px;
+  }
+  body>ul.toc {
+    top: 100px;
+  }
+
+  body>ul.toc, #rfc\.toc>ul {
+    padding: 0;
+    margin: 0;
+  }
+  ul.toc li, #rfc\.toc li {
+    font-size: 12px;
+    line-height: 20px;
+    padding-left: 15px;
+    text-indent: 0;
+  }
+
+  body {
+    padding-right: 350px;
+  }
 }
 
 .github-fork-ribbon-wrapper {
