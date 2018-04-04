@@ -26,13 +26,16 @@
     overscroll-behavior: contain;
   }
   ul.toc li, #rfc\.toc li {
-    font-size: 15px;
+    font-size: 12px;
     line-height: 20px;
     text-indent: 0;
-    padding-left: 1em;
+    padding-left: 2em;
+  }
+  #rfc\.toc > ul.toc > li {
+      padding-left: 0;
   }
   body>ul.toc {
-    top: 140px;
+    top: 100px;
   }
 
   body {
@@ -59,7 +62,7 @@ body {
 }
 .title { font-size: 36px; }
 h1 { font-size: 36px; }
-h2 { font-size: 24px; }
+h2, h1 ~ #rfc\.toc { font-size: 20px; }
 h3, h4 { font-size: 18px; }
 h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
   color: #333;
@@ -69,15 +72,18 @@ ul.toc li {
   list-style: none;
   text-indent: -2.5em;
   padding-left: 2.5em;
-  padding-bottom: 5px;
   margin: 0;
 }
-ul.toc ul {
+ul.toc {
   margin: 0;
 }
-/* xml2rfc nests ul directly inside ul which messes with the style badly */
-ul.toc, ul.toc>ul, ul.toc ul>ul {
-  margin: 0 0 0 1.5em;
+/* xslt */
+h2 ~ ul.toc ul {
+  margin: 0;
+}
+/* xml2rfc nests ul directly inside ul */
+h1 ~ ul.toc ul {
+  margin: 0 0 0 1em;
 }
 
 table {
