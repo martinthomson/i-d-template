@@ -25,9 +25,10 @@ body {
   margin: 0.8em 0 0.3em;
 }
 .title { font-size: 32px; }
-h1 { font-size: 32px; }
+#rfc\.title h1 { font-size: 32px; }
+h1 { font-size: 20px; }
 h2, h1 ~ #rfc\.toc { font-size: 20px; }
-h3, h4 { font-size: 18px; }
+h3, h4 { font-size: 16px; }
 h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
   color: #333;
 }
@@ -76,8 +77,8 @@ table.header td, table#rfc\.headerblock td {
   margin: 10px 0 32px;
 }
 #rfc\.abstract+p, #rfc\.abstract p {
-  font-size: 18px;
-  line-height: 27px;
+  font-size: 20px;
+  line-height: 28px;
 }
 
 samp, tt, code, pre {
