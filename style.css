@@ -6,6 +6,7 @@ body {
   line-height: 24px;
   margin: 75px auto;
   max-width: 724px;
+  padding: 0 5px;
 }
 
 .title, .filename, h1, h2, h3, h4, h5 {
