@@ -11,6 +11,8 @@
     r lib/style.css
     a\
   /*]]>*/</style>
+    a\
+  <meta name="viewport" content="initial-scale=1.0">
     g
   }
   # Save the last line for later.
