@@ -96,7 +96,8 @@ pre {
 }
 
 address {
-  margin: 10px 0 0;
+  margin: 16px 2px;
+  line-height: 20px;
 }
 .vcard {
   font-style: normal;
@@ -104,8 +105,8 @@ address {
 .vcardline {
   display: block;
 }
-.vcardline .fn {
-  font-weight: bold;
+.vcardline .fn, address b {
+  font-weight: normal;
 }
 .vcardline .hidden {
   display: none;
