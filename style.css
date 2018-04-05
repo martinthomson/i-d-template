@@ -24,8 +24,7 @@ body {
   line-height: 100%;
   margin: 0.8em 0 0.3em;
 }
-.title { font-size: 32px; }
-#rfc\.title h1 { font-size: 32px; }
+.title, #rfc\.title h1 { font-size: 32px; }
 h1, section h1, h2, section h2, section h3, nav h2 { font-size: 20px; }
 h3, section h4, h4, section h5 { font-size: 16px; }
 h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
