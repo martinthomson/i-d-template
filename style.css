@@ -16,19 +16,17 @@ body {
   max-width: 724px;
 }
 
-.title, .filename, h1, h2, h3, h4 {
+.title, .filename, h1, h2, h3, h4, h5 {
   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size-adjust: 0.5;
-  font-weight: 500;
+  font-weight: bold;
   color: #333;
   line-height: 100%;
   margin: 0.8em 0 0.3em;
 }
-.title { font-size: 32px; }
-#rfc\.title h1 { font-size: 32px; }
-h1 { font-size: 20px; }
-h2, h1 ~ #rfc\.toc { font-size: 20px; }
-h3, h4 { font-size: 16px; }
+.title, #rfc\.title h1 { font-size: 32px; }
+h1, section h1, h2, section h2, section h3, nav h2 { font-size: 20px; }
+h3, section h4, h4, section h5 { font-size: 16px; }
 h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
   color: #333;
 }
