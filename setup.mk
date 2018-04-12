@@ -55,7 +55,7 @@ ifeq (true,$(USE_XSLT))
 setup-master: setup-makefile
 .PHONY: setup-makefile
 setup-makefile: Makefile
-	sed -i~ -e '1{h;s/^.*$$/USE_XSLT := true/;p;x}' $<
+	sed -i~ -e '1{h;s/^.*$$/USE_XSLT := true/;p;x;}' $<
 	@-rm -f $<~
 	git add $<
 endif # USE_XSLT
