@@ -15,7 +15,7 @@ The starting point for setting up a WG / I-D is here:
 * A web browser
 * A Github account
 * A git client.  Command-line is best, and we'll assume that below.  You can probably accomplish the same thing with a GUI git client, but it will be much harder.  You can get a client at <http://git-scm.com/downloads>
-* Tools to "compile" your draft, for which there are instructions here: <https://github.com/martinthomson/i-d-template/blob/master/SETUP.md>
+* Tools to "compile" your draft, for which there are instructions here: <https://github.com/martinthomson/i-d-template/blob/master/doc/SETUP.md>
 
 # Setting up an organization
 
