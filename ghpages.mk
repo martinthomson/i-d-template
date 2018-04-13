@@ -77,8 +77,8 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	  git remote prune $$remote; \
 	done;
 
-# Clean up obsolete directories
-	@CUTOFF=`date +%s -d '-30 days'`; \
+# Clean up obsolete directories (2592000 = 30 days)
+	@CUTOFF=$$(($$(date '+%s')-2592000)); \
 	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_ROOT) | sed -e 's,.*/,,')`; \
 	for item in $$MAYBE_OBSOLETE; do \
 	  if [ -d "$(GHPAGES_ROOT)/$$item" ] && \
