@@ -176,11 +176,14 @@ fix-lint::
 	done
 	sed -i~ -e 's/ *$$//' $(join $(drafts),$(draft_types))
 
+tags:: $(addsuffix .md,$(drafts)) $(LIBDIR)/gen-tags.pl
+	perl $(LIBDIR)/gen-tags.pl $(addsuffix .md,$(drafts)) > tags
+
 ## Cleanup
 COMMA := ,
 .PHONY: clean
 clean::
-	-rm -f .tags $(targets_file) issues.json \
+	-rm -f tags .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts))) \
