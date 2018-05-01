@@ -2,21 +2,25 @@
 
 At a minimum, you need `make` and `xml2rfc`.
 
+
 ## make
 
-Mac users will need to install [Homebrew](https://brew.sh) to get a version of
-`make` that works properly (the version shipped in XCode is subtly broken).
+Mac users might need to install [Homebrew](https://brew.sh) to get a version of
+[`make`](https://www.gnu.org/software/make/) that works properly (the version
+shipped in XCode is subtly broken).
 
 ```sh
 brew install --with-default-names make
 ```
 
-Windows users will need to use [Cygwin](http://cygwin.org/) to get `make`.
-The fearless can use [bash](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide).
+Windows users will need to use [Cygwin](http://cygwin.org/) or [the Windows
+Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+to get `make`.
+
 
 ## xml2rfc
 
-All systems require [xml2rfc](http://xml2rfc.ietf.org/).  This
+All systems require [xml2rfc](http://xml2rfc.tools.ietf.org/).  This
 requires [Python](https://www.python.org/).  The easiest way to get
 `xml2rfc` is with [pip](https://pip.pypa.io/en/stable/installing/), which
 is either installed with python, or part of the `python-pip` package
@@ -45,16 +49,17 @@ To your local user account:
 $ pip install --user xml2rfc
 ```
 
-Or globally:
+Or globally (not advisable):
 
 ```sh
 $ sudo pip install xml2rfc
 ```
 
-xml2rfc depends on development versions of [libxml2](http://xmlsoft.org/) and
+xml2rfc might need development versions of [libxml2](http://xmlsoft.org/) and
 [libxslt1](http://xmlsoft.org/XSLT).  These packages are named `libxml2-dev` and
 `libxslt1-dev` (Debian, Ubuntu); `libxml2-devel` and `libxslt1-devel` (RedHat,
 Fedora); or `libxml2-devel` and `libxslt-devel` (Cygwin).
+
 
 ## Markdown
 
@@ -69,7 +74,8 @@ on the first line of the file:
 
 ## kramdown-rfc2629
 
-`kramdown-rfc2629` requires Ruby and can be installed using the Ruby package
+[`kramdown-rfc2629`](https://github.com/cabo/kramdown-rfc2629) requires
+[Ruby](https://www.ruby-lang.org/) and can be installed using the Ruby package
 manager, `gem`:
 
 ```sh
@@ -79,17 +85,19 @@ $ gem install kramdown-rfc2629
 
 ## mmark
 
-`mmark` requires go, and that comes with its own complications.  You will need
-to set aside a directory for your go code, and find a directory that is on the
-path where you can install `mmark`.  For these, I use `~/gocode` and `~/bin`
-respectively:
+[`mmark`](https://github.com/miekg/mmark) requires [go](https://golang.org/), and that comes with its
+own complications.
 
 ```sh
-export GOPATH=~/gocode
 cd ~/bin
 go get github.com/miekg/mmark/mmark
 go build github.com/miekg/mmark/mmark
 ```
+
+You might want to set aside a directory for your go code other than the default,
+and find a directory that is on the path where you can install `mmark`.  For
+these, I set `GOPATH=~/gocode`.
+
 
 ## Other tools
 
