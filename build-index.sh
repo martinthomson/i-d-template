@@ -25,11 +25,15 @@ p '<!DOCTYPE html>'
 pi '<html>'
 pi '<head>'
 p '<title>'"$user/$repo"' branches</title>'
-pi '<style>'
-p 'body { font-family: sans-serif; }'
-p 'h2 { font-size: 130%; }'
-p 'h3 { font-size: 120%; color: #222; }'
-po '</style>'
+p '<meta name="viewport" content="initial-scale=1.0">'
+pi '<style type="text/css">/*<![CDATA[*/'
+p 'body { font-family: "Helvetica Neue","Open Sans",Helvetica,Calibri,sans-serif; }'
+p 'h1, h2, td { font-family: "Helvetica Neue","Roboto Condensed","Open Sans",Helvetica,Calibri,sans-serif; }'
+p 'h1 { font-size: 20px; } h2 { font-size: 16px; }'
+p 'table { margin: 5px 10px; border-collapse: collapse; }'
+p 'th, td { font-weight: normal; text-align: left; padding: 2px 5px; }'
+p 'a:link { color: #000; } a:visited { color: #00a; }'
+po '/*]]>*/</style>'
 po '</head>'
 pi '<body>'
 
@@ -51,38 +55,43 @@ function githubio() {
 }
 
 function list_dir() {
-    pi '<ul id="branch-'"$2"'">'
+    pi '<table id="branch-'"$2"'">'
     for file in "$1"/*.txt; do
         dir=$(dirname "$file")
         file=$(basename "$file" .txt)
 
-        pi '<li>'
-        p "${file}: "
-        p '<a href="'"$(reldot "$dir")/${file}"'.html"'
-        p '   class="html '"$file"'">html</a>, '
-        p '<a href="'"$(reldot "$dir")/${file}"'.txt"'
-        p '   class="txt '"$file"'">plain text</a>, '
+        pi '<tr>'
+        p "<th>${file}</th>"
+        p '<td><a href="'"$(reldot "$dir")/${file}"'.html"'
+        p '   class="html '"$file"'">html</a></td>'
+        p '<td><a href="'"$(reldot "$dir")/${file}"'.txt"'
+        p '   class="txt '"$file"'">plain text</a></td>'
         if [ "$dir" != "$root" ]; then
             parent=$(dirname "$dir")
-            p '<a href="'"$(rfcdiff $(githubio "$parent" "$file") $(githubio "$dir" "$file"))"'">'
+            diff=$(rfcdiff $(githubio "$parent" "$file") $(githubio "$dir" "$file"))
+            p '<td><a href="'"$diff"'">'
             [ "$parent" = "$root" ] && pbranch=master || pbranch=$(rel "$parent")
-            p "  diff with ${pbranch}</a>, "
+            p "  diff with ${pbranch}</a></td>"
         fi
-        p '<a href="'"$(rfcdiff "https://tools.ietf.org/id/${file}.txt" $(githubio "$dir" "$file"))"'"'
-        p '   class="diff '"$file"'">'
-        p "  diff with last submission</a>"
-        po '</li>'
+        diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" $(githubio "$dir" "$file"))
+        p '<td><a href="'"$diff"'" class="diff '"$file"'">'
+        p '  diff with last submission</a></td>'
+        po '</tr>'
     done
-    po '</ul>'
+    po '</table>'
 }
 
-p "<h2>Editor's drafts for ${user}/${repo}</h2>"
-p "<p><a href=\"issues.html\">Saved issues</a>.</p>"
+gh="https://github.com/${user}/${repo}"
+p "<h1>Editor's drafts for <a href=\"${gh}\">${user}/${repo}</a></h1>"
+p "<p>View <a href=\"issues.html\">saved issues</a>,"
+p "  or the latest GitHub issues <a href=\"${gh}/issues\">issues</a>"
+p "  and <a href=\"${gh}/pulls\">pull requests</a>.</p>"
+
 list_dir "${root}" master
 
 for dir in "${root}"/*; do
     if [ -d "${dir}" ]; then
-        p '<h3>Preview for branch <a href="'$(basename "$dir")'">'$(basename "$dir")'</a></h3>'
+        p '<h2>Preview for branch <a href="'$(basename "$dir")'">'$(basename "$dir")'</a></h2>'
         list_dir "$dir" "$(basename "$dir")"
     fi
 done
@@ -92,7 +101,7 @@ cat <<EOJS
 // @licstart
 //  Any copyright is dedicated to the Public Domain.
 //  http://creativecommons.org/publicdomain/zero/1.0/
-// @licend */
+// @licend
 window.onload = function() {
   var referrer_branch = 'master';
   // e.g., "https://github.com/user/repo/tree/master"
