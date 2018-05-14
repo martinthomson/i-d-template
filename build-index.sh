@@ -24,7 +24,7 @@ function po() {
 p '<!DOCTYPE html>'
 pi '<html>'
 pi '<head>'
-p '<title>'"$user/$repo"' branches</title>'
+p '<title>'"$user/$repo"' preview</title>'
 p '<meta name="viewport" content="initial-scale=1.0">'
 pi '<style type="text/css">/*<![CDATA[*/'
 p 'body { font-family: "Helvetica Neue","Open Sans",Helvetica,Calibri,sans-serif; }'
