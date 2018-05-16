@@ -17,16 +17,16 @@ function abort() {
 trap abort ERR
 
 files=($(git status --porcelain draft-* | sed '/^[MARCU]/{s/.*draft-/draft-/;p;};d' | sort))
+txtfiles=()
 tmpfiles=()
 trap 'rm -f "${tmpfiles[@]}" "${txtfiles[@]}"' EXIT
 for f in "${files[@]}"; do
     tmp="${f%.*}"-tmp$$."${f##*.}"
     tmpfiles+=("$tmp")
-    tmpfiles+=("${tmp%.*}.txt")
+    txtfiles+=("${tmp%.*}.txt")
     # This makes a copy of the staged file.
     (git show :"$f" 2>/dev/null || cat "$f") > "$tmp"
 done
 [ "${#files[@]}" -eq 0 ] && exit 0
 
-tmpfiles+=("$targets_file")
-"$MAKE" txt lint "drafts=${files[*]%.*}" DISABLE_TARGETS_UPDATE=true
+"$MAKE" --trace txt lint "drafts=${tmpfiles[*]%.*}" DISABLE_TARGETS_UPDATE=true
