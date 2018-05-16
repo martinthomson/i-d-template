@@ -29,4 +29,4 @@ for f in "${files[@]}"; do
 done
 [ "${#files[@]}" -eq 0 ] && exit 0
 
-"$MAKE" --trace txt lint "drafts=${tmpfiles[*]%.*}" DISABLE_TARGETS_UPDATE=true
+"$MAKE" txt lint "drafts=${tmpfiles[*]%.*}" DISABLE_TARGETS_UPDATE=true
