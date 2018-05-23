@@ -16,7 +16,7 @@ issues.json pulls.json: fetch-ghissues $(drafts_source)
 	  if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ]; then \
 	    skip=true; \
 	  fi; \
-	  if [ -n "$$(git rev-list -n 1 --since=$$(($$(date '+%s')-28800)) $(GH_ISSUES) -- $@)" ]; then \
+	  if [ $$(($$(date '+%s')-28800)) -gt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ]; then \
 	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
 	  fi; \
 	fi; \
