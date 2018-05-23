@@ -13,10 +13,10 @@ issues: issues.json pulls.json
 issues.json pulls.json: fetch-ghissues $(drafts_source)
 	@skip=$(DISABLE_ISSUE_FETCH); \
 	if [ $(CI) = true -a "$$skip" != true ]; then \
-	  if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ]; then \
+	  if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
 	    skip=true; \
 	  fi; \
-	  if [ $$(($$(date '+%s')-28800)) -gt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ]; then \
+	  if [ $$(($$(date '+%s')-28800)) -gt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ] 2>/dev/null; then \
 	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
 	  fi; \
 	fi; \

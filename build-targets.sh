@@ -13,6 +13,20 @@ next() {
     printf "${1%-*}-%2.2d" $((1${1##*-} - 99))
 }
 
+print_sed() {
+    noop_cmd="$1"
+    sed_cmd="$2"
+    shift 2
+    if [ $# -gt 0 ]; then
+        printf "$sed_cmd"
+    else
+        printf "$noop_cmd"
+    fi
+    for s in "$@"; do
+        printf " -e '$s'"
+    done
+}
+
 # This builds a make target for a specific tag.
 build_target() {
     tag="$1"
@@ -38,7 +52,7 @@ build_target() {
                 file_tag="$prev_file_tag"
             fi
         fi
-        subst+=(-e "s/${file%.*}-latest/${file_tag}/g")
+        subst+=("s/${file%.*}-latest/${file_tag}/g")
     done
 
     if [ -z "$source_file" ]; then
@@ -48,12 +62,16 @@ build_target() {
 
     target="${target_name}.${source_file##*.}"
     if [ "$tag" == HEAD ]; then
-        echo "${target}: ${source_file}"
-        echo -e "\tsed ${subst[@]} \$< >\$@"
+        printf "${target}: ${source_file}\n"
+        printf "\t"
+        print_sed cat sed "${subst[@]}"
+        printf " \$< >\$@\n"
     else
-        echo ".INTERMEDIATE: ${target}"
-        echo "${target}:"
-        echo -e "\tgit show "$tag":"$source_file" | sed ${subst[@]} >\$@"
+        printf ".INTERMEDIATE: ${target}\n"
+        printf "${target}:\n"
+        printf "\tgit show \"$tag:$source_file\""
+	print_sed '' ' | sed' "${subst[@]}"
+        printf " >\$@\n"
     fi
 }
 
@@ -72,7 +90,7 @@ for draft in "${drafts[@]%.*}"; do
 
     if [ "${#tags[@]}" -gt 0 ]; then
         # Write out a diff target
-        echo "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt"
-        echo -e "\t-\$(rfcdiff) --html --stdout \$^ > \$@"
+        printf "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt\n"
+        printf "\t-\$(rfcdiff) --html --stdout \$^ > \$@\n"
     fi
 done
