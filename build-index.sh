@@ -4,9 +4,13 @@
 
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
+master=${GITHUB_MASTER:-master}
 root=$(realpath "${1:-.}")
-user="${2:-<user>}"
-repo="${3:-<repo>}"
+branch="${2:-$master}"
+user="${3:-<user>}"
+repo="${4:-<repo>}"
+
+gh="https://github.com/${user}/${repo}"
 
 indent=''
 function p() {
@@ -24,7 +28,7 @@ function po() {
 p '<!DOCTYPE html>'
 pi '<html>'
 pi '<head>'
-p '<title>'"$user/$repo"' preview</title>'
+p '<title>'"$user/$repo $branch"' preview</title>'
 p '<meta name="viewport" content="initial-scale=1.0">'
 pi '<style type="text/css">/*<![CDATA[*/'
 p 'body { font-family: "Helvetica Neue","Open Sans",Helvetica,Calibri,sans-serif; }'
@@ -41,17 +45,13 @@ function rfcdiff() {
     echo "https://tools.ietf.org/rfcdiff?url1=${1}&amp;url2=${2}"
 }
 
-function rel() {
-    [ "$1" = "$root" ] && return
-    echo "${1/$root\//}/"
-}
-
 function reldot() {
     [ "$1" = "$root" ] && echo '.' || echo "${1/$root\//}"
 }
 
 function githubio() {
-    echo "https://${user}.github.io/${repo}/$(rel "$1")${2}.txt"
+    d="$1/"
+    echo "https://${user}.github.io/${repo}/${d#master/}${2}.txt"
 }
 
 function list_dir() {
@@ -61,19 +61,17 @@ function list_dir() {
         file=$(basename "$file" .txt)
 
         pi '<tr>'
-        p "<th>${file}</th>"
+        p '<th>'"${file}"'</th>'
         p '<td><a href="'"$(reldot "$dir")/${file}"'.html"'
         p '   class="html '"$file"'">html</a></td>'
         p '<td><a href="'"$(reldot "$dir")/${file}"'.txt"'
         p '   class="txt '"$file"'">plain text</a></td>'
-        if [ "$dir" != "$root" ]; then
-            parent=$(dirname "$dir")
-            diff=$(rfcdiff $(githubio "$parent" "$file") $(githubio "$dir" "$file"))
-            p '<td><a href="'"$diff"'">'
-            [ "$parent" = "$root" ] && pbranch=master || pbranch=$(rel "$parent")
-            p "  diff with ${pbranch}</a></td>"
+	this_githubio=$(githubio "$branch${dir#$root}" "$file")
+        if [ "$branch" != "$master" ]; then
+	    diff=$(rfcdiff $(githubio "$master/" "$file") "$this_githubio")
+            p '<td><a href='"$diff"'>diff with '"$master"'</a></td>'
         fi
-        diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" $(githubio "$dir" "$file"))
+	diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         p '<td><a href="'"$diff"'" class="diff '"$file"'">'
         p '  diff with last submission</a></td>'
         po '</tr>'
@@ -81,19 +79,19 @@ function list_dir() {
     po '</table>'
 }
 
-gh="https://github.com/${user}/${repo}"
-p "<h1>Editor's drafts for <a href=\"${gh}\">${user}/${repo}</a></h1>"
+branchlink="$gh"
+[ "$branch" = "$master" ] || branchlink="${branchlink}/tree/${branch}"
+p "<h1>Editor's drafts for ${branch} branch of <a href=\"${branchlink}\">${user}/${repo}</a></h1>"
 p "<p>View <a href=\"issues.html\">saved issues</a>,"
 p "  or the latest GitHub issues <a href=\"${gh}/issues\">issues</a>"
 p "  and <a href=\"${gh}/pulls\">pull requests</a>.</p>"
 
-list_dir "${root}" master
+list_dir "${root}" $branch
 
-for dir in "${root}"/*; do
-    if [ -d "${dir}" ]; then
-        p '<h2>Preview for branch <a href="'$(basename "$dir")'">'$(basename "$dir")'</a></h2>'
-        list_dir "$dir" "$(basename "$dir")"
-    fi
+for dir in $(find "${root}" -type d -print); do
+    dirbranch="${dir#$root}"
+    p '<h2>Preview for branch <a href="'"$dirbranch"'">'"$dirbranch"'</a></h2>'
+    list_dir "$dir" "$dirbranch"
 done
 
 pi '<script>'
