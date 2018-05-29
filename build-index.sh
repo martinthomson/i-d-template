@@ -50,7 +50,7 @@ function reldot() {
 }
 
 function githubio() {
-    d="$1/"
+    d="${1%/}/"
     echo "https://${user}.github.io/${repo}/${d#master/}${2}.txt"
 }
 
@@ -67,7 +67,7 @@ function list_dir() {
         p '<td><a href="'"$(reldot "$dir")/${file}"'.txt"'
         p '   class="txt '"$file"'">plain text</a></td>'
 	this_githubio=$(githubio "$branch${dir#$root}" "$file")
-        if [ "$branch" != "$master" ]; then
+        if [ "$2" != "$master" ]; then
 	    diff=$(rfcdiff $(githubio "$master/" "$file") "$this_githubio")
             p '<td><a href='"$diff"'>diff with '"$master"'</a></td>'
         fi
@@ -89,7 +89,7 @@ p "  and <a href=\"${gh}/pulls\">pull requests</a>.</p>"
 list_dir "${root}" $branch
 
 for dir in $(find "${root}" -mindepth 1 -type d \( -name '.*' -prune -o -print \)); do
-    dirbranch="${dir#$root}"
+    dirbranch="${dir#$root/}"
     p '<h2>Preview for branch <a href="'"$dirbranch"'">'"$dirbranch"'</a></h2>'
     list_dir "$dir" "$dirbranch"
 done
