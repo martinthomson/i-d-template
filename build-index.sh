@@ -88,7 +88,7 @@ p "  and <a href=\"${gh}/pulls\">pull requests</a>.</p>"
 
 list_dir "${root}" $branch
 
-for dir in $(find "${root}" -type d -print); do
+for dir in $(find "${root}" -mindepth 1 -type d \( -name '.*' -prune -o -print \)); do
     dirbranch="${dir#$root}"
     p '<h2>Preview for branch <a href="'"$dirbranch"'">'"$dirbranch"'</a></h2>'
     list_dir "$dir" "$dirbranch"
