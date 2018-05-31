@@ -5,7 +5,7 @@ body {
   font-size-adjust: 0.5;
   line-height: 24px;
   margin: 75px auto;
-  max-width: 724px;
+  max-width: 624px;
   padding: 0 5px;
 }
 
@@ -73,7 +73,7 @@ table.header td, table#rfc\.headerblock td {
 }
 
 samp, tt, code, pre {
-  font: 11pt consolas, monospace;
+  font: 15px Consolas, monospace;
   font-size-adjust: none;
 }
 pre {
@@ -173,7 +173,7 @@ ul.toc li {
   margin: 0;
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 924px) {
   body {
     padding-right: 350px;
   }
@@ -181,7 +181,7 @@ ul.toc li {
     position: fixed;
     bottom: 0;
     right: 0;
-    right: calc(50vw - 550px);
+    right: calc(50vw - 500px);
     width: 300px;
     z-index: 1;
     overflow: auto;
