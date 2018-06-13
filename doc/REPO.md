@@ -58,7 +58,7 @@ $ git commit draft-ietf-unicorn-protocol.md
 $ git push
 ```
 
-Clone a copy of this respository into place:
+Clone a copy of this repository into place:
 
 ```sh
 $ git clone https://github.com/martinthomson/i-d-template lib
