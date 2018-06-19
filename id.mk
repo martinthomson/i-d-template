@@ -3,6 +3,10 @@
 drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
 
 ifeq (0,$(words $(drafts)))
+drafts := $(sort $(basename $(wildcard rfc[0-9]*.xml)))
+endif
+
+ifeq (0,$(words $(drafts)))
 $(warning No file named draft-*.md or draft-*.xml or draft-*.org)
 $(error Create a draft file before running make)
 endif
