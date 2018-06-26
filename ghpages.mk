@@ -120,5 +120,5 @@ $(CI_ARTIFACTS):
 
 .PHONY: artifacts
 artifacts: $(GHPAGES_PUBLISHED) $(CI_ARTIFACTS)
-	cp -f $^
+	cp -f $(filter-out $(CI_ARTIFACTS),$^) $(CI_ARTIFACTS)
 endif
