@@ -11,7 +11,7 @@ jobs:
       - run:
           name: "Run Tests"
           command: |
-            pip install --user behave
+            pip3 install --user behave && ln -s $HOME/.local/bin/behave $BINDIR
             mkdir -p /tmp/artifacts
             behave --junit --junit-directory /tmp/artifacts tests/*.feature"
 
