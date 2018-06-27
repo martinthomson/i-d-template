@@ -90,8 +90,8 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 
 # Clean up contents of target directory
 	@if [ -d $(GHPAGES_TARGET) ]; then \
-	  echo git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/*.html $(GHPAGES_TARGET)/*.txt; \
-	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/*.html $(GHPAGES_TARGET)/*.txt; \
+	  echo git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt; \
+	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt; \
 	fi
 
 
@@ -103,10 +103,10 @@ ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
-	git -C $(GHPAGES_ROOT) push https://github.com/$(CI_REPO_FULL) gh-pages
+	git -C $(GHPAGES_ROOT) push https://github.com/$(GITHUB_REPO_FULL) gh-pages
 else
-	@echo git -C $(GHPAGES_ROOT) push -q https://github.com/$(CI_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) gh-pages >/dev/null 2>&1
+	@echo git -C $(GHPAGES_ROOT) push -q https://github.com/$(GITHUB_REPO_FULL) gh-pages
+	@git -C $(GHPAGES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
 endif
 else
 	git -C $(GHPAGES_ROOT) push origin gh-pages

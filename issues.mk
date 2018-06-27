@@ -62,10 +62,10 @@ ghissues: $(GHISSUES_ROOT)/issues.json $(GHISSUES_ROOT)/pulls.json
 	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
-	git -C $(GHISSUES_ROOT) push https://github.com/$(CI_REPO_FULL) $(GH_ISSUES)
+	git -C $(GHISSUES_ROOT) push https://github.com/$(GITHUB_REPO_FULL) $(GH_ISSUES)
 else
-	@echo git -C $(GHISSUES_ROOT) push -q https://github.com/$(CI_REPO_FULL) $(GH_ISSUES)
-	@git -C $(GHISSUES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(CI_REPO_FULL) $(GH_ISSUES) >/dev/null 2>&1
+	@echo git -C $(GHISSUES_ROOT) push -q https://github.com/$(GITHUB_REPO_FULL) $(GH_ISSUES)
+	@git -C $(GHISSUES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(GH_ISSUES) >/dev/null 2>&1
 endif
 else
 	git -C $(GHISSUES_ROOT) push origin $(GH_ISSUES)
