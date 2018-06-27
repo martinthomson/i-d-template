@@ -15,14 +15,13 @@ endif
 .PHONY: issues
 issues: issues.json pulls.json
 issues.json pulls.json: fetch-ghissues $(drafts_source)
-	@skip=$(DISABLE_ISSUE_FETCH); \
-	if [ $(CI) = true -a "$$skip" != true ]; then \
-	  if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
-	    skip=true; \
-	  fi; \
-	  if [ $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ] 2>/dev/null; then \
+	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
+	  echo 'Skipping update of $@ (it's newer than the one on the branch)'; exit; \
+	fi; \
+	skip=$(DISABLE_ISSUE_FETCH); \
+	if [ $(CI) = true -a "$$skip" != true -a \
+	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ] 2>/dev/null; then \
 	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
-	  fi; \
 	fi; \
 	if [ "$$skip" = true ]; then \
 	    git show $(GH_ISSUES):$@ > $@; exit; \
