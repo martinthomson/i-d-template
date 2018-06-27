@@ -1,0 +1,29 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: martinthomson/i-d-template:latest
+    working_directory: ~/draft
+
+    steps:
+      - checkout
+
+      - run:
+          name: "Run Tests"
+          command: |
+            pip install --user behave
+            mkdir -p /tmp/artifacts
+            behave --junit --junit-directory /tmp/artifacts tests/*.feature"
+
+      - store_artifacts:
+          path: /tmp/artifacts
+
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*?/
