@@ -13,7 +13,7 @@ jobs:
           command: |
             pip3 install --user behave && ln -s $HOME/.local/bin/behave $BINDIR
             mkdir -p /tmp/artifacts
-            behave --junit --junit-directory /tmp/artifacts tests/*.feature"
+            behave --junit --junit-directory /tmp/artifacts tests/*.feature
 
       - store_artifacts:
           path: /tmp/artifacts
