@@ -16,7 +16,7 @@ endif
 issues: issues.json pulls.json
 issues.json pulls.json: fetch-ghissues $(drafts_source)
 	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
-	  echo 'Skipping update of $@ (it's newer than the one on the branch)'; exit; \
+	  echo 'Skipping update of $@ (it is newer than the one on the branch)'; exit; \
 	fi; \
 	skip=$(DISABLE_ISSUE_FETCH); \
 	if [ $(CI) = true -a "$$skip" != true -a \
