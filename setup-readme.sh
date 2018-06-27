@@ -25,7 +25,7 @@ for d in "$@"; do
     author=$(echo "${fullname}" | cut -f 2 -d - -)
     wg=$(echo "${fullname}" | cut -f 3 -d - -)
     wgupper=$(echo "${wg}" | tr 'a-z' 'A-Z')
-    title=$(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$d" | xargs -d '\n' echo)
+    title=$(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$d" | tr '\r\n' '  ' | sed -e 's/^[ \t]*//;s/[ \t]*$//;s/[ \t][ \t]*/ /g')
 
     if "$first"; then
         fixup_other_md "$wg"
