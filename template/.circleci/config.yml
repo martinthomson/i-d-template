@@ -8,29 +8,10 @@ jobs:
     steps:
       - checkout
 
-      # Prime caches for faster checkout
-      - restore_cache:
-          keys:
-            - git-reference
-      - run:
-          name: "Update Cache"
-          command: "git -C ~/git-reference fetch --all --prune"
-      - save_cache:
-          key: git-reference
-          paths:
-            - ~/git-reference
-
       # Build txt and html versions of drafts
-      - restore_cache:
-          keys:
-            - refcache
       - run:
           name: "Build Drafts"
           command: "make 'CLONE_ARGS=--reference ~/git-reference'"
-      - save_cache:
-          key: refcache
-          paths:
-            - ~/.cache/xml2rfc
 
       # Update editor's copy on gh-pages
       - run:
