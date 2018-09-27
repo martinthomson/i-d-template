@@ -21,11 +21,7 @@ git clone -n . "$tmp"
 git -C "$tmp" checkout -q --orphan "$branch"
 git -C "$tmp" rm -rfq .
 
-echo Creating circle.yml, .gitignore and initial files
-echo 'general:' >"$tmp"/circle.yml
-echo '  branches:' >>"$tmp"/circle.yml
-echo '    ignore:' >>"$tmp"/circle.yml
-echo "      - $branch" >>"$tmp"/circle.yml
+echo Creating .gitignore and initial files
 echo lib > "$tmp"/.gitignore
 echo venv >> "$tmp"/.gitignore
 echo .refcache >> "$tmp"/.gitignore
@@ -38,7 +34,7 @@ user=()
 git config --global --get user.name >/dev/null || user+=(-c user.name='ID Bot')
 git config --global --get user.email >/dev/null || user+=(-c user.email='idbot@example.com')
 
-git -C "$tmp" add circle.yml .gitignore "$@"
+git -C "$tmp" add .gitignore "$@"
 git -C "$tmp" "${user[@]}" commit -m "Automatic setup of $branch."
 git -C "$tmp" push origin "$branch"
 git push --set-upstream origin "$branch"
