@@ -23,7 +23,7 @@ ifneq (,$(LATEST_WARNING))
 $(warning Check names: $(LATEST_WARNING))
 endif
 ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | egrep -v '^.. (.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
-$(error You have uncommitted changes, please commit them before running setup)
+$(error You have uncommitted changes or untracked files, please commit them before running setup)
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
 $(error Please configure a remote called '$(GIT_REMOTE)' before running setup)
