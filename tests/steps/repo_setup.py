@@ -79,6 +79,15 @@ def step_impl(context):
         call(["git", "commit", "-am", "Initial commit of {}".format(draft_name)])
 
 
+@given(u'a .gitignore with the line "{ignore}"')
+def step_impl(context, ignore):
+    with cd(context.working_dir):
+        with open(".gitignore", "w") as gi:
+            gi.write("{}\n".format(ignore))
+        call(["git", "add", ".gitignore"])
+        call(["git", "commit", "-am", "Create .gitignore with '{}'".format(ignore)])
+
+
 @given(u'pushed to origin/master')
 def step_impl(context):
     with cd(context.working_dir):

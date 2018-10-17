@@ -42,7 +42,7 @@ def step_impl(context):
 
 
 @when(u'the setup script is run with "{option}"')
-def step_impl(context,option):
+def step_impl(context, option):
     run_with_capture(context, ["make", "-f", "lib/setup.mk", option])
 
 
@@ -64,9 +64,10 @@ def step_impl(context, target, option):
 @when(u'the draft is broken')
 def step_impl(context):
     with cd(context.working_dir):
-        break_this_file = glob("draft-*.md")[0]
-        run_with_capture(context, ["sed", "-i", "-e", "s/{{RFC2119}}/{{broken-reference}}/", break_this_file])
-        context.broken_file = break_this_file
+        break_this = glob("draft-*.md")[0]
+        run_with_capture(context, [
+                         "sed", "-i", "-e", "s/{{RFC2119}}/{{broken-reference}}/", break_this])
+        context.broken_file = break_this
 
 
 @when(u'the lib dir is removed')
@@ -76,7 +77,8 @@ def step_impl(context):
 
 @when(u'lib is added as a submodule')
 def step_impl(context):
-    run_with_capture(context, ["git", "submodule", "add", "-f", os.getcwd(), "lib"])
+    run_with_capture(context, ["git", "submodule",
+                               "add", "-f", os.getcwd(), "lib"])
 
 
 @when(u'git commit is run')

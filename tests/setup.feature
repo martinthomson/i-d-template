@@ -13,7 +13,7 @@ Feature: Initial setup
      and a file is created called ".circleci/config.yml"
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "issues.json"
-     and gitignore lists the xml file
+     and gitignore lists xml files
      and a precommit hook is installed
 
   Scenario:  Run setup script with XSLT on correctly-set-up directory
@@ -29,7 +29,7 @@ Feature: Initial setup
      and a file is created called ".circleci/config.yml"
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "issues.json"
-     and gitignore lists the xml file
+     and gitignore lists xml files
      and a precommit hook is installed
 
   Scenario:  Run setup script on directory with no draft
@@ -43,6 +43,7 @@ Feature: Initial setup
     Given a git repo with multiple Kramdown drafts
      when the setup script is run
      then it succeeds
+     and gitignore lists xml files
 
   Scenario:  Run setup script on directory with no origin remote
     Given a git repo with no origin
@@ -60,3 +61,11 @@ Feature: Initial setup
      when the setup script is run
      then it fails
      and generates a message "push"
+
+  Scenario:  Retain .gitignore when running setup
+    Given a git repo with a single Kramdown draft
+     and a .gitignore with the line "IGNORE-ME"
+     when the setup script is run
+     then it succeeds
+     and gitignore lists "IGNORE-ME"
+     and gitignore lists xml files

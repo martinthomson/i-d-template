@@ -61,7 +61,8 @@ setup-makefile: Makefile
 endif # USE_XSLT
 
 .PHONY: setup-gitignore
-setup-gitignore: .gitignore
+setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
+	tmp=`mktemp`; cat $^ | sort -u >$$tmp && mv -f $$tmp $<
 ifndef SUBMODULE
 	echo $(LIBDIR) >>$<
 endif

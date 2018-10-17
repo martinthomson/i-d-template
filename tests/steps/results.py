@@ -30,12 +30,20 @@ def step_impl(context, text):
     assert context.error.find(text) != -1
 
 
-@then(u'gitignore lists the xml file')
+@then(u'gitignore lists xml files')
 def step_impl(context):
     with cd(context.working_dir):
         md_files = glob("draft-*.md")
         for md in md_files:
-            check_call(["grep", "-q", md.replace(".md", ".xml"), ".gitignore"])
+            context.execute_steps(
+                u'then gitignore lists "{}"'.format(md.replace(".md", ".xml")))
+
+
+@then(u'gitignore lists "{ignore}"')
+def step_impl(context, ignore):
+    with cd(context.working_dir):
+        c = check_output(["grep", "-c", ignore, ".gitignore"]).decode("utf-8")
+        assert int(c) == 1
 
 
 @then(u'generates documents')
@@ -63,7 +71,7 @@ def step_impl(context):
     with cd(context.working_dir):
         md_files = glob("draft-*.md")
         ghpages_files = check_output(
-            ["git", "ls-tree", "gh-pages", "--name-only", "-r"] ) \
+            ["git", "ls-tree", "gh-pages", "--name-only", "-r"]) \
             .decode("utf-8")
         for md in md_files:
             txt_file = md.replace(".md", ".txt")
@@ -92,7 +100,7 @@ def step_impl(context, filename):
 def step_impl(context, branch, filename):
     with cd(context.working_dir):
         files = check_output(
-            ["git", "ls-tree", branch, "--name-only", "-r"] ) \
+            ["git", "ls-tree", branch, "--name-only", "-r"]) \
             .decode("utf-8")
         assert filename in files
 
