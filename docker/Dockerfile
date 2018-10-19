@@ -29,10 +29,10 @@ RUN set -e; tool_install() { \
       target="${BINDIR:-~/.local/bin}/${tool}"; \
       tar xzfO "$tmp" "${tool}-${version}/${tool}" >"$target"; rm -f "$tmp"; \
       chmod 755 "$target"; }; \
-    tool_install idnits 2.15.00 \
-    f655d06e7d3b1c35d7ca55f91243115359ae4fdd17553ea58a301091a07ed7ac && \
-    tool_install rfcdiff 1.45 \
-    82e449b7ee887074302b2050e41fc60d4b3bbec8c20e05ce2d7fab81b332771e
+    tool_install idnits 2.16.0 \
+    5d9f49e528879e46aff03dcaf3e0ef438ab49d5e834543a741df57fcaeca1ddb && \
+    tool_install rfcdiff 1.47 \
+    75a9e83869885836c024a94f35128eaf292c6b9de3fd9d3361fbc62d46ec9f16
 
 RUN pip3 install --user --compile xml2rfc && \
     ln -s $HOME/.local/bin/xml2rfc $BINDIR
