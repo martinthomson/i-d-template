@@ -73,7 +73,7 @@ table.header td, table#rfc\.headerblock td {
 }
 
 samp, tt, code, pre {
-  font: 15px Consolas, monospace;
+  font: 13.5px Consolas, monospace;
   font-size-adjust: none;
 }
 pre {
