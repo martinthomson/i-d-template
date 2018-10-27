@@ -52,8 +52,9 @@ is less well-tested (and slower).  Updating the
 provides a small additional speed improvement.
 
 **Bug**: Circle CI has a [bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
-that prevents `git push --tags` from triggering builds.  Push each tag
-individually.
+that prevents `git push --tags` from triggering builds if you have multiple drafts.
+Tag every draft, then push each tag individually.  (Tagging all drafts first means
+that cross references will work.)
 
 Once the CI system has built the draft, it will upload it automatically and you
 will receive an email asking you to confirm submission.  You don't need to have
