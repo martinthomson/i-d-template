@@ -14,10 +14,10 @@ pi: [toc, sortrefs, symrefs]
 
 author:
  -
-    ins: T. Todo
-    name: Todo Fullname
-    organization: TODO Organization
-    email: todo@example.com
+    ins: "H. Tschofenig"
+    name: "Hannes Tschofenig"
+    organization: "Arm Limited"
+    email: hannes.tschofenig@arm.com
 
 normative:
   RFC2119:
