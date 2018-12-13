@@ -72,7 +72,7 @@ table.header td, table#rfc\.headerblock td {
   line-height: 28px;
 }
 
-samp, tt, code, pre {
+samp, tt, code, pre, span.tt {
   font: 13.5px Consolas, monospace;
   font-size-adjust: none;
 }
