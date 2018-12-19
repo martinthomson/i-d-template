@@ -83,7 +83,7 @@ branchlink="$gh"
 [ "$branch" = "$master" ] || branchlink="${branchlink}/tree/${branch}"
 p "<h1>Editor's drafts for ${branch} branch of <a href=\"${branchlink}\">${user}/${repo}</a></h1>"
 p "<p>View <a href=\"issues.html\">saved issues</a>,"
-p "  or the latest GitHub issues <a href=\"${gh}/issues\">issues</a>"
+p "  or the latest GitHub <a href=\"${gh}/issues\">issues</a>"
 p "  and <a href=\"${gh}/pulls\">pull requests</a>.</p>"
 
 list_dir "${root}" $branch
