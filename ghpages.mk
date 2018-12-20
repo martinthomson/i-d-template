@@ -90,8 +90,8 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 
 # Clean up contents of target directory
 	@if [ -d $(GHPAGES_TARGET) ]; then \
-	  echo git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt; \
-	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt; \
+	  echo git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_EXTRA)); \
+	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_EXTRA)); \
 	fi
 
 
