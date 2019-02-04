@@ -19,13 +19,24 @@ function fixup_other_md() {
     done
 }
 
+function get_title() {
+    if hash xmllint >/dev/null 2>&1; then
+        title=($(xmllint --xpath '/rfc/front/title/text()' "$1"))
+    else
+        # sed kludge if xmllint isn't available
+        title=($(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$d"))
+    fi
+    # haxx: rely on bash parameter normalization to remove redundant whitespace
+    echo "${title[*]}"
+}
+
 first=true
 for d in "$@"; do
     fullname="${d%.xml}"
     author=$(echo "${fullname}" | cut -f 2 -d - -)
     wg=$(echo "${fullname}" | cut -f 3 -d - -)
     wgupper=$(echo "${wg}" | tr 'a-z' 'A-Z')
-    title=$(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$d" | tr '\r\n' '  ' | sed -e 's/^[ \t]*//;s/[ \t]*$//;s/[ \t][ \t]*/ /g')
+    title=$(get_title "$d")
 
     if "$first"; then
         fixup_other_md "$wg"
