@@ -24,7 +24,7 @@ function get_title() {
         title=($(xmllint --xpath '/rfc/front/title/text()' "$1"))
     else
         # sed kludge if xmllint isn't available
-        title=($(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$d"))
+        title=($(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$1"))
     fi
     # haxx: rely on bash parameter normalization to remove redundant whitespace
     echo "${title[*]}"
