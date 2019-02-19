@@ -45,7 +45,7 @@ $(GHISSUES_ROOT): fetch-ghissues
 	@git show-ref refs/heads/$(GH_ISSUES) >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/$(GH_ISSUES) >/dev/null 2>&1 && \
 	    git branch -t $(GH_ISSUES) origin/$(GH_ISSUES)) || \
-	  ! echo 'Error: No $(GH_ISSUES) branch, run `make -f $(LIBDIR)/setup.mk setup-issues` to initialize it.'
+	  ! echo 'Error: No $(GH_ISSUES) branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	git clone -q -b $(GH_ISSUES) . $@
 
 $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
