@@ -3,9 +3,9 @@
 Make a [new organization](https://github.com/organizations/new) for your working
 group.  This guide will use the name `unicorn-wg` for your working group.
 
-See the [more detailed
+There is a [more detailed
 guide](https://github.com/martinthomson/i-d-template/blob/master/doc/WG-SETUP.md)
-or just skip to the [fast setup](#fast-setup).
+for working groups.
 
 # New Draft Setup
 
