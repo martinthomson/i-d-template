@@ -64,7 +64,7 @@ a GitHub account token configured for this feature to be enabled.
 ## Semi-automated Process
 
 Rather than rely on the CI system, the `make upload` command can be used to
-upload to the datatracker.
+upload a tagged draft to the datatracker.
 
 ```sh
 $ git tag -a draft-ietf-unicorn-protocol-03
