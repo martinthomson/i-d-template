@@ -85,10 +85,10 @@ endif
 
 %.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
 ifneq (,$(if $(ENABLE_RIBBON),$(CI_REPO_FULL),))
-	sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed $< | \
+	 (cat $<;echo) | sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed | \
 	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
 else
-	sed -f $(LIBDIR)/addstyle.sed $< > $@
+	(cat $<;echo) | sed -f $(LIBDIR)/addstyle.sed > $@
 endif
 
 %.pdf: %.txt
