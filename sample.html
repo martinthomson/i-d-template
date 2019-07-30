@@ -38,7 +38,7 @@ body {
   padding: 0 5px;
   color: var(--text-color);
   background-color: var(--background-color);
-  font: 17px "Cardo", serif;
+  font: 17px "Lora", serif;
   line-height: 24px;
   scroll-behavior: smooth;
 }
@@ -51,7 +51,7 @@ body {
 #title, h1, h2, h3, h4, h5, h6 {
   font-family: "News Cycle", sans-serif;
   font-weight: bold;
-  margin: 1.2em 0 0.3em;
+  margin: 0.8em 0 0.3em;
   font-size-adjust: 0.5;
   color: var(--title-color);
   line-height: 120%;
@@ -518,7 +518,7 @@ hr.addr {
     right: 0;
     padding: 0;
     margin: 0;
-    background-color: inherit;
+    background-color: #fff;
     border-bottom: 1px solid #ccc;
   }
   #toc nav {
@@ -557,18 +557,29 @@ hr.addr {
     height: calc(100vh - 48px);
     border-left: 1px solid #ddd;
   }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
 }
 
 /* alternative layout for wide screens */
 @media screen and (min-width: 954px) {
   body {
-    padding-right: 350px;
+    padding-right: 380px;
   }
   #toc {
     position: fixed;
     bottom: 0;
     right: 0;
-    right: calc(50vw - 470px);
+    right: calc(50vw - 480px);
     width: 320px;
     margin: 0;
     padding: 0;
@@ -606,7 +617,6 @@ hr.addr {
 /* pagination */
 @media print {
   body {
-
     width: 100%;
   }
   p {
@@ -680,25 +690,6 @@ section {
 /* Top align author divs, to avoid names without organization dropping level with org names */
 .author {
   vertical-align: top;
-}
-
-/* Give floating toc a background color (needed when it's a div inside section */
-#toc {
-  background-color: white;
-}
-
-/* Make the collapsed ToC header render white on gray also when it's a link */
-@media screen and (max-width: 953px) {
-  #toc h2 a,
-  #toc h2 a:link,
-  #toc h2 a:focus,
-  #toc h2 a:hover,
-  #toc a.toplink,
-  #toc a.toplink:hover {
-    color: white;
-    background-color: #444;
-    text-decoration: none;
-  }
 }
 
 /* Style section numbers with more space between number and title */
@@ -829,19 +820,6 @@ table.left {
   font-weight: bold;
   font-size: 0.9em;
 }
-/* Tweak the invisible space above H* in order not to overlay links in text above */
- h2 {
-  margin-top: -18px;  /* provide offset for in-page anchors */
-  padding-top: 31px;
- }
- h3 {
-  margin-top: -18px;  /* provide offset for in-page anchors */
-  padding-top: 24px;
- }
- h4 {
-  margin-top: -18px;  /* provide offset for in-page anchors */
-  padding-top: 24px;
- }
 
 
 </style>
