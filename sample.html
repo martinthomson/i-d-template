@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="en" class="RFC">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<title>RFC 9999: BGP-Prefix Segment in
+    large-scale data centers</title>
+<meta content="Clarence Filsfils" name="author">
+<meta content="Stefano Previdi" name="author">
+<meta content="Gaurav Dawra" name="author">
+<meta content="Ebben Aries" name="author">
+<meta content="Petr Lapukhov" name="author">
+<meta content="
+       This document describes the motivation and benefits for applying
+      segment routing in BGP-based large-scale data-centers. It describes the
+      design to deploy segment routing in those data-centers, for both the
+      MPLS and IPv6 dataplanes.
+    " name="description">
+<meta content="xml2rfc 2.23.1" name="generator">
+<link href="draft-ietf-spring-segment-routing-msdc-11-MS.v2v3.xml" type="application/rfc+xml" rel="alternate">
+<link href="#copyright" rel="license">
+<style type="text/css">
+/* fonts */
+@import url('https://martinthomson.github.io/i-d-template/fonts.css');
+
+html {
+  --background-color: #fff;
+  --text-color: #333;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --small-font-size: 16px;
+}
+body {
+  max-width: 624px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 17px "Cardo", serif;
+  line-height: 24px;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  font-family: "News Cycle", sans-serif;
+  font-weight: bold;
+  margin: 1.2em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+  line-height: 120%;
+}
+#title {
+  padding: 1em 0 0.2em;
+  font-size: 32px;
+  clear: both;
+}
+h1, h2 {
+  font-size: 22px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p, #abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 20px;
+  line-height: 28px;
+}
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a, a[href].selfRef, figcaption a[href], caption a[href] {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--text-color);
+}
+p a[href], ul a[href], dl a[href], td a[href], a.email {
+  color: var(--link-color);
+}
+p a[href]:hover, ul a[href]:hover, dl a[href]:hover, td a[href]:hover, a.email:hover {
+  text-decoration: underline;
+}
+figcaption > a[href], caption > a[href] { /* "Figure X" is missing a selfRef class. */
+  color: var(--text-color);
+}
+figcaption > a[href]:hover, caption > a[href]:hover {
+  text-decoration: none;
+}
+figcaption >a[href]:hover, caption >a[href]:hover, a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+
+/* Figures */
+tt, code, pre, code {
+  background-color: var(--highlight-color);
+  font: 15px 'Oxygen Mono', monospace;
+}
+pre {
+  border: 1px solid var(--line-color);
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0 1.5em;
+  text-align: left;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #eee;
+}
+tr:nth-child(2n) > td {
+  background-color: var(--background-color);
+}
+tr:nth-child(2n+1) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody tr:nth-child(2n) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody tr:nth-child(2n+1) > td {
+  background-color: var(--background-color);
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+a.pilcrow[href] { color: #ddd; }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 8em;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  margin: 0;
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0 0 0 calc(1em + var(--identifier-width));
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    column-count: 2;
+    -moz-column-count: 2;
+    column-gap: 20px;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    column-count: 1;
+    -moz-column-count: 1;
+    column-gap: 0;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 600px) {
+  #authors-addresses {
+    display: relative;
+    padding: 32px 0 0;
+    column-count: 2;
+    -moz-column-count: 2;
+    column-gap: 20px;
+    -moz-column-gap: 20px;
+  }
+  #name-authors-addresses {
+    position: absolute;
+    top: 0px;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+  }
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #b76427;
+  background-color: rgba(249, 232, 105, 0.3);
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: rgba(249, 232, 105, 0.3);
+  border-radius: 3px;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 953px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc nav {
+    display: none;
+  }
+  #toc nav.active {
+    display: block;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 954px) {
+  body {
+    padding-right: 350px;
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 470px);
+    width: 320px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul p, #toc ul li {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 953px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Fix the height/width aspect for ascii art*/
+.art-text pre {
+  line-height: 1.12;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 2px 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Avoid wrapping of URLs in references */
+.references a {
+  white-space: nowrap;
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+
+
+</style>
+<link href="https://dx.doi.org/10.17487/rfc9999" rel="alternate">
+  <link href="urn:issn:2070-1721" rel="alternate">
+  </head>
+<body>
+<script>
+window.addEventListener('load',addMetadata);
+
+async function addMetadata() {
+
+  // Copy all CSS rules for "#identifiers" to "#metadata"
+    try {
+        const cssRules = document.styleSheets[0].cssRules;
+        for (let i = 0; i < cssRules.length; i++) {
+            if (/#identifiers/.exec(cssRules[i].selectorText)) {
+                const rule = cssRules[i].cssText.
+                             replace('#identifiers','#metadata');
+                document.styleSheets[0].
+                        insertRule(rule, document.styleSheets[0].cssRules.length);
+            }
+        }
+    } catch (e) {
+        console.log(e);
+    }
+
+  // Retrieve the "metadata" element from the document
+    const div = document.getElementById('metadata');
+    if (!div) {
+        console.log("Could not locate metadata <div> element");
+        return;
+    }
+    div.style.background='#eee';
+
+  // Insert the metadata block
+  // [TODO: make this more sophisticated and linkify the values]
+    try {
+        const jsonFile = document.URL.replace(/html$/,'json');
+        const response = await fetch(jsonFile);
+        const metadata = (await response.json())[0];
+
+        const label = {
+            'STATUS': 'Status',
+            'OBSOLETES': 'Obsoletes',
+            'OBSOLETED-BY': 'Obsoleted By',
+            'UPDATES': 'Updates',
+            'UPDATED-BY': 'Updated By',
+            'SEE-ALSO': 'See Also',
+            'ERRATA-URL': 'Errata',
+        };
+
+        let metadataHTML = "<dl style='overflow:hidden'>";
+        ['STATUS', 'OBSOLETES', 'OBSOLETED-BY', 'UPDATES',
+         'UPDATED-BY', 'SEE-ALSO', 'ERRATA-URL'].forEach(key => {
+            if (metadata[key]) {
+                metadataHTML += `<dt>${label[key]}:</dt><dd>${metadata[key]}</dd>`;
+            }
+        })
+                metadataHTML += "</dl>";
+        div.innerHTML = metadataHTML;
+
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+</script>
+<table class="ears">
+<thead><tr>
+<td class="left">RFC 9999</td>
+<td class="center">BGP-Prefix SID in large-scale DCs</td>
+<td class="right">July 2019</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Filsfils, et al.</td>
+<td class="center">Informational</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div class="document-information">
+<dl id="identifiers">
+<dt class="label-stream">Stream:</dt>
+<dd class="stream">Internet Engineering Task Force (IETF)</dd>
+<dt class="label-rfc">RFC:</dt>
+<dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc9999" class="eref">9999</a></dd>
+<dt class="label-category">Category:</dt>
+<dd class="category">Informational</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2019-07" class="published">July 2019</time>
+    </dd>
+<dt class="label-issn">ISSN:</dt>
+<dd class="issn">2070-1721</dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">C. Filsfils, <span class="editor">Ed.</span>
+</div>
+<div class="org">Cisco Systems, Inc.</div>
+</div>
+<div class="author">
+      <div class="author-name">S. Previdi</div>
+<div class="org">Cisco Systems, Inc.</div>
+</div>
+<div class="author">
+      <div class="author-name">G. Dawra</div>
+<div class="org">LinkedIn</div>
+</div>
+<div class="author">
+      <div class="author-name">E. Aries</div>
+<div class="org">Juniper Networks</div>
+</div>
+<div class="author">
+      <div class="author-name">P. Lapukhov</div>
+<div class="org">Facebook</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">BGP-Prefix Segment in
+    large-scale data centers</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes the motivation and benefits for applying
+      segment routing in BGP-based large-scale data-centers. It describes the
+      design to deploy segment routing in those data-centers, for both the
+      MPLS and IPv6 dataplanes.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+            This document is not an Internet Standards Track specification; it is
+            published for informational purposes.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+            This document is a product of the Internet Engineering Task Force
+            (IETF).  It represents the consensus of the IETF community.  It has
+            received public review and has been approved for publication by the
+            Internet Engineering Steering Group (IESG).  Not all documents
+            approved by the IESG are candidates for any level of Internet
+            Standard; see Section 2 of RFC 7841.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+            Information about the current status of this document, any
+            errata, and how to provide feedback on it may be obtained at
+            <span><a href="https://www.rfc-editor.org/info/rfc9999">https://www.rfc-editor.org/info/rfc9999</a></span>.<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2019 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Simplified BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-boilerplate.3">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.1">
+            <p id="section-boilerplate.3-1.1.1"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a><a href="#section-boilerplate.3-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.2">
+            <p id="section-boilerplate.3-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-large-scale-data-center-net" class="xref">Large Scale Data Center Network Design Summary</a><a href="#section-boilerplate.3-1.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.2.2.1">
+                <p id="section-boilerplate.3-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-reference-design" class="xref">Reference design</a><a href="#section-boilerplate.3-1.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.3">
+            <p id="section-boilerplate.3-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-some-open-problems-in-large" class="xref">Some open problems in large data-center networks</a><a href="#section-boilerplate.3-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.4">
+            <p id="section-boilerplate.3-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-applying-segment-routing-in" class="xref">Applying Segment Routing in the DC with MPLS dataplane</a><a href="#section-boilerplate.3-1.4.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1">
+                <p id="section-boilerplate.3-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-bgp-prefix-segment-bgp-pref" class="xref">BGP Prefix Segment (BGP-Prefix-SID)</a><a href="#section-boilerplate.3-1.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2">
+                <p id="section-boilerplate.3-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-ebgp-labeled-unicast-rfc827" class="xref">eBGP Labeled Unicast (RFC8277)</a><a href="#section-boilerplate.3-1.4.2.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.1">
+                    <p id="section-boilerplate.3-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="xref">4.2.1</a>.  <a href="#name-control-plane" class="xref">Control Plane</a><a href="#section-boilerplate.3-1.4.2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.2">
+                    <p id="section-boilerplate.3-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="xref">4.2.2</a>.  <a href="#name-data-plane" class="xref">Data Plane</a><a href="#section-boilerplate.3-1.4.2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.3">
+                    <p id="section-boilerplate.3-1.4.2.2.2.3.1"><a href="#section-4.2.3" class="xref">4.2.3</a>.  <a href="#name-network-design-variation" class="xref">Network Design Variation</a><a href="#section-boilerplate.3-1.4.2.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.4">
+                    <p id="section-boilerplate.3-1.4.2.2.2.4.1"><a href="#section-4.2.4" class="xref">4.2.4</a>.  <a href="#name-global-bgp-prefix-segment-t" class="xref">Global BGP Prefix Segment through the fabric</a><a href="#section-boilerplate.3-1.4.2.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.5">
+                    <p id="section-boilerplate.3-1.4.2.2.2.5.1"><a href="#section-4.2.5" class="xref">4.2.5</a>.  <a href="#name-incremental-deployments" class="xref">Incremental Deployments</a><a href="#section-boilerplate.3-1.4.2.2.2.5.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.3">
+                <p id="section-boilerplate.3-1.4.2.3.1"><a href="#section-4.3" class="xref">4.3</a>.  <a href="#name-ibgp-labeled-unicast-rfc827" class="xref">iBGP Labeled Unicast (RFC8277)</a><a href="#section-boilerplate.3-1.4.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.5">
+            <p id="section-boilerplate.3-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-applying-segment-routing-in-" class="xref">Applying Segment Routing in the DC with IPv6 dataplane</a><a href="#section-boilerplate.3-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.6">
+            <p id="section-boilerplate.3-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-communicating-path-informat" class="xref">Communicating path information to the host</a><a href="#section-boilerplate.3-1.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.7">
+            <p id="section-boilerplate.3-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-additional-benefits" class="xref">Additional Benefits</a><a href="#section-boilerplate.3-1.7.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.1">
+                <p id="section-boilerplate.3-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-mpls-dataplane-with-operati" class="xref">MPLS Dataplane with operational simplicity</a><a href="#section-boilerplate.3-1.7.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.2">
+                <p id="section-boilerplate.3-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-minimizing-the-fib-table" class="xref">Minimizing the FIB table</a><a href="#section-boilerplate.3-1.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.3">
+                <p id="section-boilerplate.3-1.7.2.3.1"><a href="#section-7.3" class="xref">7.3</a>.  <a href="#name-egress-peer-engineering" class="xref">Egress Peer Engineering</a><a href="#section-boilerplate.3-1.7.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.4">
+                <p id="section-boilerplate.3-1.7.2.4.1"><a href="#section-7.4" class="xref">7.4</a>.  <a href="#name-anycast" class="xref">Anycast</a><a href="#section-boilerplate.3-1.7.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.8">
+            <p id="section-boilerplate.3-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-preferred-srgb-allocation" class="xref">Preferred SRGB Allocation</a><a href="#section-boilerplate.3-1.8.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.9">
+            <p id="section-boilerplate.3-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-boilerplate.3-1.9.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.10">
+            <p id="section-boilerplate.3-1.10.1"><a href="#section-10" class="xref">10</a>. <a href="#name-manageability-consideration" class="xref">Manageability Considerations</a><a href="#section-boilerplate.3-1.10.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.11">
+            <p id="section-boilerplate.3-1.11.1"><a href="#section-11" class="xref">11</a>. <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-boilerplate.3-1.11.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.12">
+            <p id="section-boilerplate.3-1.12.1"><a href="#section-12" class="xref">12</a>. <a href="#name-acknowledgements" class="xref">Acknowledgements</a><a href="#section-boilerplate.3-1.12.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.13">
+            <p id="section-boilerplate.3-1.13.1"><a href="#section-13" class="xref">13</a>. <a href="#name-contributors" class="xref">Contributors</a><a href="#section-boilerplate.3-1.13.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.14">
+            <p id="section-boilerplate.3-1.14.1"><a href="#section-14" class="xref">14</a>. <a href="#name-references" class="xref">References</a><a href="#section-boilerplate.3-1.14.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.14.2.1">
+                <p id="section-boilerplate.3-1.14.2.1.1"><a href="#section-14.1" class="xref">14.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-boilerplate.3-1.14.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.14.2.2">
+                <p id="section-boilerplate.3-1.14.2.2.1"><a href="#section-14.2" class="xref">14.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-boilerplate.3-1.14.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.15">
+            <p id="section-boilerplate.3-1.15.1"><a href="#section-appendix.a" class="xref"></a>  <a href="#name-authors-addresses" class="xref">Authors' Addresses</a><a href="#section-boilerplate.3-1.15.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="INTRO">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Segment Routing (SR), as described in <span>[<a href="#I-D.ietf-spring-segment-routing" class="xref">I-D.ietf-spring-segment-routing</a>]</span> leverages the source routing
+      paradigm. A node steers a packet through an ordered list of
+      instructions, called segments. A segment can represent any instruction,
+      topological or service-based. A segment can have a local semantic to an
+      SR node or global within an SR domain. SR allows to enforce a flow
+      through any topological path while maintaining per-flow state only at
+      the ingress node to the SR domain. Segment Routing can be applied to the
+      MPLS and IPv6 data-planes.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">The use-cases described in this document should be considered in the
+      context of the BGP-based large-scale data-center (DC) design described
+      in <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span>. This document extends it by applying SR
+      both with IPv6 and MPLS dataplane.<a href="#section-1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="LARGESCALEDC">
+<section id="section-2">
+      <h2 id="name-large-scale-data-center-net">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-large-scale-data-center-net" class="section-name selfRef">Large Scale Data Center Network Design Summary</a>
+      </h2>
+<p id="section-2-1">This section provides a brief summary of the informational document
+      <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span> that outlines a practical network design
+      suitable for data-centers of various scales:<a href="#section-2-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-2-2.1">Data-center networks have highly symmetric topologies with
+          multiple parallel paths between two server attachment points. The
+          well-known Clos topology is most popular among the operators (as
+          described in <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span>). In a Clos topology, the
+          minimum number of parallel paths between two elements is determined
+          by the "width" of the "Tier-1" stage. See <a href="#FIGLARGE" class="xref">Figure 1</a>
+          below for an illustration of the concept.<a href="#section-2-2.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-2-2.2">Large-scale data-centers commonly use a routing protocol, such as
+          BGP-4 <span>[<a href="#RFC4271" class="xref">RFC4271</a>]</span> in order to provide endpoint
+          connectivity. Recovery after a network failure is therefore driven
+          either by local knowledge of directly available backup paths or by
+          distributed signaling between the network devices.<a href="#section-2-2.2" class="pilcrow">¶</a>
+</li>
+        <li id="section-2-2.3">Within data-center networks, traffic is load-shared using the
+          Equal Cost Multipath (ECMP) mechanism. With ECMP, every network
+          device implements a pseudo-random decision, mapping packets to one
+          of the parallel paths by means of a hash function calculated over
+          certain parts of the packet, typically a combination of various
+          packet header fields.<a href="#section-2-2.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-2-3">The following is a schematic of a five-stage Clos topology, with four
+      devices in the "Tier-1" stage. Notice that number of paths between Node1
+      and Node12 equals to four: the paths have to cross all of Tier-1
+      devices. At the same time, the number of paths between Node1 and Node2
+      equals two, and the paths only cross Tier-2 devices. Other topologies
+      are possible, but for simplicity only the topologies that have a single
+      path from Tier-1 to Tier-3 are considered below. The rest could be
+      treated similarly, with a few modifications to the logic.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<div id="REFDESIGN">
+<section id="section-2.1">
+        <h3 id="name-reference-design">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-reference-design" class="section-name selfRef">Reference design</a>
+        </h3>
+<span id="name-5-stage-clos-topology"></span><div id="FIGLARGE">
+<figure id="figure-1">
+          <div class="artwork art-text alignLeft" id="section-2.1-1.1">
+<pre>                                Tier-1
+                               +-----+
+                               |NODE |
+                            +-&gt;|  5  |--+
+                            |  +-----+  |
+                    Tier-2  |           |   Tier-2
+                   +-----+  |  +-----+  |  +-----+
+     +------------&gt;|NODE |--+-&gt;|NODE |--+--|NODE |-------------+
+     |       +-----|  3  |--+  |  6  |  +--|  9  |-----+       |
+     |       |     +-----+     +-----+     +-----+     |       |
+     |       |                                         |       |
+     |       |     +-----+     +-----+     +-----+     |       |
+     | +-----+----&gt;|NODE |--+  |NODE |  +--|NODE |-----+-----+ |
+     | |     | +---|  4  |--+-&gt;|  7  |--+--|  10 |---+ |     | |
+     | |     | |   +-----+  |  +-----+  |  +-----+   | |     | |
+     | |     | |            |           |            | |     | |
+   +-----+ +-----+          |  +-----+  |          +-----+ +-----+
+   |NODE | |NODE | Tier-3   +-&gt;|NODE |--+   Tier-3 |NODE | |NODE |
+   |  1  | |  2  |             |  8  |             | 11  | |  12 |
+   +-----+ +-----+             +-----+             +-----+ +-----+
+     | |     | |                                     | |     | |
+     A O     B O            &lt;- Servers -&gt;            Z O     O O
+</pre>
+</div>
+<figcaption><a href="#figure-1">Figure 1</a>:
+<a href="#name-5-stage-clos-topology" class="selfRef">5-stage Clos topology</a>
+          </figcaption></figure>
+</div>
+<p id="section-2.1-2">In the reference topology illustrated in <a href="#FIGLARGE" class="xref">Figure 1</a>,
+        It is assumed:<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-2.1-3.1">
+            <p id="section-2.1-3.1.1">Each node is its own AS (Node X has AS X). 4-byte AS numbers
+            are recommended (<span>[<a href="#RFC6793" class="xref">RFC6793</a>]</span>).<a href="#section-2.1-3.1.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-2.1-3.1.2.1">For simple and efficient route propagation filtering,
+                Node5, Node6, Node7 and Node8 use the same AS, Node3 and Node4
+                use the same AS, Node9 and Node10 use the same AS.<a href="#section-2.1-3.1.2.1" class="pilcrow">¶</a>
+</li>
+              <li id="section-2.1-3.1.2.2">In case of 2-byte autonomous system numbers are used and
+                for efficient usage of the scarce 2-byte Private Use AS pool,
+                different Tier-3 nodes might use the same AS.<a href="#section-2.1-3.1.2.2" class="pilcrow">¶</a>
+</li>
+              <li id="section-2.1-3.1.2.3">Without loss of generality, these details will be
+                simplified in this document and assume that each node has its
+                own AS.<a href="#section-2.1-3.1.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li id="section-2.1-3.2">Each node peers with its neighbors with a BGP session. If not
+            specified, eBGP is assumed. In a specific use-case, iBGP will be
+            used but this will be called out explicitly in that case.<a href="#section-2.1-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.1-3.3">
+            <p id="section-2.1-3.3.1">Each node originates the IPv4 address of its loopback interface
+            into BGP and announces it to its neighbors.<a href="#section-2.1-3.3.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-2.1-3.3.2.1">The loopback of Node X is 192.0.2.x/32.<a href="#section-2.1-3.3.2.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-2.1-4">In this document, the Tier-1, Tier-2 and Tier-3 nodes are referred
+        to respectively as Spine, Leaf and ToR (top of rack) nodes. When a ToR
+        node acts as a gateway to the "outside world", it is referred to as a
+        border node.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="OPENPROBS">
+<section id="section-3">
+      <h2 id="name-some-open-problems-in-large">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-some-open-problems-in-large" class="section-name selfRef">Some open problems in large data-center networks</a>
+      </h2>
+<p id="section-3-1">The data-center network design summarized above provides means for
+      moving traffic between hosts with reasonable efficiency. There are few
+      open performance and reliability problems that arise in such design:<a href="#section-3-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-3-2.1">ECMP routing is most commonly realized per-flow. This means that
+          large, long-lived "elephant" flows may affect performance of
+          smaller, short-lived "mouse" flows and reduce efficiency
+          of per-flow load-sharing. In other words, per-flow ECMP does not
+          perform efficiently when flow lifetime distribution is heavy-tailed.
+          Furthermore, due to hash-function inefficiencies it is possible to
+          have frequent flow collisions, where more flows get placed on one
+          path over the others.<a href="#section-3-2.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-2.2">Shortest-path routing with ECMP implements an oblivious routing
+          model, which is not aware of the network imbalances. If the network
+          symmetry is broken, for example due to link failures, utilization
+          hotspots may appear. For example, if a link fails between Tier-1 and
+          Tier-2 devices (e.g. Node5 and Node9), Tier-3 devices Node1 and
+          Node2 will not be aware of that, since there are other paths
+          available from perspective of Node3. They will continue sending
+          roughly equal traffic to Node3 and Node4 as if the failure didn't
+          exist which may cause a traffic hotspot.<a href="#section-3-2.2" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-2.3">Isolating faults in the network with multiple parallel paths and
+          ECMP-based routing is non-trivial due to lack of determinism.
+          Specifically, the connections from HostA to HostB may take a
+          different path every time a new connection is formed, thus making
+          consistent reproduction of a failure much more difficult. This
+          complexity scales linearly with the number of parallel paths in the
+          network, and stems from the random nature of path selection by the
+          network devices.<a href="#section-3-2.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-3-3">First, it will be explained how to apply SR in the DC, for MPLS and
+      IPv6 data-planes.<a href="#section-3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="APPLYSR">
+<section id="section-4">
+      <h2 id="name-applying-segment-routing-in">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-applying-segment-routing-in" class="section-name selfRef">Applying Segment Routing in the DC with MPLS dataplane</a>
+      </h2>
+<div id="BGPREFIXSEGMENT">
+<section id="section-4.1">
+        <h3 id="name-bgp-prefix-segment-bgp-pref">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-bgp-prefix-segment-bgp-pref" class="section-name selfRef">BGP Prefix Segment (BGP-Prefix-SID)</a>
+        </h3>
+<p id="section-4.1-1">A BGP Prefix Segment is a segment associated with a BGP prefix. A
+        BGP Prefix Segment is a network-wide instruction to forward the packet
+        along the ECMP-aware best path to the related prefix.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">The BGP Prefix Segment is defined as the BGP-Prefix-SID Attribute
+        in <span>[<a href="#I-D.ietf-idr-bgp-prefix-sid" class="xref">I-D.ietf-idr-bgp-prefix-sid</a>]</span> which contains an
+        index. Throughout this document the BGP Prefix Segment Attribute is
+        referred as the BGP-Prefix-SID and the encoded index as the
+        label-index.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.1-3">In this document, the network design decision has been made to
+        assume that all the nodes are allocated the same SRGB (Segment Routing
+        Global Block), e.g. [16000, 23999]. This provides operational
+        simplification as explained in <a href="#SINGLESRGB" class="xref">Section 8</a>, but this
+        is not a requirement.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1-4">For illustration purpose, when considering an MPLS data-plane, it
+        is assumed that the label-index allocated to prefix 192.0.2.x/32 is X.
+        As a result, a local label (16000+x) is allocated for prefix
+        192.0.2.x/32 by each node throughout the DC fabric.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">When IPv6 data-plane is considered, it is assumed that Node X is
+        allocated IPv6 address (segment) 2001:DB8::X.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="eBGP8277">
+<section id="section-4.2">
+        <h3 id="name-ebgp-labeled-unicast-rfc827">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-ebgp-labeled-unicast-rfc827" class="section-name selfRef">eBGP Labeled Unicast (RFC8277)</a>
+        </h3>
+<p id="section-4.2-1">Referring to <a href="#FIGLARGE" class="xref">Figure 1</a> and <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span>, the following design modifications are
+        introduced:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.2-2.1">Each node peers with its neighbors via a eBGP session with
+            extensions defined in <span>[<a href="#RFC8277" class="xref">RFC8277</a>]</span> (named "eBGP8277"
+            throughout this document) and with the BGP-Prefix-SID attribute
+            extension as defined in <span>[<a href="#I-D.ietf-idr-bgp-prefix-sid" class="xref">I-D.ietf-idr-bgp-prefix-sid</a>]</span>.<a href="#section-4.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.2-2.2">The forwarding plane at Tier-2 and Tier-1 is MPLS.<a href="#section-4.2-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.2-2.3">The forwarding plane at Tier-3 is either IP2MPLS (if the host
+            sends IP traffic) or MPLS2MPLS (if the host sends MPLS-
+            encapsulated traffic).<a href="#section-4.2-2.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-4.2-3"><a href="#FIGSMALL" class="xref">Figure 2</a> zooms into a path from server A to server
+        Z within the topology of <a href="#FIGLARGE" class="xref">Figure 1</a>.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<span id="name-path-from-a-to-z-via-nodes-"></span><div id="FIGSMALL">
+<figure id="figure-2">
+          <div class="artwork art-text alignLeft" id="section-4.2-4.1">
+<pre>
+                   +-----+     +-----+     +-----+
+       +----------&gt;|NODE |     |NODE |     |NODE |
+       |           |  4  |--+-&gt;|  7  |--+--|  10 |---+
+       |           +-----+     +-----+     +-----+   |
+       |                                             |
+   +-----+                                         +-----+
+   |NODE |                                         |NODE |
+   |  1  |                                         | 11  |
+   +-----+                                         +-----+
+     |                                              |
+     A                    &lt;- Servers -&gt;             Z
+</pre>
+</div>
+<figcaption><a href="#figure-2">Figure 2</a>:
+<a href="#name-path-from-a-to-z-via-nodes-" class="selfRef">Path from A to Z via nodes 1, 4, 7, 10 and 11</a>
+          </figcaption></figure>
+</div>
+<p id="section-4.2-5">Referring to <a href="#FIGLARGE" class="xref">Figure 1</a> and <a href="#FIGSMALL" class="xref">Figure 2</a> and assuming the IP address with the AS and
+        label-index allocation previously described, the following sections
+        detail the control plane operation and the data plane states for the
+        prefix 192.0.2.11/32 (loopback of Node11)<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<div id="CONTROLPLANE">
+<section id="section-4.2.1">
+          <h4 id="name-control-plane">
+<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-control-plane" class="section-name selfRef">Control Plane</a>
+          </h4>
+<p id="section-4.2.1-1">Node11 originates 192.0.2.11/32 in BGP and allocates to it a
+          BGP-Prefix-SID with label-index: index11 <span>[<a href="#I-D.ietf-idr-bgp-prefix-sid" class="xref">I-D.ietf-idr-bgp-prefix-sid</a>]</span>.<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-4.2.1-2.1">
+              <p id="section-4.2.1-2.1.1">Node11 sends the following eBGP8277 update to Node10:<a href="#section-4.2.1-2.1.1" class="pilcrow">¶</a></p>
+<dl class="dlParallel dlCompact" id="section-4.2.1-2.1.2">
+                <dt id="section-4.2.1-2.1.2.1">IP Prefix:</dt>
+                <dd id="section-4.2.1-2.1.2.2">192.0.2.11/32</dd>
+                <dt id="section-4.2.1-2.1.2.3">Label:</dt>
+                <dd id="section-4.2.1-2.1.2.4">Implicit-Null</dd>
+                <dt id="section-4.2.1-2.1.2.5">Next-hop:</dt>
+                <dd id="section-4.2.1-2.1.2.6">Node11's interface address on the link to Node10</dd>
+                <dt id="section-4.2.1-2.1.2.7">AS Path:</dt>
+                <dd id="section-4.2.1-2.1.2.8">{11}</dd>
+                <dt id="section-4.2.1-2.1.2.9">BGP-Prefix-SID:</dt>
+                <dd id="section-4.2.1-2.1.2.10">Label-Index 11</dd>
+              </dl>
+</li>
+          </ul>
+<p id="section-4.2.1-3">Node10 receives the above update. As it is SR capable, Node10 is
+          able to interpret the BGP-Prefix-SID and hence understands that it
+          should allocate the label from its own SRGB block, offset by the
+          Label-Index received in the BGP-Prefix-SID (16000+11 hence 16011) to
+          the NLRI instead of allocating a non-deterministic label out of a
+          dynamically allocated portion of the local label space. The
+          implicit-null label in the NLRI tells Node10 that it is the
+          penultimate hop and must pop the top label on the stack before
+          forwarding traffic for this prefix to Node11.<a href="#section-4.2.1-3" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-4.2.1-4.1">
+              <p id="section-4.2.1-4.1.1">Then, Node10 sends the following eBGP8277 update to Node7:<a href="#section-4.2.1-4.1.1" class="pilcrow">¶</a></p>
+<dl class="dlParallel dlCompact" id="section-4.2.1-4.1.2">
+                <dt id="section-4.2.1-4.1.2.1">IP Prefix:</dt>
+                <dd id="section-4.2.1-4.1.2.2">192.0.2.11/32</dd>
+                <dt id="section-4.2.1-4.1.2.3">Label:</dt>
+                <dd id="section-4.2.1-4.1.2.4">16011</dd>
+                <dt id="section-4.2.1-4.1.2.5">Next-hop:</dt>
+                <dd id="section-4.2.1-4.1.2.6">Node10's interface address on the link to Node7</dd>
+                <dt id="section-4.2.1-4.1.2.7">AS Path:</dt>
+                <dd id="section-4.2.1-4.1.2.8">{10, 11}</dd>
+                <dt id="section-4.2.1-4.1.2.9">BGP-Prefix-SID:</dt>
+                <dd id="section-4.2.1-4.1.2.10">Label-Index 11</dd>
+              </dl>
+</li>
+          </ul>
+<p id="section-4.2.1-5">Node7 receives the above update. As it is SR capable, Node7 is
+          able to interpret the BGP-Prefix-SID and hence allocates the local
+          (incoming) label 16011 (16000 + 11) to the NLRI (instead of
+          allocating a "dynamic" local label from its label
+          manager). Node7 uses the label in the received eBGP8277 NLRI as the
+          outgoing label (the index is only used to derive the local/incoming
+          label).<a href="#section-4.2.1-5" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-4.2.1-6.1">
+              <p id="section-4.2.1-6.1.1">Node7 sends the following eBGP8277 update to Node4:<a href="#section-4.2.1-6.1.1" class="pilcrow">¶</a></p>
+<dl class="dlParallel dlCompact" id="section-4.2.1-6.1.2">
+                <dt id="section-4.2.1-6.1.2.1">Label:</dt>
+                <dd id="section-4.2.1-6.1.2.2">16011</dd>
+                <dt id="section-4.2.1-6.1.2.3">Next-hop:</dt>
+                <dd id="section-4.2.1-6.1.2.4">Node7's interface address on the link to Node4</dd>
+                <dt id="section-4.2.1-6.1.2.5">AS Path:</dt>
+                <dd id="section-4.2.1-6.1.2.6">{7, 10, 11}</dd>
+                <dt id="section-4.2.1-6.1.2.7">BGP-Prefix-SID:</dt>
+                <dd id="section-4.2.1-6.1.2.8">Label-Index 11</dd>
+              </dl>
+</li>
+          </ul>
+<p id="section-4.2.1-7">Node4 receives the above update. As it is SR capable, Node4 is
+          able to interpret the BGP-Prefix-SID and hence allocates the local
+          (incoming) label 16011 to the NLRI (instead of allocating a
+          "dynamic" local label from its label manager). Node4
+          uses the label in the received eBGP8277 NLRI as outgoing label (the
+          index is only used to derive the local/incoming label).<a href="#section-4.2.1-7" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-4.2.1-8.1">
+              <p id="section-4.2.1-8.1.1">Node4 sends the following eBGP8277 update to Node1:<a href="#section-4.2.1-8.1.1" class="pilcrow">¶</a></p>
+<dl class="dlParallel dlCompact" id="section-4.2.1-8.1.2">
+                <dt id="section-4.2.1-8.1.2.1">IP Prefix:</dt>
+                <dd id="section-4.2.1-8.1.2.2">192.0.2.11/32</dd>
+                <dt id="section-4.2.1-8.1.2.3">Label:</dt>
+                <dd id="section-4.2.1-8.1.2.4">16011</dd>
+                <dt id="section-4.2.1-8.1.2.5">Next-hop:</dt>
+                <dd id="section-4.2.1-8.1.2.6">Node4's interface address on the link to Node1</dd>
+                <dt id="section-4.2.1-8.1.2.7">AS Path:</dt>
+                <dd id="section-4.2.1-8.1.2.8">{4, 7, 10, 11}</dd>
+                <dt id="section-4.2.1-8.1.2.9">BGP-Prefix-SID:</dt>
+                <dd id="section-4.2.1-8.1.2.10">Label-Index 11</dd>
+              </dl>
+</li>
+          </ul>
+<p id="section-4.2.1-9">Node1 receives the above update. As it is SR capable, Node1 is
+          able to interpret the BGP-Prefix-SID and hence allocates the local
+          (incoming) label 16011 to the NLRI (instead of allocating a
+          "dynamic" local label from its label manager). Node1
+          uses the label in the received eBGP8277 NLRI as outgoing label (the
+          index is only used to derive the local/incoming label).<a href="#section-4.2.1-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="DATAPLANE">
+<section id="section-4.2.2">
+          <h4 id="name-data-plane">
+<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-data-plane" class="section-name selfRef">Data Plane</a>
+          </h4>
+<p id="section-4.2.2-1">Referring to <a href="#FIGLARGE" class="xref">Figure 1</a>, and assuming all nodes
+          apply the same advertisement rules described above and all nodes
+          have the same SRGB (16000-23999), here are the IP/MPLS forwarding
+          tables for prefix 192.0.2.11/32 at Node1, Node4, Node7 and
+          Node10.<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
+<span id="name-node1-forwarding-table"></span><div id="NODE1FIB">
+<table class="center" id="table-1">
+            <caption>
+<a href="#table-1">Table 1</a>:
+<a href="#name-node1-forwarding-table" class="selfRef">Node1 Forwarding Table</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-center" rowspan="1" colspan="1">Incoming label or IP destination</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing label</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing Interface</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">ECMP{3, 4}</td>
+              </tr>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">192.0.2.11/32</td>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">ECMP{3, 4}</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<span id="name-node4-forwarding-table"></span><div id="NODE4FIB">
+<table class="center" id="table-2">
+            <caption>
+<a href="#table-2">Table 2</a>:
+<a href="#name-node4-forwarding-table" class="selfRef">Node4 Forwarding Table</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-center" rowspan="1" colspan="1">Incoming label or IP destination</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing label</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing Interface</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">ECMP{7, 8}</td>
+              </tr>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">192.0.2.11/32</td>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">ECMP{7, 8}</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<span id="name-node7-forwarding-table"></span><div id="NODE7FIB">
+<table class="center" id="table-3">
+            <caption>
+<a href="#table-3">Table 3</a>:
+<a href="#name-node7-forwarding-table" class="selfRef">Node7 Forwarding Table</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-center" rowspan="1" colspan="1">Incoming label or IP destination</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing label</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing Interface</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">10</td>
+              </tr>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">192.0.2.11/32</td>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">10</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<table class="center" id="table-4">
+            <caption>
+<a href="#table-4">Table 4</a>:
+<a href="#name-" class="selfRef"></a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-center" rowspan="1" colspan="1">Incoming label or IP destination</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing label</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing Interface</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">POP</td>
+                <td class="text-center" rowspan="1" colspan="1">11</td>
+              </tr>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">192.0.2.11/32</td>
+                <td class="text-center" rowspan="1" colspan="1">N/A</td>
+                <td class="text-center" rowspan="1" colspan="1">11</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+<div id="VARIATIONS">
+<section id="section-4.2.3">
+          <h4 id="name-network-design-variation">
+<a href="#section-4.2.3" class="section-number selfRef">4.2.3. </a><a href="#name-network-design-variation" class="section-name selfRef">Network Design Variation</a>
+          </h4>
+<p id="section-4.2.3-1">A network design choice could consist of switching all the
+          traffic through Tier-1 and Tier-2 as MPLS traffic. In this case, one
+          could filter away the IP entries at Node4, Node7 and Node10. This
+          might be beneficial in order to optimize the forwarding table
+          size.<a href="#section-4.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.3-2">A network design choice could consist in allowing the hosts to
+          send MPLS-encapsulated traffic based on the Egress Peer Engineering
+          (EPE) use-case as defined in <span>[<a href="#I-D.ietf-spring-segment-routing-central-epe" class="xref">I-D.ietf-spring-segment-routing-central-epe</a>]</span>. For example,
+          applications at HostA would send their Z-destined traffic to Node1
+          with an MPLS label stack where the top label is 16011 and the next
+          label is an EPE peer segment (<span>[<a href="#I-D.ietf-spring-segment-routing-central-epe" class="xref">I-D.ietf-spring-segment-routing-central-epe</a>]</span>) at Node11
+          directing the traffic to Z.<a href="#section-4.2.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="FABRIC">
+<section id="section-4.2.4">
+          <h4 id="name-global-bgp-prefix-segment-t">
+<a href="#section-4.2.4" class="section-number selfRef">4.2.4. </a><a href="#name-global-bgp-prefix-segment-t" class="section-name selfRef">Global BGP Prefix Segment through the fabric</a>
+          </h4>
+<p id="section-4.2.4-1">When the previous design is deployed, the operator enjoys global
+          BGP-Prefix-SID and label allocation throughout the DC fabric.<a href="#section-4.2.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.4-2">A few examples follow:<a href="#section-4.2.4-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.2.4-3.1">Normal forwarding to Node11: a packet with top label 16011
+              received by any node in the fabric will be forwarded along the
+              ECMP-aware BGP best-path towards Node11 and the label 16011 is
+              penultimate-popped at Node10 (or at Node 9).<a href="#section-4.2.4-3.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.2.4-3.2">Traffic-engineered path to Node11: an application on a host
+              behind Node1 might want to restrict its traffic to paths via the
+              Spine node Node5. The application achieves this by sending its
+              packets with a label stack of {16005, 16011}. BGP Prefix SID
+              16005 directs the packet up to Node5 along the path (Node1,
+              Node3, Node5). BGP-Prefix-SID 16011 then directs the packet down
+              to Node11 along the path (Node5, Node9, Node11).<a href="#section-4.2.4-3.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+<div id="INCRDEP">
+<section id="section-4.2.5">
+          <h4 id="name-incremental-deployments">
+<a href="#section-4.2.5" class="section-number selfRef">4.2.5. </a><a href="#name-incremental-deployments" class="section-name selfRef">Incremental Deployments</a>
+          </h4>
+<p id="section-4.2.5-1">The design previously described can be deployed incrementally.
+          Let us assume that Node7 does not support the BGP-Prefix-SID and let
+          us show how the fabric connectivity is preserved.<a href="#section-4.2.5-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.5-2">From a signaling viewpoint, nothing would change: even though
+          Node7 does not support the BGP-Prefix-SID, it does propagate the
+          attribute unmodified to its neighbors.<a href="#section-4.2.5-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.5-3">From a label allocation viewpoint, the only difference is that
+          Node7 would allocate a dynamic (random) label to the prefix
+          192.0.2.11/32 (e.g. 123456) instead of the "hinted" label as
+          instructed by the BGP-Prefix-SID. The neighbors of Node7 adapt
+          automatically as they always use the label in the BGP8277 NLRI as
+          outgoing label.<a href="#section-4.2.5-3" class="pilcrow">¶</a></p>
+<p id="section-4.2.5-4">Node4 does understand the BGP-Prefix-SID and hence allocates the
+          indexed label in the SRGB (16011) for 192.0.2.11/32.<a href="#section-4.2.5-4" class="pilcrow">¶</a></p>
+<p id="section-4.2.5-5">As a result, all the data-plane entries across the network would
+          be unchanged except the entries at Node7 and its neighbor Node4 as
+          shown in the figures below.<a href="#section-4.2.5-5" class="pilcrow">¶</a></p>
+<p id="section-4.2.5-6">The key point is that the end-to-end Label Switched Path (LSP) is
+          preserved because the outgoing label is always derived from the
+          received label within the BGP8277 NLRI. The index in the
+          BGP-Prefix-SID is only used as a hint on how to allocate the local
+          label (the incoming label) but never for the outgoing label.<a href="#section-4.2.5-6" class="pilcrow">¶</a></p>
+<span id="name-node7-forwarding-table-2"></span><div id="NODE7FIBINC">
+<table class="center" id="table-5">
+            <caption>
+<a href="#table-5">Table 5</a>:
+<a href="#name-node7-forwarding-table-2" class="selfRef">Node7 Forwarding Table</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-center" rowspan="1" colspan="1">Incoming label or IP destination</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing label</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing interface</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">12345</td>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">10</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<span id="name-node4-forwarding-table-2"></span><div id="NODE4FIBINC">
+<table class="center" id="table-6">
+            <caption>
+<a href="#table-6">Table 6</a>:
+<a href="#name-node4-forwarding-table-2" class="selfRef">Node4 Forwarding Table</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-center" rowspan="1" colspan="1">Incoming label or IP destination</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing label</th>
+                <th class="text-center" rowspan="1" colspan="1">Outgoing interface</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" rowspan="1" colspan="1">16011</td>
+                <td class="text-center" rowspan="1" colspan="1">12345</td>
+                <td class="text-center" rowspan="1" colspan="1">7</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<p id="section-4.2.5-9">The BGP-Prefix-SID can thus be deployed incrementally one node at
+          a time.<a href="#section-4.2.5-9" class="pilcrow">¶</a></p>
+<p id="section-4.2.5-10">When deployed together with a homogeneous SRGB (same SRGB across
+          the fabric), the operator incrementally enjoys the global prefix
+          segment benefits as the deployment progresses through the
+          fabric.<a href="#section-4.2.5-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="iBGP3107">
+<section id="section-4.3">
+        <h3 id="name-ibgp-labeled-unicast-rfc827">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-ibgp-labeled-unicast-rfc827" class="section-name selfRef">iBGP Labeled Unicast (RFC8277)</a>
+        </h3>
+<p id="section-4.3-1">The same exact design as eBGP8277 is used with the following
+        modifications:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-4.3-2.1">All nodes use the same AS number.<a href="#section-4.3-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="ulEmpty" id="section-4.3-2.2">Each node peers with its neighbors via an internal BGP session
+            (iBGP) with extensions defined in <span>[<a href="#RFC8277" class="xref">RFC8277</a>]</span> (named
+            "iBGP8277" throughout this document).<a href="#section-4.3-2.2" class="pilcrow">¶</a>
+</li>
+          <li class="ulEmpty" id="section-4.3-2.3">Each node acts as a route-reflector for each of its neighbors
+            and with the next-hop-self option. Next-hop-self is a well known
+            operational feature which consists of rewriting the next-hop of a
+            BGP update prior to send it to the neighbor. Usually, it's a
+            common practice to apply next-hop-self behavior towards iBGP peers
+            for eBGP learned routes. In the case outlined in this section it
+            is proposed to use the next-hop-self mechanism also to iBGP
+            learned routes.<a href="#section-4.3-2.3" class="pilcrow">¶</a>
+</li>
+          <li class="ulEmpty" id="section-4.3-2.4">
+            <span id="name-ibgp-sessions-with-reflecti"></span><div id="IBGPFIG">
+<figure id="figure-3">
+              <div class="artwork art-text alignLeft" id="section-4.3-2.4.1.1">
+<pre>
+                               Cluster-1
+                            +-----------+
+                            |  Tier-1   |
+                            |  +-----+  |
+                            |  |NODE |  |
+                            |  |  5  |  |
+                 Cluster-2  |  +-----+  |  Cluster-3
+                +---------+ |           | +---------+
+                | Tier-2  | |           | |  Tier-2 |
+                | +-----+ | |  +-----+  | | +-----+ |
+                | |NODE | | |  |NODE |  | | |NODE | |
+                | |  3  | | |  |  6  |  | | |  9  | |
+                | +-----+ | |  +-----+  | | +-----+ |
+                |         | |           | |         |
+                |         | |           | |         |
+                | +-----+ | |  +-----+  | | +-----+ |
+                | |NODE | | |  |NODE |  | | |NODE | |
+                | |  4  | | |  |  7  |  | | |  10 | |
+                | +-----+ | |  +-----+  | | +-----+ |
+                +---------+ |           | +---------+
+                            |           |
+                            |  +-----+  |
+                            |  |NODE |  |
+          Tier-3            |  |  8  |  |         Tier-3
+      +-----+ +-----+       |  +-----+  |      +-----+ +-----+
+      |NODE | |NODE |       +-----------+      |NODE | |NODE |
+      |  1  | |  2  |                          | 11  | |  12 |
+      +-----+ +-----+                          +-----+ +-----+
+                            </pre>
+</div>
+<figcaption><a href="#figure-3">Figure 3</a>:
+<a href="#name-ibgp-sessions-with-reflecti" class="selfRef">iBGP Sessions with Reflection and Next-Hop-Self</a>
+              </figcaption></figure>
+</div><a href="#section-4.3-2.4" class="pilcrow">¶</a>
+</li>
+          <li class="ulEmpty" id="section-4.3-2.5">
+            <p id="section-4.3-2.5.1">For simple and efficient route propagation filtering and as
+            illustrated in <a href="#IBGPFIG" class="xref">Figure 3</a>:<a href="#section-4.3-2.5.1" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-4.3-2.5.2.1">Node5, Node6, Node7 and Node8 use the same Cluster ID
+                (Cluster-1)<a href="#section-4.3-2.5.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="ulEmpty" id="section-4.3-2.5.2.2">Node3 and Node4 use the same Cluster ID (Cluster-2)<a href="#section-4.3-2.5.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="ulEmpty" id="section-4.3-2.5.2.3">Node9 and Node10 use the same Cluster ID (Cluster-3)<a href="#section-4.3-2.5.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="ulEmpty" id="section-4.3-2.6">The control-plane behavior is mostly the same as described in
+            the previous section: the only difference is that the eBGP8277
+            path propagation is simply replaced by an iBGP8277 path reflection
+            with next-hop changed to self.<a href="#section-4.3-2.6" class="pilcrow">¶</a>
+</li>
+          <li class="ulEmpty" id="section-4.3-2.7">The data-plane tables are exactly the same.<a href="#section-4.3-2.7" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="IPV6">
+<section id="section-5">
+      <h2 id="name-applying-segment-routing-in-">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-applying-segment-routing-in-" class="section-name selfRef">Applying Segment Routing in the DC with IPv6 dataplane</a>
+      </h2>
+<p id="section-5-1">The design described in <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span> is reused with one
+      single modification. It is highlighted using the example of the
+      reachability to Node11 via spine node Node5.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">Node5 originates 2001:DB8::5/128 with the attached BGP-Prefix-SID for
+      IPv6 packets destined to segment 2001:DB8::5 (<span>[<a href="#I-D.ietf-idr-bgp-prefix-sid" class="xref">I-D.ietf-idr-bgp-prefix-sid</a>]</span>).<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">Node11 originates 2001:DB8::11/128 with the attached BGP-Prefix-SID
+      advertising the support of the SRH for IPv6 packets destined to segment
+      2001:DB8::11.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">The control-plane and data-plane processing of all the other nodes in
+      the fabric is unchanged. Specifically, the routes to 2001:DB8::5 and
+      2001:DB8::11 are installed in the FIB along the eBGP best-path to Node5
+      (spine node) and Node11 (ToR node) respectively.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">An application on HostA which needs to send traffic to HostZ via only
+      Node5 (spine node) can do so by sending IPv6 packets with a Segment
+      Routing header (SRH, <span>[<a href="#I-D.ietf-6man-segment-routing-header" class="xref">I-D.ietf-6man-segment-routing-header</a>]</span>). The destination
+      address and active segment is set to 2001:DB8::5. The next and last
+      segment is set to 2001:DB8::11.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-6">The application must only use IPv6 addresses that have been
+      advertised as capable for SRv6 segment processing (e.g. for which the
+      BGP prefix segment capability has been advertised). How applications
+      learn this (e.g.: centralized controller and orchestration) is outside
+      the scope of this document.<a href="#section-5-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="COMMHOSTS">
+<section id="section-6">
+      <h2 id="name-communicating-path-informat">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-communicating-path-informat" class="section-name selfRef">Communicating path information to the host</a>
+      </h2>
+<p id="section-6-1">There are two general methods for communicating path information to
+      the end-hosts: "proactive" and "reactive", aka "push" and "pull" models.
+      There are multiple ways to implement either of these methods. Here, it
+      is noted that one way could be using a centralized controller: the
+      controller either tells the hosts of the prefix-to-path mappings
+      beforehand and updates them as needed (network event driven push), or
+      responds to the hosts making request for a path to specific destination
+      (host event driven pull). It is also possible to use a hybrid model,
+      i.e., pushing some state from the controller in response to particular
+      network events, while the host pulls other state on demand.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">It is also noted, that when disseminating network-related data to the
+      end-hosts a trade-off is made to balance the amount of information Vs.
+      the level of visibility in the network state. This applies both to push
+      and pull models. In the extreme case, the host would request path
+      information on every flow, and keep no local state at all. On the other
+      end of the spectrum, information for every prefix in the network along
+      with available paths could be pushed and continuously updated on all
+      hosts.<a href="#section-6-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="BENEFITS">
+<section id="section-7">
+      <h2 id="name-additional-benefits">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-additional-benefits" class="section-name selfRef">Additional Benefits</a>
+      </h2>
+<div id="MPLSIMPLE">
+<section id="section-7.1">
+        <h3 id="name-mpls-dataplane-with-operati">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-mpls-dataplane-with-operati" class="section-name selfRef">MPLS Dataplane with operational simplicity</a>
+        </h3>
+<p id="section-7.1-1">As required by <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span>, no new signaling protocol
+        is introduced. The BGP-Prefix-SID is a lightweight extension to BGP
+        Labeled Unicast <span>[<a href="#RFC8277" class="xref">RFC8277</a>]</span>. It applies either to eBGP or
+        iBGP based designs.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">Specifically, LDP and RSVP-TE are not used. These protocols would
+        drastically impact the operational complexity of the Data Center and
+        would not scale. This is in line with the requirements expressed in
+        <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span>.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.1-3">Provided the same SRGB is configured on all nodes, all nodes use
+        the same MPLS label for a given IP prefix. This is simpler from an
+        operation standpoint, as discussed in <a href="#SINGLESRGB" class="xref">Section 8</a><a href="#section-7.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="MINFIB">
+<section id="section-7.2">
+        <h3 id="name-minimizing-the-fib-table">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-minimizing-the-fib-table" class="section-name selfRef">Minimizing the FIB table</a>
+        </h3>
+<p id="section-7.2-1">The designer may decide to switch all the traffic at Tier-1 and
+        Tier-2's based on MPLS, hence drastically decreasing the IP table size
+        at these nodes.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">This is easily accomplished by encapsulating the traffic either
+        directly at the host or the source ToR node by pushing the
+        BGP-Prefix-SID of the destination ToR for intra-DC traffic, or the
+        BGP-Prefix-SID for the the border node for inter-DC or
+        DC-to-outside-world traffic.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="EPE">
+<section id="section-7.3">
+        <h3 id="name-egress-peer-engineering">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-egress-peer-engineering" class="section-name selfRef">Egress Peer Engineering</a>
+        </h3>
+<p id="section-7.3-1">It is straightforward to combine the design illustrated in this
+        document with the Egress Peer Engineering (EPE) use-case described in
+        <span>[<a href="#I-D.ietf-spring-segment-routing-central-epe" class="xref">I-D.ietf-spring-segment-routing-central-epe</a>]</span>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-2">In such case, the operator is able to engineer its outbound traffic
+        on a per host-flow basis, without incurring any additional state at
+        intermediate points in the DC fabric.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.3-3">For example, the controller only needs to inject a per-flow state
+        on the HostA to force it to send its traffic destined to a specific
+        Internet destination D via a selected border node (say Node12 in <a href="#FIGLARGE" class="xref">Figure 1</a> instead of another border node, Node11) and a
+        specific egress peer of Node12 (say peer AS 9999 of local PeerNode
+        segment 9999 at Node12 instead of any other peer which provides a path
+        to the destination D). Any packet matching this state at host A would
+        be encapsulated with SR segment list (label stack) {16012, 9999}.
+        16012 would steer the flow through the DC fabric, leveraging any ECMP,
+        along the best path to border node Node12. Once the flow gets to
+        border node Node12, the active segment is 9999 (because of PHP on the
+        upstream neighbor of Node12). This EPE PeerNode segment forces border
+        node Node12 to forward the packet to peer AS 9999, without any IP
+        lookup at the border node. There is no per-flow state for this
+        engineered flow in the DC fabric. A benefit of segment routing is the
+        per-flow state is only required at the source.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.3-4">As well as allowing full traffic engineering control such a design
+        also offers FIB table minimization benefits as the Internet-scale FIB
+        at border node Node12 is not required if all FIB lookups are avoided
+        there by using EPE.<a href="#section-7.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ANYCAST">
+<section id="section-7.4">
+        <h3 id="name-anycast">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-anycast" class="section-name selfRef">Anycast</a>
+        </h3>
+<p id="section-7.4-1">The design presented in this document preserves the availability
+        and load-balancing properties of the base design presented in <span>[<a href="#I-D.ietf-spring-segment-routing" class="xref">I-D.ietf-spring-segment-routing</a>]</span>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4-2">For example, one could assign an anycast loopback 192.0.2.20/32 and
+        associate segment index 20 to it on the border Node11 and Node12 (in
+        addition to their node-specific loopbacks). Doing so, the EPE
+        controller could express a default "go-to-the-Internet via any border
+        node" policy as segment list {16020}. Indeed, from any host in the DC
+        fabric or from any ToR node, 16020 steers the packet towards the
+        border Node11 or Node12 leveraging ECMP where available along the best
+        paths to these nodes.<a href="#section-7.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="SINGLESRGB">
+<section id="section-8">
+      <h2 id="name-preferred-srgb-allocation">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-preferred-srgb-allocation" class="section-name selfRef">Preferred SRGB Allocation</a>
+      </h2>
+<p id="section-8-1">In the MPLS case, it is recommend to use same SRGBs at each node.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">Different SRGBs in each node likely increase the complexity of the
+      solution both from an operational viewpoint and from a controller
+      viewpoint.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">From an operation viewpoint, it is much simpler to have the same
+      global label at every node for the same destination (the MPLS
+      troubleshooting is then similar to the IPv6 troubleshooting where this
+      global property is a given).<a href="#section-8-3" class="pilcrow">¶</a></p>
+<p id="section-8-4">From a controller viewpoint, this allows us to construct simple
+      policies applicable across the fabric.<a href="#section-8-4" class="pilcrow">¶</a></p>
+<p id="section-8-5">Let us consider two applications A and B respectively connected to
+      Node1 and Node2 (ToR nodes). A has two flows FA1 and FA2 destined to Z.
+      B has two flows FB1 and FB2 destined to Z. The controller wants FA1 and
+      FB1 to be load-shared across the fabric while FA2 and FB2 must be
+      respectively steered via Node5 and Node8.<a href="#section-8-5" class="pilcrow">¶</a></p>
+<p id="section-8-6">Assuming a consistent unique SRGB across the fabric as described in
+      the document, the controller can simply do it by instructing A and B to
+      use {16011} respectively for FA1 and FB1 and by instructing A and B to
+      use {16005 16011} and {16008 16011} respectively for FA2 and FB2.<a href="#section-8-6" class="pilcrow">¶</a></p>
+<p id="section-8-7">Let us assume a design where the SRGB is different at every node and
+      where the SRGB of each node is advertised using the Originator SRGB TLV
+      of the BGP-Prefix-SID as defined in <span>[<a href="#I-D.ietf-idr-bgp-prefix-sid" class="xref">I-D.ietf-idr-bgp-prefix-sid</a>]</span>: SRGB of Node K starts at value
+      K*1000 and the SRGB length is 1000 (e.g. Node1's SRGB is [1000,
+      1999], Node2's SRGB is [2000, 2999], ...).<a href="#section-8-7" class="pilcrow">¶</a></p>
+<p id="section-8-8">In this case, not only the controller would need to collect and store
+      all of these different SRGB's (e.g., through the Originator SRGB
+      TLV of the BGP-Prefix-SID), furthermore it would need to adapt the
+      policy for each host. Indeed, the controller would instruct A to use
+      {1011} for FA1 while it would have to instruct B to use {2011} for FB1
+      (while with the same SRGB, both policies are the same {16011}).<a href="#section-8-8" class="pilcrow">¶</a></p>
+<p id="section-8-9">Even worse, the controller would instruct A to use {1005, 5011} for
+      FA1 while it would instruct B to use {2011, 8011} for FB1 (while with
+      the same SRGB, the second segment is the same across both policies:
+      16011). When combining segments to create a policy, one need to
+      carefully update the label of each segment. This is obviously more
+      error-prone, more complex and more difficult to troubleshoot.<a href="#section-8-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="IANA">
+<section id="section-9">
+      <h2 id="name-iana-considerations">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-9-1">This document does not make any IANA request.<a href="#section-9-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="MANAGE">
+<section id="section-10">
+      <h2 id="name-manageability-consideration">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-manageability-consideration" class="section-name selfRef">Manageability Considerations</a>
+      </h2>
+<p id="section-10-1">The design and deployment guidelines described in this document are
+      based on the network design described in <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span>.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">The deployment model assumed in this document is based on a single
+      domain where the interconnected DCs are part of the same administrative
+      domain (which, of course, is split into different autonomous systems).
+      The operator has full control of the whole domain and the usual
+      operational and management mechanisms and procedures are used in order
+      to prevent any information related to internal prefixes and topology to
+      be leaked outside the domain.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-3">As recommended in <span>[<a href="#I-D.ietf-spring-segment-routing" class="xref">I-D.ietf-spring-segment-routing</a>]</span>,
+      the same SRGB should be allocated in all nodes in order to facilitate
+      the design, deployment and operations of the domain.<a href="#section-10-3" class="pilcrow">¶</a></p>
+<p id="section-10-4">When EPE (<span>[<a href="#I-D.ietf-spring-segment-routing-central-epe" class="xref">I-D.ietf-spring-segment-routing-central-epe</a>]</span>) is used (as
+      explained in <a href="#EPE" class="xref">Section 7.3</a>, the same operational model is
+      assumed. EPE information is originated and propagated throughout the
+      domain towards an internal server and unless explicitly configured by
+      the operator, no EPE information is leaked outside the domain
+      boundaries.<a href="#section-10-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="SEC">
+<section id="section-11">
+      <h2 id="name-security-considerations">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-11-1">This document proposes to apply Segment Routing to a well known
+      scalability requirement expressed in <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span> using the
+      BGP-Prefix-SID as defined in <span>[<a href="#I-D.ietf-idr-bgp-prefix-sid" class="xref">I-D.ietf-idr-bgp-prefix-sid</a>]</span>.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">It has to be noted, as described in <a href="#MANAGE" class="xref">Section 10</a> that the
+      design illustrated in <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span> and in this document,
+      refer to a deployment model where all nodes are under the same
+      administration. In this context, it is assumed that the operator doesn't
+      want to leak outside of the domain any information related to internal
+      prefixes and topology. The internal information includes prefix-sid and
+      EPE information. In order to prevent such leaking, the standard BGP
+      mechanisms (filters) are applied on the boundary of the domain.<a href="#section-11-2" class="pilcrow">¶</a></p>
+<p id="section-11-3">Therefore, the solution proposed in this document does not introduce
+      any additional security concerns from what expressed in <span>[<a href="#RFC7938" class="xref">RFC7938</a>]</span> and <span>[<a href="#I-D.ietf-idr-bgp-prefix-sid" class="xref">I-D.ietf-idr-bgp-prefix-sid</a>]</span>. It
+      is assumed that the security and confidentiality of the prefix and
+      topology information is preserved by outbound filters at each peering
+      point of the domain as described in <a href="#MANAGE" class="xref">Section 10</a>.<a href="#section-11-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="Acknowledgements">
+<section id="section-12">
+      <h2 id="name-acknowledgements">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="section-12-1">The authors would like to thank Benjamin Black, Arjun Sreekantiah,
+      Keyur Patel, Acee Lindem and Anoop Ghanwani for their comments and
+      review of this document.<a href="#section-12-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="Contributors">
+<section id="section-13">
+      <h2 id="name-contributors">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-contributors" class="section-name selfRef">Contributors</a>
+      </h2>
+<div class="artwork art-text alignLeft" id="section-13-1">
+<pre>
+Gaya Nagarajan
+Facebook
+US
+
+Email: gaya@fb.com
+
+
+Gaurav Dawra
+Cisco Systems
+US
+
+Email: gdawra.ietf@gmail.com
+
+
+Dmitry Afanasiev
+Yandex
+RU
+
+Email: fl0w@yandex-team.ru
+
+
+Tim Laberge
+Cisco
+US
+
+Email: tlaberge@cisco.com
+
+
+Edet Nkposong
+Salesforce.com Inc.
+US
+
+Email: enkposong@salesforce.com
+
+
+Mohan Nanduri
+Microsoft
+US
+
+Email: mnanduri@microsoft.com
+
+
+James Uttaro
+ATT
+US
+
+Email: ju1738@att.com
+
+
+Saikat Ray
+Unaffiliated
+US
+
+Email: raysaikat@gmail.com
+
+Jon Mitchell
+Unaffiliated
+US
+
+Email: jrmitche@puck.nether.net
+</pre><a href="#section-13-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<section id="section-14">
+      <h2 id="name-references">
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-14.1">
+        <h3 id="name-normative-references">
+<a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.ietf-idr-bgp-prefix-sid">[I-D.ietf-idr-bgp-prefix-sid]</dt>
+        <dd>
+<span class="refAuthor">Previdi, S.</span><span class="refAuthor">, Filsfils, C.</span><span class="refAuthor">, Lindem, A.</span><span class="refAuthor">, Sreekantiah, A.</span><span class="refAuthor">, and H. Gredler</span>, <span class="refTitle">"Segment Routing Prefix SID extensions for BGP"</span>, <span class="seriesInfo">Internet-Draft draft-ietf-idr-bgp-prefix-sid-27</span>, <time datetime="2018-06-26">26 June 2018</time>
+            <span>, &lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-idr-bgp-prefix-sid-27.txt">http://www.ietf.org/internet-drafts/draft-ietf-idr-bgp-prefix-sid-27.txt</a>&gt;</span>. </dd>
+<dt id="I-D.ietf-spring-segment-routing">[I-D.ietf-spring-segment-routing]</dt>
+        <dd>
+<span class="refAuthor">Filsfils, C.</span><span class="refAuthor">, Previdi, S.</span><span class="refAuthor">, Ginsberg, L.</span><span class="refAuthor">, Decraene, B.</span><span class="refAuthor">, Litkowski, S.</span><span class="refAuthor">, and R. Shakir</span>, <span class="refTitle">"Segment Routing Architecture"</span>, <span class="seriesInfo">Internet-Draft draft-ietf-spring-segment-routing-15</span>, <time datetime="2018-01-25">25 January 2018</time>
+            <span>, &lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-spring-segment-routing-15.txt">http://www.ietf.org/internet-drafts/draft-ietf-spring-segment-routing-15.txt</a>&gt;</span>. </dd>
+<dt id="I-D.ietf-spring-segment-routing-central-epe">[I-D.ietf-spring-segment-routing-central-epe]</dt>
+        <dd>
+<span class="refAuthor">Filsfils, C.</span><span class="refAuthor">, Previdi, S.</span><span class="refAuthor">, Dawra, G.</span><span class="refAuthor">, Aries, E.</span><span class="refAuthor">, and D. Afanasiev</span>, <span class="refTitle">"Segment Routing Centralized BGP Egress Peer
+     Engineering"</span>, <span class="seriesInfo">Internet-Draft draft-ietf-spring-segment-routing-central-epe-10</span>, <time datetime="2017-12-21">21 December 2017</time>
+            <span>, &lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-spring-segment-routing-central-epe-10.txt">http://www.ietf.org/internet-drafts/draft-ietf-spring-segment-routing-central-epe-10.txt</a>&gt;</span>. </dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement
+     Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03">March 1997</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dt id="RFC4271">[RFC4271]</dt>
+        <dd>
+<span class="refAuthor">Rekhter, Y., Ed.</span><span class="refAuthor">, Li, T., Ed.</span><span class="refAuthor">, and S. Hares, Ed.</span>, <span class="refTitle">"A Border Gateway Protocol 4 (BGP-4)"</span>, <span class="seriesInfo">RFC 4271</span>, <span class="seriesInfo">DOI 10.17487/RFC4271</span>, <time datetime="2006-01">January 2006</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc4271">https://www.rfc-editor.org/info/rfc4271</a>&gt;</span>. </dd>
+<dt id="RFC7938">[RFC7938]</dt>
+        <dd>
+<span class="refAuthor">Lapukhov, P.</span><span class="refAuthor">, Premji, A.</span><span class="refAuthor">, and J. Mitchell, Ed.</span>, <span class="refTitle">"Use of BGP for Routing in Large-Scale Data Centers"</span>, <span class="seriesInfo">RFC 7938</span>, <span class="seriesInfo">DOI 10.17487/RFC7938</span>, <time datetime="2016-08">August 2016</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7938">https://www.rfc-editor.org/info/rfc7938</a>&gt;</span>. </dd>
+<dt id="RFC8277">[RFC8277]</dt>
+      <dd>
+<span class="refAuthor">Rosen, E.</span>, <span class="refTitle">"Using BGP to Bind MPLS Labels to Address Prefixes"</span>, <span class="seriesInfo">RFC 8277</span>, <span class="seriesInfo">DOI 10.17487/RFC8277</span>, <time datetime="2017-10">October 2017</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc8277">https://www.rfc-editor.org/info/rfc8277</a>&gt;</span>. </dd>
+</dl>
+</section>
+<section id="section-14.2">
+        <h3 id="name-informative-references">
+<a href="#section-14.2" class="section-number selfRef">14.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.ietf-6man-segment-routing-header">[I-D.ietf-6man-segment-routing-header]</dt>
+        <dd>
+<span class="refAuthor">Filsfils, C.</span><span class="refAuthor">, Dukes, D.</span><span class="refAuthor">, Previdi, S.</span><span class="refAuthor">, Leddy, J.</span><span class="refAuthor">, Matsushima, S.</span><span class="refAuthor">, and d. daniel.voyer@bell.ca</span>, <span class="refTitle">"IPv6 Segment Routing Header (SRH)"</span>, <span class="seriesInfo">Internet-Draft draft-ietf-6man-segment-routing-header-21</span>, <time datetime="2019-06-13">13 June 2019</time>
+            <span>, &lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-6man-segment-routing-header-21.txt">http://www.ietf.org/internet-drafts/draft-ietf-6man-segment-routing-header-21.txt</a>&gt;</span>. </dd>
+<dt id="RFC6793">[RFC6793]</dt>
+      <dd>
+<span class="refAuthor">Vohra, Q.</span><span class="refAuthor"> and E. Chen</span>, <span class="refTitle">"BGP Support for Four-Octet Autonomous System (AS) Number
+     Space"</span>, <span class="seriesInfo">RFC 6793</span>, <span class="seriesInfo">DOI 10.17487/RFC6793</span>, <time datetime="2012-12">December 2012</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc6793">https://www.rfc-editor.org/info/rfc6793</a>&gt;</span>. </dd>
+</dl>
+</section>
+</section>
+<div id="authors-addresses">
+<section id="section-appendix.a">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="org">Cisco Systems, Inc.</span></div>
+<div dir="auto" class="left"><span class="fn nameRole">Clarence Filsfils (<span class="role">editor</span>)</span></div>
+<div dir="auto" class="left"> <span class="locality">Brussels</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Belgium</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:cfilsfil@cisco.com" class="email">cfilsfil@cisco.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Stefano Previdi</span></div>
+<div dir="auto" class="left"><span class="org">Cisco Systems, Inc.</span></div>
+<div dir="auto" class="left">  </div>
+<div dir="auto" class="left"><span class="country-name">Italy</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:stefano@previdi.net" class="email">stefano@previdi.net</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Gaurav Dawra</span></div>
+<div dir="auto" class="left"><span class="org">LinkedIn</span></div>
+<div dir="auto" class="left">,  </div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:gdawra.ietf@gmail.com" class="email">gdawra.ietf@gmail.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Ebben Aries</span></div>
+<div dir="auto" class="left"><span class="org">Juniper Networks</span></div>
+<div dir="auto" class="left"><span class="street-address">1133 Innovation Way</span></div>
+<div dir="auto" class="left">
+<span class="locality">Sunnyvale</span>,  <span class="postal-code">CA 94089</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:exa@juniper.net" class="email">exa@juniper.net</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Petr Lapukhov</span></div>
+<div dir="auto" class="left"><span class="org">Facebook</span></div>
+<div dir="auto" class="left">,  </div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:petr@fb.com" class="email">petr@fb.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>var toc = document.getElementById("toc");
+var tocToggle = toc.querySelector("h2");
+var tocNav = toc.querySelector("nav");
+
+tocToggle.onclick = e => {
+    tocNav.classList.toggle("active");
+}
+
+tocNav.addEventListener("click", e => {
+    tocNav.classList.remove("active");
+});
+</script>
+</body>
+</html>
