@@ -22,6 +22,7 @@
 <style type="text/css">
 /* fonts */
 @import url('https://martinthomson.github.io/i-d-template/fonts.css');
+@import url('https://fonts.googleapis.com/css?family=Encode+Sans+Condensed:600|Cabin+Condensed:600&display=swap');
 
 html {
   --background-color: #fff;
@@ -30,7 +31,7 @@ html {
   --link-color: #2a6496;
   --highlight-color: #f9f9f9;
   --line-color: #eee;
-  --small-font-size: 16px;
+  --small-font-size: 14.5px;
 }
 body {
   max-width: 624px;
@@ -38,8 +39,7 @@ body {
   padding: 0 5px;
   color: var(--text-color);
   background-color: var(--background-color);
-  font: 17px "Lora", serif;
-  line-height: 24px;
+  font: 16px/22px "Lora", serif;
   scroll-behavior: smooth;
 }
 
@@ -49,8 +49,8 @@ body {
 
 /* headings */
 #title, h1, h2, h3, h4, h5, h6 {
-  font-family: "News Cycle", sans-serif;
-  font-weight: bold;
+  font-family: "Encode Sans Condensed", sans-serif;
+  font-weight: 600;
   margin: 0.8em 0 0.3em;
   font-size-adjust: 0.5;
   color: var(--title-color);
@@ -61,7 +61,7 @@ body {
   font-size: 32px;
   clear: both;
 }
-h1, h2 {
+h1, h2, h3 {
   font-size: 22px;
 }
 
@@ -70,8 +70,8 @@ h1, h2 {
   padding-bottom: 0.3em;
 }
 #abstract+p, #abstract+p code, #abstract+p samp, #abstract+p tt {
-  font-size: 20px;
-  line-height: 28px;
+  font-size: 18px;
+  line-height: 24px;
 }
 p {
   padding: 0;
@@ -204,7 +204,7 @@ figcaption >a[href]:hover, caption >a[href]:hover, a[href].selfRef:hover {
 /* Figures */
 tt, code, pre, code {
   background-color: var(--highlight-color);
-  font: 15px 'Oxygen Mono', monospace;
+  font: 15px/22px 'Oxygen Mono', monospace;
 }
 pre {
   border: 1px solid var(--line-color);
@@ -580,7 +580,7 @@ hr.addr {
     bottom: 0;
     right: 0;
     right: calc(50vw - 480px);
-    width: 320px;
+    width: 312px;
     margin: 0;
     padding: 0;
     z-index: 1;
