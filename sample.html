@@ -521,12 +521,6 @@ hr.addr {
     margin: 0;
     border-bottom: 1px solid #ccc;
   }
-  #toc nav {
-    display: none;
-  }
-  #toc nav.active {
-    display: block;
-  }
   #toc h2 {
     margin: 0;
     padding: 2px 0 2px 6px;
@@ -554,8 +548,12 @@ hr.addr {
     display: none;
     padding: 0.5em 1em 1em;
     overflow: auto;
+    overscroll-behavior: contain;
     height: calc(100vh - 48px);
     border-left: 1px solid #ddd;
+  }
+  #toc nav.active {
+    display: block;
   }
   /* Make the collapsed ToC header render white on gray also when it's a link */
   #toc h2 a,
