@@ -520,6 +520,10 @@ hr.addr {
     padding: 0;
     margin: 0;
     border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
   }
   #toc h2 {
     margin: 0;
@@ -552,7 +556,7 @@ hr.addr {
     height: calc(100vh - 48px);
     border-left: 1px solid #ddd;
   }
-  #toc nav.active {
+  #toc.active nav {
     display: block;
   }
   /* Make the collapsed ToC header render white on gray also when it's a link */
@@ -2232,16 +2236,16 @@ Email: jrmitche@puck.nether.net
 </address>
 </section>
 </div>
-<script>var toc = document.getElementById("toc");
-var tocToggle = toc.querySelector("h2");
-var tocNav = toc.querySelector("nav");
+<script>const toc = document.getElementById("toc");
+const tocToggle = toc.querySelector("h2");
 
 tocToggle.onclick = e => {
-    tocNav.classList.toggle("active");
+  toc.classList.toggle("active");
 }
 
+const tocNav = toc.querySelector("nav");
 tocNav.addEventListener("click", e => {
-    tocNav.classList.remove("active");
+  toc.classList.remove("active");
 });
 </script>
 </body>
