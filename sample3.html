@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en" class="RFC">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<title>RFC 0000: Efficient Route
+    Invalidation</title>
+<meta content="Rahul Arvind Jadhav" name="author">
+<meta content="Pascal Thubert" name="author">
+<meta content="Rabi Narayan Sahoo" name="author">
+<meta content="Zhen Cao" name="author">
+<meta content='
+
+        This document explains the problems associated with the current use of
+        NPDAO messaging and also discusses the requirements for an optimized
+        route invalidation messaging scheme. Further a new proactive route
+        invalidation message called as "Destination Cleanup Object" (DCO) is
+        specified which fulfills requirements of an optimized route
+        invalidation messaging.
+
+    ' name="description">
+<meta content="xml2rfc 2.23.1" name="generator">
+<meta content="template" name="keyword">
+<meta name="viewport" content="initial-scale=1.0">
+<link href="draft-ietf-roll-efficient-npdao-15-RE.v2v3.xml" type="application/rfc+xml" rel="alternate">
+<link href="#copyright" rel="license">
+<link href="style.css" rel="stylesheet">
+<link href="https://dx.doi.org/10.17487/rfc0000" rel="alternate">
+  <link href="urn:issn:2070-1721" rel="alternate">
+  </head>
+<body>
+<script>
+window.addEventListener('load',addMetadata);
+
+async function addMetadata() {
+
+  // Copy all CSS rules for "#identifiers" to "#metadata"
+    try {
+        const cssRules = document.styleSheets[0].cssRules;
+        for (let i = 0; i < cssRules.length; i++) {
+            if (/#identifiers/.exec(cssRules[i].selectorText)) {
+                const rule = cssRules[i].cssText.
+                             replace('#identifiers','#metadata');
+                document.styleSheets[0].
+                        insertRule(rule, document.styleSheets[0].cssRules.length);
+            }
+        }
+    } catch (e) {
+        console.log(e);
+    }
+
+  // Retrieve the "metadata" element from the document
+    const div = document.getElementById('metadata');
+    if (!div) {
+        console.log("Could not locate metadata <div> element");
+        return;
+    }
+    div.style.background='#eee';
+
+  // Insert the metadata block
+  // [TODO: make this more sophisticated and linkify the values]
+    try {
+        const jsonFile = document.URL.replace(/html$/,'json');
+        const response = await fetch(jsonFile);
+        const metadata = (await response.json())[0];
+
+        const label = {
+            'STATUS': 'Status',
+            'OBSOLETES': 'Obsoletes',
+            'OBSOLETED-BY': 'Obsoleted By',
+            'UPDATES': 'Updates',
+            'UPDATED-BY': 'Updated By',
+            'SEE-ALSO': 'See Also',
+            'ERRATA-URL': 'Errata',
+        };
+
+        let metadataHTML = "<dl style='overflow:hidden'>";
+        ['STATUS', 'OBSOLETES', 'OBSOLETED-BY', 'UPDATES',
+         'UPDATED-BY', 'SEE-ALSO', 'ERRATA-URL'].forEach(key => {
+            if (metadata[key]) {
+                metadataHTML += `<dt>${label[key]}:</dt><dd>${metadata[key]}</dd>`;
+            }
+        })
+                metadataHTML += "</dl>";
+        div.innerHTML = metadataHTML;
+
+    } catch (e) {
+        console.log(e);
+    }
+}
+</script>
+<table class="ears">
+<thead><tr>
+<td class="left">RFC 0000</td>
+<td class="center">Efficient Route Invalidation</td>
+<td class="right">August 2019</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Jadhav, et al.</td>
+<td class="center">Standards Track</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div class="document-information">
+<dl id="identifiers">
+<dt class="label-stream">Stream:</dt>
+<dd class="stream">Internet Engineering Task Force (IETF)</dd>
+<dt class="label-rfc">RFC:</dt>
+<dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc0000" class="eref">0000</a></dd>
+<dt class="label-category">Category:</dt>
+<dd class="category">Standards Track</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2019-08" class="published">August 2019</time>
+    </dd>
+<dt class="label-issn">ISSN:</dt>
+<dd class="issn">2070-1721</dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">R.A. Jadhav, <span class="editor">Ed.</span>
+</div>
+<div class="org">Huawei</div>
+</div>
+<div class="author">
+      <div class="author-name">P. Thubert</div>
+<div class="org">Cisco</div>
+</div>
+<div class="author">
+      <div class="author-name">R.N. Sahoo</div>
+<div class="org">Huawei</div>
+</div>
+<div class="author">
+      <div class="author-name">Z. Cao</div>
+<div class="org">Huawei</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Efficient Route
+    Invalidation</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">
+        This document explains the problems associated with the current use of
+        NPDAO messaging and also discusses the requirements for an optimized
+        route invalidation messaging scheme. Further a new proactive route
+        invalidation message called as "Destination Cleanup Object" (DCO) is
+        specified which fulfills requirements of an optimized route
+        invalidation messaging.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+            This is an Internet Standards Track document.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+            This document is a product of the Internet Engineering Task Force
+            (IETF).  It represents the consensus of the IETF community.  It has
+            received public review and has been approved for publication by
+            the Internet Engineering Steering Group (IESG).  Further
+            information on Internet Standards is available in Section 2 of
+            RFC 7841.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+            Information about the current status of this document, any
+            errata, and how to provide feedback on it may be obtained at
+            <span><a href="https://www.rfc-editor.org/info/rfc0000">https://www.rfc-editor.org/info/rfc0000</a></span>.<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2019 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Simplified BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-boilerplate.3">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.1">
+            <p id="section-boilerplate.3-1.1.1"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a><a href="#section-boilerplate.3-1.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.1.2.1">
+                <p id="section-boilerplate.3-1.1.2.1.1"><a href="#section-1.1" class="xref">1.1</a>.  <a href="#name-requirements-language-and-t" class="xref">Requirements Language and Terminology</a><a href="#section-boilerplate.3-1.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.1.2.2">
+                <p id="section-boilerplate.3-1.1.2.2.1"><a href="#section-1.2" class="xref">1.2</a>.  <a href="#name-current-npdao-messaging" class="xref">Current NPDAO messaging</a><a href="#section-boilerplate.3-1.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.1.2.3">
+                <p id="section-boilerplate.3-1.1.2.3.1"><a href="#section-1.3" class="xref">1.3</a>.  <a href="#name-why-is-npdao-important" class="xref">Why Is NPDAO Important?</a><a href="#section-boilerplate.3-1.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.2">
+            <p id="section-boilerplate.3-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-problems-with-current-npdao" class="xref">Problems with current NPDAO messaging</a><a href="#section-boilerplate.3-1.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.2.2.1">
+                <p id="section-boilerplate.3-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-lost-npdao-due-to-link-brea" class="xref">Lost NPDAO due to link break to the previous parent</a><a href="#section-boilerplate.3-1.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.2.2.2">
+                <p id="section-boilerplate.3-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>.  <a href="#name-invalidate-routes-of-depend" class="xref">Invalidate Routes of Dependent Nodes</a><a href="#section-boilerplate.3-1.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.2.2.3">
+                <p id="section-boilerplate.3-1.2.2.3.1"><a href="#section-2.3" class="xref">2.3</a>.  <a href="#name-possible-route-downtime-cau" class="xref">Possible route downtime caused by asynchronous operation of NPDAO and DAO</a><a href="#section-boilerplate.3-1.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.3">
+            <p id="section-boilerplate.3-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-requirements-for-the-npdao-" class="xref">Requirements for the NPDAO Optimization</a><a href="#section-boilerplate.3-1.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.1">
+                <p id="section-boilerplate.3-1.3.2.1.1"><a href="#section-3.1" class="xref">3.1</a>.  <a href="#name-req1-remove-messaging-depen" class="xref">Req#1: Remove messaging dependency on link to the previous parent</a><a href="#section-boilerplate.3-1.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.2">
+                <p id="section-boilerplate.3-1.3.2.2.1"><a href="#section-3.2" class="xref">3.2</a>.  <a href="#name-req2-dependent-nodes-route-" class="xref">Req#2: Dependent nodes route invalidation on parent             switching</a><a href="#section-boilerplate.3-1.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.3">
+                <p id="section-boilerplate.3-1.3.2.3.1"><a href="#section-3.3" class="xref">3.3</a>.  <a href="#name-req3-route-invalidation-sho" class="xref">Req#3: Route invalidation should not impact data traffic</a><a href="#section-boilerplate.3-1.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.4">
+            <p id="section-boilerplate.3-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-changes-to-rpl-signaling" class="xref">Changes to RPL signaling</a><a href="#section-boilerplate.3-1.4.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1">
+                <p id="section-boilerplate.3-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-change-in-rpl-route-invalid" class="xref">Change in RPL route invalidation semantics</a><a href="#section-boilerplate.3-1.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2">
+                <p id="section-boilerplate.3-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-transit-information-option-" class="xref">Transit Information Option changes</a><a href="#section-boilerplate.3-1.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.3">
+                <p id="section-boilerplate.3-1.4.2.3.1"><a href="#section-4.3" class="xref">4.3</a>.  <a href="#name-destination-cleanup-object-" class="xref">Destination Cleanup Object (DCO)</a><a href="#section-boilerplate.3-1.4.2.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.3.2.1">
+                    <p id="section-boilerplate.3-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="xref">4.3.1</a>.  <a href="#name-secure-dco" class="xref">Secure DCO</a><a href="#section-boilerplate.3-1.4.2.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.3.2.2">
+                    <p id="section-boilerplate.3-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="xref">4.3.2</a>.  <a href="#name-dco-options" class="xref">DCO Options</a><a href="#section-boilerplate.3-1.4.2.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.3.2.3">
+                    <p id="section-boilerplate.3-1.4.2.3.2.3.1"><a href="#section-4.3.3" class="xref">4.3.3</a>.  <a href="#name-path-sequence-number-in-the" class="xref">Path Sequence number in the DCO</a><a href="#section-boilerplate.3-1.4.2.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.3.2.4">
+                    <p id="section-boilerplate.3-1.4.2.3.2.4.1"><a href="#section-4.3.4" class="xref">4.3.4</a>.  <a href="#name-destination-cleanup-option-" class="xref">Destination Cleanup Option Acknowledgment (DCO-ACK)</a><a href="#section-boilerplate.3-1.4.2.3.2.4.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.3.2.5">
+                    <p id="section-boilerplate.3-1.4.2.3.2.5.1"><a href="#section-4.3.5" class="xref">4.3.5</a>.  <a href="#name-secure-dco-ack" class="xref">Secure DCO-ACK</a><a href="#section-boilerplate.3-1.4.2.3.2.5.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.4">
+                <p id="section-boilerplate.3-1.4.2.4.1"><a href="#section-4.4" class="xref">4.4</a>.  <a href="#name-dco-base-rules" class="xref">DCO Base Rules</a><a href="#section-boilerplate.3-1.4.2.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.5">
+                <p id="section-boilerplate.3-1.4.2.5.1"><a href="#section-4.5" class="xref">4.5</a>.  <a href="#name-unsolicited-dco" class="xref">Unsolicited DCO</a><a href="#section-boilerplate.3-1.4.2.5.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.6">
+                <p id="section-boilerplate.3-1.4.2.6.1"><a href="#section-4.6" class="xref">4.6</a>.  <a href="#name-other-considerations" class="xref">Other considerations</a><a href="#section-boilerplate.3-1.4.2.6.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.6.2.1">
+                    <p id="section-boilerplate.3-1.4.2.6.2.1.1"><a href="#section-4.6.1" class="xref">4.6.1</a>.  <a href="#name-dependent-nodes-invalidatio" class="xref">Dependent Nodes invalidation</a><a href="#section-boilerplate.3-1.4.2.6.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.6.2.2">
+                    <p id="section-boilerplate.3-1.4.2.6.2.2.1"><a href="#section-4.6.2" class="xref">4.6.2</a>.  <a href="#name-npdao-and-dco-in-the-same-n" class="xref">NPDAO and DCO in the same network</a><a href="#section-boilerplate.3-1.4.2.6.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.6.2.3">
+                    <p id="section-boilerplate.3-1.4.2.6.2.3.1"><a href="#section-4.6.3" class="xref">4.6.3</a>.  <a href="#name-considerations-for-dco-retr" class="xref">Considerations for DCO retry</a><a href="#section-boilerplate.3-1.4.2.6.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.6.2.4">
+                    <p id="section-boilerplate.3-1.4.2.6.2.4.1"><a href="#section-4.6.4" class="xref">4.6.4</a>.  <a href="#name-dco-with-multiple-preferred" class="xref">DCO with multiple preferred parents</a><a href="#section-boilerplate.3-1.4.2.6.2.4.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.5">
+            <p id="section-boilerplate.3-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-acknowledgments" class="xref">Acknowledgments</a><a href="#section-boilerplate.3-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.6">
+            <p id="section-boilerplate.3-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-boilerplate.3-1.6.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.1">
+                <p id="section-boilerplate.3-1.6.2.1.1"><a href="#section-6.1" class="xref">6.1</a>.  <a href="#name-new-registry-for-the-destin" class="xref">New Registry for the Destination Cleanup Object (DCO) Flags</a><a href="#section-boilerplate.3-1.6.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.2">
+                <p id="section-boilerplate.3-1.6.2.2.1"><a href="#section-6.2" class="xref">6.2</a>.  <a href="#name-new-registry-for-the-destina" class="xref">New Registry for the Destination Cleanup Object Acknowledgment (DCO-ACK) Status field</a><a href="#section-boilerplate.3-1.6.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3">
+                <p id="section-boilerplate.3-1.6.2.3.1"><a href="#section-6.3" class="xref">6.3</a>.  <a href="#name-new-registry-for-the-destinat" class="xref">New Registry for the Destination Cleanup Object (DCO)         Acknowledgment Flags</a><a href="#section-boilerplate.3-1.6.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.7">
+            <p id="section-boilerplate.3-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-boilerplate.3-1.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.8">
+            <p id="section-boilerplate.3-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-boilerplate.3-1.8.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.9">
+            <p id="section-boilerplate.3-1.9.1"><a href="#section-appendix.a" class="xref">Appendix A</a>.  <a href="#name-example-messaging" class="xref">Example Messaging</a><a href="#section-boilerplate.3-1.9.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.9.2.1">
+                <p id="section-boilerplate.3-1.9.2.1.1"><a href="#section-a.1" class="xref">A.1</a>.  <a href="#name-example-dco-messaging" class="xref">Example DCO Messaging</a><a href="#section-boilerplate.3-1.9.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.9.2.2">
+                <p id="section-boilerplate.3-1.9.2.2.1"><a href="#section-a.2" class="xref">A.2</a>.  <a href="#name-example-dco-messaging-with-" class="xref">Example DCO Messaging with multiple preferred parents</a><a href="#section-boilerplate.3-1.9.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.10">
+            <p id="section-boilerplate.3-1.10.1"><a href="#section-appendix.b" class="xref"></a>  <a href="#name-authors-addresses" class="xref">Authors' Addresses</a><a href="#section-boilerplate.3-1.10.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">
+            RPL <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span> (Routing Protocol for Low power and
+            lossy networks) specifies a proactive distance-vector based routing
+            scheme. RPL has optional messaging in the form of DAO
+            (Destination Advertisement Object) messages, which the 6LBR (6Lo
+            Border Router) and 6LR (6Lo Router) can use to learn a route
+            towards the downstream nodes. In storing mode, DAO messages would
+            result in routing entries being created on all intermediate 6LRs
+            from the node's parent all the way towards the 6LBR.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">
+            RPL allows the use of No-Path DAO (NPDAO) messaging to invalidate a
+            routing path corresponding to the given target, thus releasing
+            resources utilized on that path. A NPDAO is a DAO message with
+            route lifetime of zero, originates at the target node and always
+            flows upstream towards the 6LBR. This document explains the
+            problems associated with the current use of NPDAO messaging and
+            also discusses the requirements for an optimized route invalidation
+            messaging scheme. Further a new proactive route invalidation
+            message called as "Destination Cleanup Object" (DCO) is specified
+            which fulfills requirements of an optimized route invalidation
+            messaging.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">
+            The document only caters to the RPL's storing mode of operation
+            (MOP). The non-storing MOP does not require use of NPDAO for route
+            invalidation since routing entries are not maintained on 6LRs.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<section id="section-1.1">
+        <h3 id="name-requirements-language-and-t">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-requirements-language-and-t" class="section-name selfRef">Requirements Language and Terminology</a>
+        </h3>
+<p id="section-1.1-1">
+                The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL
+                NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+                "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+                described in BCP 14 <span>[<a href="#RFC2119" class="xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="xref">RFC8174</a>]</span> when, and only when, they appear in all
+                capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">
+                This specification requires readers to be familiar with all the
+                terms and concepts that are discussed in "RPL: IPv6 Routing
+                Protocol for Low-Power and Lossy Networks" <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<dl class="dlNewline" id="section-1.1-3">
+          <dt id="section-1.1-3.1">Low Power and Lossy Networks (LLN):</dt>
+          <dd id="section-1.1-3.2">
+                        Network in which both the routers and their
+                        interconnect are constrained. LLN routers typically
+                        operate with constraints on processing power, memory,
+                        and energy (batter power). Their interconnects are
+                        characterized by high loss rates, low data rates, and
+                        instability.
+                    </dd>
+          <dt id="section-1.1-3.3">6LoWPAN Router (6LR):</dt>
+          <dd id="section-1.1-3.4">
+                        An intermediate router that is able to send and receive Router
+                        Advertisements (RAs) and Router Solicitations (RSs) as well as
+                        forward and route IPv6 packets.
+                    </dd>
+          <dt id="section-1.1-3.5">Directed Acyclic Graph (DAG):</dt>
+          <dd id="section-1.1-3.6">
+                        A directed graph having the property that all edges are
+                        oriented in such a way that no cycles exist.
+                    </dd>
+          <dt id="section-1.1-3.7">Destination-Oriented DAG (DODAG):</dt>
+          <dd id="section-1.1-3.8">
+                        A DAG rooted at a single destination, i.e., at a single
+                        DAG root with no outgoing edges.
+                    </dd>
+          <dt id="section-1.1-3.9">6LoWPAN Border Router (6LBR):</dt>
+          <dd id="section-1.1-3.10">
+                        A border router which is a DODAG root and is the edge
+                        node for traffic flowing in and out of the 6LoWPAN
+                        network.
+                    </dd>
+          <dt id="section-1.1-3.11">Destination Advertisement Object (DAO):</dt>
+          <dd id="section-1.1-3.12">
+                        DAO messaging allows downstream routes to the nodes to
+                        be established.
+                    </dd>
+          <dt id="section-1.1-3.13">DODAG Information Object (DIO):</dt>
+          <dd id="section-1.1-3.14">
+                        DIO messaging allows upstream routes to the 6LBR to be
+                        established. DIO messaging is initiated at the DAO
+                        root.
+                    </dd>
+          <dt id="section-1.1-3.15">Common Ancestor node</dt>
+          <dd id="section-1.1-3.16">
+                        6LR/6LBR node which is the first common node between
+                        two paths of a target node.
+                    </dd>
+          <dt id="section-1.1-3.17">No-Path DAO (NPDAO):</dt>
+          <dd id="section-1.1-3.18">
+                        A DAO message which has target with lifetime 0 used for
+                        the purpose of route invalidation.
+                    </dd>
+          <dt id="section-1.1-3.19">Destination Cleanup Object (DCO):</dt>
+          <dd id="section-1.1-3.20">
+                        A new RPL control message code defined by this
+                        document. DCO messaging improves proactive route
+                        invalidation in RPL.
+                    </dd>
+          <dt id="section-1.1-3.21">Regular DAO:</dt>
+          <dd id="section-1.1-3.22">
+                        A DAO message with non-zero lifetime. Routing
+                        adjacencies are created or updated based on this
+                        message.
+                    </dd>
+          <dt id="section-1.1-3.23">Target node:</dt>
+          <dd id="section-1.1-3.24">
+                        The node switching its parent whose routing adjacencies
+                        are updated (created/removed).
+                    </dd>
+        </dl>
+</section>
+<div id="current_npdao">
+<section id="section-1.2">
+        <h3 id="name-current-npdao-messaging">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-current-npdao-messaging" class="section-name selfRef">Current NPDAO messaging</a>
+        </h3>
+<p id="section-1.2-1">
+                RPL uses NPDAO messaging in the storing mode so that the node
+                changing its routing adjacencies can invalidate the previous
+                route. This is needed so that nodes along the previous path can
+                release any resources (such as the routing entry) they maintain
+                on behalf of target node.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-2">
+                For the rest of this document consider the following topology:<a href="#section-1.2-2" class="pilcrow">¶</a></p>
+<span id="name-sample-topology"></span><div id="sample_top">
+<figure id="figure-1">
+          <div class="artwork art-text alignCenter" id="section-1.2-3.1">
+<pre>
+    (6LBR)
+      |
+      |
+      |
+     (A)
+     / \
+    /   \
+   /     \
+ (G)     (H)
+  |       |
+  |       |
+  |       |
+ (B)     (C)
+   \      ;
+    \    ;
+     \  ;
+      (D)
+      / \
+     /   \
+    /     \
+  (E)     (F)
+                        </pre>
+</div>
+<figcaption><a href="#figure-1">Figure 1</a>:
+<a href="#name-sample-topology" class="selfRef">Sample                     topology</a>
+          </figcaption></figure>
+</div>
+<p id="section-1.2-4">
+                Node (D) is connected via preferred parent (B). (D) has an
+                alternate path via (C) towards the 6LBR. Node (A) is the common
+                ancestor for (D) for paths through (B)-(G) and (C)-(H). When
+                (D) switches from (B) to (C), RPL allows sending NPDAO to (B)
+                and regular DAO to (C).<a href="#section-1.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-1.3">
+        <h3 id="name-why-is-npdao-important">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-why-is-npdao-important" class="section-name selfRef">Why Is NPDAO Important?</a>
+        </h3>
+<p id="section-1.3-1">
+                Nodes in LLNs may be resource constrained. There is limited
+                memory available and routing entry records are one of the
+                primary elements occupying dynamic memory in the nodes. Route
+                invalidation helps 6LR nodes to decide which entries could be
+                discarded to better optimize resource utilization. Thus it
+                becomes necessary to have an efficient route invalidation
+                mechanism. Also note that a single parent switch may result in
+                a "sub-tree" switching from one parent to another. Thus the
+                route invalidation needs to be done on behalf of the sub-tree
+                and not the switching node alone. In the above example, when
+                Node (D) switches parent, the route updates needs to be done
+                for the routing tables entries of (C),(H),(A),(G), and (B) with
+                destination (D),(E) and (F). Without efficient route
+                invalidation, a 6LR may have to hold a lot of stale route
+                entries.<a href="#section-1.3-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+<div id="current_npdao_problems">
+<section id="section-2">
+      <h2 id="name-problems-with-current-npdao">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-problems-with-current-npdao" class="section-name selfRef">Problems with current NPDAO messaging</a>
+      </h2>
+<section id="section-2.1">
+        <h3 id="name-lost-npdao-due-to-link-brea">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-lost-npdao-due-to-link-brea" class="section-name selfRef">Lost NPDAO due to link break to the previous parent</a>
+        </h3>
+<p id="section-2.1-1">
+                When a node switches its parent, the NPDAO is to be sent to
+                its previous parent and a regular DAO to its new parent. In
+                cases where the node switches its parent because of transient
+                or permanent parent link/node failure then the NPDAO message is
+                bound to fail.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-2.2">
+        <h3 id="name-invalidate-routes-of-depend">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-invalidate-routes-of-depend" class="section-name selfRef">Invalidate Routes of Dependent Nodes</a>
+        </h3>
+<p id="section-2.2-1">
+                RPL does not specify how route invalidation will work for
+                dependent nodes rooted at the switching node, resulting in
+                stale routing entries of the dependent nodes. The only way for
+                6LR to invalidate the route entries for dependent nodes would
+                be to use route lifetime expiry which could be substantially
+                high for LLNs.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2-2">
+                In the example topology, when Node (D) switches its parent,
+                Node (D) generates an NPDAO on its behalf. There is no NPDAO
+                generated by the dependent child nodes (E) and (F), through the
+                previous path via (D) to (B) and (G), resulting in stale
+                entries on nodes (B) and (G) for nodes (E) and (F).<a href="#section-2.2-2" class="pilcrow">¶</a></p>
+</section>
+<section id="section-2.3">
+        <h3 id="name-possible-route-downtime-cau">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-possible-route-downtime-cau" class="section-name selfRef">Possible route downtime caused by asynchronous operation of NPDAO and DAO</a>
+        </h3>
+<p id="section-2.3-1">
+                A switching node may generate both an NPDAO and DAO via two
+                different paths at almost the same time. There is a possibility
+                that an NPDAO generated may invalidate the previous route and
+                the regular DAO sent via the new path gets lost on the way.
+                This may result in route downtime impacting downward
+                traffic for the switching node.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">
+                In the example topology, consider Node (D) switches from parent
+                (B) to (C). An NPDAO sent via the previous route may invalidate
+                the previous route whereas there is no way to determine whether
+                the new DAO has successfully updated the route entries on the
+                new path.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+</section>
+</section>
+</div>
+<div id="requirements">
+<section id="section-3">
+      <h2 id="name-requirements-for-the-npdao-">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-requirements-for-the-npdao-" class="section-name selfRef">Requirements for the NPDAO Optimization</a>
+      </h2>
+<section id="section-3.1">
+        <h3 id="name-req1-remove-messaging-depen">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-req1-remove-messaging-depen" class="section-name selfRef">Req#1: Remove messaging dependency on link to the previous parent</a>
+        </h3>
+<p id="section-3.1-1">
+                When the switching node sends the NPDAO message to the previous
+                parent, it is normal that the link to the previous parent is
+                prone to failure (that's why the node decided to switch).
+                Therefore, it is required that the route invalidation does not
+                depend on the previous link which is prone to failure. The
+                previous link referred here represents the link between the
+                node and its previous parent (from whom the node is now
+                disassociating).<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-3.2">
+        <h3 id="name-req2-dependent-nodes-route-">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-req2-dependent-nodes-route-" class="section-name selfRef">Req#2: Dependent nodes route invalidation on parent             switching</a>
+        </h3>
+<p id="section-3.2-1">
+                It should be possible to do route invalidation for dependent
+                nodes rooted at the switching node.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-3.3">
+        <h3 id="name-req3-route-invalidation-sho">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-req3-route-invalidation-sho" class="section-name selfRef">Req#3: Route invalidation should not impact data traffic</a>
+        </h3>
+<p id="section-3.3-1">
+                While sending the NPDAO and DAO messages, it is possible that
+                the NPDAO successfully invalidates the previous path, while the
+                newly sent DAO gets lost (new path not set up successfully).
+                This will result in downstream unreachability to the node
+                switching paths. Therefore, it is desirable that the route
+                invalidation is synchronized with the DAO to avoid the risk of
+                route downtime.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+</div>
+<section id="section-4">
+      <h2 id="name-changes-to-rpl-signaling">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-changes-to-rpl-signaling" class="section-name selfRef">Changes to RPL signaling</a>
+      </h2>
+<section id="section-4.1">
+        <h3 id="name-change-in-rpl-route-invalid">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-change-in-rpl-route-invalid" class="section-name selfRef">Change in RPL route invalidation semantics</a>
+        </h3>
+<p id="section-4.1-1">
+                As described in <a href="#current_npdao" class="xref">Section 1.2</a>, the NPDAO
+                originates at the node changing to a new parent and traverses
+                upstream towards the root. In order to solve the problems as
+                mentioned in <a href="#current_npdao_problems" class="xref">Section 2</a>, the
+                document adds a new proactive route invalidation message
+                called "Destination Cleanup Object" (DCO) that originates at a
+                common ancestor node and flows downstream between the new and
+                old path. The common ancestor node generates a DCO in response
+                to the change in the next-hop on receiving a regular DAO with
+                updated Path Sequence for the target.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">
+                The 6LRs in the path for DCO take action such as route
+                invalidation based on the DCO information and subsequently send
+                another DCO with the same information downstream to the next
+                hop. This operation is similar to how the DAOs are handled on
+                intermediate 6LRs in storing MOP in <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>.
+                Just like DAO in storing MOP, the DCO is sent using link-local
+                unicast source and destination IPv6 address. Unlike DAO, which
+                always travels upstream, the DCO always travels downstream.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.1-3">
+                In <a href="#sample_top" class="xref">Figure 1</a>, when node D decides to
+                switch the path from B to C, it sends a regular DAO to node C
+                with reachability information containing the address of D as
+                the target and an incremented Path Sequence. Node C will update
+                the routing table based on the reachability information in the
+                DAO and in turn generate another DAO with the same reachability
+                information and forward it to H. Node H also follows the same
+                procedure as Node C and forwards it to node A. When node A
+                receives the regular DAO, it finds that it already has a
+                routing table entry on behalf of the target address of node D.
+                It finds however that the next hop information for reaching
+                node D has changed i.e., node D has decided to change the
+                paths. In this case, Node A which is the common ancestor node
+                for node D along the two paths (previous and new), should
+                generate a DCO which traverses downwards in the network. Node A
+                handles normal DAO forwarding to 6LBR as required by <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="transit_opt_changes">
+<section id="section-4.2">
+        <h3 id="name-transit-information-option-">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-transit-information-option-" class="section-name selfRef">Transit Information Option changes</a>
+        </h3>
+<p id="section-4.2-1">
+                Every RPL message is divided into base message fields and
+                additional Options as described in <span><a href="https://www.rfc-editor.org/info/rfc6550#section-6" class="relref">Section 6</a> of [<a href="#RFC6550" class="xref">RFC6550</a>]</span><a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">
+                This document specifies a change in the Transit Information Option to
+                contain the "Invalidate previous route" (I) flag. This I-flag signals
+                the common ancestor node to generate a DCO on behalf of the
+                target node. The I-flag is carried in the Transit Information
+                Option which augments the reachability information for a given
+                set of RPL Target(s). Transit Information Option with I-flag
+                set should be carried in the DAO message when route
+                invalidation is sought for the corresponding target(s).<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<span id="name-updated-transit-information"></span><div id="transit_info_with_i">
+<figure id="figure-2">
+          <div class="artwork art-text alignCenter" id="section-4.2-3.1">
+<pre>
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 0x06 | Option Length |E|I|  Flags    | Path Control  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Path Sequence | Path Lifetime |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        </pre>
+</div>
+<figcaption><a href="#figure-2">Figure 2</a>:
+<a href="#name-updated-transit-information" class="selfRef">Updated Transit Information Option (New I flag                     added)</a>
+          </figcaption></figure>
+</div>
+<dl class="dlNewline" id="section-4.2-4">
+          <dt id="section-4.2-4.1">I (Invalidate previous route) flag:</dt>
+          <dd id="section-4.2-4.2">The 'I' flag is set by the
+                target node to indicate to the common ancestor node that it
+                wishes to invalidate any previous route between the two paths.</dd>
+        </dl>
+<p id="section-4.2-5"><span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span> allows the parent address to be sent in
+                the Transit Information Option depending on the mode of
+                operation. In case of storing mode of operation the field is
+                usually not needed. In case of DCO, the parent address field
+                <span class="bcp14">MUST NOT</span> be included.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-6">
+                The common ancestor node <span class="bcp14">SHOULD</span> generate a DCO message in
+                response to this I-flag when it sees that the routing
+                adjacencies have changed for the target. The I-flag is
+                intended to give the target node control over its own route
+                invalidation, serving as a signal to request DCO generation.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-4.3">
+        <h3 id="name-destination-cleanup-object-">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-destination-cleanup-object-" class="section-name selfRef">Destination Cleanup Object (DCO)</a>
+        </h3>
+<p id="section-4.3-1">
+                A new ICMPv6 RPL control message code is defined by this
+                specification and is referred to as "Destination Cleanup Object"
+                (DCO), which is used for proactive cleanup of state and routing
+                information held on behalf of the target node by 6LRs. The DCO
+                message always traverses downstream and cleans up route
+                information and other state information associated with the
+                given target.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<span id="name-dco-base-object"></span><div id="dco_obj">
+<figure id="figure-3">
+          <div class="artwork art-text alignCenter" id="section-4.3-2.1">
+<pre>
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| RPLInstanceID |K|D|   Flags   |   Reserved    | DCOSequence   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                            DODAGID(optional)                  +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Option(s)...
++-+-+-+-+-+-+-+-+
+                        </pre>
+</div>
+<figcaption><a href="#figure-3">Figure 3</a>:
+<a href="#name-dco-base-object" class="selfRef">DCO base object</a>
+          </figcaption></figure>
+</div>
+<dl class="dlNewline" id="section-4.3-3">
+          <dt id="section-4.3-3.1">RPLInstanceID:
+</dt>
+          <dd id="section-4.3-3.2">8-bit field indicating the topology instance associated with the DODAG, as
+learned from the DIO.
+</dd>
+          <dt id="section-4.3-3.3">K:
+</dt>
+          <dd id="section-4.3-3.4">The 'K' flag indicates that the recipient of DCO message is expected to
+send a DCO-ACK back. If the DCO-ACK is not received even after setting the 'K'
+flag, an implementation may retry the DCO at a later time. The number of
+retries are implementation and deployment dependent and are expected to be
+kept similar with those used in DAO retries in <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>. <a href="#dco_retry" class="xref">Section 4.6.3</a> specifies the
+considerations for DCO retry. A node receiving a DCO message without the 'K'
+flag set <span class="bcp14">MAY</span> respond with a DCO-ACK, especially to report an error
+condition. An example error condition could be that the node sending the
+DCO-ACK does not find the routing entry for the indicated target. When the
+sender does not set the 'K' flag it is an indication that the sender does not
+expect a response, and the sender <span class="bcp14">SHOULD NOT</span> retry the DCO.
+</dd>
+          <dt id="section-4.3-3.5">D:
+</dt>
+          <dd id="section-4.3-3.6">The 'D' flag indicates that the DODAGID field is present. This flag <span class="bcp14">MUST</span>
+be set when a local RPLInstanceID is used.
+</dd>
+          <dt id="section-4.3-3.7">Flags:
+</dt>
+          <dd id="section-4.3-3.8">The 6 bits remaining unused in the Flags field are reserved for future
+use. These bits <span class="bcp14">MUST</span> be initialized to zero by the sender and <span class="bcp14">MUST</span> be ignored
+by the receiver.
+</dd>
+          <dt id="section-4.3-3.9">Reserved:
+</dt>
+          <dd id="section-4.3-3.10">8-bit unused field. The field <span class="bcp14">MUST</span> be initialized to zero by the sender
+and <span class="bcp14">MUST</span> be ignored by the receiver.
+</dd>
+          <dt id="section-4.3-3.11">DCOSequence:
+</dt>
+          <dd id="section-4.3-3.12"> 8-bit field incremented at each unique DCO message from a node and echoed
+in the DCO-ACK message. The initial DCOSequence can be chosen randomly by the
+node. <a href="#base_rules" class="xref">Section 4.4</a> explains the handling of
+the DCOSequence.
+</dd>
+          <dt id="section-4.3-3.13">DODAGID (optional):
+</dt>
+          <dd id="section-4.3-3.14">128-bit unsigned integer set by a DODAG root that uniquely identifies a
+DODAG. This field <span class="bcp14">MUST</span> be present when the 'D' flag is set and <span class="bcp14">MUST NOT</span> be
+present if 'D' flag is not set. DODAGID is used when a local RPLInstanceID is
+in use, in order to identify the DODAGID that is associated with the RPLInstanceID.
+</dd>
+        </dl>
+<section id="section-4.3.1">
+          <h4 id="name-secure-dco">
+<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-secure-dco" class="section-name selfRef">Secure DCO</a>
+          </h4>
+<p id="section-4.3.1-1">
+                    A Secure DCO message follows the format in Figure 7 of <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>, where the base message
+                    format is the DCO message shown in <a href="#dco_obj" class="xref">Figure 3</a>.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-4.3.2">
+          <h4 id="name-dco-options">
+<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-dco-options" class="section-name selfRef">DCO Options</a>
+          </h4>
+<p id="section-4.3.2-1">
+                    The DCO message <span class="bcp14">MUST</span> carry at least one RPL Target and the
+                    Transit Information Option and <span class="bcp14">MAY</span> carry other valid
+                    options. This specification allows for the DCO message to
+                    carry the following options:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+            <caption><a href="#table-1">Table 1</a></caption>
+<tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x00</td>
+                <td class="text-left" rowspan="1" colspan="1">Pad1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x01</td>
+                <td class="text-left" rowspan="1" colspan="1">PadN</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x05</td>
+                <td class="text-left" rowspan="1" colspan="1">RPL Target</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x06</td>
+                <td class="text-left" rowspan="1" colspan="1">Transit Information</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">0x09</td>
+                <td class="text-left" rowspan="1" colspan="1">RPL Target Descriptor</td>
+              </tr>
+            </tbody>
+          </table>
+<p id="section-4.3.2-3"><span><a href="https://www.rfc-editor.org/info/rfc6550#section-6.7" class="relref">Section 6.7</a> of [<a href="#RFC6550" class="xref">RFC6550</a>]</span><a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-4.3.3">
+          <h4 id="name-path-sequence-number-in-the">
+<a href="#section-4.3.3" class="section-number selfRef">4.3.3. </a><a href="#name-path-sequence-number-in-the" class="section-name selfRef">Path Sequence number in the DCO</a>
+          </h4>
+<p id="section-4.3.3-1">
+                    A DCO message may contain a Path Sequence in the Transit
+                    Information Option to identify the freshness of the DCO
+                    message. The Path Sequence in the DCO <span class="bcp14">MUST</span> use the same
+                    Path Sequence number present in the regular DAO message
+                    when the DCO is generated in response to a DAO message.
+                    Thus if a DCO is received by a 6LR and subsequently a DAO
+                    is received with an old sequence number, then the DAO
+                    <span class="bcp14">MUST</span> be ignored. When the DCO is generated in response to a
+                    DCO from upstream parent, the Path Sequence <span class="bcp14">MUST</span> be copied
+                    from the received DCO.<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-4.3.4">
+          <h4 id="name-destination-cleanup-option-">
+<a href="#section-4.3.4" class="section-number selfRef">4.3.4. </a><a href="#name-destination-cleanup-option-" class="section-name selfRef">Destination Cleanup Option Acknowledgment (DCO-ACK)</a>
+          </h4>
+<p id="section-4.3.4-1">
+                    The DCO-ACK message <span class="bcp14">SHOULD</span> be sent as a unicast packet by a
+                    DCO recipient in response to a unicast DCO message with 'K'
+                    flag set. If 'K' flag is not set then the receiver of the
+                    DCO message <span class="bcp14">MAY</span> send a DCO-ACK, especially to report an error
+                    condition.<a href="#section-4.3.4-1" class="pilcrow">¶</a></p>
+<span id="name-dco-ack-base-object"></span><div id="dco_ack">
+<figure id="figure-4">
+            <div class="artwork art-text alignCenter" id="section-4.3.4-2.1">
+<pre>
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| RPLInstanceID |D|   Flags     |  DCOSequence  |    Status     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                            DODAGID(optional)                  +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                            </pre>
+</div>
+<figcaption><a href="#figure-4">Figure 4</a>:
+<a href="#name-dco-ack-base-object" class="selfRef">DCO-ACK base                         object</a>
+            </figcaption></figure>
+</div>
+<dl class="dlNewline" id="section-4.3.4-3">
+            <dt id="section-4.3.4-3.1">RPLInstanceID:</dt>
+            <dd id="section-4.3.4-3.2">8-bit field indicating the topology instance associated with the DODAG, as
+learned from the DIO. </dd>
+            <dt id="section-4.3.4-3.3">RPLInstanceID:
+</dt>
+            <dd id="section-4.3.4-3.4">8-bit field indicating the topology instance associated with the DODAG, as
+learned from the DIO.
+</dd>
+            <dt id="section-4.3.4-3.5">D:
+</dt>
+            <dd id="section-4.3.4-3.6">The 'D' flag indicates that the DODAGID field is present.  This flag <span class="bcp14">MUST</span>
+be set when a local RPLInstanceID is used.
+</dd>
+            <dt id="section-4.3.4-3.7">Flags:
+</dt>
+            <dd id="section-4.3.4-3.8">7-bit unused field. The field <span class="bcp14">MUST</span> be initialized to zero by the sender
+and <span class="bcp14">MUST</span> be ignored by the receiver.
+</dd>
+            <dt id="section-4.3.4-3.9">DCOSequence:
+</dt>
+            <dd id="section-4.3.4-3.10">8-bit field. The DCOSequence in DCO-ACK is copied from the DCOSequence
+received in the DCO message.
+</dd>
+            <dt id="section-4.3.4-3.11">Status:
+</dt>
+            <dd id="section-4.3.4-3.12">Indicates the completion. Status 0 is defined as unqualified acceptance in
+this specification. Status 1 is defined as "No routing-entry for the Target
+found". The remaining status values are reserved as rejection codes.
+</dd>
+            <dt id="section-4.3.4-3.13">DODAGID (optional):
+</dt>
+            <dd id="section-4.3.4-3.14">128-bit unsigned integer set by a DODAG root that uniquely identifies a
+DODAG. This field <span class="bcp14">MUST</span> be present when the 'D' flag is set and <span class="bcp14">MUST NOT</span> be
+present when 'D' flag is not set. DODAGID is used when a local RPLInstanceID
+is in use, in order to identify the DODAGID that is associated with the
+RPLInstanceID.  </dd>
+          </dl>
+</section>
+<section id="section-4.3.5">
+          <h4 id="name-secure-dco-ack">
+<a href="#section-4.3.5" class="section-number selfRef">4.3.5. </a><a href="#name-secure-dco-ack" class="section-name selfRef">Secure DCO-ACK</a>
+          </h4>
+<p id="section-4.3.5-1">
+                    A Secure DCO-ACK message follows the format in Figure 7 of
+     <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>, where the base message
+                    format is the DCO-ACK message shown in <a href="#dco_ack" class="xref">Figure 4</a>.<a href="#section-4.3.5-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+<div id="base_rules">
+<section id="section-4.4">
+        <h3 id="name-dco-base-rules">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-dco-base-rules" class="section-name selfRef">DCO Base Rules</a>
+        </h3>
+<ol start="1" type="1" class="normal" id="section-4.4-1">
+          <li id="section-4.4-1.1">
+                        If a node sends a DCO message with newer or different
+                        information than the prior DCO message transmission, it
+                        <span class="bcp14">MUST</span> increment the DCOSequence field by at least one.
+                        A DCO message transmission that is identical to the
+                        prior DCO message transmission <span class="bcp14">MAY</span> increment the
+                        DCOSequence field. The DCOSequence counter follows the
+                        sequence counter operation as defined in
+                        <span><a href="https://www.rfc-editor.org/info/rfc6550#section-7.2" class="relref">Section 7.2</a> of [<a href="#RFC6550" class="xref">RFC6550</a>]</span><a href="#section-4.4-1.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.4-1.2">
+                        The RPLInstanceID and DODAGID fields of a DCO message
+                        <span class="bcp14">MUST</span> be the same value as that of the DAO message in
+                        response to which the DCO is generated on the common
+                        ancestor node.<a href="#section-4.4-1.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.4-1.3">
+                        A node <span class="bcp14">MAY</span> set the 'K' flag in a unicast DCO message to
+                        solicit a unicast DCO-ACK in response in order to
+                        confirm the attempt.<a href="#section-4.4-1.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.4-1.4">
+                        A node receiving a unicast DCO message with the 'K'
+                        flag set <span class="bcp14">SHOULD</span> respond with a DCO-ACK. A node
+                        receiving a DCO message without the 'K' flag set <span class="bcp14">MAY</span>
+                        respond with a DCO-ACK, especially to report an error
+                        condition.<a href="#section-4.4-1.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.4-1.5">
+                        A node receiving a unicast DCO message <span class="bcp14">MUST</span> verify the
+                        stored Path Sequence in context to the given target. If
+                        the stored Path Sequence is more fresh, newer than
+                        the Path Sequence received in the DCO, then the DCO
+                        <span class="bcp14">MUST</span> be dropped.<a href="#section-4.4-1.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.4-1.6">
+                        A node that sets the 'K' flag in a unicast DCO message
+                        but does not receive DCO-ACK in response <span class="bcp14">MAY</span> reschedule
+                        the DCO message transmission for another attempt, up
+                        until an implementation specific number of retries.<a href="#section-4.4-1.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.4-1.7">
+                        A node receiving a unicast DCO message with its own
+                        address in the RPL Target Option <span class="bcp14">MUST</span> strip-off that
+                        Target Option. If this Target Option is the only one in
+                        the DCO message then the DCO message <span class="bcp14">MUST</span> be dropped.<a href="#section-4.4-1.7" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-4.4-2">
+                The scope of DCOSequence values is unique to the node which
+                generates it.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-4.5">
+        <h3 id="name-unsolicited-dco">
+<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-unsolicited-dco" class="section-name selfRef">Unsolicited DCO</a>
+        </h3>
+<p id="section-4.5-1">
+                A 6LR may generate an unsolicited DCO to unilaterally cleanup
+                the path on behalf of the target entry. The 6LR has all the
+                state information, namely, the Target address and the Path
+                Sequence, required for generating DCO in its routing table.
+                The conditions why 6LR may generate an unsolicited DCO are
+                beyond the scope of this document but some possible reasons
+                could be:<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-4.5-2">
+          <li id="section-4.5-2.1">
+                        On route expiry of an entry, a 6LR may decide to
+                        graciously cleanup the entry by initiating DCO.<a href="#section-4.5-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.5-2.2">
+                        6LR needs to entertain higher priority entries in case
+                        the routing table is full, thus resulting in eviction
+                        of an existing routing entry. In this case the eviction
+                        can be handled graciously using DCO.<a href="#section-4.5-2.2" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-4.5-3">
+                Note that if the 6LR initiates a unilateral path cleanup using
+                DCO and if it has the latest state for the target then the DCO
+                would finally reach the target node. Thus the target node would
+                be informed of its invalidation.<a href="#section-4.5-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-4.6">
+        <h3 id="name-other-considerations">
+<a href="#section-4.6" class="section-number selfRef">4.6. </a><a href="#name-other-considerations" class="section-name selfRef">Other considerations</a>
+        </h3>
+<section id="section-4.6.1">
+          <h4 id="name-dependent-nodes-invalidatio">
+<a href="#section-4.6.1" class="section-number selfRef">4.6.1. </a><a href="#name-dependent-nodes-invalidatio" class="section-name selfRef">Dependent Nodes invalidation</a>
+          </h4>
+<p id="section-4.6.1-1">
+                    Current RPL <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span> does not provide a
+                    mechanism for route invalidation for dependent nodes. This
+                    document allows the dependent nodes invalidation. Dependent
+                    nodes will generate their respective DAOs to update their
+                    paths, and the previous route invalidation for those nodes
+                    should work in the similar manner described for switching
+                    node. The dependent node may set the I-flag in the Transit
+                    Information Option as part of regular DAO so as to
+                    request invalidation of previous route from the common
+                    ancestor node.<a href="#section-4.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.6.1-2">
+                    Dependent nodes do not have any indication regarding if any
+                    of their parents in turn have decided to switch their
+                    parent. Thus for route invalidation the dependent nodes may
+                    choose to always set the 'I' flag in all its DAO message's
+                    Transit Information Option. Note that setting the I-flag is
+                    not counterproductive even if there is no previous
+                    route to be invalidated.<a href="#section-4.6.1-2" class="pilcrow">¶</a></p>
+</section>
+<section id="section-4.6.2">
+          <h4 id="name-npdao-and-dco-in-the-same-n">
+<a href="#section-4.6.2" class="section-number selfRef">4.6.2. </a><a href="#name-npdao-and-dco-in-the-same-n" class="section-name selfRef">NPDAO and DCO in the same network</a>
+          </h4>
+<p id="section-4.6.2-1">
+                    The current NPDAO mechanism in <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span> can
+                    still be used in the same network where DCO is used. The
+                    NPDAO messaging can be used, for example, on route lifetime
+                    expiry of the target or when the node simply decides to
+                    gracefully terminate the RPL session on graceful node
+                    shutdown. Moreover, a deployment can have a mix of nodes
+                    supporting the DCO and the existing NPDAO mechanism. It is
+                    also possible that the same node supports both the NPDAO
+                    and DCO signaling for route invalidation.<a href="#section-4.6.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.6.2-2"><span><a href="https://www.rfc-editor.org/info/rfc6550#section-9.8" class="relref">Section 9.8</a> of [<a href="#RFC6550" class="xref">RFC6550</a>]</span><span class="bcp14">SHOULD</span>
+                    send a No-Path DAO message to that removed DAO parent to
+                    invalidate the existing router". This document introduces
+                    an alternative and more optimized way of route invalidation
+                    but it also allows existing NPDAO messaging to work. Thus
+                    an implementation has two choices to make when a route
+                    invalidation is to be initiated:<a href="#section-4.6.2-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-4.6.2-3">
+            <li id="section-4.6.2-3.1">
+                            Use NPDAO to invalidate the previous route and
+                            send regular DAO on the new path.<a href="#section-4.6.2-3.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.6.2-3.2">
+                            Send regular DAO on the new path with the 'I'
+                            flag set in the Transit Information Option such
+                            that the common ancestor node initiates the DCO
+                            message downstream to invalidate the previous
+                            route.<a href="#section-4.6.2-3.2" class="pilcrow">¶</a>
+</li>
+          </ol>
+<p id="section-4.6.2-4">
+                    This document recommends using option 2 for reasons
+                    specified in <a href="#requirements" class="xref">Section 3</a> in this
+                    document.<a href="#section-4.6.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.6.2-5">
+                    This document assumes that all the 6LRs in the network
+                    support this specification. If there are 6LRs en-route DCO
+                    message path which do not support this document, then the
+                    route invalidation for corresponding targets may not work
+                    or may work partially i.e., only part of the path
+                    supporting DCO may be invalidated. Alternatively, a node
+                    could generate an NPDAO if it does not receive a DCO with
+                    itself as target within specified time limit. The specified
+                    time limit is deployment specific and depends upon the
+                    maximum depth of the network and per hop average latency.
+                    Note that sending NPDAO and DCO for the same operation
+                    would not result in unwanted side-effects because the
+                    acceptability of NPDAO or DCO depends upon the Path
+                    Sequence freshness.<a href="#section-4.6.2-5" class="pilcrow">¶</a></p>
+</section>
+<div id="dco_retry">
+<section id="section-4.6.3">
+          <h4 id="name-considerations-for-dco-retr">
+<a href="#section-4.6.3" class="section-number selfRef">4.6.3. </a><a href="#name-considerations-for-dco-retr" class="section-name selfRef">Considerations for DCO retry</a>
+          </h4>
+<p id="section-4.6.3-1">
+                    A DCO message could be retried by a sender if it sets the
+                    'K' flag and does not receive a DCO-ACK. The DCO retry time
+                    could be dependent on the maximum depth of the network and
+                    average per hop latency. This could range from 2 seconds to
+                    120 seconds depending on the deployment. In case the
+                    latency limits are not known, an implementation <span class="bcp14">MUST NOT</span>
+                    retry more than once in 3 seconds and <span class="bcp14">MUST NOT</span> retry more
+                    than 3 times.<a href="#section-4.6.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.6.3-2">
+                    The number of retries could also be set depending on how
+                    critical the route invalidation could be for the deployment
+                    and the link layer retry configuration. For networks
+                    supporting only MP2P and P2MP flows, such as in AMI and
+                    telemetry applications, the 6LRs may not be very keen to
+                    invalidate routes, unless they are highly
+                    memory-constrained. For home and building automation
+                    networks which may have substantial P2P traffic, the 6LRs
+                    might be keen to invalidate efficiently because it may
+                    additionally impact the forwarding efficiency.<a href="#section-4.6.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-4.6.4">
+          <h4 id="name-dco-with-multiple-preferred">
+<a href="#section-4.6.4" class="section-number selfRef">4.6.4. </a><a href="#name-dco-with-multiple-preferred" class="section-name selfRef">DCO with multiple preferred parents</a>
+          </h4>
+<p id="section-4.6.4-1"><span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span> allows a node to select multiple
+                    preferred parents for route establishment.
+                    <span><a href="https://www.rfc-editor.org/info/rfc6550#section-9.2.1" class="relref">Section 9.2.1</a> of [<a href="#RFC6550" class="xref">RFC6550</a>]</span><span class="bcp14">MUST</span> be sent with the
+                    same Path Sequence in the Transit Information".
+                    Subsequently when route invalidation has to be initiated,
+                    RPL mentions use of NPDAO which can be initiated with an
+                    updated Path Sequence to all the parent nodes through which
+                    the route is to be invalidated.<a href="#section-4.6.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.6.4-2">
+                    With DCO, the Target node itself does not initiate the
+                    route invalidation and it is left to the common ancestor
+                    node. A common ancestor node when it discovers an updated
+                    DAO from a new next-hop, it initiates a DCO. With multiple
+                    preferred parents, this handling does not change. But in
+                    this case it is recommended that an implementation
+                    initiates a DCO after a time period (DelayDCO) such that
+                    the common ancestor node may receive updated DAOs from all
+                    possible next-hops. This will help to reduce DCO control
+                    overhead i.e., the common ancestor can wait for updated
+                    DAOs from all possible directions before initiating a DCO
+                    for route invalidation. After timeout, the DCO needs to be
+                    generated for all the next-hops for whom the route
+                    invalidation needs to be done.<a href="#section-4.6.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.6.4-3">
+                    This document recommends using a DelayDCO timer value of
+                    1sec. This value is inspired by the default DelayDAO value
+                    of 1sec in <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>. Here the hypothesis is
+                    that the DAOs from all possible parent sets would be
+                    received on the common ancestor within this time period.<a href="#section-4.6.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.6.4-4">
+                    It is still possible that a DCO is generated before all the
+                    updated DAOs from all the paths are received. In this case,
+                    the ancestor node would start the invalidation procedure
+                    for paths from which the updated DAO is not received. The
+                    DCO generated in this case would start invalidating the
+                    segments along these paths on which the updated DAOs are
+                    not received. But once the DAO reaches these segments, the
+                    routing state would be updated along these segments and
+                    should not lead to any inconsistent routing state.<a href="#section-4.6.4-4" class="pilcrow">¶</a></p>
+<p id="section-4.6.4-5">
+                    Note that there is no requirement for synchronization
+                    between DCO and DAOs. The DelayDCO timer simply ensures
+                    that the DCO control overhead can be reduced and is only
+                    needed when the network contains nodes using multiple
+                    preferred parent.<a href="#section-4.6.4-5" class="pilcrow">¶</a></p>
+</section>
+</section>
+</section>
+<div id="Acknowledgments">
+<section id="section-5">
+      <h2 id="name-acknowledgments">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="section-5-1">
+            Many thanks to Alvaro Retana, Cenk Gundogan, Simon Duquennoy, Georgios
+            Papadopoulous, Peter Van Der Stok for their review and comments.
+            Alvaro Retana helped shape this document's final version with
+            critical review comments.<a href="#section-5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="IANA">
+<section id="section-6">
+      <h2 id="name-iana-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-6-1">
+            IANA is requested to allocate new codes for the DCO and DCO-ACK
+            messages from the RPL Control Codes registry.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-2">
+        <caption><a href="#table-2">Table 2</a></caption>
+<thead>
+          <tr>
+            <th class="text-center" rowspan="1" colspan="1">Code</th>
+            <th class="text-center" rowspan="1" colspan="1">Description</th>
+            <th class="text-center" rowspan="1" colspan="1">Reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">TBD1</td>
+            <td class="text-center" rowspan="1" colspan="1">Destination Cleanup Object</td>
+            <td class="text-center" rowspan="1" colspan="1">This document</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">TBD2</td>
+            <td class="text-center" rowspan="1" colspan="1">Destination Cleanup Object Acknowledgment</td>
+            <td class="text-center" rowspan="1" colspan="1">This document</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">TBD3</td>
+            <td class="text-center" rowspan="1" colspan="1">Secure Destination Cleanup Object</td>
+            <td class="text-center" rowspan="1" colspan="1">This document</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">TBD4</td>
+            <td class="text-center" rowspan="1" colspan="1">Secure Destination Cleanup Object Acknowledgment</td>
+            <td class="text-center" rowspan="1" colspan="1">This document</td>
+          </tr>
+        </tbody>
+      </table>
+<p id="section-6-3">
+            IANA is requested to allocate bit 1 from the Transit Information
+            Option Flags registry for the I-flag (<a href="#transit_opt_changes" class="xref">Section 4.2</a>)<a href="#section-6-3" class="pilcrow">¶</a></p>
+<section id="section-6.1">
+        <h3 id="name-new-registry-for-the-destin">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-new-registry-for-the-destin" class="section-name selfRef">New Registry for the Destination Cleanup Object (DCO) Flags</a>
+        </h3>
+<p id="section-6.1-1">
+                IANA is requested to create a registry for the 8-bit Destination Cleanup
+                Object (DCO) Flags field. This registry should be located in
+                existing category of "Routing Protocol for Low Power and Lossy
+                Networks (RPL)".<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">
+                New bit numbers may be allocated only by an IETF Review. Each
+                bit is tracked with the following qualities:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.1-3.1">Bit number (counting from bit 0 as the most significant bit)<a href="#section-6.1-3.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.1-3.2">Capability description<a href="#section-6.1-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.1-3.3">Defining RFC<a href="#section-6.1-3.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-6.1-4">
+                The following bits are currently defined:<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<span id="name-dco-base-flags"></span><table class="center" id="table-3">
+          <caption>
+<a href="#table-3">Table 3</a>:
+<a href="#name-dco-base-flags" class="selfRef">DCO Base Flags</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Bit number</th>
+              <th class="text-center" rowspan="1" colspan="1">Description</th>
+              <th class="text-center" rowspan="1" colspan="1">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">0</td>
+              <td class="text-center" rowspan="1" colspan="1">DCO-ACK request (K)</td>
+              <td class="text-center" rowspan="1" colspan="1">This document</td>
+            </tr>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">1</td>
+              <td class="text-center" rowspan="1" colspan="1">DODAGID field is present (D)</td>
+              <td class="text-center" rowspan="1" colspan="1">This document</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+<section id="section-6.2">
+        <h3 id="name-new-registry-for-the-destina">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-new-registry-for-the-destina" class="section-name selfRef">New Registry for the Destination Cleanup Object Acknowledgment (DCO-ACK) Status field</a>
+        </h3>
+<p id="section-6.2-1">
+                IANA is requested to create a registry for the 8-bit Destination Cleanup
+                Object Acknowledgment (DCO-ACK) Status field. This registry
+                should be located in existing category of "Routing Protocol for
+                Low Power and Lossy Networks (RPL)".<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">
+                New Status values may be allocated only by an IETF Review. Each
+                value is tracked with the following qualities:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.2-3.1">Status Code<a href="#section-6.2-3.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-3.2">Description<a href="#section-6.2-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.2-3.3">Defining RFC<a href="#section-6.2-3.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-6.2-4">
+                The following values are currently defined:<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+<span id="name-dco-ack-status-codes"></span><table class="center" id="table-4">
+          <caption>
+<a href="#table-4">Table 4</a>:
+<a href="#name-dco-ack-status-codes" class="selfRef">DCO-ACK Status Codes</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Status Code</th>
+              <th class="text-center" rowspan="1" colspan="1">Description</th>
+              <th class="text-center" rowspan="1" colspan="1">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">0</td>
+              <td class="text-center" rowspan="1" colspan="1">Unqualified acceptance</td>
+              <td class="text-center" rowspan="1" colspan="1">This document</td>
+            </tr>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">1</td>
+              <td class="text-center" rowspan="1" colspan="1">No routing-entry for the indicated Target found</td>
+              <td class="text-center" rowspan="1" colspan="1">This document</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+<section id="section-6.3">
+        <h3 id="name-new-registry-for-the-destinat">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-new-registry-for-the-destinat" class="section-name selfRef">New Registry for the Destination Cleanup Object (DCO)         Acknowledgment Flags</a>
+        </h3>
+<p id="section-6.3-1">
+                IANA is requested to create a registry for the 8-bit
+                Destination Cleanup Object (DCO) Acknowledgment Flags field.
+                This registry should be located in existing category of
+                "Routing Protocol for Low Power and Lossy Networks (RPL)".<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">
+                New bit numbers may be allocated only by an IETF Review. Each
+                bit is tracked with the following qualities:<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3-3.1">Bit number (counting from bit 0 as the most significant bit)<a href="#section-6.3-3.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.3-3.2">Capability description<a href="#section-6.3-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.3-3.3">Defining RFC<a href="#section-6.3-3.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-6.3-4">
+                The following bits are currently defined:<a href="#section-6.3-4" class="pilcrow">¶</a></p>
+<span id="name-dco-ack-base-flags"></span><table class="center" id="table-5">
+          <caption>
+<a href="#table-5">Table 5</a>:
+<a href="#name-dco-ack-base-flags" class="selfRef">DCO-ACK Base Flags</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Bit number</th>
+              <th class="text-center" rowspan="1" colspan="1">Description</th>
+              <th class="text-center" rowspan="1" colspan="1">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">0</td>
+              <td class="text-center" rowspan="1" colspan="1">DODAGID field is present (D)</td>
+              <td class="text-center" rowspan="1" colspan="1">This document</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</section>
+</div>
+<div id="Security">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-7-1">
+            This document introduces the ability for a common ancestor node to
+            invalidate a route on behalf of the target node. The common
+            ancestor node could be directed to do so by the target node using
+            the I-flag in DCO's Transit Information Option. However, the common
+            ancestor node is in a position to unilaterally initiate the route
+            invalidation since it possesses all the required state information,
+            namely, the Target address and the corresponding Path Sequence.
+            Thus a rogue common ancestor node could initiate such an
+            invalidation and impact the traffic to the target node.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">
+            This document also introduces an I-flag which is set by the target
+            node and used by the ancestor node to initiate a DCO if the
+            ancestor sees an update in the route adjacency. However,
+            this flag could be spoofed by a malicious 6LR in the path and can
+            cause invalidation of an existing active path. Note that invalidation
+            will happen only if the other conditions such as Path Sequence
+            condition is also met. Having said that, such a malicious 6LR may
+            spoof a DAO on behalf of the (sub) child with the I-flag set and
+            can cause route invalidation on behalf of the (sub) child node.
+            Note that, using existing mechanisms offered by <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>, a malicious 6LR might also spoof a DAO with
+            lifetime of zero or otherwise cause denial of service by dropping
+            traffic entirely, so the new mechanism described in this document
+            does not present a substantially increased risk of disruption.<a href="#section-7-2" class="pilcrow">¶</a></p>
+<p id="section-7-3">
+            This document assumes that the security mechanisms as defined in
+            <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span> are followed, which means that the common
+            ancestor node and all the 6LRs are part of the RPL network because
+            they have the required credentials. A non-secure RPL network needs
+            to take into consideration the risks highlighted in this section as
+            well as those highlighted in <span>[<a href="#RFC6550" class="xref">RFC6550</a>]</span>.<a href="#section-7-3" class="pilcrow">¶</a></p>
+<p id="section-7-4">
+            All RPL messages support a secure version of messages which allows
+            integrity protection using either a MAC or a signature. Optionally,
+            secured RPL messages also have encryption protection for
+            confidentiality.<a href="#section-7-4" class="pilcrow">¶</a></p>
+<p id="section-7-5">
+            The document adds new messages (DCO, DCO-ACK) which are
+            syntactically similar to existing RPL messages such as DAO,
+            DAO-ACK. Secure versions of DCO and DCO-ACK are added similar to
+            other RPL messages (such as DAO, DAO-ACK).<a href="#section-7-5" class="pilcrow">¶</a></p>
+<p id="section-7-6">
+            RPL supports three security modes as mentioned in
+            <span><a href="https://www.rfc-editor.org/info/rfc6550#section-10.1" class="relref">Section 10.1</a> of [<a href="#RFC6550" class="xref">RFC6550</a>]</span><a href="#section-7-6" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-7-7">
+        <li id="section-7-7.1">
+                    Unsecured: In this mode, it is expected that the RPL control messages
+                    are secured by other security mechanisms, such as
+                    link-layer security. In this mode, the RPL control messages,
+                    including DCO, DCO-ACK, do not have Security sections.
+                    Also note that unsecured mode does not imply that all
+                    messages are sent without any protection.<a href="#section-7-7.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-7-7.2">
+                    Preinstalled: In this mode, RPL uses secure messages. Thus
+                    secure versions of DCO, DCO-ACK <span class="bcp14">MUST</span> be used in this mode.<a href="#section-7-7.2" class="pilcrow">¶</a>
+</li>
+        <li id="section-7-7.3">
+                    Authenticated: In this mode, RPL uses secure messages. Thus
+                    secure versions of DCO, DCO-ACK <span class="bcp14">MUST</span> be used in this mode.<a href="#section-7-7.3" class="pilcrow">¶</a>
+</li>
+      </ol>
+</section>
+</div>
+<section id="section-8">
+      <h2 id="name-normative-references">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+      </h2>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+      <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03">March 1997</time>
+          <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dt id="RFC6550">[RFC6550]</dt>
+      <dd>
+<span class="refAuthor">Winter, T., Ed.</span><span class="refAuthor">, Thubert, P., Ed.</span><span class="refAuthor">, Brandt, A.</span><span class="refAuthor">, Hui, J.</span><span class="refAuthor">, Kelsey, R.</span><span class="refAuthor">, Levis, P.</span><span class="refAuthor">, Pister, K.</span><span class="refAuthor">, Struik, R.</span><span class="refAuthor">, Vasseur, JP.</span><span class="refAuthor">, and R. Alexander</span>, <span class="refTitle">"RPL: IPv6 Routing Protocol for Low-Power and Lossy Networks"</span>, <span class="seriesInfo">RFC 6550</span>, <span class="seriesInfo">DOI 10.17487/RFC6550</span>, <time datetime="2012-03">March 2012</time>
+          <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc6550">https://www.rfc-editor.org/info/rfc6550</a>&gt;</span>. </dd>
+<dt id="RFC8174">[RFC8174]</dt>
+    <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05">May 2017</time>
+          <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+</dl>
+</section>
+<div id="app-additional">
+<section id="section-appendix.a">
+      <h2 id="name-example-messaging">
+<a href="#section-appendix.a" class="section-number selfRef">Appendix A. </a><a href="#name-example-messaging" class="section-name selfRef">Example Messaging</a>
+      </h2>
+<section id="section-a.1">
+        <h2 id="name-example-dco-messaging">
+<a href="#section-a.1" class="section-number selfRef">A.1. </a><a href="#name-example-dco-messaging" class="section-name selfRef">Example DCO Messaging</a>
+        </h2>
+<p id="section-a.1-1">
+            In <a href="#sample_top" class="xref">Figure 1</a>, node (D) switches its parent from
+            (B) to (C). This example assumes that Node D has already
+            established its own route via Node B-G-A-6LBR using pathseq=x. The
+            example uses DAO and DCO messaging convention and specifies only
+            the required parameters to explain the example namely, the
+            parameter 'tgt', which stands for Target Option and value of this
+            parameter specifies the address of the target node. The parameter
+            'pathseq', which specifies the Path Sequence value carried in the
+            Transit Information Option. The parameter 'I_flag' specifies the
+            'I' flag in the Transit Information Option.
+            sequence of actions is as follows:<a href="#section-a.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-a.1-2">
+          <li id="section-a.1-2.1">Node D switches its parent from node B to node C<a href="#section-a.1-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.2">D sends a regular DAO(tgt=D,pathseq=x+1,I_flag=1) in the
+                    updated path to C<a href="#section-a.1-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.3">C checks for a routing entry on behalf of D, since it cannot
+                    find an entry on behalf of D it creates a new routing entry
+                    and forwards the reachability information of the target D
+                    to H in a DAO(tgt=D,pathseq=x+1,I_flag=1).<a href="#section-a.1-2.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.4">Similar to C, node H checks for a routing entry on behalf of
+                    D, cannot find an entry and hence creates a new routing
+                    entry and forwards the reachability information of the
+                    target D to A in a DAO(tgt=D,pathseq=x+1,I_flag=1).<a href="#section-a.1-2.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.5">
+                    Node A receives the DAO(tgt=D,pathseq=x+1,I_flag=1), and
+                    checks for a routing entry on behalf of D. It finds a
+                    routing entry but checks that the next hop for target D is
+                    different (i.e., Node G). Node A checks the I_flag and
+                    generates DCO(tgt=D,pathseq=x+1) to previous next hop for
+                    target D which is G. Subsequently, Node A updates the
+                    routing entry and forwards the reachability information of
+                    target D upstream DAO(tgt=D,pathseq=x+1,I_flag=1).<a href="#section-a.1-2.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.6">
+                    Node G receives the DCO(tgt=D,pathseq=x+1). It checks if
+                    the received path sequence is later than the stored path
+                    sequence. If it is later, Node G invalidates the routing entry
+                    of target D and forwards the (un)reachability information
+                    downstream to B in DCO(tgt=D,pathseq=x+1).<a href="#section-a.1-2.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.7">
+                    Similarly, B processes the DCO(tgt=D,pathseq=x+1) by
+                    invalidating the routing entry of target D and forwards the
+                    (un)reachability information downstream to D.<a href="#section-a.1-2.7" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.8">
+                    D ignores the DCO(tgt=D,pathseq=x+1) since the target is
+                    itself.<a href="#section-a.1-2.8" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.1-2.9">
+                    The propagation of the DCO will stop at any node where the
+                    node does not have an routing information associated with
+                    the target. If cached routing information is present and
+                    the cached Path Sequence is higher than the value in the
+                    DCO, then the DCO is dropped.<a href="#section-a.1-2.9" class="pilcrow">¶</a>
+</li>
+        </ol>
+</section>
+<section id="section-a.2">
+        <h2 id="name-example-dco-messaging-with-">
+<a href="#section-a.2" class="section-number selfRef">A.2. </a><a href="#name-example-dco-messaging-with-" class="section-name selfRef">Example DCO Messaging with multiple preferred parents</a>
+        </h2>
+<span id="name-sample-topology-2"></span><div id="sample_top_mpp">
+<figure id="figure-5">
+          <div class="artwork art-text alignCenter" id="section-a.2-1.1">
+<pre>
+        (6LBR)
+          |
+          |
+          |
+        (N11)
+         / \
+        /   \
+       /     \
+    (N21)   (N22)
+      /      / \
+     /      /   \
+    /      /     \
+ (N31)  (N32)  (N33)
+     :    |    /
+      :   |   /
+       :  |  /
+        (N41)
+                        </pre>
+</div>
+<figcaption><a href="#figure-5">Figure 5</a>:
+<a href="#name-sample-topology-2" class="selfRef">Sample                     topology 2</a>
+          </figcaption></figure>
+</div>
+<p id="section-a.2-2">
+                In <a href="#sample_top_mpp" class="xref">Figure 5</a>, node (N41) selects multiple
+                preferred parents (N32) and (N33).
+                The sequence of actions is as follows:<a href="#section-a.2-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-a.2-3">
+          <li id="section-a.2-3.1">
+                        (N41) sends DAO(tgt=N41,PS=x,I_flag=1) to (N32) and (N33).
+                        Here I_flag refers to the Invalidation flag and PS refers to
+                        Path Sequence in Transit Information option.<a href="#section-a.2-3.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.2">
+                        (N32) sends DAO(tgt=N41,PS=x,I_flag=1) to (N22). (N33) also
+                        sends DAO(tgt=N41,PS=x,I_flag=1) to (N22). (N22) learns
+                        multiple routes for the same destination (N41) through
+                        multiple next-hops. (N22) may receive the DAOs from
+                        (N32) and (N33) in any order with the I_flag set. The
+                        implementation should use the DelayDCO timer to wait to
+                        initiate the DCO. If (N22) receives an updated DAO from
+                        all the paths then the DCO need not be initiated in
+                        this case. Thus the route table at N22 should contain
+                        (Dst,NextHop,PS): { (N41,N32,x), (N41,N33,x) }.<a href="#section-a.2-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.3">
+                        (N22) sends DAO(tgt=N41,PS=x,I_flag=1) to (N11).<a href="#section-a.2-3.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.4">
+                        (N11) sends DAO(tgt=N41,PS=x,I_flag=1) to (6LBR). Thus the
+                        complete path is established.<a href="#section-a.2-3.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.5">
+                        (N41) decides to change preferred parent set from {
+                        N32, N33 } to { N31, N32 }.<a href="#section-a.2-3.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.6">
+                        (N41) sends DAO(tgt=N41,PS=x+1,I_flag=1) to (N32). (N41)
+                        sends DAO(tgt=N41,PS=x+1,I_flag=1) to (N31).<a href="#section-a.2-3.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.7">
+                        (N32) sends DAO(tgt=N41,PS=x+1,I_flag=1) to (N22).
+                        (N22) has multiple routes to destination (N41). It sees
+                        that a new Path Sequence for Target=N41 is received and
+                        thus it waits for pre-determined time period (DelayDCO
+                        time period) to invalidate another route
+                        {(N41),(N33),x}. After time period, (N22) sends
+                        DCO(tgt=N41,PS=x+1) to (N33). Also (N22) sends the
+                        regular DAO(tgt=N41,PS=x+1,I_flag=1) to (N11).<a href="#section-a.2-3.7" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.8">
+                        (N33) receives DCO(tgt=N41,PS=x+1). The received Path
+                        Sequence is latest and thus it invalidates the entry
+                        associated with target (N41). (N33) then sends the
+                        DCO(tgt=N41,PS=x+1) to (N41). (N41) sees itself as the
+                        target and drops the DCO.<a href="#section-a.2-3.8" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.9">
+                        From Step 6 above, (N31) receives the
+                        DAO(tgt=N41,PS=x+1,I_flag=1). It creates a routing
+                        entry and sends the DAO(tgt=N41,PS=x+1,I_flag=1) to
+                        (N21). Similarly (N21) receives the DAO and
+                        subsequently sends the DAO(tgt=N41,PS=x+1,I_flag=1) to
+                        (N11).<a href="#section-a.2-3.9" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.10">
+                        (N11) receives DAO(tgt=N41,PS=x+1,I_flag=1) from (N21).
+                        It waits for DelayDCO timer since it has multiple
+                        routes to (N41). (N41) will receive
+                        DAO(tgt=N41,PS=x+1,I_flag=1) from (N22) from Step 7
+                        above. Thus (N11) has received regular
+                        DAO(tgt=N41,PS=x+1,I_flag=1) from all paths and thus
+                        does not initiate DCO.<a href="#section-a.2-3.10" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.2-3.11">
+                        (N11) forwards the DAO(tgt=N41,PS=x+1,I_flag=1) to 6LBR
+                        and the full path is established.<a href="#section-a.2-3.11" class="pilcrow">¶</a>
+</li>
+        </ol>
+</section>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="section-appendix.b">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Rahul Arvind Jadhav (<span class="role">editor</span>)</span></div>
+<div dir="auto" class="left"><span class="org">Huawei</span></div>
+<div dir="auto" class="left"><span class="street-address">Kundalahalli Village, Whitefield,</span></div>
+<div dir="auto" class="left">
+<span class="locality">Bangalore</span> <span class="postal-code">560037</span>
+</div>
+<div dir="auto" class="left"><span class="region">Karnataka</span></div>
+<div dir="auto" class="left"><span class="country-name">India</span></div>
+<div class="tel">
+<span>Phone:</span>
+<a href="tel:+91-080-49160700" class="tel">+91-080-49160700</a>
+</div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:rahul.ietf@gmail.com" class="email">rahul.ietf@gmail.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="org">Cisco Systems, Inc</span></div>
+<div dir="auto" class="left"><span class="fn nameRole">Pascal Thubert</span></div>
+<div dir="auto" class="left"><span class="street-address">Building D, 45 Allee des Ormes - BP1200 </span></div>
+<div dir="auto" class="left">
+<span class="postal-code">06254</span> <span class="locality">MOUGINS - Sophia Antipolis</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">France</span></div>
+<div class="tel">
+<span>Phone:</span>
+<a href="tel:+33%20497%2023%2026%2034" class="tel">+33 497 23 26 34</a>
+</div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:pthubert@cisco.com" class="email">pthubert@cisco.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Rabi Narayan Sahoo</span></div>
+<div dir="auto" class="left"><span class="org">Huawei</span></div>
+<div dir="auto" class="left"><span class="street-address">Kundalahalli Village, Whitefield, </span></div>
+<div dir="auto" class="left">
+<span class="locality">Bangalore</span> <span class="postal-code">560037</span>
+</div>
+<div dir="auto" class="left"><span class="region">Karnataka</span></div>
+<div dir="auto" class="left"><span class="country-name">India</span></div>
+<div class="tel">
+<span>Phone:</span>
+<a href="tel:+91-080-49160700" class="tel">+91-080-49160700</a>
+</div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:rabinarayans@huawei.com" class="email">rabinarayans@huawei.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Zhen Cao</span></div>
+<div dir="auto" class="left"><span class="org">Huawei</span></div>
+<div dir="auto" class="left"><span class="street-address">W Chang'an Ave</span></div>
+<div dir="auto" class="left"><span class="locality">Beijing</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:zhencao.ietf@gmail.com" class="email">zhencao.ietf@gmail.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>
+const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>

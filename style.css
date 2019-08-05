@@ -69,11 +69,12 @@ div {
   background-color: var(--highlight-color);
   border: 1px solid var(--line-color);
   border-radius: 3px;
-  padding: 1em 1em 0;
-  margin-bottom: 1.5em;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
 }
 .alignRight.art-text pre {
   padding: 0;
+  width: auto;
 }
 .alignRight {
   margin: 1em 0;
@@ -96,11 +97,12 @@ svg {
   background-color: var(--highlight-color);
   border: 1px solid var(--line-color);
   border-radius: 3px;
-  padding: 1em 1em 0;
-  margin-bottom: 1.5em;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
 }
 .alignCenter.art-text pre {
   padding: 0;
+  width: auto;
 }
 .alignCenter {
   margin: 1em 0;
@@ -166,10 +168,10 @@ a, a[href].selfRef, figcaption a[href], caption a[href] {
 a[href] {
   color: var(--text-color);
 }
-p a[href], ul a[href], dl a[href], td a[href], a.email {
+p a[href], ul a[href], dl a[href], td a[href], a.email, a.xref {
   color: var(--link-color);
 }
-p a[href]:hover, ul a[href]:hover, dl a[href]:hover, td a[href]:hover, a.email:hover {
+p a[href]:hover, ul a[href]:hover, dl a[href]:hover, td a[href]:hover, a.email:hover, , a.xref:hover {
   text-decoration: underline;
 }
 figcaption > a[href], caption > a[href] { /* "Figure X" is missing a selfRef class. */
@@ -204,7 +206,7 @@ figure blockquote {
 }
 figcaption, caption {
   font-style: italic;
-  margin: 0 1.5em;
+  margin: 0.5em 1.5em;
   text-align: left;
 }
 @media screen {
@@ -273,7 +275,7 @@ thead+tbody tr:nth-child(2n+1) > td {
 }
 table caption {
   font-style: italic;
-  margin: 0;
+  margin: 0.3em 0;
   padding: 0;
   text-align: left;
 }
@@ -542,6 +544,7 @@ hr.addr {
   }
   #toc nav {
     display: none;
+    background-color: var(--background-color);
     padding: 0.5em 1em 1em;
     overflow: auto;
     overscroll-behavior: contain;

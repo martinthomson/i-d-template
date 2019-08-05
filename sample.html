@@ -1431,15 +1431,12 @@ Email: jrmitche@puck.nether.net
 </address>
 </section>
 </div>
-<script>const toc = document.getElementById("toc");
-const tocToggle = toc.querySelector("h2");
-
-tocToggle.onclick = e => {
+<script>
+const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
   toc.classList.toggle("active");
-}
-
-const tocNav = toc.querySelector("nav");
-tocNav.addEventListener("click", e => {
+});
+toc.querySelector("nav").addEventListener("click", e => {
   toc.classList.remove("active");
 });
 </script>
