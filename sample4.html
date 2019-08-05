@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en" class="RFC">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<title>RFC 0000: Sending Multiple RTP
+    Streams in a Single RTP Session: Grouping RTCP Reception Statistics and
+    Other Feedback</title>
+<meta content="Jonathan Lennox" name="author">
+<meta content="Magnus Westerlund" name="author">
+<meta content="Qin Wu" name="author">
+<meta content="Colin Perkins" name="author">
+<meta content="
+       RTP allows multiple RTP streams to be sent in a single session, but
+      requires each Synchronisation Source (SSRC) to send RTCP reception
+      quality reports for every other SSRC visible in the session. This causes
+      the number of RTCP reception reports to grow with the number of SSRCs,
+      rather than the number of endpoints. In many cases most of these RTCP
+      reception reports are unnecessary, since all SSRCs of an endpoint are
+      normally co-located and see the same reception quality. This memo
+      defines a Reporting Group extension to RTCP to reduce the reporting
+      overhead in such scenarios.
+    " name="description">
+<meta content="xml2rfc 2.23.1" name="generator">
+<meta name="viewport" content="initial-scale=1.0">
+<link href="draft-ietf-avtcore-rtp-multi-stream-optimisation-12-KC.v2v3.xml" type="application/rfc+xml" rel="alternate">
+<link href="#copyright" rel="license">
+<link href="style.css" rel="stylesheet">
+<link href="https://dx.doi.org/10.17487/rfc0000" rel="alternate">
+  <link href="urn:issn:2070-1721" rel="alternate">
+  </head>
+<body>
+<script>
+window.addEventListener('load',addMetadata);
+
+async function addMetadata() {
+
+  // Copy all CSS rules for "#identifiers" to "#metadata"
+    try {
+        const cssRules = document.styleSheets[0].cssRules;
+        for (let i = 0; i < cssRules.length; i++) {
+            if (/#identifiers/.exec(cssRules[i].selectorText)) {
+                const rule = cssRules[i].cssText.
+                             replace('#identifiers','#metadata');
+                document.styleSheets[0].
+                        insertRule(rule, document.styleSheets[0].cssRules.length);
+            }
+        }
+    } catch (e) {
+        console.log(e);
+    }
+
+  // Retrieve the "metadata" element from the document
+    const div = document.getElementById('metadata');
+    if (!div) {
+        console.log("Could not locate metadata <div> element");
+        return;
+    }
+    div.style.background='#eee';
+
+  // Insert the metadata block
+  // [TODO: make this more sophisticated and linkify the values]
+    try {
+        const jsonFile = document.URL.replace(/html$/,'json');
+        const response = await fetch(jsonFile);
+        const metadata = (await response.json())[0];
+
+        const label = {
+            'STATUS': 'Status',
+            'OBSOLETES': 'Obsoletes',
+            'OBSOLETED-BY': 'Obsoleted By',
+            'UPDATES': 'Updates',
+            'UPDATED-BY': 'Updated By',
+            'SEE-ALSO': 'See Also',
+            'ERRATA-URL': 'Errata',
+        };
+
+        let metadataHTML = "<dl style='overflow:hidden'>";
+        ['STATUS', 'OBSOLETES', 'OBSOLETED-BY', 'UPDATES',
+         'UPDATED-BY', 'SEE-ALSO', 'ERRATA-URL'].forEach(key => {
+            if (metadata[key]) {
+                metadataHTML += `<dt>${label[key]}:</dt><dd>${metadata[key]}</dd>`;
+            }
+        })
+                metadataHTML += "</dl>";
+        div.innerHTML = metadataHTML;
+
+    } catch (e) {
+        console.log(e);
+    }
+}
+</script>
+<table class="ears">
+<thead><tr>
+<td class="left">RFC 0000</td>
+<td class="center">Grouping RTCP Reception Statistics</td>
+<td class="right">August 2019</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Lennox, et al.</td>
+<td class="center">Standards Track</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div class="document-information">
+<dl id="identifiers">
+<dt class="label-stream">Stream:</dt>
+<dd class="stream">Internet Engineering Task Force (IETF)</dd>
+<dt class="label-rfc">RFC:</dt>
+<dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc0000" class="eref">0000</a></dd>
+<dt class="label-category">Category:</dt>
+<dd class="category">Standards Track</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2019-08" class="published">August 2019</time>
+    </dd>
+<dt class="label-issn">ISSN:</dt>
+<dd class="issn">2070-1721</dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">J. Lennox</div>
+<div class="org">Vidyo</div>
+</div>
+<div class="author">
+      <div class="author-name">M. Westerlund</div>
+<div class="org">Ericsson</div>
+</div>
+<div class="author">
+      <div class="author-name">Q. Wu</div>
+<div class="org">Huawei</div>
+</div>
+<div class="author">
+      <div class="author-name">C. Perkins</div>
+<div class="org">University of Glasgow</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Sending Multiple RTP
+    Streams in a Single RTP Session: Grouping RTCP Reception Statistics and
+    Other Feedback</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">RTP allows multiple RTP streams to be sent in a single session, but
+      requires each Synchronisation Source (SSRC) to send RTCP reception
+      quality reports for every other SSRC visible in the session. This causes
+      the number of RTCP reception reports to grow with the number of SSRCs,
+      rather than the number of endpoints. In many cases most of these RTCP
+      reception reports are unnecessary, since all SSRCs of an endpoint are
+      normally co-located and see the same reception quality. This memo
+      defines a Reporting Group extension to RTCP to reduce the reporting
+      overhead in such scenarios.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+            This is an Internet Standards Track document.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+            This document is a product of the Internet Engineering Task Force
+            (IETF).  It represents the consensus of the IETF community.  It has
+            received public review and has been approved for publication by
+            the Internet Engineering Steering Group (IESG).  Further
+            information on Internet Standards is available in Section 2 of
+            RFC 7841.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+            Information about the current status of this document, any
+            errata, and how to provide feedback on it may be obtained at
+            <span><a href="https://www.rfc-editor.org/info/rfc0000">https://www.rfc-editor.org/info/rfc0000</a></span>.<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2019 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Simplified BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-boilerplate.3">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.1">
+            <p id="section-boilerplate.3-1.1.1"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a><a href="#section-boilerplate.3-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.2">
+            <p id="section-boilerplate.3-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-terminology" class="xref">Terminology</a><a href="#section-boilerplate.3-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.3">
+            <p id="section-boilerplate.3-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-rtcp-reporting-groups" class="xref">RTCP Reporting Groups</a><a href="#section-boilerplate.3-1.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.1">
+                <p id="section-boilerplate.3-1.3.2.1.1"><a href="#section-3.1" class="xref">3.1</a>.  <a href="#name-semantics-and-behaviour-of-" class="xref">Semantics and Behaviour of RTCP Reporting Groups</a><a href="#section-boilerplate.3-1.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.2">
+                <p id="section-boilerplate.3-1.3.2.2.1"><a href="#section-3.2" class="xref">3.2</a>.  <a href="#name-identifying-members-of-an-r" class="xref">Identifying Members of an RTCP Reporting Group</a><a href="#section-boilerplate.3-1.3.2.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.2.2.1">
+                    <p id="section-boilerplate.3-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="xref">3.2.1</a>.  <a href="#name-definition-and-use-of-the-r" class="xref">Definition and Use of the RTCP RGRP SDES Item</a><a href="#section-boilerplate.3-1.3.2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.2.2.2">
+                    <p id="section-boilerplate.3-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="xref">3.2.2</a>.  <a href="#name-definition-and-use-of-the-rt" class="xref">Definition and Use of the RTCP RGRS Packet</a><a href="#section-boilerplate.3-1.3.2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.3">
+                <p id="section-boilerplate.3-1.3.2.3.1"><a href="#section-3.3" class="xref">3.3</a>.  <a href="#name-interactions-with-the-rtp-a" class="xref">Interactions with the RTP/AVPF Feedback Profile</a><a href="#section-boilerplate.3-1.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.4">
+                <p id="section-boilerplate.3-1.3.2.4.1"><a href="#section-3.4" class="xref">3.4</a>.  <a href="#name-interactions-with-rtcp-exte" class="xref">Interactions with RTCP Extended Report (XR) Packets</a><a href="#section-boilerplate.3-1.3.2.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.5">
+                <p id="section-boilerplate.3-1.3.2.5.1"><a href="#section-3.5" class="xref">3.5</a>.  <a href="#name-middlebox-considerations" class="xref">Middlebox Considerations</a><a href="#section-boilerplate.3-1.3.2.5.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.3.2.6">
+                <p id="section-boilerplate.3-1.3.2.6.1"><a href="#section-3.6" class="xref">3.6</a>.  <a href="#name-sdp-signalling-for-reportin" class="xref">SDP Signalling for Reporting Groups</a><a href="#section-boilerplate.3-1.3.2.6.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.4">
+            <p id="section-boilerplate.3-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-properties-of-rtcp-reportin" class="xref">Properties of RTCP Reporting Groups</a><a href="#section-boilerplate.3-1.4.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1">
+                <p id="section-boilerplate.3-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-bandwidth-benefits-of-rtcp-" class="xref">Bandwidth Benefits of RTCP Reporting Groups</a><a href="#section-boilerplate.3-1.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2">
+                <p id="section-boilerplate.3-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-compatibility-of-rtcp-repor" class="xref">Compatibility of RTCP Reporting Groups</a><a href="#section-boilerplate.3-1.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.5">
+            <p id="section-boilerplate.3-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-boilerplate.3-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.6">
+            <p id="section-boilerplate.3-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-boilerplate.3-1.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.7">
+            <p id="section-boilerplate.3-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-references" class="xref">References</a><a href="#section-boilerplate.3-1.7.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.1">
+                <p id="section-boilerplate.3-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-boilerplate.3-1.7.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.2">
+                <p id="section-boilerplate.3-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-boilerplate.3-1.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.8">
+            <p id="section-boilerplate.3-1.8.1"><a href="#section-appendix.a" class="xref"></a>  <a href="#name-authors-addresses" class="xref">Authors' Addresses</a><a href="#section-boilerplate.3-1.8.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">The Real-time Transport Protocol (RTP) <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span> is a
+      protocol for group communication, supporting multiparty multimedia
+      sessions. A single RTP session can support multiple participants sending
+      at once, and can also support participants sending multiple simultaneous
+      RTP streams. Examples of the latter might include a participant with
+      multiple cameras who chooses to send multiple views of a scene, or a
+      participant that sends audio and video flows multiplexed in a single RTP
+      session. Rules for handling RTP sessions containing multiple RTP streams
+      are described in <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span> with some clarifications in
+      <span>[<a href="#RTP-STREAMS" class="xref">RTP-STREAMS</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">An RTP endpoint will have one or more synchronisation sources
+      (SSRCs). It will have at least one RTP Stream, and thus SSRC, for each
+      media source it sends, and might use multiple SSRCs per media source
+      when using <span><a href="#RFC6190" class="xref">media scalability features</a> [<a href="#RFC6190" class="xref">RFC6190</a>]</span>,
+      forward error correction, <span><a href="#RFC4588" class="xref">RTP
+      retransmission</a> [<a href="#RFC4588" class="xref">RFC4588</a>]</span>, or similar mechanisms. An endpoint that is not
+      sending any RTP stream, will have at least one SSRC to use for reporting
+      and any feedback messages. Each SSRC has to send RTCP sender reports
+      corresponding to the RTP packets it sends, and receiver reports for
+      traffic it receives. That is, every SSRC will send RTCP packets to
+      report on every other SSRC. This rule is simple, but can be quite
+      inefficient for endpoints that send large numbers of RTP streams in a
+      single RTP session. Consider a session comprising ten participants, each
+      sending three media sources, each with their own RTP stream. There will
+      be 30 SSRCs in such an RTP session, and each of those 30 SSRCs will send
+      an RTCP Sender Report/Receiver Report packet (containing several report
+      blocks) per reporting interval as each SSRC reports on all the others.
+      However, the three SSRCs comprising each participant are commonly
+      co-located such that they see identical reception quality. If there was
+      a way to indicate that several SSRCs are co-located, and see the same
+      reception quality, then two-thirds of those RTCP reports could be
+      suppressed. This would allow the remaining RTCP reports to be sent more
+      often, while keeping within the same RTCP bandwidth fraction.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This memo defines such an RTCP extension, RTCP Reporting Groups. This
+      extension is used to indicate the SSRCs that originate from the same
+      endpoint, and therefore have identical reception quality, hence allowing
+      the endpoints to suppress unnecessary RTCP reception quality
+      reports.<a href="#section-1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>",
+    "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL
+    NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>",
+    "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+    "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are
+    to be interpreted as described in BCP 14 <span>[<a href="#RFC2119" class="xref">RFC2119</a>]</span>
+        <span>[<a href="#RFC8174" class="xref">RFC8174</a>]</span> when, and only when, they appear in all capitals,
+    as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+<div id="reportgroups">
+<section id="section-3">
+      <h2 id="name-rtcp-reporting-groups">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-rtcp-reporting-groups" class="section-name selfRef">RTCP Reporting Groups</a>
+      </h2>
+<p id="section-3-1">An RTCP Reporting Group is a set of synchronization sources (SSRCs)
+      that are co-located at a single endpoint (which could be an end host or
+      a middlebox) in an RTP session. Since they are co-located, every SSRC in
+      the RTCP reporting group will have an identical view of the network
+      conditions, and see the same lost packets, jitter, etc. This allows a
+      single representative to send RTCP reception quality reports on behalf
+      of the rest of the reporting group, reducing the number of RTCP packets
+      that need to be sent without loss of information.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<section id="section-3.1">
+        <h3 id="name-semantics-and-behaviour-of-">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-semantics-and-behaviour-of-" class="section-name selfRef">Semantics and Behaviour of RTCP Reporting Groups</a>
+        </h3>
+<p id="section-3.1-1">A group of co-located SSRCs that see identical network conditions
+        can form an RTCP reporting group. If reporting groups are in use, an
+        RTP endpoint with multiple SSRCs <span class="bcp14">MAY</span> put those SSRCs into a reporting
+        group if their view of the network is identical; i.e., if they report
+        on traffic received at the same interface of an RTP endpoint. SSRCs
+        with different views of the network <span class="bcp14">MUST NOT</span> be put into the same
+        reporting group.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">An endpoint that has combined its SSRCs into an RTCP reporting
+        group will choose one (or a subset) of those SSRCs to act as
+        "reporting source(s)" for that RTCP reporting group. A reporting
+        source will send RTCP SR/RR reception quality reports on behalf of the
+        other members of the RTCP reporting group. A reporting source <span class="bcp14">MUST</span>
+        suppress the RTCP SR/RR reports that relate to other members of the
+        reporting group, and only report on remote SSRCs. The other members
+        (non reporting sources) of the RTCP reporting group will suppress
+        their RTCP reception quality reports, and instead send an RTCP RGRS
+        packet (see <a href="#sec-rgrs" class="xref">Section 3.2.2</a>) to indicate that they are part
+        of an RTCP reporting group and give the SSRCs of the reporting
+        sources.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">If there are large numbers of remote SSRCs in the RTP session, then
+        the reception quality reports generated by the reporting source might
+        grow too large to fit into a single compound RTCP packet, forcing the
+        reporting source to use a round-robin policy to determine what remote
+        SSRCs it includes in each compound RTCP packet, and so reducing the
+        frequency of reports on each SSRC. To avoid this, in sessions with
+        large numbers of remote SSRCs, an RTCP reporting group <span class="bcp14">MAY</span> use more
+        than one reporting source. If several SSRCs are acting as reporting
+        sources for an RTCP reporting group, then each reporting source <span class="bcp14">MUST</span>
+        have non-overlapping sets of remote SSRCs it reports on.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.1-4">An endpoint <span class="bcp14">MUST NOT</span> create an RTCP reporting group that comprises
+        only a single local SSRC (i.e., an RTCP reporting group where the
+        reporting source is the only member of the group), unless it is
+        anticipated that the group might have additional SSRCs added to it in
+        the future.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.1-5">If a reporting source leaves the RTP session (i.e., if it sends a
+        RTCP BYE packet, or leaves the session without sending BYE under the
+        rules of <span>[<a href="#RFC3550" class="xref">RFC3550</a>], <a href="https://www.rfc-editor.org/info/rfc3550#section-6.3.7" class="relref">Section 6.3.7</a></span><span class="bcp14">MUST</span> either (a) have another
+        reporting source, if one exists, report on the remote SSRCs the
+        leaving SSRC reported on, (b) choose a new reporting source, or (c)
+        disband the RTCP reporting group and begin sending reception quality
+        reports following <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span> and <span>[<a href="#RTP-STREAMS" class="xref">RTP-STREAMS</a>]</span>.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.1-6">The RTCP timing rules assign different bandwidth fractions to
+        senders and receivers. This lets senders transmit RTCP reception
+        quality reports more often than receivers. If a reporting source in an
+        RTCP reporting group is a receiver, but one or more non-reporting
+        SSRCs in the RTCP reporting group are senders, then the endpoint <span class="bcp14">MAY</span>
+        treat the reporting source as a sender for the purpose of RTCP
+        bandwidth allocation, increasing its RTCP bandwidth allocation,
+        provided it also treats one of the senders as if it were a receiver
+        and makes the corresponding reduction in RTCP bandwidth for that SSRC.
+        However, the application needs to consider the impact on the frequency
+        of transmitting of the synchronization information included in RTCP
+        Sender Reports.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
+</section>
+<section id="section-3.2">
+        <h3 id="name-identifying-members-of-an-r">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-identifying-members-of-an-r" class="section-name selfRef">Identifying Members of an RTCP Reporting Group</a>
+        </h3>
+<p id="section-3.2-1">When RTCP Reporting Groups are in use, the other SSRCs in the RTP
+        session need to be able to identify which SSRCs are members of an RTCP
+        reporting group. Two RTCP extensions are defined to support this: the
+        RTCP RGRP SDES item is used by the reporting source(s) to identify an
+        RTCP reporting group, and the RTCP RGRS packet is used by other
+        members of an RTCP reporting group to identify the reporting
+        source(s).<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<div id="sec-rgrp">
+<section id="section-3.2.1">
+          <h4 id="name-definition-and-use-of-the-r">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-definition-and-use-of-the-r" class="section-name selfRef">Definition and Use of the RTCP RGRP SDES Item</a>
+          </h4>
+<p id="section-3.2.1-1">This document defines a new RTCP SDES item to identify an RTCP
+          reporting group. The motivation for giving a reporting group an
+          identify is to ensure that the RTCP reporting group and its member
+          SSRCs can be correctly associated when there are multiple reporting
+          sources, and to ensure that a reporting SSRC can be associated with
+          the correct reporting group if an SSRC collision occurs.<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-2">This document defines the RTCP Source Description (SDES) RGRP
+          item. The RTCP SDES RGRP item <span class="bcp14">MUST</span> be sent by the reporting sources
+          in a reporting group, and <span class="bcp14">MUST NOT</span> be sent by other members of the
+          reporting group or by SSRCs that are not members of any RTCP
+          reporting group. Specifically, every reporting source in an RTCP
+          reporting group <span class="bcp14">MUST</span> include an RTCP SDES packet containing an RGRP
+          item in every compound RTCP packet in which it sends an RR or SR
+          packet (i.e., in every RTCP packet it sends, unless <span><a href="#RFC5506" class="xref">Reduced-Size RTCP</a> [<a href="#RFC5506" class="xref">RFC5506</a>]</span> is in use).<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-3">Syntactically, the format of the RTCP SDES RGRP item is identical
+          to that of the <span><a href="#RFC7022" class="xref">RTCP SDES CNAME item</a> [<a href="#RFC7022" class="xref">RFC7022</a>]</span>,
+          except that the SDES item type field <span class="bcp14">MUST</span> have value RGRP=(TBA)
+          instead of CNAME=1. The value of the RTCP SDES RGRP item <span class="bcp14">MUST</span> be
+          chosen with the same concerns about global uniqueness and the same
+          privacy considerations as the RTCP SDES CNAME. The value of the RTCP
+          SDES RGRP item <span class="bcp14">MUST</span> be stable throughout the lifetime of the
+          reporting group, even if some or all of the reporting sources change
+          their SSRC due to collisions, or if the set of reporting sources
+          changes.<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-3.2.1-4.1">Note to RFC Editor: please replace (TBA) in the above
+              paragraph with the RTCP SDES item type number assigned to the
+              RGRP item, then delete this note.<a href="#section-3.2.1-4.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-3.2.1-5">An RTP mixer or translator that forwards RTCP SR or RR packets
+          from members of a reporting group <span class="bcp14">MUST</span> forward the corresponding
+          RTCP SDES RGRP items as well, even if it otherwise strips SDES items
+          other than the CNAME item.<a href="#section-3.2.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-rgrs">
+<section id="section-3.2.2">
+          <h4 id="name-definition-and-use-of-the-rt">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-definition-and-use-of-the-rt" class="section-name selfRef">Definition and Use of the RTCP RGRS Packet</a>
+          </h4>
+<p id="section-3.2.2-1">A new RTCP packet type is defined to allow the members of an RTCP
+          reporting group to identify the reporting sources for that group.
+          This allows participants in an RTP session to distinguish an SSRC
+          that is sending empty RTCP reception reports because it is a member
+          of an RTCP reporting group, from an SSRC that is sending empty RTCP
+          reception reports because it is not receiving any traffic. It also
+          explicitly identifies the reporting sources, allowing other members
+          of the RTP session to know which SSRCs are acting as the reporting
+          sources for an RTCP reporting group, and allowing them to detect if
+          RTCP packets from any of the reporting sources are being lost.<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-2">The format of the RTCP RGRS packet is defined below. It comprises
+          the fixed RTCP header that indicates the packet type and length, the
+          SSRC of the packet sender, and a list of reporting sources for the
+          RTCP reporting group of which the packet sender is a member.<a href="#section-3.2.2-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-3.2.2-3">
+<pre>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|V=2|P|    SC   | PT=RGRS(TBA)  |             length            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     SSRC of packet sender                     |
++=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+:          List of SSRC(s) for the Reporting Source(s)          :
+:                              ...                              :
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</pre><a href="#section-3.2.2-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.2-4">The fields in the RTCP RGRS packet have the following definition:<a href="#section-3.2.2-4" class="pilcrow">¶</a></p>
+<dl class="dlParallel" id="section-3.2.2-5">
+            <dt id="section-3.2.2-5.1">version (V):</dt>
+            <dd id="section-3.2.2-5.2">2 bits unsigned integer. This field
+              identifies the RTP version. The current RTP version is 2.</dd>
+            <dt id="section-3.2.2-5.3">padding (P):</dt>
+            <dd id="section-3.2.2-5.4">1 bit. If set, the padding bit
+              indicates that the RTCP packet contains additional padding
+              octets at the end that are not part of the control information
+              but are included in the length field. See <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span>.</dd>
+            <dt id="section-3.2.2-5.5">Source Count (SC):</dt>
+            <dd id="section-3.2.2-5.6">5 bits unsigned integer.
+              Indicates the number of reporting source SSRCs that are included
+              in this RTCP packet. As the RTCP RGRS packet <span class="bcp14">MUST NOT</span> be not
+              sent by reporting sources, all the SSRCs in the list of
+              reporting sources will be different from the SSRC of the packet
+              sender. Every RTCP RGRS packet <span class="bcp14">MUST</span> contain at least one
+              reporting source SSRC.</dd>
+            <dt id="section-3.2.2-5.7">Payload type (PT):</dt>
+            <dd id="section-3.2.2-5.8">
+              <p id="section-3.2.2-5.8.1">8 bits unsigned integer. The
+              RTCP packet type number that identifies the packet as being an
+              RTCP RGRS packet. The RGRS RTCP packet has the value [TBA].<a href="#section-3.2.2-5.8.1" class="pilcrow">¶</a></p>
+<ul class="ulEmpty">
+<li class="ulEmpty" id="section-3.2.2-5.8.2.1">Note to RFC Editor: please replace [TBA] here, and in the
+                  packet format diagram above, with the RTCP packet type that
+                  IANA assigns to the RTCP RGRS packet.<a href="#section-3.2.2-5.8.2.1" class="pilcrow">¶</a>
+</li>
+              </ul>
+</dd>
+            <dt id="section-3.2.2-5.9">Length:</dt>
+            <dd id="section-3.2.2-5.10">16 bits unsigned integer. The length of
+              this packet in 32-bit words minus one, including the header and
+              any padding. This is in line with the definition of the length
+              field used in RTCP sender and receiver reports <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span>. Since all RTCP RGRS packets include at least
+              one reporting source SSRC, the length will always be 2 or
+              greater.</dd>
+            <dt id="section-3.2.2-5.11">SSRC of packet sender:</dt>
+            <dd id="section-3.2.2-5.12">32 bits. The SSRC of the
+              sender of this packet.</dd>
+            <dt id="section-3.2.2-5.13">List of SSRCs for the Reporting Source(s):</dt>
+            <dd id="section-3.2.2-5.14">A
+              variable length size (as indicated by SC header field) of the 32
+              bit SSRC values of the reporting sources for the RTCP Reporting
+              Group of which the packet sender is a member.</dd>
+          </dl>
+<p id="section-3.2.2-6">Every source that belongs to an RTCP reporting group but is not a
+          reporting source <span class="bcp14">MUST</span> include an RTCP RGRS packet in every compound
+          RTCP packet in which it sends an RR or SR packet (i.e., in every
+          RTCP packet it sends, unless <span><a href="#RFC5506" class="xref"> Reduced-Size
+          RTCP</a> [<a href="#RFC5506" class="xref">RFC5506</a>]</span> is in use). Each RTCP RGRS packet <span class="bcp14">MUST</span> contain the SSRC
+          identifier of at least one reporting source. If there are more
+          reporting sources in an RTCP reporting group than can fit into an
+          RTCP RGRS packet, the members of that reporting group <span class="bcp14">MUST</span> send the
+          SSRCs of the reporting sources in a round-robin fashion in
+          consecutive RTCP RGRS packets, such that all the SSRCs of the
+          reporting sources are included over the course of several RTCP
+          reporting intervals.<a href="#section-3.2.2-6" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-7">An RTP mixer or translator that forwards RTCP SR or RR packets
+          from members of a reporting group <span class="bcp14">MUST</span> also forward the
+          corresponding RGRS RTCP packets. If the RTP mixer or translator
+          rewrites SSRC values of the packets it forwards, it <span class="bcp14">MUST</span> make the
+          corresponding changes to the RTCP RGRS packets.<a href="#section-3.2.2-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+<section id="section-3.3">
+        <h3 id="name-interactions-with-the-rtp-a">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-interactions-with-the-rtp-a" class="section-name selfRef">Interactions with the RTP/AVPF Feedback Profile</a>
+        </h3>
+<p id="section-3.3-1">Use of the RTP/AVPF Feedback Profile <span>[<a href="#RFC4585" class="xref">RFC4585</a>]</span>
+        allows SSRCs to send rapid RTCP feedback requests and codec control
+        messages. If use of the RTP/AVPF profile has been negotiated in an RTP
+        session, members of an RTCP reporting group can send rapid RTCP
+        feedback and codec control messages following <span>[<a href="#RFC4585" class="xref">RFC4585</a>]</span>
+        and <span>[<a href="#RFC5104" class="xref">RFC5104</a>]</span>, as updated by <span><a class="relref">Section 5.4</a> of [<a href="#RTP-STREAMS" class="xref">RTP-STREAMS</a>]</span><a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">The members of an RTCP reporting group will all see identical
+        network conditions. Accordingly, one might therefore think that it
+        doesn't matter which SSRC in the reporting group sends the RTP/AVPF
+        feedback or codec control messages. There might be, however, cases
+        where the sender of the feedback/codec control message has semantic
+        importance, or when only a subset of the members of an RTCP reporting
+        group might want to send RTP/AVPF feedback or a codec control message
+        in response to a particular event. For example, an RTP video sender
+        might choose to treat packet loss feedback received from SSRCs known
+        to be audio receivers with less urgency than feedback that it receives
+        from video receivers when deciding what packets to retransmit, and a
+        multimedia receiver using reporting groups might want to choose the
+        outgoing SSRC for feedback packets to reflect this.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.3-3">Each member of an RTCP reporting group <span class="bcp14">SHOULD</span> therefore send
+        RTP/AVPF feedback/codec control messages independently of the other
+        members of the reporting group, to respect the semantic meaning of the
+        message sender. The suppression rules of <span>[<a href="#RFC4585" class="xref">RFC4585</a>]</span> will
+        ensure that only a single copy of each feedback packet is (typically)
+        generated, even if several members of a reporting group send the same
+        feedback. When an endpoint knows that several members of its RTCP
+        reporting group will be sending identical feedback, and that the
+        sender of the feedback is not semantically important, then that
+        endpoint <span class="bcp14">MAY</span> choose to send all its feedback from the reporting source
+        and deterministically suppress feedback packets generated by the other
+        sources in the reporting group.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-4">It is important to note that the RTP/AVPF timing rules operate on a
+        per-SSRC basis. Using a single reporting source to send all feedback
+        for a reporting group will hence limit the amount of feedback that can
+        be sent to that which can be sent by one SSRC. If this limit is a
+        problem, then the reporting group can allow each of its members to
+        send its own feedback, using its own SSRC.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<p id="section-3.3-5">If the RTP/AVPF feedback messages or codec control requests are
+        sent as compound RTCP packets, then those compound RTCP packets <span class="bcp14">MUST</span>
+        include either an RTCP RGRS packet or an RTCP SDES RGRP item,
+        depending on whether they are sent by the reporting source or a
+        non-reporting source in the RTCP reporting group respectively. The
+        contents of non-compound RTCP feedback or codec control messages are
+        not affected by the use of RTCP reporting groups.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
+</section>
+<section id="section-3.4">
+        <h3 id="name-interactions-with-rtcp-exte">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-interactions-with-rtcp-exte" class="section-name selfRef">Interactions with RTCP Extended Report (XR) Packets</a>
+        </h3>
+<p id="section-3.4-1">When using RTCP Extended Reports (XR) <span>[<a href="#RFC3611" class="xref">RFC3611</a>]</span> with
+        RTCP reporting groups, it is <span class="bcp14">RECOMMENDED</span> that the reporting source is
+        used to send the RTCP XR packets. If multiple reporting sources are in
+        use, the reporting source that sends the SR/RR packets that relate to
+        a particular remote SSRC  <span class="bcp14">SHOULD</span> send the RTCP XR reports about that
+        SSRC. This is motivated as one commonly combine the RTCP XR metrics
+        with the regular report block to more fully understand the situation.
+        Receiving these blocks in different compound packets reduces their
+        value as the measuring intervals are not synchronized in those
+        cases.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.4-2">Some RTCP XR report blocks are specific to particular types of
+        media, and might be relevant to only some members of a reporting
+        group. For example, it would make no sense for an SSRC that is
+        receiving video to send a VoIP metric RTCP XR report block. Such media
+        specific RTCP XR report blocks <span class="bcp14">MUST</span> be sent by the SSRC to which they
+        are relevant, and <span class="bcp14">MUST NOT</span> be included in the common report sent by
+        the reporting source. This might mean that some SSRCs send RTCP XR
+        packets in compound RTCP packets that contain an empty RTCP SR/RR
+        packet, and that the time period covered by the RTCP XR packet is
+        different to that covered by the RTCP SR/RR packet. If it is important
+        that the RTCP XR packet and RTCP SR/RR packet cover the same time
+        period, then that source  <span class="bcp14">SHOULD</span> be removed from the RTCP reporting
+        group, and send standard RTCP packets instead.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+</section>
+<section id="section-3.5">
+        <h3 id="name-middlebox-considerations">
+<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-middlebox-considerations" class="section-name selfRef">Middlebox Considerations</a>
+        </h3>
+<p id="section-3.5-1">Many different types of middlebox are used with RTP. RTCP reporting
+        groups are potentially relevant to those types of RTP middlebox that
+        have their own SSRCs and generate RTCP reports for the traffic they
+        receive. RTP middleboxes that do not have their own SSRC, and that
+        don't send RTCP reports on the traffic they receive, cannot use the
+        RTCP reporting groups extension, since they generate no RTCP reports
+        to group.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2">An RTP middlebox that has several SSRCs of its own can use the RTCP
+        reporting groups extension to group the RTCP reports it generates.
+        This can occur, for example, if a middlebox is acting as an RTP mixer
+        for both audio and video flows that are multiplexed onto a single RTP
+        session, where the middlebox has one SSRC for the audio mixer and one
+        for the video mixer part, and when the middlebox wants to avoid cross
+        reporting between audio and video.<a href="#section-3.5-2" class="pilcrow">¶</a></p>
+<p id="section-3.5-3">A middlebox cannot use the RTCP reporting groups extension to group
+        RTCP packets from the SSRCs that it is forwarding. It can, however,
+        group the RTCP packets from the SSRCs it is forwarding into compound
+        RTCP packets following the rules in <span><a href="https://www.rfc-editor.org/info/rfc3550#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC3550" class="xref">RFC3550</a>]</span><span>[<a href="#RTP-STREAMS" class="xref">RTP-STREAMS</a>]</span>. If the middlebox is
+        using RTCP reporting groups for its own SSRCs, it <span class="bcp14">MAY</span> include RTCP
+        packets from the SSRCs that it is forwarding as part of the compound
+        RTCP packets its reporting source generates.<a href="#section-3.5-3" class="pilcrow">¶</a></p>
+<p id="section-3.5-4">A middlebox that forwards RTCP SR or RR packets sent by members of
+        a reporting group <span class="bcp14">MUST</span> forward the corresponding RTCP SDES RGRP items,
+        as described in <a href="#sec-rgrp" class="xref">Section 3.2.1</a>. A middlebox that forwards
+        RTCP SR or RR packets sent by member of a reporting group <span class="bcp14">MUST</span> also
+        forward the corresponding RTCP RGRS packets, as described in <a href="#sec-rgrs" class="xref">Section 3.2.2</a>. Failure to forward these packets can cause
+        compatibility problems, as described in <a href="#compat" class="xref">Section 4.2</a>.<a href="#section-3.5-4" class="pilcrow">¶</a></p>
+<p id="section-3.5-5">If a middlebox rewrites SSRC values in the RTP and RTCP packets
+        that it is forwarding, then it <span class="bcp14">MUST</span> make the corresponding changes in
+        RTCP SDES packets containing RGRP items and in RTCP RGRS packets, to
+        allow them to be associated with the rewritten SSRCs.<a href="#section-3.5-5" class="pilcrow">¶</a></p>
+</section>
+<div id="sdp">
+<section id="section-3.6">
+        <h3 id="name-sdp-signalling-for-reportin">
+<a href="#section-3.6" class="section-number selfRef">3.6. </a><a href="#name-sdp-signalling-for-reportin" class="section-name selfRef">SDP Signalling for Reporting Groups</a>
+        </h3>
+<p id="section-3.6-1">This document defines the "a=rtcp-rgrp" <span><a href="#RFC4566" class="xref">Session Description Protocol (SDP)</a> [<a href="#RFC4566" class="xref">RFC4566</a>]</span> attribute
+        to indicate if the session participant is capable of supporting RTCP
+        Reporting Groups for applications that use SDP for configuration of
+        RTP sessions. It is a property attribute, and hence takes no value.
+        The <span><a href="#SDP-ATTRIBUTES" class="xref">multiplexing
+        category</a> [<a href="#SDP-ATTRIBUTES" class="xref">SDP-ATTRIBUTES</a>]</span> is IDENTICAL, as the functionality applies on RTP
+        session level. A participant that proposes the use of RTCP Reporting
+        Groups <span class="bcp14">SHALL</span> itself support the reception of RTCP Reporting Groups.<a href="#section-3.6-1" class="pilcrow">¶</a></p>
+<dl class="dlParallel" id="section-3.6-2">
+          <dt id="section-3.6-2.1">The formal definition of this attribute is:</dt>
+          <dd id="section-3.6-2.2">
+            <p id="section-3.6-2.2.1"><a href="#section-3.6-2.2.1" class="pilcrow">¶</a></p>
+<dl class="dlParallel" id="section-3.6-2.2.2">
+              <dt id="section-3.6-2.2.2.1">Name:</dt>
+              <dd id="section-3.6-2.2.2.2">rtcp-rgrp</dd>
+              <dt id="section-3.6-2.2.2.3">Value:</dt>
+              <dd id="section-3.6-2.2.2.4"></dd>
+              <dt id="section-3.6-2.2.2.5">Usage Level:</dt>
+              <dd id="section-3.6-2.2.2.6">session, media</dd>
+              <dt id="section-3.6-2.2.2.7">Type of attribute:</dt>
+              <dd id="section-3.6-2.2.2.8">Media or session level</dd>
+              <dt id="section-3.6-2.2.2.9">Charset Dependent:</dt>
+              <dd id="section-3.6-2.2.2.10">no</dd>
+              <dt id="section-3.6-2.2.2.11">Example:</dt>
+              <dd id="section-3.6-2.2.2.12">a=rtcp-rgrp</dd>
+            </dl>
+</dd>
+        </dl>
+<p id="section-3.6-3">When using SDP Offer/Answer <span>[<a href="#RFC3264" class="xref">RFC3264</a>]</span>, the following
+        procedures are to be used:<a href="#section-3.6-3" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-3.6-4.1">Generating the initial SDP offer: If the offerer supports the
+            RTCP reporting group extensions, and is willing to accept RTCP
+            packets containing those extensions, then it <span class="bcp14">MUST</span> include an
+            "a=rtcp-rgrp" attribute in the initial offer. If the offerer does
+            not support RTCP reporting groups extensions, or is not willing to
+            accept RTCP packets containing those extensions, then it <span class="bcp14">MUST NOT</span>
+            include the "a=rtcp-rgrp" attribute in the offer.<a href="#section-3.6-4.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-3.6-4.2">Generating the SDP answer: If the SDP offer contains an
+            "a=rtcp-rgrp" attribute, and if the answerer supports RTCP
+            reporting groups and is willing to receive RTCP packets using the
+            RTCP reporting groups extensions, then the answerer <span class="bcp14">MAY</span> include an
+            "a=rtcp-rgrp" attribute in the answer and <span class="bcp14">MAY</span> send RTCP packets
+            containing the RTCP reporting groups extensions. If the offer does
+            not contain an "a=rtcp-rgrp" attribute, or if the offer does
+            contain such an attribute but the answerer does not wish to accept
+            RTCP packets using the RTCP reporting groups extensions, then the
+            answer <span class="bcp14">MUST NOT</span> include an "a=rtcp-rgrp" attribute.<a href="#section-3.6-4.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-3.6-4.3">Offerer Processing of the SDP Answer: If the SDP answer
+            contains an "a=rtcp-rgrp" attribute, and the corresponding offer
+            also contained an "a=rtcp-rgrp" attribute, then the offerer <span class="bcp14">MUST</span>
+            be prepared to accept and process RTCP packets that contain the
+            reporting groups extension, and <span class="bcp14">MAY</span> send RTCP packets that contain
+            the reporting groups extension. If the SDP answer contains an
+            "a=rtcp-rgrp" attribute, but the corresponding offer did not
+            contain the "a=rtcp-rgrp" attribute, then the offerer <span class="bcp14">MUST</span> reject
+            the call. If the SDP answer does not contain an "a=rtcp-rgrp"
+            attribute, then the offerer <span class="bcp14">MUST NOT</span> send packets containing the
+            RTCP reporting groups extensions, and does not need to process
+            packet containing the RTCP reporting groups extensions.<a href="#section-3.6-4.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.6-5">In declarative usage of SDP, such as the <span><a href="#RFC2326" class="xref">Real Time Streaming Protocol (RTSP)</a> [<a href="#RFC2326" class="xref">RFC2326</a>]</span> and the
+        <span><a href="#RFC2974" class="xref">Session Announcement Protocol (SAP)</a> [<a href="#RFC2974" class="xref">RFC2974</a>]</span>, the
+        presence of the attribute indicates that the session participant <span class="bcp14">MAY</span>
+        use RTCP Reporting Groups in its RTCP transmissions. An implementation
+        that doesn't explicitly support RTCP Reporting Groups <span class="bcp14">MAY</span> join a RTP
+        session as long as it has been verified that the implementation
+        doesn't suffer from the problems discussed in <a href="#compat" class="xref">Section 4.2</a>.<a href="#section-3.6-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<section id="section-4">
+      <h2 id="name-properties-of-rtcp-reportin">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-properties-of-rtcp-reportin" class="section-name selfRef">Properties of RTCP Reporting Groups</a>
+      </h2>
+<p id="section-4-1">This section provides additional information on what the resulting
+      properties are with the design specified in <a href="#reportgroups" class="xref">Section 3</a>. The content of this section is
+      non-normative.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="reportgroups-bw">
+<section id="section-4.1">
+        <h3 id="name-bandwidth-benefits-of-rtcp-">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-bandwidth-benefits-of-rtcp-" class="section-name selfRef">Bandwidth Benefits of RTCP Reporting Groups</a>
+        </h3>
+<p id="section-4.1-1">To understand the benefits of RTCP reporting groups, consider a
+        scenario in which the two endpoints in a session each have a hundred
+        sources, of which eight each are sending within any given reporting
+        interval.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">For ease of analysis, we can make the simplifying approximation
+        that the duration of the RTCP reporting interval is equal to the total
+        size of the RTCP packets sent during an RTCP interval, divided by the
+        RTCP bandwidth. (This will be approximately true in scenarios where
+        the bandwidth is not so high that the minimum RTCP interval is
+        reached.) For further simplification, we can assume RTCP senders are
+        following the recommendations regarding Compound RTCP Packets in <span>[<a href="#RTP-STREAMS" class="xref">RTP-STREAMS</a>]</span>; thus, the per-packet
+        transport-layer overhead will be small relative to the RTCP data.
+        Thus, only the actual RTCP data itself need be considered.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.1-3">In a report interval in this scenario, there will, as a baseline,
+        be 200 SDES packets, 184 RR packets, and 16 SR packets. This amounts
+        to approximately 6.5 kB of RTCP per report interval, assuming 16-byte
+        CNAMEs and no other SDES information.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1-4">Using the original <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span>
+        everyone-reports-on-every-sender feedback rules, each of the 184
+        receivers will send 16 report blocks, and each of the 16 senders will
+        send 15. This amounts to approximately 76 kB of report block traffic
+        per interval; 92% of RTCP traffic consists of report blocks.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">If reporting groups are used, however, there is only 0.4 kB of
+        reports per interval, with no loss of useful information.
+        Additionally, there will be (assuming 16-byte RGRPs, and a single
+        reporting source per reporting group) an additional 2.4 kB per cycle
+        of RGRP SDES items and RGRS packets. Put another way, the unmodified
+        <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span> reporting interval is approximately 9 times
+        longer than if reporting groups are in use.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="compat">
+<section id="section-4.2">
+        <h3 id="name-compatibility-of-rtcp-repor">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-compatibility-of-rtcp-repor" class="section-name selfRef">Compatibility of RTCP Reporting Groups</a>
+        </h3>
+<p id="section-4.2-1">The RTCP traffic generated by receivers using RTCP Reporting Groups
+        might appear, to observers unaware of these semantics, to be generated
+        by receivers who are experiencing a network disconnection, as the
+        non-reporting sources appear not to be receiving a given sender at
+        all.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">This could be a potentially critical problem for such a sender
+        using RTCP for congestion control, as such a sender might think that
+        it is sending so much traffic that it is causing complete congestion
+        collapse.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2-3">However, such an interpretation of the session statistics would
+        require a fairly sophisticated RTCP analysis. Any receiver of RTCP
+        statistics which is just interested in information about itself needs
+        to be prepared that any given reception report might not contain
+        information about a specific media source, because reception reports
+        in large conferences can be round-robined.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">Thus, it is unclear to what extent such backward compatibility
+        issues would actually cause trouble in practice.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+<section id="section-5">
+      <h2 id="name-security-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-5-1">The security considerations of <span>[<a href="#RFC3550" class="xref">RFC3550</a>]</span> and <span>[<a href="#RTP-STREAMS" class="xref">RTP-STREAMS</a>]</span> apply. If the RTP/AVPF
+      profile is in use, then the security considerations of <span>[<a href="#RFC4585" class="xref">RFC4585</a>]</span> (and <span>[<a href="#RFC5104" class="xref">RFC5104</a>]</span>, if used) also apply.
+      If RTCP XR is used, the security consideration of <span>[<a href="#RFC3611" class="xref">RFC3611</a>]</span> and any XR report blocks used also apply.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">The RTCP SDES RGRP item is vulnerable to malicious modifications
+      unless integrity protected is used. A modification of this item's length
+      field cause the parsing of the RTCP packet in which it is contained to
+      fail. Depending on the implementation, parsing of the full compound RTCP
+      packet can also fail causing the whole packet to be discarded. A
+      modification to the value of this SDES item would make the receiver of
+      the report think that the sender of the report was a member of a
+      different RTCP reporting group. This will potentially create an
+      inconsistency, when the RGRS reports the source as being in the same
+      reporting group as another source with another reporting group
+      identifier. What impact on a receiver implementation such
+      inconsistencies would have are difficult to fully predict. One case is
+      when congestion control or other adaptation mechanisms are used, an
+      inconsistent report can result in a media sender to reduce its bit-rate.
+      However, a direct modification of the receiver report or a feedback
+      message itself would be a more efficient attack, and equally costly to
+      perform.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">The new RGRS RTCP Packet type is very simple. The common RTCP packet
+      type header shares the security risks with previous RTCP packet types.
+      Errors or modification of the length field can cause the full compound
+      packet to fail header validation (see <span><a href="https://www.rfc-editor.org/info/rfc3550#section-A.2" class="relref">Appendix A.2</a> of [<a href="#RFC3550" class="xref">RFC3550</a>]</span><span class="bcp14">SHOULD</span> be discarded. If consistent changes are
+      done, that could be part of a resource exhaustion attack on a receiver
+      implementation. Modification of the "List of SSRCs for the Reporting
+      Source(s)" would change the SSRC the receiver expect to report on behalf
+      of this SSRC. If that SSRC exist, that could potentially change the
+      report group used for this SSRC. A change to another reporting group
+      belonging to another endpoint is likely detectable as there would be a
+      mismatch between the SSRC of the packet sender's endpoint information,
+      transport addresses, SDES CNAME etc and the corresponding information
+      from the reporting group indicated.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">In general the reporting group is providing limited impacts attacks.
+      The most significant result from an deliberate attack would be to cause
+      the information to be discarded or be inconsistent, including discard of
+      all RTCP packets that are modified. This causes a lack of information at
+      any receiver entity, possibly disregarding the endpoints participation
+      in the session.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">To protect against this type of attacks from external non trusted
+      entities, integrity and source authentication <span class="bcp14">SHOULD</span> be applied. This
+      can be done, for example, by using <span><a href="#RFC3711" class="xref">SRTP</a> [<a href="#RFC3711" class="xref">RFC3711</a>]</span>
+      with appropriate key-management, other options exist as discussed in
+      <span><a href="#RFC7201" class="xref">RTP Security Options</a> [<a href="#RFC7201" class="xref">RFC7201</a>]</span>.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-6">The Report Group Identifier has a potential privacy impacting
+      properties. If this would be generated by an implementation in such a
+      way that is long term stable or predictable, it could be used for
+      tracking a particular end-point. Therefore it is <span class="bcp14">RECOMMENDED</span> that it be
+      generated as a short-term persistent RGRP, following the rules for
+      short-term persistent CNAMEs in <span>[<a href="#RFC7022" class="xref">RFC7022</a>]</span>. The rest of
+      the information revealed, i.e. the SSRCs, the size of reporting group
+      and the number of reporting sources in a reporting group is of less
+      sensitive nature, considering that the SSRCs and the communication would
+      anyway be revealed without this extension. By encrypting the report
+      group extensions the SSRC values would preserved confidential, but can
+      still be revealed if <span><a href="#RFC3711" class="xref">SRTP</a> [<a href="#RFC3711" class="xref">RFC3711</a>]</span> is used. The
+      size of the reporting groups and number of reporting sources are likely
+      determinable from analysis of the packet pattern and sizes. However,
+      this information appears to have limited value.<a href="#section-5-6" class="pilcrow">¶</a></p>
+</section>
+<section id="section-6">
+      <h2 id="name-iana-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-6-1">(Note to the RFC-Editor: in the following, please replace "TBA" with
+      the IANA-assigned value, and "XXXX" with the number of this document,
+      then delete this note)<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">The IANA is requested to register one new RTCP SDES items in the
+      "RTCP SDES Item Types" registry, as follows:<a href="#section-6-2" class="pilcrow">¶</a></p>
+<span id="name-iana-rtcp-sdes-item-types-r"></span><div id="table_ex_1">
+<table class="center" id="table-1">
+        <caption>
+<a href="#table-1">Table 1</a>:
+<a href="#name-iana-rtcp-sdes-item-types-r" class="selfRef">IANA "RTCP SDES Item Types" Registry</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Value</th>
+            <th class="text-left" rowspan="1" colspan="1">Abbrev</th>
+            <th class="text-left" rowspan="1" colspan="1">Name</th>
+            <th class="text-left" rowspan="1" colspan="1">Reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">TBA</td>
+            <td class="text-left" rowspan="1" colspan="1">RGRP</td>
+            <td class="text-left" rowspan="1" colspan="1">Reporting Group Identifier</td>
+            <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+<p id="section-6-4">The definition of the RTCP SDES RGRP item is given in <a href="#sec-rgrp" class="xref">Section 3.2.1</a> of this memo.<a href="#section-6-4" class="pilcrow">¶</a></p>
+<p id="section-6-5">The IANA is also requested to register one new RTCP packet type in
+      the "RTCP Control Packet Types (PT)" Registry as follows:<a href="#section-6-5" class="pilcrow">¶</a></p>
+<span id="name-iana-rtcp-control-packet-ty"></span><div id="table_ex_2">
+<table class="center" id="table-2">
+        <caption>
+<a href="#table-2">Table 2</a>:
+<a href="#name-iana-rtcp-control-packet-ty" class="selfRef">IANA "RTCP Control Packet Types (PT)" Registry</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Value</th>
+            <th class="text-left" rowspan="1" colspan="1">Abbrev</th>
+            <th class="text-left" rowspan="1" colspan="1">Name</th>
+            <th class="text-left" rowspan="1" colspan="1">Reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">TBA</td>
+            <td class="text-left" rowspan="1" colspan="1">RGRS</td>
+            <td class="text-left" rowspan="1" colspan="1">Reporting Group Reporting Sources</td>
+            <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+<p id="section-6-7">The definition of the RTCP RGRS packet type is given in <a href="#sec-rgrs" class="xref">Section 3.2.2</a> of this memo.<a href="#section-6-7" class="pilcrow">¶</a></p>
+<p id="section-6-8">The IANA is also requested to register one new SDP attribute:<a href="#section-6-8" class="pilcrow">¶</a></p>
+<dl class="dlParallel" id="section-6-9">
+        <dt id="section-6-9.1">SDP Attribute ("att-field"):</dt>
+        <dd id="section-6-9.2">
+          <p id="section-6-9.2.1"><a href="#section-6-9.2.1" class="pilcrow">¶</a></p>
+<dl class="dlParallel" id="section-6-9.2.2">
+            <dt id="section-6-9.2.2.1">Attribute name:</dt>
+            <dd id="section-6-9.2.2.2">rtcp-rgrp</dd>
+            <dt id="section-6-9.2.2.3">Long form:</dt>
+            <dd id="section-6-9.2.2.4">RTCP Reporting Groups</dd>
+            <dt id="section-6-9.2.2.5">Long form:</dt>
+            <dd id="section-6-9.2.2.6">RTCP Reporting Groups</dd>
+            <dt id="section-6-9.2.2.7">Type of name:</dt>
+            <dd id="section-6-9.2.2.8">att-field</dd>
+            <dt id="section-6-9.2.2.9">Type of attribute:</dt>
+            <dd id="section-6-9.2.2.10">Media or session level</dd>
+            <dt id="section-6-9.2.2.11">Subject to charset:</dt>
+            <dd id="section-6-9.2.2.12">No</dd>
+            <dt id="section-6-9.2.2.13">Purpose:</dt>
+            <dd id="section-6-9.2.2.14">Negotiate or configure the use of the RTCP
+                          Reporting Group Extension.</dd>
+            <dt id="section-6-9.2.2.15">Reference:</dt>
+            <dd id="section-6-9.2.2.16">RFC XXXX</dd>
+            <dt id="section-6-9.2.2.17">Values:</dt>
+            <dd id="section-6-9.2.2.18">None</dd>
+          </dl>
+</dd>
+      </dl>
+<p id="section-6-10">The definition of the "a=rtcp-rgrp" SDES attribute is given in <a href="#sdp" class="xref">Section 3.6</a> of this memo.<a href="#section-6-10" class="pilcrow">¶</a></p>
+</section>
+<section id="section-7">
+      <h2 id="name-references">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-7.1">
+        <h3 id="name-normative-references">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03">March 1997</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dt id="RFC3264">[RFC3264]</dt>
+        <dd>
+<span class="refAuthor">Rosenberg, J.</span><span class="refAuthor"> and H. Schulzrinne</span>, <span class="refTitle">"An Offer/Answer Model with Session Description Protocol (SDP)"</span>, <span class="seriesInfo">RFC 3264</span>, <span class="seriesInfo">DOI 10.17487/RFC3264</span>, <time datetime="2002-06">June 2002</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc3264">https://www.rfc-editor.org/info/rfc3264</a>&gt;</span>. </dd>
+<dt id="RFC3550">[RFC3550]</dt>
+        <dd>
+<span class="refAuthor">Schulzrinne, H.</span><span class="refAuthor">, Casner, S.</span><span class="refAuthor">, Frederick, R.</span><span class="refAuthor">, and V. Jacobson</span>, <span class="refTitle">"RTP: A Transport Protocol for Real-Time Applications"</span>, <span class="seriesInfo">STD 64</span>, <span class="seriesInfo">RFC 3550</span>, <span class="seriesInfo">DOI 10.17487/RFC3550</span>, <time datetime="2003-07">July 2003</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc3550">https://www.rfc-editor.org/info/rfc3550</a>&gt;</span>. </dd>
+<dt id="RFC4566">[RFC4566]</dt>
+        <dd>
+<span class="refAuthor">Handley, M.</span><span class="refAuthor">, Jacobson, V.</span><span class="refAuthor">, and C. Perkins</span>, <span class="refTitle">"SDP: Session Description Protocol"</span>, <span class="seriesInfo">RFC 4566</span>, <span class="seriesInfo">DOI 10.17487/RFC4566</span>, <time datetime="2006-07">July 2006</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc4566">https://www.rfc-editor.org/info/rfc4566</a>&gt;</span>. </dd>
+<dt id="RFC7022">[RFC7022]</dt>
+        <dd>
+<span class="refAuthor">Begen, A.</span><span class="refAuthor">, Perkins, C.</span><span class="refAuthor">, Wing, D.</span><span class="refAuthor">, and E. Rescorla</span>, <span class="refTitle">"Guidelines for Choosing RTP Control Protocol (RTCP) Canonical Names (CNAMEs)"</span>, <span class="seriesInfo">RFC 7022</span>, <span class="seriesInfo">DOI 10.17487/RFC7022</span>, <time datetime="2013-09">September 2013</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7022">https://www.rfc-editor.org/info/rfc7022</a>&gt;</span>. </dd>
+<dt id="RTP-STREAMS">[RTP-STREAMS]</dt>
+        <dd>
+<span class="refAuthor">Lennox, J.</span><span class="refAuthor">, Westerlund, M.</span><span class="refAuthor">, Wu, Q.</span><span class="refAuthor">, and C. Perkins</span>, <span class="refTitle">"Sending Multiple RTP Streams in a Single RTP Session"</span>, <span class="seriesInfo">Work in Progress, draft-ietf-avtcore-rtp-multi-stream-11</span>, <time datetime="2015-12">December 2015</time>. </dd>
+<dt id="SDP-ATTRIBUTES">[SDP-ATTRIBUTES]</dt>
+      <dd>
+<span class="refAuthor">Nandakumar, S.</span>, <span class="refTitle">"A Framework for SDP Attributes when Multiplexing"</span>, <span class="seriesInfo">Work in Progress, draft-ietf-mmusic-sdp-mux-attributes-17</span>, <time datetime="2018-02">February 2018</time>
+            <span>, &lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-mmusic-sdp-mux-attributes-17.txt">http://www.ietf.org/internet-drafts/draft-ietf-mmusic-sdp-mux-attributes-17.txt</a>&gt;</span>. </dd>
+</dl>
+</section>
+<section id="section-7.2">
+        <h3 id="name-informative-references">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2326">[RFC2326]</dt>
+        <dd>
+<span class="refAuthor">Schulzrinne, H.</span><span class="refAuthor">, Rao, A.</span><span class="refAuthor">, and R. Lanphier</span>, <span class="refTitle">"Real Time Streaming Protocol (RTSP)"</span>, <span class="seriesInfo">RFC 2326</span>, <span class="seriesInfo">DOI 10.17487/RFC2326</span>, <time datetime="1998-04">April 1998</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc2326">https://www.rfc-editor.org/info/rfc2326</a>&gt;</span>. </dd>
+<dt id="RFC2974">[RFC2974]</dt>
+        <dd>
+<span class="refAuthor">Handley, M.</span><span class="refAuthor">, Perkins, C.</span><span class="refAuthor">, and E. Whelan</span>, <span class="refTitle">"Session Announcement Protocol"</span>, <span class="seriesInfo">RFC 2974</span>, <span class="seriesInfo">DOI 10.17487/RFC2974</span>, <time datetime="2000-10">October 2000</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc2974">https://www.rfc-editor.org/info/rfc2974</a>&gt;</span>. </dd>
+<dt id="RFC3611">[RFC3611]</dt>
+        <dd>
+<span class="refAuthor">Friedman, T., Ed.</span><span class="refAuthor">, Caceres, R., Ed.</span><span class="refAuthor">, and A. Clark, Ed.</span>, <span class="refTitle">"RTP Control Protocol Extended Reports (RTCP XR)"</span>, <span class="seriesInfo">RFC 3611</span>, <span class="seriesInfo">DOI 10.17487/RFC3611</span>, <time datetime="2003-11">November 2003</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc3611">https://www.rfc-editor.org/info/rfc3611</a>&gt;</span>. </dd>
+<dt id="RFC3711">[RFC3711]</dt>
+        <dd>
+<span class="refAuthor">Baugher, M.</span><span class="refAuthor">, McGrew, D.</span><span class="refAuthor">, Naslund, M.</span><span class="refAuthor">, Carrara, E.</span><span class="refAuthor">, and K. Norrman</span>, <span class="refTitle">"The Secure Real-time Transport Protocol (SRTP)"</span>, <span class="seriesInfo">RFC 3711</span>, <span class="seriesInfo">DOI 10.17487/RFC3711</span>, <time datetime="2004-03">March 2004</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc3711">https://www.rfc-editor.org/info/rfc3711</a>&gt;</span>. </dd>
+<dt id="RFC4585">[RFC4585]</dt>
+        <dd>
+<span class="refAuthor">Ott, J.</span><span class="refAuthor">, Wenger, S.</span><span class="refAuthor">, Sato, N.</span><span class="refAuthor">, Burmeister, C.</span><span class="refAuthor">, and J. Rey</span>, <span class="refTitle">"Extended RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/AVPF)"</span>, <span class="seriesInfo">RFC 4585</span>, <span class="seriesInfo">DOI 10.17487/RFC4585</span>, <time datetime="2006-07">July 2006</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc4585">https://www.rfc-editor.org/info/rfc4585</a>&gt;</span>. </dd>
+<dt id="RFC4588">[RFC4588]</dt>
+        <dd>
+<span class="refAuthor">Rey, J.</span><span class="refAuthor">, Leon, D.</span><span class="refAuthor">, Miyazaki, A.</span><span class="refAuthor">, Varsa, V.</span><span class="refAuthor">, and R. Hakenberg</span>, <span class="refTitle">"RTP Retransmission Payload Format"</span>, <span class="seriesInfo">RFC 4588</span>, <span class="seriesInfo">DOI 10.17487/RFC4588</span>, <time datetime="2006-07">July 2006</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc4588">https://www.rfc-editor.org/info/rfc4588</a>&gt;</span>. </dd>
+<dt id="RFC5104">[RFC5104]</dt>
+        <dd>
+<span class="refAuthor">Wenger, S.</span><span class="refAuthor">, Chandra, U.</span><span class="refAuthor">, Westerlund, M.</span><span class="refAuthor">, and B. Burman</span>, <span class="refTitle">"Codec Control Messages in the RTP Audio-Visual Profile with Feedback (AVPF)"</span>, <span class="seriesInfo">RFC 5104</span>, <span class="seriesInfo">DOI 10.17487/RFC5104</span>, <time datetime="2008-02">February 2008</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5104">https://www.rfc-editor.org/info/rfc5104</a>&gt;</span>. </dd>
+<dt id="RFC5506">[RFC5506]</dt>
+        <dd>
+<span class="refAuthor">Johansson, I.</span><span class="refAuthor"> and M. Westerlund</span>, <span class="refTitle">"Support for Reduced-Size Real-Time Transport Control Protocol (RTCP): Opportunities and Consequences"</span>, <span class="seriesInfo">RFC 5506</span>, <span class="seriesInfo">DOI 10.17487/RFC5506</span>, <time datetime="2009-04">April 2009</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5506">https://www.rfc-editor.org/info/rfc5506</a>&gt;</span>. </dd>
+<dt id="RFC6190">[RFC6190]</dt>
+        <dd>
+<span class="refAuthor">Wenger, S.</span><span class="refAuthor">, Wang, Y.-K.</span><span class="refAuthor">, Schierl, T.</span><span class="refAuthor">, and A. Eleftheriadis</span>, <span class="refTitle">"RTP Payload Format for Scalable Video Coding"</span>, <span class="seriesInfo">RFC 6190</span>, <span class="seriesInfo">DOI 10.17487/RFC6190</span>, <time datetime="2011-05">May 2011</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc6190">https://www.rfc-editor.org/info/rfc6190</a>&gt;</span>. </dd>
+<dt id="RFC7201">[RFC7201]</dt>
+        <dd>
+<span class="refAuthor">Westerlund, M.</span><span class="refAuthor"> and C. Perkins</span>, <span class="refTitle">"Options for Securing RTP Sessions"</span>, <span class="seriesInfo">RFC 7201</span>, <span class="seriesInfo">DOI 10.17487/RFC7201</span>, <time datetime="2014-04">April 2014</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7201">https://www.rfc-editor.org/info/rfc7201</a>&gt;</span>. </dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05">May 2017</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+</dl>
+</section>
+</section>
+<div id="authors-addresses">
+<section id="section-appendix.a">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Jonathan Lennox</span></div>
+<div dir="auto" class="left"><span class="org">Vidyo, Inc.</span></div>
+<div dir="auto" class="left"><span class="street-address">433 Hackensack Avenue, Seventh Floor</span></div>
+<div dir="auto" class="left">
+<span class="locality">Hackensack</span>, <span class="region">NJ</span> <span class="postal-code">07601</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:jonathan@vidyo.com" class="email">jonathan@vidyo.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="org">Ericsson</span></div>
+<div dir="auto" class="left"><span class="fn nameRole">Magnus Westerlund</span></div>
+<div dir="auto" class="left"><span class="street-address">Farogatan 2</span></div>
+<div dir="auto" class="left">SE-<span class="postal-code">164 80</span> <span class="locality">Kista</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Sweden</span></div>
+<div class="tel">
+<span>Phone:</span>
+<a href="tel:+46%2010%20714%2082%2087" class="tel">+46 10 714 82 87</a>
+</div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:magnus.westerlund@ericsson.com" class="email">magnus.westerlund@ericsson.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="country-name">China</span></div>
+<div dir="auto" class="left"><span class="postal-code">210012</span></div>
+<div dir="auto" class="left">
+<span class="region">Jiangsu</span><span class="locality">Nanjing,</span>
+</div>
+<div dir="auto" class="left"><span class="street-address">101 Software Avenue, Yuhua District</span></div>
+<div dir="auto" class="left"><span class="org">Huawei</span></div>
+<div dir="auto" class="left"><span class="fn nameRole">Qin Wu</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:bill.wu@huawei.com" class="email">bill.wu@huawei.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Colin Perkins</span></div>
+<div dir="auto" class="left"><span class="org">University of Glasgow</span></div>
+<div dir="auto" class="left"><span class="street-address">School of Computing Science</span></div>
+<div dir="auto" class="left"><span class="locality">Glasgow</span></div>
+<div dir="auto" class="left"><span class="postal-code">G12 8QQ</span></div>
+<div dir="auto" class="left"><span class="country-name">United Kingdom</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:csp@csperkins.org" class="email">csp@csperkins.org</a>
+</div>
+</address>
+</section>
+</div>
+<script>
+const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
