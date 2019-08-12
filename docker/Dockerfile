@@ -29,8 +29,8 @@ RUN set -e; tool_install() { \
       target="${BINDIR:-~/.local/bin}/${tool}"; \
       tar xzfO "$tmp" "${tool}-${version}/${tool}" >"$target"; rm -f "$tmp"; \
       chmod 755 "$target"; }; \
-    tool_install idnits 2.16.0 \
-    5d9f49e528879e46aff03dcaf3e0ef438ab49d5e834543a741df57fcaeca1ddb && \
+    tool_install idnits 2.16.02 \
+    e9a501fc1f3a4584dda854067398eaebba29f128fb09f80048a760e950c35c49 && \
     tool_install rfcdiff 1.47 \
     75a9e83869885836c024a94f35128eaf292c6b9de3fd9d3361fbc62d46ec9f16
 
