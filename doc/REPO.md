@@ -99,7 +99,7 @@ README.  Then:
 $ git init unicorn-protocol
 $ cd unicorn-protocol
 $ git remote add origin https://github.com/unicorn-wg/unicorn-protocol
-# Make the draft
+# Copy a template in place, change the filename and title.
 $ git commit -m "Initial version blah blah blah" draft-*.{md,xml}
 $ git push -u origin master
 $ git clone https://github.com/martinthomson/i-d-template lib
