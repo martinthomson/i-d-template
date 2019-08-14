@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
 <title>RFC 9999: Advertising L2 Bundle Member Link
     Attributes in IS-IS</title>
 <meta content="Les Ginsberg" name="author">
@@ -20,10 +21,9 @@
        This document introduces the ability for IS-IS to advertise the link
       attributes of layer 2 (L2) bundle members.
     " name="description">
-<meta content="xml2rfc 2.23.1" name="generator">
+<meta content="xml2rfc 2.24.0" name="generator">
 <meta content="Sample" name="keyword">
-<meta name="viewport" content="initial-scale=1.0">
-<link href="draft-ietf-isis-l2bundles-07-SG.v2v3.xml" type="application/rfc+xml" rel="alternate">
+<link href="draft-ietf-isis-l2bundles-07-SG.v2v3.v24.xml" type="application/rfc+xml" rel="alternate">
 <link href="#copyright" rel="license">
 <link href="style.css" rel="stylesheet">
 <link href="https://dx.doi.org/10.17487/rfc9999" rel="alternate">
@@ -361,10 +361,12 @@ async function addMetadata() {
                 <dt id="section-2-6.1.2.2.4.1">P-flag:</dt>
                 <dd id="section-2-6.1.2.2.4.2">When set to 1 one of the sub-TLVs described in Section 2.1 immediately
 follows the flags field. If the P-flag is set to 0, then none of the sub-TLVs
-described in Section 2.1 are present.</dd>
+described in Section 2.1 are present.<a href="#section-2-6.1.2.2.4.2" class="pilcrow">¶</a>
+</dd>
                 <dt id="section-2-6.1.2.2.4.3">Other bits:</dt>
                 <dd id="section-2-6.1.2.2.4.4">
-                  <span class="bcp14">MUST</span> be zero when originated and ignored when received.</dd>
+                  <span class="bcp14">MUST</span> be zero when originated and ignored when received.<a href="#section-2-6.1.2.2.4.4" class="pilcrow">¶</a>
+</dd>
               </dl>
 </li>
           </ul>
@@ -509,26 +511,32 @@ described in Section 2.1 are present.</dd>
               <dd id="section-3.1-4.1.2.2">Address-Family flag.  If unset, then the Adj-SID refers
          to an L2 Bundle Member with outgoing IPv4 encapsulation. If set
          then the Adj-SID refers to an L2 Bundle Member with outgoing
-         IPv6 encapsulation.</dd>
+         IPv6 encapsulation.<a href="#section-3.1-4.1.2.2" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.1-4.1.2.3">V-Flag:</dt>
               <dd id="section-3.1-4.1.2.4">Value flag.  If set, then the Adj-SID carries a value.
-         By default the flag is SET.</dd>
+         By default the flag is SET.<a href="#section-3.1-4.1.2.4" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.1-4.1.2.5">L-Flag:</dt>
               <dd id="section-3.1-4.1.2.6">Local Flag.  If set, then the value/index carried by
          the Adj-SID has local significance.  By default the flag is
-         SET.</dd>
+         SET.<a href="#section-3.1-4.1.2.6" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.1-4.1.2.7">S-Flag.</dt>
               <dd id="section-3.1-4.1.2.8">Set Flag.  When set, the S-Flag indicates that the
          Adj-SID refers to a set of L2 Bundle Members (and therefore
-         <span class="bcp14">MAY</span> be assigned to other L2 Bundle Members as well).</dd>
+         <span class="bcp14">MAY</span> be assigned to other L2 Bundle Members as well).<a href="#section-3.1-4.1.2.8" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.1-4.1.2.9">P-Flag.</dt>
               <dd id="section-3.1-4.1.2.10">Persistent flag.  When set, the P-Flag indicates that
          the Adj-SID is persistently allocated, i.e., the Adj-SID value
-         remains consistent across router restart and/or interface flap.</dd>
+         remains consistent across router restart and/or interface flap.<a href="#section-3.1-4.1.2.10" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.1-4.1.2.11">Other bits:</dt>
               <dd id="section-3.1-4.1.2.12">
                 <span class="bcp14">MUST</span> be zero when originated and ignored when
-         received.</dd>
+         received.<a href="#section-3.1-4.1.2.12" class="pilcrow">¶</a>
+</dd>
             </dl>
 </li>
         </ul>
@@ -536,7 +544,8 @@ described in Section 2.1 are present.</dd>
           <dt id="section-3.1-5.1">Weight:</dt>
           <dd id="section-3.1-5.2">1 octet.  The value represents the weight of the Adj-SID
         for the purpose of load balancing.  The use of the weight is
-        defined in <span>[<a href="#RFC8402" class="xref">RFC8402</a>]</span>.</dd>
+        defined in <span>[<a href="#RFC8402" class="xref">RFC8402</a>]</span>.<a href="#section-3.1-5.2" class="pilcrow">¶</a>
+</dd>
         </dl>
 <aside id="section-3.1-6">
           <p id="section-3.1-6.1">NOTE: Flags and weight are shared by all L2 Bundle Members
@@ -613,26 +622,32 @@ described in Section 2.1 are present.</dd>
               <dd id="section-3.2-8.1.2.2">Address-Family flag.  If unset, then the Adj-SID refers
          to an L2 Bundle Member with outgoing IPv4 encapsulation. If set
          then the Adj-SID refers to an L2 Bundle Member with outgoing
-         IPv6 encapsulation.</dd>
+         IPv6 encapsulation.<a href="#section-3.2-8.1.2.2" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.2-8.1.2.3">V-Flag:</dt>
               <dd id="section-3.2-8.1.2.4">Value flag.  If set, then the Adj-SID carries a value.
-         By default the flag is SET.</dd>
+         By default the flag is SET.<a href="#section-3.2-8.1.2.4" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.2-8.1.2.5">L-Flag:</dt>
               <dd id="section-3.2-8.1.2.6">Local Flag.  If set, then the value/index carried by
          the Adj-SID has local significance.  By default the flag is
-         SET.</dd>
+         SET.<a href="#section-3.2-8.1.2.6" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.2-8.1.2.7">S-Flag.</dt>
               <dd id="section-3.2-8.1.2.8">Set Flag.  When set, the S-Flag indicates that the
          Adj-SID refers to a set of L2 Bundle Members (and therefore
-         <span class="bcp14">MAY</span> be assigned to other L2 Bundle Members as well).</dd>
+         <span class="bcp14">MAY</span> be assigned to other L2 Bundle Members as well).<a href="#section-3.2-8.1.2.8" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.2-8.1.2.9">P-Flag.</dt>
               <dd id="section-3.2-8.1.2.10">Persistent flag.  When set, the P-Flag indicates that
          the Adj-SID is persistently allocated, i.e., the Adj-SID value
-         remains consistent across router restart and/or interface flap.</dd>
+         remains consistent across router restart and/or interface flap.<a href="#section-3.2-8.1.2.10" class="pilcrow">¶</a>
+</dd>
               <dt id="section-3.2-8.1.2.11">Other bits:</dt>
               <dd id="section-3.2-8.1.2.12">
                 <span class="bcp14">MUST</span> be zero when originated and ignored when
-         received.</dd>
+         received.<a href="#section-3.2-8.1.2.12" class="pilcrow">¶</a>
+</dd>
             </dl>
 </li>
         </ul>
@@ -640,7 +655,8 @@ described in Section 2.1 are present.</dd>
           <dt id="section-3.2-9.1">Weight:</dt>
           <dd id="section-3.2-9.2">1 octet.  The value represents the weight of the Adj-SID
     for the purpose of load balancing.  The use of the weight is
-    defined in <span>[<a href="#RFC8402" class="xref">RFC8402</a>]</span>.</dd>
+    defined in <span>[<a href="#RFC8402" class="xref">RFC8402</a>]</span>.<a href="#section-3.2-9.2" class="pilcrow">¶</a>
+</dd>
         </dl>
 <aside id="section-3.2-10">
           <p id="section-3.2-10.1">NOTE: Flags and weight are shared by all L2 Bundle Members
@@ -698,12 +714,15 @@ described in Section 2.1 are present.</dd>
 <dl class="dlParallel" id="section-4-4">
         <dt id="section-4-4.1">y:</dt>
         <dd id="section-4-4.2">sub-TLV may appear in TLV 25 but <span class="bcp14">MUST</span> NOT be shared by multiple
-    L2 Bundle Members</dd>
+    L2 Bundle Members<a href="#section-4-4.2" class="pilcrow">¶</a>
+</dd>
         <dt id="section-4-4.3">y(s):</dt>
         <dd id="section-4-4.4">sub-TLV may appear in TLV 25 and <span class="bcp14">MAY</span> be shared by multiple
-    L2 Bundle Members</dd>
+    L2 Bundle Members<a href="#section-4-4.4" class="pilcrow">¶</a>
+</dd>
         <dt id="section-4-4.5">n:</dt>
-        <dd id="section-4-4.6">sub-TLV <span class="bcp14">MUST</span> NOT appear in TLV 25</dd>
+        <dd id="section-4-4.6">sub-TLV <span class="bcp14">MUST</span> NOT appear in TLV 25<a href="#section-4-4.6" class="pilcrow">¶</a>
+</dd>
       </dl>
 <p id="section-4-5">The following table indicates the appropriate settings for all
       currently defined sub-TLVs as regards their use in the new L2 Bundle
@@ -711,7 +730,7 @@ described in Section 2.1 are present.</dd>
 <span id="name-appropriate-settings-for-al"></span><div id="iana-table">
 <table class="center" id="table-1">
         <caption>
-<a href="#table-1">Table 1</a>:
+<a href="#table-1" class="selfRef">Table 1</a>:
 <a href="#name-appropriate-settings-for-al" class="selfRef">Appropriate Settings for All Defined Sub-TLVs as regards their use in
 the new L2 Bundle Member Attributes TLV</a>
         </caption>
@@ -896,7 +915,7 @@ the new L2 Bundle Member Attributes TLV</a>
       </ul>
 <div id="table2">
 <table class="center" id="table-2">
-        <caption><a href="#table-2">Table 2</a></caption>
+        <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
 <thead>
           <tr>
             <th class="text-left" rowspan="1" colspan="1">22</th>
@@ -932,7 +951,7 @@ the new L2 Bundle Member Attributes TLV</a>
       </ul>
 <div id="table3">
 <table class="center" id="table-3">
-        <caption><a href="#table-3">Table 3</a></caption>
+        <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
 <thead>
           <tr>
             <th class="text-left" rowspan="1" colspan="1">22</th>
@@ -1022,40 +1041,31 @@ Email: sprevidi@cisco.com</pre><a href="#section-6-2" class="pilcrow">¶</a>
           (ISO 8473)"</span>, <span class="seriesInfo">ISO/IEC 10589:2002, Second Edition</span>, <time datetime="2002-11">November 2002</time>. </dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
-<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03">March 1997</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
 <dt id="RFC4202">[RFC4202]</dt>
         <dd>
-<span class="refAuthor">Kompella, K., Ed.</span><span class="refAuthor"> and Y. Rekhter, Ed.</span>, <span class="refTitle">"Routing Extensions in Support of Generalized Multi-Protocol Label Switching (GMPLS)"</span>, <span class="seriesInfo">RFC 4202</span>, <span class="seriesInfo">DOI 10.17487/RFC4202</span>, <time datetime="2005-10">October 2005</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc4202">https://www.rfc-editor.org/info/rfc4202</a>&gt;</span>. </dd>
+<span class="refAuthor">Kompella, K., Ed.</span><span class="refAuthor"> and Y. Rekhter, Ed.</span>, <span class="refTitle">"Routing Extensions in Support of Generalized Multi-Protocol Label Switching (GMPLS)"</span>, <span class="seriesInfo">RFC 4202</span>, <span class="seriesInfo">DOI 10.17487/RFC4202</span>, <time datetime="2005-10">October 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4202">https://www.rfc-editor.org/info/rfc4202</a>&gt;</span>. </dd>
 <dt id="RFC5304">[RFC5304]</dt>
         <dd>
-<span class="refAuthor">Li, T.</span><span class="refAuthor"> and R. Atkinson</span>, <span class="refTitle">"IS-IS Cryptographic Authentication"</span>, <span class="seriesInfo">RFC 5304</span>, <span class="seriesInfo">DOI 10.17487/RFC5304</span>, <time datetime="2008-10">October 2008</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5304">https://www.rfc-editor.org/info/rfc5304</a>&gt;</span>. </dd>
+<span class="refAuthor">Li, T.</span><span class="refAuthor"> and R. Atkinson</span>, <span class="refTitle">"IS-IS Cryptographic Authentication"</span>, <span class="seriesInfo">RFC 5304</span>, <span class="seriesInfo">DOI 10.17487/RFC5304</span>, <time datetime="2008-10">October 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc5304">https://www.rfc-editor.org/info/rfc5304</a>&gt;</span>. </dd>
 <dt id="RFC5305">[RFC5305]</dt>
         <dd>
-<span class="refAuthor">Li, T.</span><span class="refAuthor"> and H. Smit</span>, <span class="refTitle">"IS-IS Extensions for Traffic Engineering"</span>, <span class="seriesInfo">RFC 5305</span>, <span class="seriesInfo">DOI 10.17487/RFC5305</span>, <time datetime="2008-10">October 2008</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5305">https://www.rfc-editor.org/info/rfc5305</a>&gt;</span>. </dd>
+<span class="refAuthor">Li, T.</span><span class="refAuthor"> and H. Smit</span>, <span class="refTitle">"IS-IS Extensions for Traffic Engineering"</span>, <span class="seriesInfo">RFC 5305</span>, <span class="seriesInfo">DOI 10.17487/RFC5305</span>, <time datetime="2008-10">October 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc5305">https://www.rfc-editor.org/info/rfc5305</a>&gt;</span>. </dd>
 <dt id="RFC5307">[RFC5307]</dt>
         <dd>
-<span class="refAuthor">Kompella, K., Ed.</span><span class="refAuthor"> and Y. Rekhter, Ed.</span>, <span class="refTitle">"IS-IS Extensions in Support of Generalized Multi-Protocol Label Switching (GMPLS)"</span>, <span class="seriesInfo">RFC 5307</span>, <span class="seriesInfo">DOI 10.17487/RFC5307</span>, <time datetime="2008-10">October 2008</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5307">https://www.rfc-editor.org/info/rfc5307</a>&gt;</span>. </dd>
+<span class="refAuthor">Kompella, K., Ed.</span><span class="refAuthor"> and Y. Rekhter, Ed.</span>, <span class="refTitle">"IS-IS Extensions in Support of Generalized Multi-Protocol Label Switching (GMPLS)"</span>, <span class="seriesInfo">RFC 5307</span>, <span class="seriesInfo">DOI 10.17487/RFC5307</span>, <time datetime="2008-10">October 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc5307">https://www.rfc-editor.org/info/rfc5307</a>&gt;</span>. </dd>
 <dt id="RFC5310">[RFC5310]</dt>
         <dd>
-<span class="refAuthor">Bhatia, M.</span><span class="refAuthor">, Manral, V.</span><span class="refAuthor">, Li, T.</span><span class="refAuthor">, Atkinson, R.</span><span class="refAuthor">, White, R.</span><span class="refAuthor">, and M. Fanto</span>, <span class="refTitle">"IS-IS Generic Cryptographic Authentication"</span>, <span class="seriesInfo">RFC 5310</span>, <span class="seriesInfo">DOI 10.17487/RFC5310</span>, <time datetime="2009-02">February 2009</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5310">https://www.rfc-editor.org/info/rfc5310</a>&gt;</span>. </dd>
+<span class="refAuthor">Bhatia, M.</span><span class="refAuthor">, Manral, V.</span><span class="refAuthor">, Li, T.</span><span class="refAuthor">, Atkinson, R.</span><span class="refAuthor">, White, R.</span><span class="refAuthor">, and M. Fanto</span>, <span class="refTitle">"IS-IS Generic Cryptographic Authentication"</span>, <span class="seriesInfo">RFC 5310</span>, <span class="seriesInfo">DOI 10.17487/RFC5310</span>, <time datetime="2009-02">February 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc5310">https://www.rfc-editor.org/info/rfc5310</a>&gt;</span>. </dd>
 <dt id="RFC6119">[RFC6119]</dt>
         <dd>
-<span class="refAuthor">Harrison, J.</span><span class="refAuthor">, Berger, J.</span><span class="refAuthor">, and M. Bartlett</span>, <span class="refTitle">"IPv6 Traffic Engineering in IS-IS"</span>, <span class="seriesInfo">RFC 6119</span>, <span class="seriesInfo">DOI 10.17487/RFC6119</span>, <time datetime="2011-02">February 2011</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc6119">https://www.rfc-editor.org/info/rfc6119</a>&gt;</span>. </dd>
+<span class="refAuthor">Harrison, J.</span><span class="refAuthor">, Berger, J.</span><span class="refAuthor">, and M. Bartlett</span>, <span class="refTitle">"IPv6 Traffic Engineering in IS-IS"</span>, <span class="seriesInfo">RFC 6119</span>, <span class="seriesInfo">DOI 10.17487/RFC6119</span>, <time datetime="2011-02">February 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6119">https://www.rfc-editor.org/info/rfc6119</a>&gt;</span>. </dd>
 <dt id="RFC7810">[RFC7810]</dt>
         <dd>
-<span class="refAuthor">Previdi, S., Ed.</span><span class="refAuthor">, Giacalone, S.</span><span class="refAuthor">, Ward, D.</span><span class="refAuthor">, Drake, J.</span><span class="refAuthor">, and Q. Wu</span>, <span class="refTitle">"IS-IS Traffic Engineering (TE) Metric Extensions"</span>, <span class="seriesInfo">RFC 7810</span>, <span class="seriesInfo">DOI 10.17487/RFC7810</span>, <time datetime="2016-05">May 2016</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7810">https://www.rfc-editor.org/info/rfc7810</a>&gt;</span>. </dd>
+<span class="refAuthor">Previdi, S., Ed.</span><span class="refAuthor">, Giacalone, S.</span><span class="refAuthor">, Ward, D.</span><span class="refAuthor">, Drake, J.</span><span class="refAuthor">, and Q. Wu</span>, <span class="refTitle">"IS-IS Traffic Engineering (TE) Metric Extensions"</span>, <span class="seriesInfo">RFC 7810</span>, <span class="seriesInfo">DOI 10.17487/RFC7810</span>, <time datetime="2016-05">May 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7810">https://www.rfc-editor.org/info/rfc7810</a>&gt;</span>. </dd>
 <dt id="RFC8174">[RFC8174]</dt>
         <dd>
-<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05">May 2017</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
 <dt id="SR-ISIS">[SR-ISIS]</dt>
       <dd>
 <span class="refAuthor">Previdi, S.</span><span class="refAuthor">, Ginsberg, L.</span><span class="refAuthor">, Filsfils, C.</span><span class="refAuthor">, Bashandy, A.</span><span class="refAuthor">, Gredler, H.</span><span class="refAuthor">, and B. Decraene</span>, <span class="refTitle">"IS-IS Extensions for Segment Routing"</span>, <span class="seriesInfo">Work in Progress draft-ietf-isis-segment-routing-extensions-25</span>, <time datetime="2019-05-19">19 May 2019</time>. </dd>
@@ -1068,12 +1078,10 @@ Email: sprevidi@cisco.com</pre><a href="#section-6-2" class="pilcrow">¶</a>
 <dl class="references">
 <dt id="RFC4655">[RFC4655]</dt>
         <dd>
-<span class="refAuthor">Farrel, A.</span><span class="refAuthor">, Vasseur, J.-P.</span><span class="refAuthor">, and J. Ash</span>, <span class="refTitle">"A Path Computation Element (PCE)-Based Architecture"</span>, <span class="seriesInfo">RFC 4655</span>, <span class="seriesInfo">DOI 10.17487/RFC4655</span>, <time datetime="2006-08">August 2006</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc4655">https://www.rfc-editor.org/info/rfc4655</a>&gt;</span>. </dd>
+<span class="refAuthor">Farrel, A.</span><span class="refAuthor">, Vasseur, J.-P.</span><span class="refAuthor">, and J. Ash</span>, <span class="refTitle">"A Path Computation Element (PCE)-Based Architecture"</span>, <span class="seriesInfo">RFC 4655</span>, <span class="seriesInfo">DOI 10.17487/RFC4655</span>, <time datetime="2006-08">August 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4655">https://www.rfc-editor.org/info/rfc4655</a>&gt;</span>. </dd>
 <dt id="RFC8402">[RFC8402]</dt>
       <dd>
-<span class="refAuthor">Filsfils, C., Ed.</span><span class="refAuthor">, Previdi, S., Ed.</span><span class="refAuthor">, Ginsberg, L.</span><span class="refAuthor">, Decraene, B.</span><span class="refAuthor">, Litkowski, S.</span><span class="refAuthor">, and R. Shakir</span>, <span class="refTitle">"Segment Routing Architecture"</span>, <span class="seriesInfo">RFC 8402</span>, <span class="seriesInfo">DOI 10.17487/RFC8402</span>, <time datetime="2018-07">July 2018</time>
-            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc8402">https://www.rfc-editor.org/info/rfc8402</a>&gt;</span>. </dd>
+<span class="refAuthor">Filsfils, C., Ed.</span><span class="refAuthor">, Previdi, S., Ed.</span><span class="refAuthor">, Ginsberg, L.</span><span class="refAuthor">, Decraene, B.</span><span class="refAuthor">, Litkowski, S.</span><span class="refAuthor">, and R. Shakir</span>, <span class="refTitle">"Segment Routing Architecture"</span>, <span class="seriesInfo">RFC 8402</span>, <span class="seriesInfo">DOI 10.17487/RFC8402</span>, <time datetime="2018-07">July 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8402">https://www.rfc-editor.org/info/rfc8402</a>&gt;</span>. </dd>
 </dl>
 </section>
 </section>
@@ -1091,7 +1099,7 @@ Email: sprevidi@cisco.com</pre><a href="#section-6-2" class="pilcrow">¶</a>
 <p id="section-appendix.a-5">Four bundle members with the following attributes:<a href="#section-appendix.a-5" class="pilcrow">¶</a></p>
 <div id="table4">
 <table class="center" id="table-4">
-        <caption><a href="#table-4">Table 4</a></caption>
+        <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
 <thead>
           <tr>
             <th class="text-left" rowspan="1" colspan="1">Num</th>
@@ -1133,7 +1141,7 @@ Email: sprevidi@cisco.com</pre><a href="#section-6-2" class="pilcrow">¶</a>
 <p id="section-appendix.a-9">Three bundle members with the following attributes:<a href="#section-appendix.a-9" class="pilcrow">¶</a></p>
 <div id="table5">
 <table class="center" id="table-5">
-        <caption><a href="#table-5">Table 5</a></caption>
+        <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
 <thead>
           <tr>
             <th class="text-left" rowspan="1" colspan="1">Num</th>

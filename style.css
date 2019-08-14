@@ -162,25 +162,19 @@ dl > dd > dl {
 }
 
 /* links */
-a, a[href].selfRef, figcaption a[href], caption a[href] {
+a, a[href].selfRef:hover {
   text-decoration: none;
+}
+a[href].selfRef {
+  color: var(--text-color);
 }
 a[href] {
-  color: var(--text-color);
-}
-p a[href], ul a[href], dl a[href], td a[href], a.email, a.xref {
   color: var(--link-color);
 }
-p a[href]:hover, ul a[href]:hover, dl a[href]:hover, td a[href]:hover, a.email:hover, , a.xref:hover {
+a[href]:hover {
   text-decoration: underline;
 }
-figcaption > a[href], caption > a[href] { /* "Figure X" is missing a selfRef class. */
-  color: var(--text-color);
-}
-figcaption > a[href]:hover, caption > a[href]:hover {
-  text-decoration: none;
-}
-figcaption >a[href]:hover, caption >a[href]:hover, a[href].selfRef:hover {
+a[href].selfRef:hover {
   background-color: var(--highlight-color);
 }
 
