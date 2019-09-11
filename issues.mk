@@ -13,8 +13,8 @@ endif
 
 ## Store a copy of any github issues
 .PHONY: issues
-issues: issues.json pulls.json
-issues.json pulls.json: fetch-ghissues $(drafts_source)
+issues: fetch-ghissues issues.json pulls.json
+issues.json: $(drafts_source)
 	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
 	  echo 'Skipping update of $@ (it is newer than the one on the branch)'; exit; \
 	fi; \
@@ -26,19 +26,40 @@ issues.json pulls.json: fetch-ghissues $(drafts_source)
 	if [ "$$skip" = true ]; then \
 	    git show $(GH_ISSUES):$@ > $@; exit; \
 	fi; \
-	echo '[' > $@; \
-	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/$(basename $(notdir $@))?state=all; \
-	tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); trap 'rm -f $$tmp' EXIT; \
+	url="https://api.github.com/repos/$(GITHUB_REPO_FULL)$(basename $(notdir $@))?state=all&since=$$(git log -n 1 --pretty=format:%cI $(GH_ISSUES) -- $@)"; \
+	tmp_headers=$$(mktemp /tmp/$(basename $(notdir $@))-headers.XXXXXX);  \
+	tmp_old=$$(mktemp /tmp/$(basename $(notdir $@))-old.XXXXXX); \
+	git show $(GH_ISSUES):$@ > $$tmp_old; \
+	tmp_new=$$(mktemp /tmp/$(basename $(notdir $@))-new.XXXXXX); \
+	trap 'rm -f $$tmp_headers $$tmp_new $$tmp_old' EXIT; \
+	echo '[' > $$tmp_new; \
 	while [ -n "$$url" ]; do \
 	  echo "Fetching $(basename $(notdir $@)) from $$url"; \
-	  $(curl) $(GITHUB_OAUTH) $$url -D $$tmp | sed -e '1s/^ *\[//;$$s/\] *$$//' >> $@; \
-	  if ! head -1 $$tmp | grep -q ' 200 OK'; then \
+	  echo $(curl) $(GITHUB_OAUTH) -D $$tmp_headers "$$url"; \
+	  $(curl) $(GITHUB_OAUTH) -D $$tmp_headers "$$url" | sed -e '1s/^ *\[//;$$s/\] *$$//' >> $$tmp_new; \
+	  if ! head -1 $$tmp_headers | grep -q ' 200 OK'; then \
 	    echo "Error loading $$url:"; cat $$tmp; exit 1; \
 	  fi; \
-	  url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
-	  [ -n "$$url" ] && echo , >> $@; \
+	  url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp_headers); \
+	  [ -n "$$url" ] && echo , >> $$tmp_new; \
 	done; \
-	echo ']' >> $@
+	echo ']' >> $$tmp_new; \
+	jq --slurpfile old_file $$tmp_old --slurpfile new_file $$tmp_new -n '$$old_file | .[0] as $$old | $$new_file | .[0] as $$new | $$new + $$old | unique_by(.id) | sort_by(.number)' > $@
+
+pulls.json: issues.json
+	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
+	  echo 'Skipping update of $@ (it is newer than the one on the branch)'; exit; \
+	fi; \
+	skip=$(DISABLE_ISSUE_FETCH); \
+	if [ $(CI) = true -a "$$skip" != true -a \
+	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ] 2>/dev/null; then \
+	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
+	fi; \
+	if [ "$$skip" = true ]; then \
+	    git show $(GH_ISSUES):$@ > $@; exit; \
+	fi; \
+	jq --slurpfile issues $< -n '[ $issues | .[] | map(select( .pull_request)) | sort_by(.number)]' > $@;
+
 
 GHISSUES_ROOT := /tmp/ghissues$(shell echo $$$$)
 $(GHISSUES_ROOT): fetch-ghissues
