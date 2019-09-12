@@ -65,7 +65,7 @@ pulls.json: issues.json
 	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ] 2>/dev/null; then \
 	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
 	fi; \
-	if [ "$$skip" = true ]; then \
+	if [ "$$skip" = true ] || [! -s "$<"]; then \
 	    git show $(GH_ISSUES):$@ > $@; exit; \
 	fi; \
 	jq --slurpfile issues $< -n '[ $issues | .[] | map(select( .pull_request)) | sort_by(.number)]' > $@;
