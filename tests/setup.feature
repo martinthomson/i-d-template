@@ -13,7 +13,7 @@ Feature: Initial setup
      and a file is created called ".circleci/config.yml"
      and a file is created called ".note.xml"
      and a branch is created called "gh-pages" containing "index.html"
-     and a branch is created called "gh-pages" containing "issues.json"
+     and a branch is created called "gh-pages" containing "archive_repo.json"
      and gitignore lists xml files
      and a precommit hook is installed
 
@@ -30,7 +30,7 @@ Feature: Initial setup
      and a file is created called ".circleci/config.yml"
      and a file is created called ".note.xml"
      and a branch is created called "gh-pages" containing "index.html"
-     and a branch is created called "gh-pages" containing "issues.json"
+     and a branch is created called "gh-pages" containing "archive_repo.json"
      and gitignore lists xml files
      and a precommit hook is installed
 

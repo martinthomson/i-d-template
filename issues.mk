@@ -13,32 +13,26 @@ endif
 
 ## Store a copy of any github issues
 .PHONY: issues
-issues: issues.json pulls.json
-issues.json pulls.json: fetch-ghissues $(drafts_source)
-	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
-	  echo 'Skipping update of $@ (it is newer than the one on the branch)'; exit; \
+issues: archive_repo.json
+archive_repo.json: fetch-ghissues $(drafts_source)
+	@if [ -f archive_repo.json ] &&\
+	   [ "$(call last_modified,archive_repo.json)" -gt "$(call last_commit,$(GH_ISSUES),archive_repo.json)" ] 2>/dev/null; then \
+	  echo 'Skipping update of archive_repo.json (it is newer than the ones on the branch)'; exit; \
 	fi; \
 	skip=$(DISABLE_ISSUE_FETCH); \
 	if [ $(CI) = true -a "$$skip" != true -a \
-	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ] 2>/dev/null; then \
-	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
+	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- archive_repo.json)" ] 2>/dev/null; then \
+	    skip=true; echo 'Skipping update of archive_repo.json (most recent update was in the last 8 hours)'; \
 	fi; \
 	if [ "$$skip" = true ]; then \
-	    git show $(GH_ISSUES):$@ > $@; exit; \
+		git show $(GH_ISSUES):archive_repo.json > archive_repo.json; \
+		exit; \
 	fi; \
-	echo '[' > $@; \
-	url=https://api.github.com/repos/$(GITHUB_REPO_FULL)/$(basename $(notdir $@))?state=all; \
-	tmp=$$(mktemp /tmp/$(basename $(notdir $@)).XXXXXX); trap 'rm -f $$tmp' EXIT; \
-	while [ -n "$$url" ]; do \
-	  echo "Fetching $(basename $(notdir $@)) from $$url"; \
-	  $(curl) $(GITHUB_OAUTH) $$url -D $$tmp | sed -e '1s/^ *\[//;$$s/\] *$$//' >> $@; \
-	  if ! head -1 $$tmp | grep -q ' 200 OK'; then \
-	    echo "Error loading $$url:"; cat $$tmp; exit 1; \
-	  fi; \
-	  url=$$(sed -e 's/^Link:.*<\([^>]*\)>;[^,]*rel="next".*/\1/;t;d' $$tmp); \
-	  [ -n "$$url" ] && echo , >> $@; \
-	done; \
-	echo ']' >> $@
+	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
+	trap 'rm -f $$old_archive' EXIT; \
+	git show $(GH_ISSUES):archive_repo.json > $$old_archive; \
+	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(GH_TOKEN) $@ --reference $$old_archive;
+
 
 GHISSUES_ROOT := /tmp/ghissues$(shell echo $$$$)
 $(GHISSUES_ROOT): fetch-ghissues
@@ -54,10 +48,10 @@ $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
 ## Commit and push the changes to $(GH_ISSUES)
 .PHONY: ghissues gh-issues
 gh-issues: ghissues
-ghissues: $(GHISSUES_ROOT)/issues.json $(GHISSUES_ROOT)/pulls.json
+ghissues: $(GHISSUES_ROOT)/archive_repo.json
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
-	git -C $(GHISSUES_ROOT) add -f issues.json pulls.json issues.html issues.js
-	if test `git -C $(GHISSUES_ROOT) status --porcelain issues.json pulls.json issues.js issues.html | wc -l` -gt 0; then \
+	git -C $(GHISSUES_ROOT) add -f archive_repo.json issues.html issues.js
+	if test `git -C $(GHISSUES_ROOT) status --porcelain archive_repo.json issues.js issues.html | wc -l` -gt 0; then \
 	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
@@ -71,8 +65,8 @@ else
 endif # PUSH_GHPAGES
 	-rm -rf $(GHISSUES_ROOT)
 
-## Save issues.json to the CI_ARTIFACTS directory
+## Save archive_repo.json to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))
 .PHONY: artifacts
-artifacts: issues.json pulls.json
+artifacts: archive_repo.json
 endif
