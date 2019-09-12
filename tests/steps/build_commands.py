@@ -16,6 +16,7 @@ git_commit = [
     "user.email=behave@example.com",
     "commit",
 ]
+offline_make_options = ["PUSH_GHPAGES=false", "FETCH_ISSUES=false"]
 
 
 @contextmanager
@@ -53,17 +54,17 @@ def step_impl(context, option):
 
 @when(u"make is run")
 def step_impl(context):
-    run_with_capture(context, ["make"])
+    run_with_capture(context, ["make"] + offline_make_options)
 
 
 @when(u'make "{target}" is run')
 def step_impl(context, target):
-    run_with_capture(context, ["make", target])
+    run_with_capture(context, ["make", target] + offline_make_options)
 
 
 @when(u'make "{target}" is run with "{option}"')
 def step_impl(context, target, option):
-    run_with_capture(context, ["make", target, option])
+    run_with_capture(context, ["make", target, option] + offline_make_options)
 
 
 @when(u"the draft is broken")
