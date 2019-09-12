@@ -28,7 +28,8 @@ issues.json: $(drafts_source)
 	fi; \
 	tmp_headers=$$(mktemp /tmp/$(basename $(notdir $@))-headers.XXXXXX);  \
 	tmp_old=$$(mktemp /tmp/$(basename $(notdir $@))-old.XXXXXX); \
-	merge=false; \
+	tmp_new=$$(mktemp /tmp/$(basename $(notdir $@))-new.XXXXXX); \
+	trap 'rm -f $$tmp_headers $$tmp_new $$tmp_old' EXIT; \
 	if git show $(GH_ISSUES):$@ > $$tmp_old && [ ! -s "$$tmp_old" ]; then \
 		url="https://api.github.com/repos/$(GITHUB_REPO_FULL)$(basename $(notdir $@))?state=all&since=$$(git log -n 1 --pretty=format:%cI $(GH_ISSUES) -- $@)"; \
 	    merge=true; \
@@ -36,8 +37,6 @@ issues.json: $(drafts_source)
 		url="https://api.github.com/repos/$(GITHUB_REPO_FULL)$(basename $(notdir $@))?state=all"; \
 		merge=false; \
 	fi; \
-	tmp_new=$$(mktemp /tmp/$(basename $(notdir $@))-new.XXXXXX); \
-	trap 'rm -f $$tmp_headers $$tmp_new $$tmp_old' EXIT; \
 	echo '[' > $$tmp_new; \
 	while [ -n "$$url" ]; do \
 	  echo "Fetching $(basename $(notdir $@)) from $$url"; \
