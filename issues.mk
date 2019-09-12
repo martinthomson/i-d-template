@@ -26,10 +26,16 @@ issues.json: $(drafts_source)
 	if [ "$$skip" = true ]; then \
 	    git show $(GH_ISSUES):$@ > $@; exit; \
 	fi; \
-	url="https://api.github.com/repos/$(GITHUB_REPO_FULL)$(basename $(notdir $@))?state=all&since=$$(git log -n 1 --pretty=format:%cI $(GH_ISSUES) -- $@)"; \
 	tmp_headers=$$(mktemp /tmp/$(basename $(notdir $@))-headers.XXXXXX);  \
 	tmp_old=$$(mktemp /tmp/$(basename $(notdir $@))-old.XXXXXX); \
-	git show $(GH_ISSUES):$@ > $$tmp_old; \
+	merge=false; \
+	if git show $(GH_ISSUES):$@ > $$tmp_old && [ ! -s "$$tmp_old" ]; then \
+		url="https://api.github.com/repos/$(GITHUB_REPO_FULL)$(basename $(notdir $@))?state=all&since=$$(git log -n 1 --pretty=format:%cI $(GH_ISSUES) -- $@)"; \
+	    merge=true; \
+	else \
+		url="https://api.github.com/repos/$(GITHUB_REPO_FULL)$(basename $(notdir $@))?state=all"; \
+		merge=false; \
+	fi; \
 	tmp_new=$$(mktemp /tmp/$(basename $(notdir $@))-new.XXXXXX); \
 	trap 'rm -f $$tmp_headers $$tmp_new $$tmp_old' EXIT; \
 	echo '[' > $$tmp_new; \
@@ -44,7 +50,12 @@ issues.json: $(drafts_source)
 	  [ -n "$$url" ] && echo , >> $$tmp_new; \
 	done; \
 	echo ']' >> $$tmp_new; \
-	jq --slurpfile old_file $$tmp_old --slurpfile new_file $$tmp_new -n '$$old_file | .[0] as $$old | $$new_file | .[0] as $$new | $$new + $$old | unique_by(.id) | sort_by(.number)' > $@
+	if [ "$$merge" = true ]; then \
+		jq --slurpfile old_file $$tmp_old --slurpfile new_file $$tmp_new -n '$$old_file | .[0] as $$old | $$new_file | .[0] as $$new | $$new + $$old | unique_by(.id) | sort_by(.number)' > $@; \
+	else \
+		mv $$tmp_new $@; \
+	fi;
+
 
 pulls.json: issues.json
 	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
