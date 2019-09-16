@@ -10,6 +10,12 @@ Turn internet-draft source into text and HTML.  This supports XML files using
 [mmark](https://github.com/miekg/mmark)
 
 ```sh
+$ make yanglint
+```
+
+Check YANG modules and examples for errors and warnings (see [YANG](YANG.md)).  Also runs automatically during `make` if the `VALIDATE_YANG` environment variable is set.
+
+```sh
 $ make diff
 ```
 
