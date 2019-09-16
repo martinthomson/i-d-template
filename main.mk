@@ -39,6 +39,7 @@ include $(LIBDIR)/ghpages.mk
 include $(LIBDIR)/archive.mk
 include $(LIBDIR)/upload.mk
 include $(LIBDIR)/update.mk
+include $(LIBDIR)/yanglint.mk
 
 -include .includes.mk
 .includes.mk: $(filter %.md,$(drafts_source))
@@ -87,16 +88,30 @@ ifeq (true,$(TIDY))
 MD_POST += | $(trace) -q $@ -s tidy $(rfc-tidy)
 endif
 
+# x.md.yangdeps files created by yang-inject.sh
+-include $(addsuffix .yangdeps,$(wildcard *.md))
+
 %.xml: %.md $(DEPS_FILES)
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
+	if grep -q -E '^\s*YANG-(MODULE|DATA|TREE)' $< ; then \
+	  if [ "$(VALIDATE_YANG)" = "1" ]; then \
+	    if ! $(LIBDIR)/yang-check.sh $< ; then \
+	      echo "$(LIBDIR)/yang-check.sh $< failed" ; \
+	      exit 1 ; \
+	    fi ; \
+	  fi ;\
+	  if $(LIBDIR)/yang-inject.sh $< ; then \
+			f="$<.withyang"; \
+		else echo "$(LIBDIR)/yang-inject.sh $< failed" ; exit 1 ; fi ; \
+	else f="$<" ; fi; \
 	if [ "$$h" = '---' ]; then \
-	  $(echo) '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(trace) $@ -s kramdown-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
+	  $(echo) '$(subst ','"'"',cat $$f $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
+	  cat $$f $(MD_PRE) | $(trace) $@ -s kramdown-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  $(echo) '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(trace) $@ -s mmark $(mmark) $(MD_POST) >$@; \
+	  $(echo) '$(subst ','"'"',cat $$f $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
+	  cat $$f $(MD_PRE) | $(trace) $@ -s mmark $(mmark) $(MD_POST) >$@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
@@ -286,6 +301,7 @@ COMMA := ,
 clean::
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
+	    $(addsuffix .{md.withyang$(COMMA)md.yangdeps},$(drafts)) \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)

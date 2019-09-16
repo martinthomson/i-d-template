@@ -15,6 +15,12 @@ addition of the source files for each draft, though you might choose to
 some files.
 
 ```sh
+$ make yanglint
+```
+
+Check YANG modules and examples for errors and warnings (see [YANG](YANG.md)).  Also runs automatically during `make` if the `VALIDATE_YANG` environment variable is set.
+
+```sh
 $ make diff
 ```
 
