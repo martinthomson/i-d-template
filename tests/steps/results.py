@@ -15,12 +15,12 @@ def cd(newdir):
         os.chdir(prevdir)
 
 
-@then(u'it succeeds')
+@then(u"it succeeds")
 def step_impl(context):
     assert context.result == 0
 
 
-@then(u'it fails')
+@then(u"it fails")
 def step_impl(context):
     assert context.result != 0
 
@@ -30,13 +30,14 @@ def step_impl(context, text):
     assert context.error.find(text) != -1
 
 
-@then(u'gitignore lists xml files')
+@then(u"gitignore lists xml files")
 def step_impl(context):
     with cd(context.working_dir):
         md_files = glob("draft-*.md")
         for md in md_files:
             context.execute_steps(
-                u'then gitignore lists "{}"'.format(md.replace(".md", ".xml")))
+                u'then gitignore lists "{}"'.format(md.replace(".md", ".xml"))
+            )
 
 
 @then(u'gitignore lists "{ignore}"')
@@ -46,7 +47,7 @@ def step_impl(context, ignore):
         assert int(c) == 1
 
 
-@then(u'generates documents')
+@then(u"generates documents")
 def step_impl(context):
     with cd(context.working_dir):
         md_files = glob("draft-*.md")
@@ -57,7 +58,7 @@ def step_impl(context):
             assert os.path.isfile(html_file)
 
 
-@then(u'generates upload files')
+@then(u"generates upload files")
 def step_impl(context):
     with cd(context.working_dir):
         for md in glob("draft-*.md"):
@@ -66,13 +67,13 @@ def step_impl(context):
                 assert os.path.isfile(upload_file)
 
 
-@then(u'documents are added to gh-pages')
+@then(u"documents are added to gh-pages")
 def step_impl(context):
     with cd(context.working_dir):
         md_files = glob("draft-*.md")
         ghpages_files = check_output(
-            ["git", "ls-tree", "gh-pages", "--name-only", "-r"]) \
-            .decode("utf-8")
+            ["git", "ls-tree", "gh-pages", "--name-only", "-r"]
+        ).decode("utf-8")
         for md in md_files:
             txt_file = md.replace(".md", ".txt")
             html_file = md.replace(".md", ".html")
@@ -83,29 +84,30 @@ def step_impl(context):
 @then(u'a file is created called "{filename}" which contains "{text}"')
 def step_impl(context, filename, text):
     context.execute_steps(
-        u'then a branch is created called "master" containing "%s"' % filename)
+        u'then a branch is created called "master" containing "%s"' % filename
+    )
     with cd(context.working_dir):
-        content = check_output(
-            ["git", "show", "master:%s" % filename]).decode("utf-8")
+        content = check_output(["git", "show", "master:%s" % filename]).decode("utf-8")
         assert text in content
 
 
 @then(u'a file is created called "{filename}"')
 def step_impl(context, filename):
     context.execute_steps(
-        u'then a branch is created called "master" containing "%s"' % filename)
+        u'then a branch is created called "master" containing "%s"' % filename
+    )
 
 
 @then(u'a branch is created called "{branch}" containing "{filename}"')
 def step_impl(context, branch, filename):
     with cd(context.working_dir):
-        files = check_output(
-            ["git", "ls-tree", branch, "--name-only", "-r"]) \
-            .decode("utf-8")
+        files = check_output(["git", "ls-tree", branch, "--name-only", "-r"]).decode(
+            "utf-8"
+        )
         assert filename in files
 
 
-@then(u'a precommit hook is installed')
+@then(u"a precommit hook is installed")
 def step_impl(context):
     with cd(context.working_dir):
-        assert len(glob('.git/hooks/pre-commit')) == 1
+        assert len(glob(".git/hooks/pre-commit")) == 1

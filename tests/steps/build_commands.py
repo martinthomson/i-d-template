@@ -8,8 +8,14 @@ import os
 import sys
 import fileinput
 
-git_commit = ["git", "-c", "user.name=Behave Tests", "-c",
-              "user.email=behave@example.com", "commit"]
+git_commit = [
+    "git",
+    "-c",
+    "user.name=Behave Tests",
+    "-c",
+    "user.email=behave@example.com",
+    "commit",
+]
 
 
 @contextmanager
@@ -23,11 +29,10 @@ def cd(newdir):
 
 
 def run_with_capture(context, command):
-    with cd(context.working_dir), \
-            TemporaryFile(mode='w+') as outFile, \
-            TemporaryFile(mode='w+') as errFile:
-        context.result = call(command,
-                              stdout=outFile, stderr=errFile)
+    with cd(context.working_dir), TemporaryFile(mode="w+") as outFile, TemporaryFile(
+        mode="w+"
+    ) as errFile:
+        context.result = call(command, stdout=outFile, stderr=errFile)
         outFile.seek(0)
         context.out = outFile.read()
         errFile.seek(0)
@@ -36,7 +41,7 @@ def run_with_capture(context, command):
     print(context.error, file=sys.stderr)
 
 
-@when(u'the setup script is run')
+@when(u"the setup script is run")
 def step_impl(context):
     run_with_capture(context, ["make", "-f", "lib/setup.mk"])
 
@@ -46,7 +51,7 @@ def step_impl(context, option):
     run_with_capture(context, ["make", "-f", "lib/setup.mk", option])
 
 
-@when(u'make is run')
+@when(u"make is run")
 def step_impl(context):
     run_with_capture(context, ["make"])
 
@@ -61,34 +66,34 @@ def step_impl(context, target, option):
     run_with_capture(context, ["make", target, option])
 
 
-@when(u'the draft is broken')
+@when(u"the draft is broken")
 def step_impl(context):
     with cd(context.working_dir):
         break_this = glob("draft-*.md")[0]
-        run_with_capture(context, [
-                         "sed", "-i", "-e", "s/{{RFC2119}}/{{broken-reference}}/", break_this])
+        run_with_capture(
+            context,
+            ["sed", "-i", "-e", "s/{{RFC2119}}/{{broken-reference}}/", break_this],
+        )
         context.broken_file = break_this
 
 
-@when(u'the lib dir is removed')
+@when(u"the lib dir is removed")
 def step_impl(context):
     run_with_capture(context, ["rm", "-rf", "lib"])
 
 
-@when(u'lib is added as a submodule')
+@when(u"lib is added as a submodule")
 def step_impl(context):
-    run_with_capture(context, ["git", "submodule",
-                               "add", "-f", os.getcwd(), "lib"])
+    run_with_capture(context, ["git", "submodule", "add", "-f", os.getcwd(), "lib"])
 
 
-@when(u'git commit is run')
+@when(u"git commit is run")
 def step_impl(context):
     with cd(context.working_dir):
-        run_with_capture(context, git_commit +
-                         ["-am", "Committing broken draft"])
+        run_with_capture(context, git_commit + ["-am", "Committing broken draft"])
 
 
-@when(u'a non-broken draft is committed')
+@when(u"a non-broken draft is committed")
 def step_impl(context):
     with cd(context.working_dir):
         drafts = glob("draft-*.md")
@@ -97,5 +102,4 @@ def step_impl(context):
         with open(commit_this_file, "a") as update:
             update.write("# One more appendix\n\nCan you see me?\n")
         call(["git", "add", commit_this_file])
-        run_with_capture(context, git_commit +
-                         ["-m", "Only the non-broken file"])
+        run_with_capture(context, git_commit + ["-m", "Only the non-broken file"])

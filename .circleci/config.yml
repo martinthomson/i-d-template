@@ -9,6 +9,12 @@ jobs:
       - checkout
 
       - run:
+          name: "Check Formatting"
+          command: |
+            pip3 install --user black && ln -s $HOME/.local/bin/black $BINDIR
+            black --check .
+
+      - run:
           name: "Run Tests"
           command: |
             pip3 install --user behave && ln -s $HOME/.local/bin/behave $BINDIR
