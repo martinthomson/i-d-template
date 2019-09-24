@@ -31,6 +31,9 @@ if args.lastSuccessDateTime and not args.omitOld and not args.refIssues:
 if not args.githubToken and 'GH_TOKEN' in os.environ.keys():
     args.githubToken = os.environ['GH_TOKEN']
 
+if args.repo[-1] == '/':
+    args.repo = args.repo[:-1]
+
 API_headers = {"user-agent":"MikeBishop"}
 
 if args.githubToken:
