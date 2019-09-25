@@ -294,12 +294,7 @@ a.pilcrow {
 a.pilcrow[href] { color: #ddd; }
 a.pilcrow[href]:hover { text-decoration: none; }
 @media screen {
-  aside:hover > a.pilcrow,
-  p:hover > a.pilcrow,
-  blockquote:hover > a.pilcrow,
-  div:hover > a.pilcrow,
-  li:hover > a.pilcrow,
-  pre:hover > a.pilcrow {
+  :hover > a.pilcrow {
     visibility: visible;
   }
   a.pilcrow:hover {
@@ -420,15 +415,11 @@ hr {
 @media (min-width: 600px) {
   .index ul {
     column-count: 2;
-    -moz-column-count: 2;
     column-gap: 20px;
-    -moz-column-gap: 20px;
   }
   .index ul ul {
     column-count: 1;
-    -moz-column-count: 1;
     column-gap: 0;
-    -moz-column-gap: 0;
   }
 }
 
