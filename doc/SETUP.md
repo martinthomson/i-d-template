@@ -10,8 +10,11 @@ Mac users might need to install [Homebrew](https://brew.sh) to get a version of
 shipped in XCode is subtly broken).
 
 ```sh
-brew install --with-default-names make
+brew install make
 ```
+
+Note that this installs as `gmake`.  Follow the instructions to add this as
+`make` to your path.
 
 Windows users will need to use [Cygwin](http://cygwin.org/) or [the Windows
 Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
