@@ -161,3 +161,20 @@ about pull requests.
 
 Circle (or Travis) will now also check pull requests for errors, letting you
 know if things didn't work out so that you don't merge anything suspect.
+
+
+# Regenerating README.md
+
+When you change things in the repository, it can help if you are able to use
+automatic regeneration for files.  `README.md` is typically the file that needs
+this sort of updating as files are added, renamed, or removed fairly often.
+
+As long as your input files are newer than `README.md` (use `touch` if this
+isn't the case), then it can be rebuilt using `setup.mk` as follows:
+
+```sh
+make -f lib/setup.mk README.md
+git commit -m "Update README" README.md
+```
+
+This will erase any customization you have added.
