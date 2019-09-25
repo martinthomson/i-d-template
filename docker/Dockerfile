@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates coreutils curl git make ssh libxml2-utils xsltproc \
     python3-minimal python3-lxml python3-pip python3-setuptools python3-wheel \
     mmark ruby \
- && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
  && apt-get autoremove -y && apt-get clean -y
 
 ENV USER idci
