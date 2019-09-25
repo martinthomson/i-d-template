@@ -6,6 +6,13 @@ jobs:
     working_directory: ~/draft
 
     steps:
+      - run:
+          name: "Print Configuration"
+          command: |
+            xml2rfc --version
+            gem list -q kramdown-rfc2629
+            echo -n 'mmark '; mmark --version
+
       - restore_cache:
           name: "Restoring cache - Git"
           keys:
