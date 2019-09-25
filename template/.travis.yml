@@ -1,32 +1,39 @@
-language: python
-sudo: false
+sudo: required
 dist: xenial
 
-addons:
-  apt:
-    packages:
-     - python-pip
-     - xsltproc
+services:
+  - docker
 
 env:
-  global:
-   - GOPATH="${TRAVIS_BUILD_DIR}/.go_workspace"
-   - mmark_src=github.com/miekg/mmark/mmark
-   - mmark=./mmark
+  DRAFT_DIR: /home/idci/draft
 
-install:
- - pip install xml2rfc
- - if head -1 -q *.md | grep '^\-\-\-' >/dev/null 2>&1; then gem install --no-doc kramdown-rfc2629; fi
- - if head -1 -q *.md | grep '^%%%' >/dev/null 2>&1; then go get "$mmark_src" && go build "$mmark_src"; fi
+before_install:
+  - docker --version
+  - docker pull martinthomson/i-d-template
 
 script:
- - make
- - make issues || make issues DISABLE_ISSUE_FETCH=true && make gh-issues
- - make gh-pages
+  - docker run -d -v "$PWD:/tmp/draft" --tmpfs "$DRAFT_DIR:rw,exec" --name idci
+      martinthomson/i-d-template sleep 300
+  - docker exec idci cp -rn /tmp/draft /home/idci
+  - docker exec -w "$DRAFT_DIR" -e CI=true
+      -e TRAVIS_REPO_SLUG -e TRAVIS_BRANCH -e TRAVIS_TAG -e TRAVIS_PULL_REQUEST
+      idci make CLONE_ARGS='--reference /home/idci/git-reference'
+  - docker exec idci ls -l /home/idci/draft/lib
+  - if [ "${TRAVIS_TAG#draft-}" == "${TRAVIS_TAG}" ]; then
+      docker exec -w "$DRAFT_DIR" -e CI=true -e GH_TOKEN
+        -e TRAVIS_REPO_SLUG -e TRAVIS_BRANCH -e TRAVIS_TAG -e TRAVIS_PULL_REQUEST
+        idci make ghpages;
+    fi
 
 deploy:
   provider: script
-  script: make upload
+  script:
+    - docker exec -w "$DRAFT_DIR" -e CI=true -e GH_TOKEN
+        -e TRAVIS_REPO_SLUG -e TRAVIS_BRANCH -e TRAVIS_TAG -e TRAVIS_PULL_REQUEST
+        idci make upload
   skip_cleanup: true
   on:
     tags: true
+
+after_script:
+  - docker container rm -f idci
