@@ -136,8 +136,8 @@ This requires that you sign in with [Circle](https://circleci.com/) or
 [Travis](https://travis-ci.org/).
 
 First [enable builds for the new repository](https://circleci.com/add-projects)
-(or on [Travis](https://travis-ci.org/profile), though Travis might need to be
-refreshed before you can see your repository).
+(or on [Travis](https://travis-ci.org/profile), though Travis is less well
+supported on the whole).
 
 Then, you need to get yourself a [new GitHub application
 token](https://github.com/settings/tokens/new).  The application token only
