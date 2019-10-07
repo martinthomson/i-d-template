@@ -35,7 +35,7 @@ You can copy of one of the examples files
 if you are starting from scratch.
 
 Edit the draft so that it has both a title and the correct name.  These tools
-uses the `-latest` suffix in place of the usual number ('-00', or '-08').  The
+use the `-latest` suffix in place of the usual number ('-00', or '-08').  The
 number is generated automatically when you use `make submit`.
 
 In XML, you should have at least:
