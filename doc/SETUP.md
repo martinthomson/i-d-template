@@ -24,10 +24,11 @@ to get `make`.
 ## xml2rfc
 
 All systems require [xml2rfc](http://xml2rfc.tools.ietf.org/).  This
-requires [Python](https://www.python.org/).  The easiest way to get
-`xml2rfc` is with [pip](https://pip.pypa.io/en/stable/installing/), which
-is either installed with python, or part of the `python-pip` package
-on most distributions.
+requires [Python 3](https://www.python.org/).  Be sure not to get Python 2,
+which is no longer supported.  The easiest way to get `xml2rfc` is with
+[pip](https://pip.pypa.io/en/stable/installing/), which is either installed with
+python, or part of the `python-pip` or `python3-pip` package on most
+distributions.
 
 On Cygwin, you'll need to install `pip` directly:
 
@@ -43,19 +44,19 @@ Using a `virtualenv`:
 $ virtualenv --no-site-packages venv
 # remember also to activate the virtualenv before any 'make' run
 $ source venv/bin/activate
-$ pip install xml2rfc
+$ pip3 install xml2rfc
 ```
 
 To your local user account:
 
 ```sh
-$ pip install --user xml2rfc
+$ pip3 install --user xml2rfc
 ```
 
 Or globally (not advisable):
 
 ```sh
-$ sudo pip install xml2rfc
+$ sudo pip3 install xml2rfc
 ```
 
 xml2rfc might need development versions of [libxml2](http://xmlsoft.org/) and
