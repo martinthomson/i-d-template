@@ -10,6 +10,7 @@ include $(LIBDIR)/ghpages.mk
 include $(LIBDIR)/issues.mk
 include $(LIBDIR)/upload.mk
 include $(LIBDIR)/update.mk
+include $(LIBDIR)/yanglint.mk
 
 ## Basic Targets
 .PHONY: txt html pdf
@@ -32,16 +33,30 @@ REMOVE_LATEST =
 endif
 export XML_RESOURCE_ORG_PREFIX
 
+# x.md.yangdeps files created by yang-inject.sh
+-include $(addsuffix .yangdeps,$(wildcard *.md))
+
 %.xml: %.md
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
+	if grep -q -E '^\s*YANG-(MODULE|DATA|TREE)' $< ; then \
+	  if [ "$(VALIDATE_YANG)" = "1" ]; then \
+	    if ! $(LIBDIR)/yang-check.sh $< ; then \
+	      echo "$(LIBDIR)/yang-check.sh $< failed" ; \
+	      exit 1 ; \
+	    fi ; \
+	  fi ;\
+	  if $(LIBDIR)/yang-inject.sh $< ; then \
+			f="$<.withyang"; \
+		else echo "$(LIBDIR)/yang-inject.sh $< failed" ; exit 1 ; fi ; \
+	else f="$<" ; fi; \
 	if [ "$$h" = '---' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) > $@)'; \
-	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) > $@; \
+	  echo '$(subst ','"'"',cat $$f $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) > $@)'; \
+	  cat $$f $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) > $@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page > $@)'; \
-	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page > $@; \
+	  echo '$(subst ','"'"',cat $$f $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page > $@)'; \
+	  cat $$f $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page > $@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi
@@ -183,6 +198,7 @@ COMMA := ,
 clean::
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
+	    $(addsuffix .{md.withyang$(COMMA)md.yangdeps},$(drafts)) \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)

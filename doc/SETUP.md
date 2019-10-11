@@ -103,6 +103,32 @@ and find a directory that is on the path where you can install `mmark`.  For
 these, I set `GOPATH=~/gocode`.
 
 
+## pyang
+
+[`pyang`](https://github.com/mbj4668/pyang) is needed for markdown that uses `YANG-TREE <module.yang>` to import an external yang file.
+
+```sh
+$ pip install pyang
+```
+
+
+## yanglint / libyang
+
+[`yanglint`](https://github.com/CESNET/libyang/tree/master/tools/lint) is part of the [`libyang`](https://github.com/CESNET/libyang) package.  It's required only if you're validating YANG modules with `make yanglint` or with the `VALIDATE_YANG=1` environment variable during make.
+
+In late 2019, the libyang package is unfortunately not yet widely available as an rpm, deb, brew, etc. package in stable distros like for example the latest LTS, Bionic Beaver.  So if you're using this feature, it may be necessary to install from source.  This requires `cmake` and `libpcre3-dev`:
+
+```sh
+git clone https://github.com/CESNET/libyang.git
+mkdir libyang/build
+pushd libyang/build
+cmake -DCMAKE_INSTALL_PREFIX=/ ..
+make
+make install
+popd
+```
+
+
 ## Other tools
 
 Some other helpful tools are listed in `config.mk`.
