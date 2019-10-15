@@ -1,5 +1,5 @@
 .PHONY: latest
-latest:: txt raw html
+latest:: txt html
 
 .DELETE_ON_ERROR:
 
