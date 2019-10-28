@@ -71,7 +71,7 @@ def step_impl(context):
         random_string = "".join(
             random.SystemRandom().choice(string.ascii_lowercase) for n in range(8)
         )
-        draft_name = "draft-behave-" + random_string
+        draft_name = "draft-behave-template-" + random_string
         file_name = draft_name + ".md"
         with open(file_name, "wb") as newFile:
             call(

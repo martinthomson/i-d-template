@@ -11,6 +11,7 @@ Feature: Initial setup
      and a file is created called ".gitignore"
      and a file is created called ".travis.yml"
      and a file is created called ".circleci/config.yml"
+     and a file is created called ".note.xml"
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "issues.json"
      and gitignore lists xml files
@@ -27,6 +28,7 @@ Feature: Initial setup
      and a file is created called ".gitignore"
      and a file is created called ".travis.yml"
      and a file is created called ".circleci/config.yml"
+     and a file is created called ".note.xml"
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "issues.json"
      and gitignore lists xml files
