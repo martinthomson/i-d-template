@@ -8,6 +8,10 @@ SOURCE_BRANCH := $(TRAVIS_PULL_REQUEST_BRANCH)
 else
 SOURCE_BRANCH := $(TRAVIS_BRANCH)
 endif
+else ifneq (,$(GITHUB_REF))
+# GitHub gives the entire ref name, e.g.: refs/head/master
+# The variable expansion returns the substring after last /, e.g.: master
+SOURCE_BRANCH := $(shell echo $(GITHUB_REF\#\#*\\/))
 else
 SOURCE_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 ifeq (HEAD,$(SOURCE_BRANCH))

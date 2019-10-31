@@ -1,0 +1,28 @@
+name: Delivery Pipeline
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Ruby 2.6
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.6.x
+    - name: Install build tools
+      run: |
+        sudo apt install xml2rfc --no-install-recommends
+        gem install --no-doc kramdown-rfc2629
+    - name: Build drafts
+      run: make
+    - name: Update GitHub Pages
+      run: make gh-pages
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    - name: Upload to Datatracker
+      run: make upload
+      if: startsWith(github.ref, 'refs/tags/draft-')
