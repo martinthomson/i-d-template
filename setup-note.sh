@@ -28,7 +28,7 @@ eref() {
     echo "<eref target=\"$1\">$1</eref>"
 }
 ml() {
-    echo "https://mailarchive.ietf.org/arch/search?email_list=$1"
+    echo "https://mailarchive.ietf.org/arch/browse/$1/"
 }
 
 echo '<note title="Note to Readers">'
