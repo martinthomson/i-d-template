@@ -212,7 +212,7 @@ figcaption, caption {
   }
   figure pre {
     display: block;
-    width: calc(100% - 22px);
+    width: calc(100% - 25px);
   }
   pre + .pilcrow {
     display: inline-block;
