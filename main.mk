@@ -39,11 +39,11 @@ export XML_RESOURCE_ORG_PREFIX
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $(ADD_NOTE) > $@)'; \
-	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $(ADD_NOTE) > $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@)'; \
+	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page $(ADD_NOTE) > $@)'; \
-	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page $(ADD_NOTE) > $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@)'; \
+	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi
