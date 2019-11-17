@@ -55,7 +55,7 @@ ifdef REFCACHEDIR
 endif
 
 %.xml: %.org
-	$(oxtradoc) -m outline-to-xml -n "$@" $< > $@
+	$(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
 ifeq (true,$(XML2RFCV3))
 XML2RFCV3OPTION := --v3
