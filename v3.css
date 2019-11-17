@@ -459,6 +459,7 @@ hr.addr {
   #name-authors-addresses {
     position: absolute;
     top: 0px;
+    column-span: all;
   }
   /* hack for break-inside: avoid-column */
   #authors-addresses address {
