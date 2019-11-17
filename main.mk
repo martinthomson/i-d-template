@@ -87,8 +87,8 @@ $(XSLTDIR):
 %.raw.txt: %.cleanxml
 	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --raw
 else
-%.htmltmp: %.xml
-	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --html
+%.html: %.xml
+	$(xml2rfc) $(XML2RFCV3OPTION) --css=$(LIBDIR)/v3.css $< -o $@ --html
 
 %.txt: %.xml
 	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --text
