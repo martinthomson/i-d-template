@@ -21,32 +21,37 @@ pdf:: $(addsuffix .pdf,$(drafts))
 ## Basic Recipes
 .INTERMEDIATE: $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
 
-NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
+export XML_RESOURCE_ORG_PREFIX
+
+MD_PRE :=
 ifneq (,$(MD_PREPROCESSOR))
-MD_PREPROCESSOR := | $(MD_PREPROCESSOR)
+MD_PRE += | $(MD_PREPROCESSOR)
 endif
 ifneq (1,$(words $(drafts)))
-REMOVE_LATEST = | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
+NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
+MD_PTR += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
-else
-REMOVE_LATEST =
 endif
-ADD_NOTE = | $(LIBDIR)/add-note.py
-export XML_RESOURCE_ORG_PREFIX
+MD_POST := | $(LIBDIR)/add-note.py
+ifeq (true,$(USE_XSLT))
+MD_POST +=  >
+else
+MD_POST += | $(xml2rfc) --v2v3 /dev/stdin -o
+endif
 
 %.xml: %.md
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@)'; \
-	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(kramdown-rfc2629) $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc2629) $(MD_POST) $@)'; \
+	  cat $< $(MD_PRE) | $(kramdown-rfc2629) $(MD_POST) $@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@)'; \
-	  cat $< $(MD_PREPROCESSOR) $(REMOVE_LATEST) | $(mmark) -xml2 -page $(ADD_NOTE) | $(xml2rfc) --v2v3 /dev/stdin -o $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) $@)'; \
+	  cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) $@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
-	fi
+	fi && [ -e $@ ]
 
 ifdef REFCACHEDIR
 %.xml: .refcache
