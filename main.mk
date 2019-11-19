@@ -83,8 +83,8 @@ $(XSLTDIR):
 %.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
 	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
 
-%.htmltmp: %.xml $(LIBDIR)/rfc2629.xslt
-	$(xsltproc) --novalid $(LIBDIR)/rfc2629.xslt $< > $@
+%.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
+	$(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml
 	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --text
@@ -100,15 +100,6 @@ else
 
 %.raw.txt: %.xml
 	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --raw
-endif
-
-%.html: %.htmltmp $(LIBDIR)/addstyle.sed $(LIBDIR)/style.css
-# Note that the extra `echo` here is to work around a limitation in addstyle.sed
-ifneq (,$(if $(ENABLE_RIBBON),$(CI_REPO_FULL),))
-	(cat $<;echo) | sed -f $(LIBDIR)/addstyle.sed -f $(LIBDIR)/addribbon.sed | \
-	  sed -e 's~{SLUG}~$(CI_REPO_FULL)~' > $@
-else
-	(cat $<;echo) | sed -f $(LIBDIR)/addstyle.sed > $@
 endif
 
 %.pdf: %.txt
