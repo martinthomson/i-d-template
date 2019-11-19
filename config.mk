@@ -2,10 +2,6 @@
 # All are assumed to be on the path, but you can override these
 # in the environment, or command line.
 
-# Set XML2RFCV3 to "true" to use the xml2rfc v3 path, described at
-# https://tools.ietf.org/src/xml2rfc/trunk/cli/doc/xml2rfc3.html.
-XML2RFCV3 ?= false
-
 # Mandatory:
 #   https://pypi.python.org/pypi/xml2rfc
 xml2rfc ?= xml2rfc -q

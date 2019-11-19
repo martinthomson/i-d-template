@@ -62,12 +62,6 @@ endif
 %.xml: %.org
 	$(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
-ifeq (true,$(XML2RFCV3))
-XML2RFCV3OPTION := --v3
-else
-XML2RFCV3OPTION :=
-endif
-
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 ifeq (true,$(USE_XSLT))
 $(LIBDIR)/rfc2629.xslt: $(XSLTDIR)/rfc2629.xslt
@@ -87,19 +81,19 @@ $(XSLTDIR):
 	$(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml
-	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --text
+	$(xml2rfc) $< -o $@ --text
 
 %.raw.txt: %.cleanxml
-	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --raw
+	$(xml2rfc) $< -o $@ --raw
 else
 %.html: %.xml $(LIBDIR)/v3.css
-	$(xml2rfc) $(XML2RFCV3OPTION) --css=$(LIBDIR)/v3.css $< -o $@ --html
+	$(xml2rfc) --css=$(LIBDIR)/v3.css $< -o $@ --html
 
 %.txt: %.xml
-	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --text
+	$(xml2rfc) $< -o $@ --text
 
 %.raw.txt: %.xml
-	$(xml2rfc) $(XML2RFCV3OPTION) $< -o $@ --raw
+	$(xml2rfc) $< -o $@ --raw
 endif
 
 %.pdf: %.txt
