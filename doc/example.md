@@ -1,6 +1,6 @@
 ---
-title: TODO - Your title
-abbrev: TODO - Abbreviation
+title: "TODO - Your title"
+abbrev: "TODO - Abbreviation"
 docname: draft-todo-your-name-here
 category: info
 
@@ -14,9 +14,9 @@ pi: [toc, sortrefs, symrefs]
 
 author:
  -
-    ins: "H. Tschofenig"
-    name: "Hannes Tschofenig"
-    organization: "Arm Limited"
+    ins: H. Tschofenig
+    name: Hannes Tschofenig
+    organization: Arm Limited
     email: hannes.tschofenig@arm.com
 
 normative:
