@@ -284,12 +284,6 @@ a.pilcrow {
   margin-left: 3px;
   visibility: hidden;
   user-select: none;
-  -ms-user-select: none;
-  -o-user-select:none;
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
 }
 a.pilcrow[href] { color: #ddd; }
 a.pilcrow[href]:hover { text-decoration: none; }
@@ -452,9 +446,7 @@ hr.addr {
     display: relative;
     padding: 32px 0 0;
     column-count: 2;
-    -moz-column-count: 2;
     column-gap: 20px;
-    -moz-column-gap: 20px;
   }
   #name-authors-addresses {
     position: absolute;
