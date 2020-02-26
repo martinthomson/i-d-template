@@ -219,6 +219,10 @@ figcaption, caption {
     vertical-align: text-bottom;
     padding-bottom: 8px;
   }
+  table {
+    display: inline-block;
+    overflow-x: auto;
+  }
 }
 
 /* aside, blockquote */
