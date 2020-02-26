@@ -1,0 +1,3048 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Signing HTTP Messages</title>
+<meta content="Annabelle Backman" name="author">
+<meta content="Justin Richer" name="author">
+<meta content="Manu Sporny" name="author">
+<meta content="
+       This document describes a mechanism for creating, encoding, and verifying digital signatures or message authentication codes over content within an HTTP message.  This mechanism supports use cases where the full HTTP message may not be known to the signer, and where the message may be transformed (e.g., by intermediaries) before reaching the verifier. 
+    " name="description">
+<meta content="xml2rfc 2.36.0" name="generator">
+<meta content="HTTP" name="keyword">
+<meta content="digital signature" name="keyword">
+<meta content="PKI" name="keyword">
+<meta content="draft-richanna-http-message-signatures-00" name="ietf.draft">
+<link href="/tmp/draft-richanna-http-message-signatures-00-HeLX6y.xml" type="application/rfc+xml" rel="alternate">
+<link href="#copyright" rel="license">
+<style type="text/css">/*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necssary during the development of the v3
+  formatters.
+
+*/
+
+/* fonts */
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans'); /* Sans-serif */
+@import url('https://fonts.googleapis.com/css?family=Noto+Serif'); /* Serif (print) */
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono'); /* Monospace */
+
+@viewport {
+  zoom: 1.0;
+  width: extend-to-zoom;
+}
+@-ms-viewport {
+  width: extend-to-zoom;
+  zoom: 1.0;
+}
+/* general and mobile first */
+html {
+}
+body {
+  max-width: 90%;
+  margin: 1.5em auto;
+  color: #222;
+  background-color: #fff;
+  font-size: 14px;
+  font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  scroll-behavior: smooth;
+}
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+  line-height: 1.3;
+}
+#title {
+  clear: both;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 0.5em 0;
+  padding: 1em 0 0.5em;
+}
+.author {
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 26px;
+  margin: 1em 0;
+}
+h2 {
+  font-size: 22px;
+  margin-top: -20px;  /* provide offset for in-page anchors */
+  padding-top: 33px;
+}
+h3 {
+  font-size: 18px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h4 {
+  font-size: 16px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h5, h6 {
+  font-size: 14px;
+}
+#n-copyright-notice {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+}
+/* general structure */
+p {
+  padding: 0;
+  margin: 0 0 1em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+.alignCenter.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+/* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #22e; /* Arlen: WCAG 2019 */
+}
+a[href]:hover {
+  background-color: #f2f2f2;
+}
+figcaption a[href],
+a[href].selfRef {
+  color: #222;
+}
+/* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+/* Figures */
+tt, code, pre, code {
+  background-color: #f9f9f9;
+  font-family: 'Roboto Mono', monospace;
+}
+pre {
+  border: 1px solid #eee;
+  margin: 0;
+  padding: 1em;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption {
+  font-style: italic;
+  margin: 0 0 1em 0;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: #f9f9f9;
+  color: #111; /* Arlen: WCAG 2019 */
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid #eee;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #e9e9e9;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f5f5f5;
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  color: #666; /* Arlen: AHDJ 2019 */
+  text-decoration: none;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: 0.9em;
+}
+#identifiers dt {
+  width: 3em;
+  clear: left;
+}
+#identifiers dd {
+  float: left;
+  margin-bottom: 0;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #666; /* Arlen: WCAG 2019 */
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    -moz-column-count: 1;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  font-family: "Noto Sans",Arial,Helvetica,sans-serif;
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #9e2a00; /* Arlen: WCAG 2019 */
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  border-radius: 3px;
+}
+.cref {
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 1023px) {
+  body {
+    padding-top: 2em;
+  }
+  #title {
+    padding: 1em 0;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: -18px;  /* provide offset for in-page anchors */
+    padding-top: 38px;
+  }
+  #identifiers dd {
+    max-width: 60%;
+  }
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc h2 {
+    margin: -1px 0 0 0;
+    padding: 4px 0 4px 6px;
+    padding-right: 1em;
+    min-width: 190px;
+    font-size: 1.1em;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 6px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 1024px) {
+  body {
+    max-width: 724px;
+    margin: 42px auto;
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+  #toc {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    width: 25%;
+    margin: 0;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #toc h2 {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 0;
+    overflow: auto;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+/* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+/*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+  /* The follwing is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+  /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+}
+
+/* Changes introduced to fix issues found during implementation */
+/* Make sure links are clickable even if overlapped by following H* */
+a {
+  z-index: 2;
+}
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Leave room in document info to show Internet-Draft on one line */
+#identifiers dt {
+  width: 8em;
+}
+
+/* Don't waste quite as much whitespace between label and value in doc info */
+#identifiers dd {
+  margin-left: 1em;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 1023px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Give the bottom of the ToC some whitespace */
+@media screen and (min-width: 1024px) {
+  #toc {
+    padding: 0 0 1em 1em;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* prevent monospace from becoming overly large */
+tt, code, pre, code {
+  font-size: 95%;
+}
+
+/* Fix the height/width aspect for ascii art*/
+pre.sourcecode,
+.art-text pre {
+  line-height: 1.12;
+}
+
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin-right: 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact informatio look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 30em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+caption a[href] {
+  color: #222;
+}
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Avoid wrapping of URLs in references */
+@media screen {
+  .references a {
+    white-space: nowrap;
+  }
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+/* Float artwork pilcrow to the right */
+@media screen {
+  .artwork a.pilcrow {
+    display: block;
+    line-height: 0.7;
+    margin-top: 0.15em;
+  }
+}
+/* Make pilcrows on dd visible */
+@media screen {
+  dd:hover > a.pilcrow {
+    visibility: visible;
+  }
+}
+/* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+.alignLeft.art-text,
+.alignCenter.art-text,
+.alignRight.art-text {
+   margin-bottom: 0;
+}
+.alignLeft,
+.alignCenter,
+.alignRight {
+  margin: 1em 0 0 0;
+}
+/* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+/* Styling for the external metadata */
+div#external-metadata {
+  background-color: #eee;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  display: none;
+}
+div#internal-metadata {
+  padding: 0.5em;                       /* to match the external-metadata padding */
+}
+/* Styling for title RFC Number */
+h1#rfcnum {
+  clear: both;
+  margin: 0 0 -1em;
+  padding: 1em 0 0 0;
+}
+/* Make .olPercent look the same as <ol><li> */
+dl.olPercent > dd {
+  margin: 0 0 0.25em 0;
+  min-height: initial;
+}
+/* Give aside some styling to set it apart */
+aside {
+  border-left: 1px solid #ddd;
+  margin: 1em 0 1em 2em;
+  padding: 0.2em 2em;
+}
+aside > dl,
+aside > ol,
+aside > ul,
+aside > table,
+aside > p {
+  margin-bottom: 0;
+}
+/* Additional page break settings */
+@media print {
+  figcaption, table caption {
+    page-break-before: avoid;
+  }
+}
+/* Font size adjustments for print */
+@media print {
+  body  { font-size: 10pt;      line-height: normal; max-width: 96%; }
+  h1    { font-size: 1.72em;    padding-top: 1.5em; } /* 1*1.2*1.2*1.2 */
+  h2    { font-size: 1.44em;    padding-top: 1.5em; } /* 1*1.2*1.2 */
+  h3    { font-size: 1.2em;     padding-top: 1.5em; } /* 1*1.2 */
+  h4    { font-size: 1em;       padding-top: 1.5em; }
+  h5, h6 { font-size: 1em;      margin: initial; padding: 0.5em 0 0.3em; }
+}
+/* Sourcecode margin in print, when there's no pilcrow */
+@media print {
+  .artwork,
+  .sourcecode {
+    margin-bottom: 1em;
+  }
+}
+/* Use style rules to govern display of the TOC. */
+@media screen and (max-width: 1023px) {
+  #toc nav { display: none; }
+  #toc.active nav { display: block; }
+}
+}</style>
+<link href="rfc-local.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<script src="metadata.min.js"></script>
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Signing HTTP Messages</td>
+<td class="right">December 2019</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Backman, et al.</td>
+<td class="center">Expires 14 June 2020</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">HTTPbis Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-richanna-http-message-signatures-00</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2019-12-12" class="published">12 December 2019</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2020-06-14">14 June 2020</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">A. Backman, <span class="editor">Ed.</span>
+</div>
+<div class="org">Amazon</div>
+</div>
+<div class="author">
+      <div class="author-name">J. Richer</div>
+<div class="org">Bespoke Engineering</div>
+</div>
+<div class="author">
+      <div class="author-name">M. Sporny</div>
+<div class="org">Digital Bazaar</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Signing HTTP Messages</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes a mechanism for creating, encoding, and verifying digital signatures or message authentication codes over content within an HTTP message.  This mechanism supports use cases where the full HTTP message may not be known to the signer, and where the message may be transformed (e.g., by intermediaries) before reaching the verifier.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <p id="section-note.1-1">This draft is based on draft-cavage-http-signatures-12.  <a href="https://github.com/w3c-dvcg/http-signatures/issues?page=2&amp;q=is%3Aissue+is%3Aopen">The community</a> and the authors have identified several issues with the current text.  Additionally, the authors have identified a number of features that are required in order to support additional use cases.  In order to preserve continuity with the effort that has been put into draft-cavage-http-signatures-12, this draft maintains normative compatibility with it, and thus does not address these issues or include these features, as doing so requires making backwards-incompatible changes to normative requirements.  While such changes are inevitable, the editor recommends that they be driven by working group discussion following adoption of the draft (see <a href="#wg-discuss" class="xref">Topics for Working Group Discussion</a>).  The editor requests that the working group recognize the intent of this initial draft and this recommendation when considering adoption of this draft.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">This note is to be removed before publishing as an RFC.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 14 June 2020.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2019 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Simplified BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a><a href="#section-toc.1-1.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1"><a href="#section-1.1" class="xref">1.1</a>.  <a href="#name-requirements-discussion" class="xref">Requirements Discussion</a><a href="#section-toc.1-1.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1"><a href="#section-1.2" class="xref">1.2</a>.  <a href="#name-http-message-transformation" class="xref">HTTP Message Transformations</a><a href="#section-toc.1-1.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1"><a href="#section-1.3" class="xref">1.3</a>.  <a href="#name-safe-transformations" class="xref">Safe Transformations</a><a href="#section-toc.1-1.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.1.2.4">
+                <p id="section-toc.1-1.1.2.4.1"><a href="#section-1.4" class="xref">1.4</a>.  <a href="#name-conventions-and-terminology" class="xref">Conventions and Terminology</a><a href="#section-toc.1-1.1.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-identifying-and-canonicaliz" class="xref">Identifying and Canonicalizing Content</a><a href="#section-toc.1-1.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-http-header-fields" class="xref">HTTP Header Fields</a><a href="#section-toc.1-1.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>.  <a href="#name-signature-creation-time" class="xref">Signature Creation Time</a><a href="#section-toc.1-1.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="xref">2.3</a>.  <a href="#name-signature-expiration-time" class="xref">Signature Expiration Time</a><a href="#section-toc.1-1.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="xref">2.4</a>.  <a href="#name-target-endpoint" class="xref">Target Endpoint</a><a href="#section-toc.1-1.2.2.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-http-message-signatures" class="xref">HTTP Message Signatures</a><a href="#section-toc.1-1.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="xref">3.1</a>.  <a href="#name-signature-metadata" class="xref">Signature Metadata</a><a href="#section-toc.1-1.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="xref">3.2</a>.  <a href="#name-creating-a-signature" class="xref">Creating a Signature</a><a href="#section-toc.1-1.3.2.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="xref">3.2.1</a>.  <a href="#name-choose-and-set-signature-me" class="xref">Choose and Set Signature Metadata Properties</a><a href="#section-toc.1-1.3.2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-toc.1-1.3.2.2.2.2">
+                    <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="xref">3.2.2</a>.  <a href="#name-create-the-signature-input" class="xref">Create the Signature Input</a><a href="#section-toc.1-1.3.2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-toc.1-1.3.2.2.2.3">
+                    <p id="section-toc.1-1.3.2.2.2.3.1"><a href="#section-3.2.3" class="xref">3.2.3</a>.  <a href="#name-sign-the-signature-input" class="xref">Sign the Signature Input</a><a href="#section-toc.1-1.3.2.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="xref">3.3</a>.  <a href="#name-verifying-a-signature" class="xref">Verifying a Signature</a><a href="#section-toc.1-1.3.2.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.3.2.3.2.1">
+                    <p id="section-toc.1-1.3.2.3.2.1.1"><a href="#section-3.3.1" class="xref">3.3.1</a>.  <a href="#name-enforcing-application-requi" class="xref">Enforcing Application Requirements</a><a href="#section-toc.1-1.3.2.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-the-signature-http-header" class="xref">The 'Signature' HTTP Header</a><a href="#section-toc.1-1.4.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-signature-header-parameters" class="xref">Signature Header Parameters</a><a href="#section-toc.1-1.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-example" class="xref">Example</a><a href="#section-toc.1-1.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-toc.1-1.5.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="xref">5.1</a>.  <a href="#name-http-signature-algorithms-r" class="xref">HTTP Signature Algorithms Registry</a><a href="#section-toc.1-1.5.2.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.5.2.1.2.1">
+                    <p id="section-toc.1-1.5.2.1.2.1.1"><a href="#section-5.1.1" class="xref">5.1.1</a>.  <a href="#name-registration-template" class="xref">Registration Template</a><a href="#section-toc.1-1.5.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-toc.1-1.5.2.1.2.2">
+                    <p id="section-toc.1-1.5.2.1.2.2.1"><a href="#section-5.1.2" class="xref">5.1.2</a>.  <a href="#name-initial-contents" class="xref">Initial Contents</a><a href="#section-toc.1-1.5.2.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="xref">5.2</a>.  <a href="#name-http-signature-parameters-r" class="xref">HTTP Signature Parameters Registry</a><a href="#section-toc.1-1.5.2.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.5.2.2.2.1">
+                    <p id="section-toc.1-1.5.2.2.2.1.1"><a href="#section-5.2.1" class="xref">5.2.1</a>.  <a href="#name-registration-template-2" class="xref">Registration Template</a><a href="#section-toc.1-1.5.2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-toc.1-1.5.2.2.2.2">
+                    <p id="section-toc.1-1.5.2.2.2.2.1"><a href="#section-5.2.2" class="xref">5.2.2</a>.  <a href="#name-initial-contents-2" class="xref">Initial Contents</a><a href="#section-toc.1-1.5.2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-toc.1-1.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-references" class="xref">References</a><a href="#section-toc.1-1.7.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-toc.1-1.7.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-toc.1-1.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-appendix.a" class="xref">Appendix A</a>.  <a href="#name-examples" class="xref">Examples</a><a href="#section-toc.1-1.8.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-a.1" class="xref">A.1</a>.  <a href="#name-example-keys" class="xref">Example Keys</a><a href="#section-toc.1-1.8.2.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.8.2.1.2.1">
+                    <p id="section-toc.1-1.8.2.1.2.1.1"><a href="#section-a.1.1" class="xref">A.1.1</a>.  <a href="#name-rsa-test" class="xref"><code>rsa-test</code></a><a href="#section-toc.1-1.8.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-a.2" class="xref">A.2</a>.  <a href="#name-example-keyid-values" class="xref">Example <code>keyId</code> Values</a><a href="#section-toc.1-1.8.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-a.3" class="xref">A.3</a>.  <a href="#name-test-cases" class="xref">Test Cases</a><a href="#section-toc.1-1.8.2.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-toc.1-1.8.2.3.2.1">
+                    <p id="section-toc.1-1.8.2.3.2.1.1"><a href="#section-a.3.1" class="xref">A.3.1</a>.  <a href="#name-signature-generation" class="xref">Signature Generation</a><a href="#section-toc.1-1.8.2.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-toc.1-1.8.2.3.2.2">
+                    <p id="section-toc.1-1.8.2.3.2.2.1"><a href="#section-a.3.2" class="xref">A.3.2</a>.  <a href="#name-signature-verification" class="xref">Signature Verification</a><a href="#section-toc.1-1.8.2.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-appendix.b" class="xref">Appendix B</a>.  <a href="#name-topics-for-working-group-di" class="xref">Topics for Working Group Discussion</a><a href="#section-toc.1-1.9.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-appendix.c" class="xref"></a><a href="#name-acknowledgements" class="xref">Acknowledgements</a><a href="#section-toc.1-1.10.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-appendix.d" class="xref"></a><a href="#name-document-history" class="xref">Document History</a><a href="#section-toc.1-1.11.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-appendix.e" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a><a href="#section-toc.1-1.12.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="intro">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Message integrity and authenticity are important security properties that are critical to the secure operation of many <span>[<a href="#RFC7230" class="xref">HTTP</a>]</span> applications.  Application developers typically rely on the transport layer to provide these properties, by operating their application over <span><a href="#RFC8446" class="xref">TLS</a> [<a href="#RFC8446" class="xref">RFC8446</a>]</span>.  However, TLS only guarantees these properties over a single TLS connection, and the path between client and application may be composed of multiple independent TLS connections (for example, if the application is hosted behind a TLS-terminating gateway or if the client is behind a TLS Inspection appliance).  In such cases, TLS cannot guarantee end-to-end message integrity or authenticity between the client and application.  Additionally, some operating environments present obstacles that make it impractical to use TLS, or to use features necessary to provide message authenticity.  Furthermore, some applications require the binding of an application-level key to the HTTP message, separate from any TLS certificates in use. Consequently, while TLS can meet message integrity and authenticity needs for many HTTP-based applications, it is not a universal solution.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document defines a mechanism for providing end-to-end integrity and authenticity for content within an HTTP message.  The mechanism allows applications to create digital signatures or message authentication codes (MACs) over only that content within the message that is meaningful and appropriate for the application.  Strict canonicalization rules ensure that the verifier can verify the signature even if the message has been transformed in any of the many ways permitted by HTTP.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">The mechanism described in this document consists of three parts:<a href="#section-1-3" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-1-4.1">A common nomenclature and canonicalization rule set for the different protocol elements and other content within HTTP messages.<a href="#section-1-4.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-1-4.2">Algorithms for generating and verifying signatures over HTTP message content using this nomenclature and rule set.<a href="#section-1-4.2" class="pilcrow">¶</a>
+</li>
+        <li id="section-1-4.3">A mechanism for attaching a signature and related metadata to an HTTP message.<a href="#section-1-4.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<section id="section-1.1">
+        <h3 id="name-requirements-discussion">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-requirements-discussion" class="section-name selfRef">Requirements Discussion</a>
+        </h3>
+<p id="section-1.1-1">HTTP permits and sometimes requires intermediaries to transform messages in a variety of ways.  This may result in a recipient receiving a message that is not bitwise equivalent to the message that was oringally sent.  In such a case, the recipient will be unable to verify a signature over the raw bytes of the sender's HTTP message, as verifying digital signatures or MACs requires both signer and verifier to have the exact same signed content.  Since the raw bytes of the message cannot be relied upon as signed content, the signer and verifier must derive the signed content from their respective versions of the message, via a mechanism that is resilient to safe changes that do not alter the meaning of the message.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">For a variety of reasons, it is impractical to strictly define what constitutes a safe change versus an unsafe one.  Applications use HTTP in a wide variety of ways, and may disagree on whether a particular piece of information in a message (e.g., the body, or the Date header field) is relevant.  Thus a general purpose solution must provide signers with some degree of control over which message content is signed.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">HTTP applications may be running in environments that do not provide complete access to or control over HTTP messages (such as a web browser's JavaScript environment), or may be using libraries that abstract away the details of the protocol (such as <a href="https://openjdk.java.net/groups/net/httpclient/intro.html">the Java HTTPClient library</a>).  These applications need to be able to generate and verify signatures despite incomplete knowledge of the HTTP message.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="about_sigs">
+<section id="section-1.2">
+        <h3 id="name-http-message-transformation">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-http-message-transformation" class="section-name selfRef">HTTP Message Transformations</a>
+        </h3>
+<p id="section-1.2-1">As mentioned earlier, HTTP explicitly permits and in some cases requires implementations to transform messages in a variety of ways.  Implementations are required to tolerate many of these transformations.  What follows is a non-normative and non-exhaustive list of transformations that may occur under HTTP, provided as context:<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-1.2-2.1">Re-ordering of header fields with different header field names (<span>[<a href="#RFC7230" class="xref">HTTP</a>], <a href="https://rfc-editor.org/rfc/rfc7230#section-3.2.2" class="relref">Section 3.2.2</a></span>).<a href="#section-1.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.2-2.2">Combination of header fields with the same field name (<span>[<a href="#RFC7230" class="xref">HTTP</a>], <a href="https://rfc-editor.org/rfc/rfc7230#section-3.2.2" class="relref">Section 3.2.2</a></span>).<a href="#section-1.2-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.2-2.3">Removal of header fields listed in the <code>Connection</code> header field (<span>[<a href="#RFC7230" class="xref">HTTP</a>], <a href="https://rfc-editor.org/rfc/rfc7230#section-6.1" class="relref">Section 6.1</a></span>).<a href="#section-1.2-2.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.2-2.4">Addition of header fields that indicate control options (<span>[<a href="#RFC7230" class="xref">HTTP</a>], <a href="https://rfc-editor.org/rfc/rfc7230#section-6.1" class="relref">Section 6.1</a></span>).<a href="#section-1.2-2.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.2-2.5">Addition or removal of a transfer coding (<span>[<a href="#RFC7230" class="xref">HTTP</a>], <a href="https://rfc-editor.org/rfc/rfc7230#section-5.7.2" class="relref">Section 5.7.2</a></span>).<a href="#section-1.2-2.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.2-2.6">Addition of header fields such as <code>Via</code> (<span>[<a href="#RFC7230" class="xref">HTTP</a>], <a href="https://rfc-editor.org/rfc/rfc7230#section-5.7.1" class="relref">Section 5.7.1</a></span>) and <code>Forwarded</code> (<span>[<a href="#RFC7239" class="xref">RFC7239</a>], <a href="https://rfc-editor.org/rfc/rfc7239#section-4" class="relref">Section 4</a></span>).<a href="#section-1.2-2.6" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+<section id="section-1.3">
+        <h3 id="name-safe-transformations">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-safe-transformations" class="section-name selfRef">Safe Transformations</a>
+        </h3>
+<p id="section-1.3-1">Based on the definition of HTTP and the requirements described above, we can identify certain types of transformations that should not prevent signature verification, even when performed on content covered by the signature.  The following list describes those transformations:<a href="#section-1.3-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-1.3-2.1">Combination of header fields with the same field name.<a href="#section-1.3-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.3-2.2">Reordering of header fields with different names.<a href="#section-1.3-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.3-2.3">Conversion between HTTP/1.x and HTTP/2, or vice-versa.<a href="#section-1.3-2.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.3-2.4">Changes in casing (e.g., "Origin" to "origin") of any case-insensitive content such as header field names, request URI scheme, or host.<a href="#section-1.3-2.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.3-2.5">Addition or removal of leading or trailing whitespace to a header field value.<a href="#section-1.3-2.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.3-2.6">Addition or removal of <code>obs-fold</code>s.<a href="#section-1.3-2.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-1.3-2.7">Changes to the request-target and Host header field that when applied together do not result in a change to the message's effective request URI, as defined in <span><a href="https://rfc-editor.org/rfc/rfc7230#section-5.5" class="relref">Section 5.5</a> of [<a href="#RFC7230" class="xref">HTTP</a>]</span>.<a href="#section-1.3-2.7" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-1.3-3">Additionally, all changes to content not covered by the signature are considered safe.<a href="#section-1.3-3" class="pilcrow">¶</a></p>
+</section>
+<div id="definitions">
+<section id="section-1.4">
+        <h3 id="name-conventions-and-terminology">
+<a href="#section-1.4" class="section-number selfRef">1.4. </a><a href="#name-conventions-and-terminology" class="section-name selfRef">Conventions and Terminology</a>
+        </h3>
+<p id="section-1.4-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <span><a href="#RFC2119" class="xref">BCP14</a> [<a href="#RFC2119" class="xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="xref">RFC8174</a>]</span> when, and only when, they appear in all capitals, as shown here.<a href="#section-1.4-1" class="pilcrow">¶</a></p>
+<p id="section-1.4-2">The terms "HTTP message", "HTTP method", "HTTP request", "HTTP response", <code>absolute-form</code>, <code>absolute-path</code>, "effective request URI", "gateway", "header field", "intermediary", <code>request-target</code>, "sender", and "recipient" are used as defined in <span>[<a href="#RFC7230" class="xref">HTTP</a>]</span>.<a href="#section-1.4-2" class="pilcrow">¶</a></p>
+<p id="section-1.4-3">For brevity, the term "signature" on its own is used in this document to refer to both digital signatures and keyed MACs. Similarly, the verb "sign" refers to the generation of either a digital signature or keyed MAC over a given input string. The qualified term "digital signature" refers specifically to the output of an asymmetric cryptographic signing operation.<a href="#section-1.4-3" class="pilcrow">¶</a></p>
+<p id="section-1.4-4">In addition to those listed above, this document uses the following terms:<a href="#section-1.4-4" class="pilcrow">¶</a></p>
+<dl class="dlNewline" id="section-1.4-5">
+          <dt id="section-1.4-5.1">Decimal String</dt>
+          <dd id="section-1.4-5.2">An Integer String optionally concatenated with a period <code>"."</code> followed by a second Integer String, representing a positive real number expressed in base 10.  The first Integer String represents the integral portion of the number, while the optional second Integer String represents the fractional portion of the number. [[ Editor's note: There's got to be a definition for this that we can reference. ]]<a href="#section-1.4-5.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-1.4-5.3">Integer String</dt>
+          <dd id="section-1.4-5.4">A US-ASCII string of one or more digits <code>"0-9"</code>, representing a positive integer in base 10. [[ Editor's note: There's got to be a definition for this that we can reference. ]]<a href="#section-1.4-5.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-1.4-5.5">Signer</dt>
+          <dd id="section-1.4-5.6">The entity that is generating or has generated an HTTP Message Signature.<a href="#section-1.4-5.6" class="pilcrow">¶</a>
+</dd>
+<dt id="section-1.4-5.7">Verifier</dt>
+          <dd id="section-1.4-5.8">An entity that is verifying or has verified an HTTP Message Signature against an HTTP Message.  Note that an HTTP Message Signature may be verified multiple times, potentially by different entities.<a href="#section-1.4-5.8" class="pilcrow">¶</a>
+</dd>
+</dl>
+<p id="section-1.4-6">This document contains non-normative examples of partial and complete HTTP messages.  To improve readability, header fields may be split into multiple lines, using the <code>obs-fold</code> syntax.  This syntax is deprecated in <span>[<a href="#RFC7230" class="xref">HTTP</a>]</span>, and senders <span class="bcp14">MUST NOT</span> generate messages that include it.<a href="#section-1.4-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="content-identifiers">
+<section id="section-2">
+      <h2 id="name-identifying-and-canonicaliz">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-identifying-and-canonicaliz" class="section-name selfRef">Identifying and Canonicalizing Content</a>
+      </h2>
+<p id="section-2-1">In order to allow signers and verifiers to establish which content is covered by a signature, this document defines content identifiers for signature metadata and discrete pieces of message content that may be covered by an HTTP Message Signature.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Some content within HTTP messages may undergo transformations that change the bitwise value without altering meaning of the content (for example, the merging together of header fields with the same name).  Message content must therefore be canonicalized before it is signed, to ensure that a signature can be verified despite such innocuous transformations.  This document defines rules for each content identifier that transform the identifier's associated content into such a canonical form.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">The following sections define content identifiers, their associated content, and their canonicalization rules.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<section id="section-2.1">
+        <h3 id="name-http-header-fields">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-http-header-fields" class="section-name selfRef">HTTP Header Fields</a>
+        </h3>
+<p id="section-2.1-1">An HTTP header field value is identified by its header field name.  While HTTP header field names are case-insensitive, implementations <span class="bcp14">SHOULD</span> use lowercased field names (e.g., <code>content-type</code>, <code>date</code>, <code>etag</code>) when using them as content identifiers.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">An HTTP header field value is canonicalized as follows:<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-2.1-3">
+          <li id="section-2.1-3.1">Create an ordered list of the field values of each instance of the header field in the message, in the order that they occur (or will occur) in the message.<a href="#section-2.1-3.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.1-3.2">Strip leading and trailing whitespace from each item in the list.<a href="#section-2.1-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.1-3.3">Concatenate the list items together, with a comma <code>","</code> and space <code>" "</code> between each item.  The resulting string is the canonicalized value.<a href="#section-2.1-3.3" class="pilcrow">¶</a>
+</li>
+        </ol>
+<section id="section-2.1.1">
+          <h4 id="name-canonicalization-examples">
+<a href="#section-2.1.1" class="section-number selfRef">2.1.1. </a><a href="#name-canonicalization-examples" class="section-name selfRef">Canonicalization Examples</a>
+          </h4>
+<p id="section-2.1.1-1">This section contains non-normative examples of canonicalized values for header fields, given the following example HTTP message:<a href="#section-2.1.1-1" class="pilcrow">¶</a></p>
+<div id="section-2.1.1-2">
+<pre class="sourcecode">
+HTTP/1.1 200 OK
+Server: www.example.com
+Date: Tue, 07 Jun 2014 20:51:35 GMT
+X-OWS-Header:   Leading and trailing whitespace.   
+X-Obs-Fold-Header: Obsolete  
+    line folding.
+X-Empty-Header: 
+Cache-Control: max-age=60
+Cache-Control:    must-revalidate
+</pre><a href="#section-2.1.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-2.1.1-3">The following table shows example canonicalized values for header fields, given that message:<a href="#section-2.1.1-3" class="pilcrow">¶</a></p>
+<span id="name-non-normative-examples-of-h"></span><table class="center" id="table-1">
+            <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-non-normative-examples-of-h" class="selfRef">Non-normative examples of header field canonicalization.</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Header Field</th>
+                <th class="text-left" rowspan="1" colspan="1">Canonicalized Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>(cache-control)</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>max-age=60, must-revalidate</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>(date)</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Tue, 07 Jun 2014 20:51:35 GMT</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>(server)</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>www.example.com</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>(x-empty-header)</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code></code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>(x-obs-fold-header)</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Obsolete line folding.</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>(x-ows-header)</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Leading and trailing whitespace.</code>
+</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</section>
+<section id="section-2.2">
+        <h3 id="name-signature-creation-time">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-signature-creation-time" class="section-name selfRef">Signature Creation Time</a>
+        </h3>
+<p id="section-2.2-1">The signature's Creation Time (<a href="#signature-metadata" class="xref">Section 3.1</a>) is identified by the <code>(created)</code> identifier.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2-2">Its canonicalized value is an Integer String containing the signature's Creation Time expressed as the number of seconds since the Epoch, as defined in <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_16">Section 4.16</a> of <span>[<a href="#POSIX.1" class="xref">POSIX.1</a>]</span>.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
+<aside id="section-2.2-3">
+          <p id="section-2.2-3.1">The use of seconds since the Epoch to canonicalize a timestamp simplifies processing and avoids timezone management required by specifications such as <span>[<a href="#RFC3339" class="xref">RFC3339</a>]</span>.<a href="#section-2.2-3.1" class="pilcrow">¶</a></p>
+</aside>
+</section>
+<section id="section-2.3">
+        <h3 id="name-signature-expiration-time">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-signature-expiration-time" class="section-name selfRef">Signature Expiration Time</a>
+        </h3>
+<p id="section-2.3-1">The signature's Expiration Time (<a href="#signature-metadata" class="xref">Section 3.1</a>) is identified by the <code>(expired)</code> identifier.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">Its canonicalized value is a Decimal String containing the signature's Expiration Time expressed as the number of seconds since the Epoch, as defined in <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_16">Section 4.16</a> of <span>[<a href="#POSIX.1" class="xref">POSIX.1</a>]</span>.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+</section>
+<section id="section-2.4">
+        <h3 id="name-target-endpoint">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-target-endpoint" class="section-name selfRef">Target Endpoint</a>
+        </h3>
+<p id="section-2.4-1">The request target endpoint, consisting of the request method and the path and query of the effective request URI, is identified by the <code>(request-target)</code> identifier.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+<p id="section-2.4-2">Its value is canonicalized as follows:<a href="#section-2.4-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-2.4-3">
+          <li id="section-2.4-3.1">Take the lowercased HTTP method of the message.<a href="#section-2.4-3.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.4-3.2">Append a space <code>" "</code>.<a href="#section-2.4-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.4-3.3">Append the path and query of the request target of the message, formatted according to the rules defined for the <code>:path</code> pseudo-header in <span>[<a href="#RFC7540" class="xref">HTTP2</a>], <a href="https://rfc-editor.org/rfc/rfc7540#section-8.1.2.3" class="relref">Section 8.1.2.3</a></span>.  The resulting string is the canonicalized value.<a href="#section-2.4-3.3" class="pilcrow">¶</a>
+</li>
+        </ol>
+<section id="section-2.4.1">
+          <h4 id="name-canonicalization-examples-2">
+<a href="#section-2.4.1" class="section-number selfRef">2.4.1. </a><a href="#name-canonicalization-examples-2" class="section-name selfRef">Canonicalization Examples</a>
+          </h4>
+<p id="section-2.4.1-1">The following table contains non-normative example HTTP messages and their canonicalized <code>(request-target)</code> values.<a href="#section-2.4.1-1" class="pilcrow">¶</a></p>
+<span id="name-non-normative-examples-of-r"></span><table class="center" id="table-2">
+            <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-non-normative-examples-of-r" class="selfRef">Non-normative examples of <code>(request-target)</code> canonicalization.</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">HTTP Message</th>
+                <th class="text-left" rowspan="1" colspan="1">
+                  <code>(request-target)</code>
+</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <div id="section-2.4.1-2.2.1.1.1">
+<pre class="sourcecode">
+POST /?param=value HTTP/1.1
+Host: www.example.com</pre><a href="#section-2.4.1-2.2.1.1.1" class="pilcrow">¶</a>
+</div>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>post /?param=value</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <div id="section-2.4.1-2.2.2.1.1">
+<pre class="sourcecode">
+POST /a/b HTTP/1.1
+Host: www.example.com</pre><a href="#section-2.4.1-2.2.2.1.1" class="pilcrow">¶</a>
+</div>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>post /a/b</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <div id="section-2.4.1-2.2.3.1.1">
+<pre class="sourcecode">
+GET http://www.example.com/a/ HTTP/1.1</pre><a href="#section-2.4.1-2.2.3.1.1" class="pilcrow">¶</a>
+</div>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>get /a/</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <div id="section-2.4.1-2.2.4.1.1">
+<pre class="sourcecode">
+GET http://www.example.com HTTP/1.1</pre><a href="#section-2.4.1-2.2.4.1.1" class="pilcrow">¶</a>
+</div>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>get /</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <div id="section-2.4.1-2.2.5.1.1">
+<pre class="sourcecode">
+CONNECT server.example.com:80 HTTP/1.1
+Host: server.example.com</pre><a href="#section-2.4.1-2.2.5.1.1" class="pilcrow">¶</a>
+</div>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>connect /</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <div id="section-2.4.1-2.2.6.1.1">
+<pre class="sourcecode">
+OPTIONS * HTTP/1.1
+Host: server.example.com</pre><a href="#section-2.4.1-2.2.6.1.1" class="pilcrow">¶</a>
+</div>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>options *</code>
+</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</section>
+</section>
+</div>
+<div id="message-signatures">
+<section id="section-3">
+      <h2 id="name-http-message-signatures">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-http-message-signatures" class="section-name selfRef">HTTP Message Signatures</a>
+      </h2>
+<p id="section-3-1">An HTTP Message Signature is a signature over a string generated from a subset of the content in an HTTP message and metadata about the signature itself.  When successfully verified against an HTTP message, it provides cryptographic proof that with respect to the subset of content that was signed, the message is semantically equivalent to the message for which the signature was generated.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<div id="signature-metadata">
+<section id="section-3.1">
+        <h3 id="name-signature-metadata">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-signature-metadata" class="section-name selfRef">Signature Metadata</a>
+        </h3>
+<p id="section-3.1-1">HTTP Message Signatures have metadata properties that provide information regarding the signature's generation and/or verification.  The following metadata properties are defined:<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<dl class="dlNewline" id="section-3.1-2">
+          <dt id="section-3.1-2.1">Algorithm</dt>
+          <dd id="section-3.1-2.2">An HTTP Signature Algorithm defined in the <a href="#hsa-registry" class="xref">HTTP Signature Algorithms Registry</a> defined in this document.  It describes the signing and verification algorithms for the signature.<a href="#section-3.1-2.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-3.1-2.3">Creation Time</dt>
+          <dd id="section-3.1-2.4">A timestamp representing the point in time that the signature was generated.  Sub-second precision is not supported.  A signature's Creation Time <span class="bcp14">MAY</span> be undefined, indicating that it is unknown.<a href="#section-3.1-2.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-3.1-2.5">Covered Content</dt>
+          <dd id="section-3.1-2.6">An ordered list of content identifiers (<a href="#content-identifiers" class="xref">Section 2</a>) that indicates the metadata and message content that is covered by the signature.  The order of identifiers in this list affects signature generation and verification, and therefore <span class="bcp14">MUST</span> be preserved.<a href="#section-3.1-2.6" class="pilcrow">¶</a>
+</dd>
+<dt id="section-3.1-2.7">Expiration Time</dt>
+          <dd id="section-3.1-2.8">A timestamp representing the point in time at which the signature expires.  An expired signature always fails verification.  A signature's Expiration Time <span class="bcp14">MAY</span> be undefined, indicating that the signature does not expire.<a href="#section-3.1-2.8" class="pilcrow">¶</a>
+</dd>
+<dt id="section-3.1-2.9">Verification Key Material</dt>
+          <dd id="section-3.1-2.10">
+            <p id="section-3.1-2.10.1">The key material required to verify the signature.<a href="#section-3.1-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+</dl>
+</section>
+</div>
+<div id="create">
+<section id="section-3.2">
+        <h3 id="name-creating-a-signature">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-creating-a-signature" class="section-name selfRef">Creating a Signature</a>
+        </h3>
+<p id="section-3.2-1">In order to create a signature, a signer completes the following process:<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-3.2-2">
+          <li id="section-3.2-2.1">Choose key material and algorithm, and set metadata properties (<a href="#choose-metadata" class="xref">Section 3.2.1</a>)<a href="#section-3.2-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-3.2-2.2">Create the Signature Input (<a href="#canonicalization" class="xref">Section 3.2.2</a>)<a href="#section-3.2-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-3.2-2.3">Sign the Signature Input (<a href="#sign-sig-input" class="xref">Section 3.2.3</a>)<a href="#section-3.2-2.3" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-3.2-3">The following sections describe each of these steps in detail.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<div id="choose-metadata">
+<section id="section-3.2.1">
+          <h4 id="name-choose-and-set-signature-me">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-choose-and-set-signature-me" class="section-name selfRef">Choose and Set Signature Metadata Properties</a>
+          </h4>
+<ol start="1" type="1" class="normal" id="section-3.2.1-1">
+            <li id="section-3.2.1-1.1">The signer chooses an HTTP Signature Algorithm from those registered in the <a href="#hsa-registry" class="xref">HTTP Signature Algorithms Registry</a> defined by this document, and sets the signature's Algorithm property to that value.  The signer <span class="bcp14">MUST NOT</span> choose an algorithm marked "Deprecated".  The mechanism by which the signer chooses an algorithm is out of scope for this document.<a href="#section-3.2.1-1.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-3.2.1-1.2">The signer chooses key material to use for signing and verification, and sets the signature's Verification Key Material property to the key material required for verification.  The signer <span class="bcp14">MUST</span> choose key material that is appropriate for the signature's Algorithm, and that conforms to any requirements defined by the Algorithm, such as key size or format.  The mechanism by which the signer chooses key material is out of scope for this document.<a href="#section-3.2.1-1.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-3.2.1-1.3">The signer sets the signature's Creation Time property to the current time.<a href="#section-3.2.1-1.3" class="pilcrow">¶</a>
+</li>
+            <li id="section-3.2.1-1.4">The signer sets the signature's Expiration Time property to the time at which the signature is to expire, or to undefined if the signature will not expire.<a href="#section-3.2.1-1.4" class="pilcrow">¶</a>
+</li>
+            <li id="section-3.2.1-1.5">The signer creates an ordered list of content identifiers representing the message content and signature metadata to be covered by the signature, and assigns this list as the signature's Covered Content.  Each identifier <span class="bcp14">MUST</span> be one of those defined in <a href="#content-identifiers" class="xref">Section 2</a>.  This list <span class="bcp14">MUST NOT</span> be empty, as this would result in creating a signature over the empty string.  If the signature's Algorithm name does not start with <code>rsa</code>, <code>hmac</code>, or <code>ecdsa</code>, signers <span class="bcp14">SHOULD</span> include <code>(created)</code> and <code>(request-target)</code> in the list.  If the signature's Algorithm starts with <code>rsa</code>, <code>hmac</code>, or <code>ecdsa</code>, signers <span class="bcp14">SHOULD</span> include <code>date</code> and <code>(request-target)</code> in the list.  Further guidance on what to include in this list and in what order is out of scope for this document.  However, the list order is significant and once established for a given signature it <span class="bcp14">MUST</span> be preserved for that signature.<a href="#section-3.2.1-1.5" class="pilcrow">¶</a>
+</li>
+          </ol>
+<p id="section-3.2.1-2">For example, given the following HTTP message:<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+<div id="section-3.2.1-3">
+<pre class="sourcecode">
+GET /foo HTTP/1.1
+Host: example.org
+Date: Tue, 07 Jun 2014 20:51:35 GMT
+X-Example: Example header
+        with some whitespace.
+X-EmptyHeader:
+Cache-Control: max-age=60
+Cache-Control: must-revalidate</pre><a href="#section-3.2.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.1-4">The following table presents a non-normative example of metadata values that a signer may choose:<a href="#section-3.2.1-4" class="pilcrow">¶</a></p>
+<span id="name-non-normative-example-metad"></span><div id="example-metadata">
+<table class="center" id="table-3">
+            <caption>
+<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#name-non-normative-example-metad" class="selfRef">Non-normative example metadata values</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Property</th>
+                <th class="text-left" rowspan="1" colspan="1">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Algorithm</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>rsa-256</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Covered Content</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>(request-target)</code>, <code>(created)</code>, <code>host</code>, <code>date</code>, <code>cache-contol</code>, <code>x-emptyheader</code>, <code>x-example</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Creation Time</td>
+                <td class="text-left" rowspan="1" colspan="1">Equal to the value specified in the Date header field.</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Expiration Time</td>
+                <td class="text-left" rowspan="1" colspan="1">Equal to the Creation Time plus five minutes.</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Verification Key Material</td>
+                <td class="text-left" rowspan="1" colspan="1">The public key provided in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a> and identified by the <code>keyId</code> value "test-key-b".</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+</section>
+</div>
+<div id="canonicalization">
+<section id="section-3.2.2">
+          <h4 id="name-create-the-signature-input">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-create-the-signature-input" class="section-name selfRef">Create the Signature Input</a>
+          </h4>
+<p id="section-3.2.2-1">The Signature Input is a US-ASCII string containing the content that will be signed.  To create it, the signer concatenates together entries for each identifier in the signature's Covered Content in the order it occurs in the list, with each entry separated by a newline <code>"\n"</code>.  An identifier's entry is a US-ASCII string consisting of the lowercased identifier followed with a colon <code>":"</code>, a space <code>" "</code>, and the identifier's canonicalized value (described below).<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-2">If Covered Content contains <code>(created)</code> and the signature's Creation Time is undefined or the signature's Algorithm name starts with <code>rsa</code>, <code>hmac</code>, or <code>ecdsa</code> an implementation <span class="bcp14">MUST</span> produce an error.<a href="#section-3.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-3">If Covered Content contains <code>(expires)</code> and the signature does not have an Expiration Time or the signature's Algorithm name starts with <code>rsa</code>, <code>hmac</code>, or <code>ecdsa</code> an implementation <span class="bcp14">MUST</span> produce an error.<a href="#section-3.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-4">If Covered Content contains an identifier for a header field that is not present or malformed in the message, the implementation <span class="bcp14">MUST</span> produce an error.<a href="#section-3.2.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-5">For the non-normative example Signature metadata in <a href="#example-metadata" class="xref">Table 3</a>,  the corresponding Signature Input is:<a href="#section-3.2.2-5" class="pilcrow">¶</a></p>
+<span id="name-non-normative-example-signa"></span><div id="example-sig-input">
+<figure id="figure-1">
+            <div id="section-3.2.2-6.1">
+<pre class="sourcecode">
+(request-target): get /foo
+(created): 1402170695
+host: example.org
+date: Tue, 07 Jun 2014 20:51:35 GMT
+cache-control: max-age=60, must-revalidate
+x-emptyheader:
+x-example: Example header with some whitespace.</pre><a href="#section-3.2.2-6.1" class="pilcrow">¶</a>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-non-normative-example-signa" class="selfRef">Non-normative example Signature Input</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="sign-sig-input">
+<section id="section-3.2.3">
+          <h4 id="name-sign-the-signature-input">
+<a href="#section-3.2.3" class="section-number selfRef">3.2.3. </a><a href="#name-sign-the-signature-input" class="section-name selfRef">Sign the Signature Input</a>
+          </h4>
+<p id="section-3.2.3-1">The signer signs the Signature Input using the signing algorithm described by the signature's Algorithm property, and the key material chosen by the signer.  The signer then encodes the result of that operation as a base 64-encoded string <span>[<a href="#RFC4648" class="xref">RFC4648</a>]</span>.  This string is the signature value.<a href="#section-3.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.3-2">For the non-normative example Signature metadata in <a href="#choose-metadata" class="xref">Section 3.2.1</a> and Signature Input in <a href="#example-sig-input" class="xref">Figure 1</a>, the corresponding signature value is:<a href="#section-3.2.3-2" class="pilcrow">¶</a></p>
+<span id="name-non-normative-example-signat"></span><div id="example-sig-value">
+<figure id="figure-2">
+            <div id="section-3.2.3-3.1">
+<pre class="sourcecode">
+T1l3tWH2cSP31nfuvc3nVaHQ6IAu9YLEXg2pCeEOJETXnlWbgKtBTaXV6LNQWtf4O42V2
+DZwDZbmVZ8xW3TFW80RrfrY0+fyjD4OLN7/zV6L6d2v7uBpuWZ8QzKuHYFaRNVXgFBXN3
+VJnsIOUjv20pqZMKO3phLCKX2/zQzJLCBQvF/5UKtnJiMp1ACNhG8LF0Q0FPWfe86YZBB
+xqrQr5WfjMu0LOO52ZAxi9KTWSlceJ2U361gDb7S5Deub8MaDrjUEpluphQeo8xyvHBoN
+Xsqeax/WaHyRYOgaW6krxEGVaBQAfA2czYZhEA05Tb38ahq/gwDQ1bagd9rGnCHtAg==</pre><a href="#section-3.2.3-3.1" class="pilcrow">¶</a>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-non-normative-example-signat" class="selfRef">Non-normative example signature value</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="verify">
+<section id="section-3.3">
+        <h3 id="name-verifying-a-signature">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-verifying-a-signature" class="section-name selfRef">Verifying a Signature</a>
+        </h3>
+<p id="section-3.3-1">In order to verify a signature, a verifier <span class="bcp14">MUST</span>:<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal" id="section-3.3-2">
+          <li id="section-3.3-2.1">Examine the signature's metadata to confirm that the signature meets the requirements described in this document, as well as any additional requirements defined by the application such as which header fields or other content are required to be covered by the signature.<a href="#section-3.3-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-3.3-2.2">Use the received HTTP message and the signature's metadata to recreate the Signature Input, using the process described in <a href="#canonicalization" class="xref">Section 3.2.2</a>.<a href="#section-3.3-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-3.3-2.3">Use the signature's Algorithm and Verification Key Material with the recreated Signing Input to verify the signature value.<a href="#section-3.3-2.3" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-3.3-3">A signature with a Creation Time that is in the future or an Expiration Time that is in the past <span class="bcp14">MUST NOT</span> be processed.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-4">The verifier <span class="bcp14">MUST</span> ensure that a signature's Algorithm is appropriate for the key material the verifier will use to verify the signature.  If the Algorithm is not appropriate for the key material (for example, if it is the wrong size, or in the wrong format), the signature <span class="bcp14">MUST NOT</span> be processed.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<section id="section-3.3.1">
+          <h4 id="name-enforcing-application-requi">
+<a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-enforcing-application-requi" class="section-name selfRef">Enforcing Application Requirements</a>
+          </h4>
+<p id="section-3.3.1-1">The verification requirements specified in this document are intended as a baseline set of restrictions that are generally applicable to all use cases.  Applications using HTTP Message Signatures <span class="bcp14">MAY</span> impose requirements above and beyond those specified by this document, as appropriate for their use case.<a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-2">Some non-normative examples of additional requirements an application might define are:<a href="#section-3.3.1-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-3.3.1-3.1">Requiring a specific set of header fields to be signed (e.g., Authorization, Digest).<a href="#section-3.3.1-3.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-3.3.1-3.2">Enforcing a maximum signature age.<a href="#section-3.3.1-3.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-3.3.1-3.3">Prohibiting the use of certain algorithms, or mandating the use of an algorithm.<a href="#section-3.3.1-3.3" class="pilcrow">¶</a>
+</li>
+            <li id="section-3.3.1-3.4">Requiring keys to be of a certain size (e.g., 2048 bits vs. 1024 bits).<a href="#section-3.3.1-3.4" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-3.3.1-4">Application-specific requirements are expected and encouraged.  When an application defines additional requirements, it <span class="bcp14">MUST</span> enforce them during the signature verification process, and signature verification <span class="bcp14">MUST</span> fail if the signature does not conform to the application's requirements.<a href="#section-3.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.3.1-5">Applications <span class="bcp14">MUST</span> enforce the requirements defined in this document.  Regardless of use case, applications <span class="bcp14">MUST NOT</span> accept signatures that do not conform to these requirements.<a href="#section-3.3.1-5" class="pilcrow">¶</a></p>
+</section>
+</section>
+</div>
+</section>
+</div>
+<div id="sig">
+<section id="section-4">
+      <h2 id="name-the-signature-http-header">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-the-signature-http-header" class="section-name selfRef">The 'Signature' HTTP Header</a>
+      </h2>
+<p id="section-4-1">The "Signature" HTTP header provides a mechanism to attach a signature to the HTTP message from which it was generated.  The header field name is "Signature" and its value is a list of parameters and values, formatted according to the <code>signature</code> syntax defined below, using the extended Augmented Backus-Naur Form (ABNF) notation used in <span>[<a href="#RFC7230" class="xref">HTTP</a>]</span>.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="section-4-2">
+<pre class="sourcecode">
+signature    = #( sig-param )
+
+sig-param    = token BWS "=" BWS ( token / quoted-string )</pre><a href="#section-4-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4-3">Each <code>sig-param</code> is the name of a parameter defined in the <a href="#param-registry" class="xref">Section 5.2</a> defined in this document.  The initial contents of this registry are described in <a href="#params" class="xref">Section 4.1</a>.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<div id="params">
+<section id="section-4.1">
+        <h3 id="name-signature-header-parameters">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-signature-header-parameters" class="section-name selfRef">Signature Header Parameters</a>
+        </h3>
+<p id="section-4.1-1">The Signature header's parameters contain the signature value itself and the signature metadata properties required to verify the signature.  Unless otherwise specified, parameters <span class="bcp14">MUST NOT</span> occur multiple times in one header, whether with the same or different values.  The following parameters are defined:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<dl class="dlNewline" id="section-4.1-2">
+          <dt id="section-4.1-2.1"><code>algorithm</code></dt>
+          <dd id="section-4.1-2.2">
+            <p id="section-4.1-2.2.1"><span class="bcp14">RECOMMENDED</span>.  The <code>algorithm</code> parameter contains the name of the signature's Algorithm, as registered in the <a href="#hsa-registry" class="xref">HTTP Signature Algorithms Registry</a> defined by this document.  Verifiers <span class="bcp14">MUST</span> determine the signature's Algorithm from the <code>keyId</code> parameter rather than from <code>algorithm</code>.  If <code>algorithm</code> is provided and differs from or is incompatible with the algorithm or key material identified by <code>keyId</code> (for example, <code>algorithm</code> has a value of <code>rsa-sha256</code> but <code>keyId</code> identifies an EdDSA key), then implementations <span class="bcp14">MUST</span> produce an error.  Implementers should note that previous versions of this specification determined the signature's Algorithm using the <code>algorithm</code> parameter only, and thus could be utilized by attackers to expose security vulnerabilities.  The default value for this parameter is "hs2019".<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+<dt id="section-4.1-2.3"><code>created</code></dt>
+          <dd id="section-4.1-2.4">
+            <span class="bcp14">RECOMMENDED</span>.  The <code>created</code> parameter contains the signature's Creation Time, expressed as the canonicalized value of the <code>(created)</code> content identifier, as defined in <a href="#content-identifiers" class="xref">Section 2</a>.  If not specified, the signature's Creation Time is undefined.  This parameter is useful when signers are not capable of controlling the <code>Date</code> HTTP Header such as when operating in certain web browser environments.<a href="#section-4.1-2.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-4.1-2.5"><code>expires</code></dt>
+          <dd id="section-4.1-2.6">
+            <span class="bcp14">OPTIONAL</span>.  The <code>expires</code> parameter contains the signature's Expiration Time, expressed as the canonicalized value of the <code>(expires)</code> content identifier, as defined in <a href="#content-identifiers" class="xref">Section 2</a>.  If the signature does not have an Expiration Time, this parameter <code>MUST</code> be omitted.  If not specified, the signature's Expiration Time is undefined.<a href="#section-4.1-2.6" class="pilcrow">¶</a>
+</dd>
+<dt id="section-4.1-2.7"><code>headers</code></dt>
+          <dd id="section-4.1-2.8">
+            <span class="bcp14">OPTIONAL</span>.  The <code>headers</code> parameter contains the signature's Covered Content, expressed as a string containing a quoted list of the identifiers in the list, in the order they occur in the list, with a space <code>" "</code> between each identifier.  If specified, identifiers for header fields <span class="bcp14">SHOULD</span> be lowercased and all others <span class="bcp14">MUST</span> be lowercased.  The default value for this parameter is "(created)".<a href="#section-4.1-2.8" class="pilcrow">¶</a>
+</dd>
+<dt id="section-4.1-2.9"><code>keyId</code></dt>
+          <dd id="section-4.1-2.10">
+            <span class="bcp14">REQUIRED</span>.  The <code>keyId</code> parameter is a US-ASCII string whose value can be used by a verifier to identify and/or obtain the signature's <code>Verification Key Material</code>.  The format and semantics of this value are out of scope for this document.<a href="#section-4.1-2.10" class="pilcrow">¶</a>
+</dd>
+<dt id="section-4.1-2.11"><code>signature</code></dt>
+          <dd id="section-4.1-2.12">
+            <span class="bcp14">REQUIRED</span>.  The <code>signature</code> parameter contains the signature value, as described in <a href="#sign-sig-input" class="xref">Section 3.2.3</a>.<a href="#section-4.1-2.12" class="pilcrow">¶</a>
+</dd>
+</dl>
+</section>
+</div>
+<section id="section-4.2">
+        <h3 id="name-example">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-example" class="section-name selfRef">Example</a>
+        </h3>
+<p id="section-4.2-1">The following is a non-normative example Signature header field representing the signature in <a href="#example-sig-value" class="xref">Figure 2</a>:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<div id="section-4.2-2">
+<pre class="sourcecode">
+Signature: keyId="test-key-b", algorithm="rsa-sha256",
+    created=1402170695, expires=1402170995,
+    headers="(request-target) (created) host date cache-control
+        x-emptyheader x-example",
+    signature="T1l3tWH2cSP31nfuvc3nVaHQ6IAu9YLEXg2pCeEOJETXnlWbgKtBTa
+        XV6LNQWtf4O42V2DZwDZbmVZ8xW3TFW80RrfrY0+fyjD4OLN7/zV6L6d2v7uB
+        puWZ8QzKuHYFaRNVXgFBXN3VJnsIOUjv20pqZMKO3phLCKX2/zQzJLCBQvF/5
+        UKtnJiMp1ACNhG8LF0Q0FPWfe86YZBBxqrQr5WfjMu0LOO52ZAxi9KTWSlceJ
+        2U361gDb7S5Deub8MaDrjUEpluphQeo8xyvHBoNXsqeax/WaHyRYOgaW6krxE
+        GVaBQAfA2czYZhEA05Tb38ahq/gwDQ1bagd9rGnCHtAg=="</pre><a href="#section-4.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</section>
+</div>
+<div id="iana">
+<section id="section-5">
+      <h2 id="name-iana-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<div id="hsa-registry">
+<section id="section-5.1">
+        <h3 id="name-http-signature-algorithms-r">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-http-signature-algorithms-r" class="section-name selfRef">HTTP Signature Algorithms Registry</a>
+        </h3>
+<p id="section-5.1-1">This document defines HTTP Signature Algorithms, for which IANA is asked to create and maintain a new registry titled "HTTP Signature Algorithms".  Initial values for this registry are given in <a href="#iana-hsa-contents" class="xref">Section 5.1.2</a>.  Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy <span>[<a href="#RFC8126" class="xref">BCP 26</a>]</span> and shall follow the template presented in <a href="#iana-hsa-template" class="xref">Section 5.1.1</a>.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<div id="iana-hsa-template">
+<section id="section-5.1.1">
+          <h4 id="name-registration-template">
+<a href="#section-5.1.1" class="section-number selfRef">5.1.1. </a><a href="#name-registration-template" class="section-name selfRef">Registration Template</a>
+          </h4>
+<dl class="dlNewline" id="section-5.1.1-1">
+            <dt id="section-5.1.1-1.1">Algorithm Name</dt>
+            <dd id="section-5.1.1-1.2">An identifier for the HTTP Signature Algorithm.  The name <span class="bcp14">MUST</span> be an ASCII string consisting only of lower-case characters (<code>"a"</code> - <code>"z"</code>), digits (<code>"0"</code> - <code>"9"</code>), and hyphens (<code>"-"</code>), and <span class="bcp14">SHOULD NOT</span> exceed 20 characters in length.  The identifier <span class="bcp14">MUST</span> be unique within the context of the registry.<a href="#section-5.1.1-1.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.1-1.3">Status</dt>
+            <dd id="section-5.1.1-1.4">A brief text description of the status of the algorithm.  The description <span class="bcp14">MUST</span> begin with one of "Active" or "Deprecated", and <span class="bcp14">MAY</span> provide further context or explanation as to the reason for the status.<a href="#section-5.1.1-1.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.1-1.5">Description</dt>
+            <dd id="section-5.1.1-1.6">A description of the algorithm used to sign the signing string when generating an HTTP Message Signature, or instructions on how to determine that algorithm. When the description specifies an algorithm, it <span class="bcp14">MUST</span> include a reference to the document or documents that define the algorithm.<a href="#section-5.1.1-1.6" class="pilcrow">¶</a>
+</dd>
+</dl>
+</section>
+</div>
+<div id="iana-hsa-contents">
+<section id="section-5.1.2">
+          <h4 id="name-initial-contents">
+<a href="#section-5.1.2" class="section-number selfRef">5.1.2. </a><a href="#name-initial-contents" class="section-name selfRef">Initial Contents</a>
+          </h4>
+<p id="section-5.1.2-1">[[ MS: The references in this section are problematic as many of the specifications that they refer to are too implementation specific, rather than just pointing to the proper signature and hashing specifications.  A better approach might be just specifying the signature and hashing function specifications, leaving implementers to connect the dots (which are not that hard to connect). ]]<a href="#section-5.1.2-1" class="pilcrow">¶</a></p>
+<section id="section-5.1.2.1">
+            <h5 id="name-hs2019">
+<a href="#name-hs2019" class="section-name selfRef"><code>hs2019</code></a>
+            </h5>
+<dl class="dlNewline" id="section-5.1.2.1-1">
+              <dt id="section-5.1.2.1-1.1">Algorithm Name</dt>
+              <dd id="section-5.1.2.1-1.2">
+                <code>hs2019</code><a href="#section-5.1.2.1-1.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.1-1.3">Status</dt>
+              <dd id="section-5.1.2.1-1.4">active<a href="#section-5.1.2.1-1.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.1-1.5">Description</dt>
+              <dd id="section-5.1.2.1-1.6">
+                <p id="section-5.1.2.1-1.6.1">Derived from metadata associated with <code>keyId</code>.  Recommend support for:<a href="#section-5.1.2.1-1.6.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-5.1.2.1-1.6.2.1">RSASSA-PSS <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> using SHA-512 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span><a href="#section-5.1.2.1-1.6.2.1" class="pilcrow">¶</a>
+</li>
+                  <li id="section-5.1.2.1-1.6.2.2">HMAC <span>[<a href="#RFC2104" class="xref">RFC2104</a>]</span> using SHA-512 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span><a href="#section-5.1.2.1-1.6.2.2" class="pilcrow">¶</a>
+</li>
+                  <li id="section-5.1.2.1-1.6.2.3">ECDSA using curve P-256 <span>[<a href="#FIPS186-4" class="xref">DSS</a>]</span> and SHA-512 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span><a href="#section-5.1.2.1-1.6.2.3" class="pilcrow">¶</a>
+</li>
+                  <li id="section-5.1.2.1-1.6.2.4">Ed25519ph, Ed25519ctx, and Ed25519 <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span><a href="#section-5.1.2.1-1.6.2.4" class="pilcrow">¶</a>
+</li>
+                </ul>
+</dd>
+</dl>
+</section>
+<section id="section-5.1.2.2">
+            <h5 id="name-rsa-sha1">
+<a href="#name-rsa-sha1" class="section-name selfRef"><code>rsa-sha1</code></a>
+            </h5>
+<dl class="dlNewline" id="section-5.1.2.2-1">
+              <dt id="section-5.1.2.2-1.1">Algorithm Name</dt>
+              <dd id="section-5.1.2.2-1.2">
+                <code>rsa-sha1</code><a href="#section-5.1.2.2-1.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.2-1.3">Status</dt>
+              <dd id="section-5.1.2.2-1.4">Deprecated; SHA-1 not secure.<a href="#section-5.1.2.2-1.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.2-1.5">Description</dt>
+              <dd id="section-5.1.2.2-1.6">RSASSA-PKCS1-v1_5 <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> using SHA-1 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span><a href="#section-5.1.2.2-1.6" class="pilcrow">¶</a>
+</dd>
+</dl>
+</section>
+<section id="section-5.1.2.3">
+            <h5 id="name-rsa-sha256">
+<a href="#name-rsa-sha256" class="section-name selfRef"><code>rsa-sha256</code></a>
+            </h5>
+<dl class="dlNewline" id="section-5.1.2.3-1">
+              <dt id="section-5.1.2.3-1.1">Algorithm Name</dt>
+              <dd id="section-5.1.2.3-1.2">
+                <code>rsa-sha256</code><a href="#section-5.1.2.3-1.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.3-1.3">Status</dt>
+              <dd id="section-5.1.2.3-1.4">Deprecated; specifying signature algorithm enables attack vector.<a href="#section-5.1.2.3-1.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.3-1.5">Description</dt>
+              <dd id="section-5.1.2.3-1.6">RSASSA-PKCS1-v1_5 <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> using SHA-256 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span><a href="#section-5.1.2.3-1.6" class="pilcrow">¶</a>
+</dd>
+</dl>
+</section>
+<section id="section-5.1.2.4">
+            <h5 id="name-hmac-sha256">
+<a href="#name-hmac-sha256" class="section-name selfRef"><code>hmac-sha256</code></a>
+            </h5>
+<dl class="dlNewline" id="section-5.1.2.4-1">
+              <dt id="section-5.1.2.4-1.1">Algorithm Name</dt>
+              <dd id="section-5.1.2.4-1.2">
+                <code>hmac-sha256</code><a href="#section-5.1.2.4-1.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.4-1.3">Status</dt>
+              <dd id="section-5.1.2.4-1.4">Deprecated; specifying signature algorithm enables attack vector.<a href="#section-5.1.2.4-1.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.4-1.5">Description</dt>
+              <dd id="section-5.1.2.4-1.6">HMAC <span>[<a href="#RFC2104" class="xref">RFC2104</a>]</span> using SHA-256 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span><a href="#section-5.1.2.4-1.6" class="pilcrow">¶</a>
+</dd>
+</dl>
+</section>
+<section id="section-5.1.2.5">
+            <h5 id="name-ecdsa-sha256">
+<a href="#name-ecdsa-sha256" class="section-name selfRef"><code>ecdsa-sha256</code></a>
+            </h5>
+<dl class="dlNewline" id="section-5.1.2.5-1">
+              <dt id="section-5.1.2.5-1.1">Algorithm Name</dt>
+              <dd id="section-5.1.2.5-1.2">
+                <code>ecdsa-sha256</code><a href="#section-5.1.2.5-1.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.5-1.3">Status</dt>
+              <dd id="section-5.1.2.5-1.4">Deprecated; specifying signature algorithm enables attack vector.<a href="#section-5.1.2.5-1.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.1.2.5-1.5">Description</dt>
+              <dd id="section-5.1.2.5-1.6">ECDSA using curve P-256 <span>[<a href="#FIPS186-4" class="xref">DSS</a>]</span> and SHA-256 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span><a href="#section-5.1.2.5-1.6" class="pilcrow">¶</a>
+</dd>
+</dl>
+</section>
+</section>
+</div>
+</section>
+</div>
+<div id="param-registry">
+<section id="section-5.2">
+        <h3 id="name-http-signature-parameters-r">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-http-signature-parameters-r" class="section-name selfRef">HTTP Signature Parameters Registry</a>
+        </h3>
+<p id="section-5.2-1">This document defines the Signature header field, whose value contains a list of named parameters.  IANA is asked to create and maintain a new registry titled "HTTP Signature Parameters" to record and maintain the set of named parameters defined for use within the Signature header field.  Initial values for this registry are given in <a href="#iana-param-contents" class="xref">Section 5.2.2</a>.  Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy <span>[<a href="#RFC8126" class="xref">BCP 26</a>]</span> and shall follow the template presented in <a href="#iana-param-template" class="xref">Section 5.2.1</a>.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<div id="iana-param-template">
+<section id="section-5.2.1">
+          <h4 id="name-registration-template-2">
+<a href="#section-5.2.1" class="section-number selfRef">5.2.1. </a><a href="#name-registration-template-2" class="section-name selfRef">Registration Template</a>
+          </h4>
+<dl class="dlNewline" id="section-5.2.1-1">
+            <dt id="section-5.2.1-1.1">Name</dt>
+            <dd id="section-5.2.1-1.2">An identifier for the parameter.  The name <span class="bcp14">MUST</span> be an ASCII string consisting only of lower-case characters (<code>"a"</code> - <code>"z"</code>), digits (<code>"0"</code> - <code>"9"</code>), and hyphens (<code>"-"</code>), and <span class="bcp14">SHOULD NOT</span> exceed 20 characters in length.  The identifier <span class="bcp14">MUST</span> be unique within the context of the registry.<a href="#section-5.2.1-1.2" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.2.1-1.3">Status</dt>
+            <dd id="section-5.2.1-1.4">A value indicating the status of the parameter definition.  Allowed values are "Active" and "Deprecated".  Active parameter definitions are available for general use.  Deprecated parameter definitions may be in use by existing implementations, but <span class="bcp14">SHOULD NOT</span> be used by new implementations.<a href="#section-5.2.1-1.4" class="pilcrow">¶</a>
+</dd>
+<dt id="section-5.2.1-1.5">Reference(s)</dt>
+            <dd id="section-5.2.1-1.6">A reference or list of references to the documents that define the purpose, content, and usage of the parameter.  The parameter definition <span class="bcp14">MUST</span> define the format of the parameter's value using the extended ABNF notation used in <span>[<a href="#RFC7230" class="xref">HTTP</a>]</span>, or by referencing one or more standard formats such as base 64 or URI.  The parameter definition <span class="bcp14">MUST</span> also specify the normative requirements for when and how the parameter may be used.  Value formats <span class="bcp14">MUST NOT</span> allow values that would break the parameter list syntax used by the Signature header.<a href="#section-5.2.1-1.6" class="pilcrow">¶</a>
+</dd>
+</dl>
+</section>
+</div>
+<div id="iana-param-contents">
+<section id="section-5.2.2">
+          <h4 id="name-initial-contents-2">
+<a href="#section-5.2.2" class="section-number selfRef">5.2.2. </a><a href="#name-initial-contents-2" class="section-name selfRef">Initial Contents</a>
+          </h4>
+<p id="section-5.2.2-1">The table below contains the initial contents of the HTTP Signature Parameters Registry.  Each row in the table represents a distinct entry in the registry.<a href="#section-5.2.2-1" class="pilcrow">¶</a></p>
+<span id="name-initial-contents-of-the-htt"></span><table class="center" id="table-4">
+            <caption>
+<a href="#table-4" class="selfRef">Table 4</a>:
+<a href="#name-initial-contents-of-the-htt" class="selfRef">Initial contents of the HTTP Signature Parameters Registry.</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Name</th>
+                <th class="text-left" rowspan="1" colspan="1">Status</th>
+                <th class="text-left" rowspan="1" colspan="1">Reference(s)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>algorithm</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Active</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <a href="#params" class="xref">Section 4.1</a> of this document</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>created</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Active</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <p id="section-5.2.2-2.2.2.3.1"><a href="#params" class="xref">Section 4.1</a> of this document<a href="#section-5.2.2-2.2.2.3.1" class="pilcrow">¶</a></p>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>expires</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Active</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <p id="section-5.2.2-2.2.3.3.1"><a href="#params" class="xref">Section 4.1</a> of this document<a href="#section-5.2.2-2.2.3.3.1" class="pilcrow">¶</a></p>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>headers</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Active</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <p id="section-5.2.2-2.2.4.3.1"><a href="#params" class="xref">Section 4.1</a> of this document<a href="#section-5.2.2-2.2.4.3.1" class="pilcrow">¶</a></p>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>keyId</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Active</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <p id="section-5.2.2-2.2.5.3.1"><a href="#params" class="xref">Section 4.1</a> of this document<a href="#section-5.2.2-2.2.5.3.1" class="pilcrow">¶</a></p>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>signature</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Active</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <p id="section-5.2.2-2.2.6.3.1"><a href="#params" class="xref">Section 4.1</a> of this document<a href="#section-5.2.2-2.2.6.3.1" class="pilcrow">¶</a></p>
+</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="security">
+<section id="section-6">
+      <h2 id="name-security-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-6-1">[[ TODO: need to dive deeper on this section; not sure how much of what's referenced below is actually applicable, or if it covers everything we need to worry about. ]]<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">[[ TODO: Should provide some recommendations on how to determine what content needs to be signed for a given use case. ]]<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">There are a number of security considerations to take into account when implementing or utilizing this specification.  A thorough security analysis of this protocol, including its strengths and weaknesses, can be found in <span><a href="#WP-HTTP-Sig-Audit" class="xref">Security Considerations for HTTP Signatures</a> [<a href="#WP-HTTP-Sig-Audit" class="xref">WP-HTTP-Sig-Audit</a>]</span>.<a href="#section-6-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-7">
+      <h2 id="name-references">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-7.1">
+        <h3 id="name-normative-references">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC8126">[BCP 26]</dt>
+        <dd>
+<span class="refAuthor">Cotton, M.</span><span class="refAuthor">, Leiba, B.</span><span class="refAuthor">, and T. Narten</span>, <span class="refTitle">"Guidelines for Writing an IANA Considerations Section in RFCs"</span>, <span class="seriesInfo">BCP 26</span>, <span class="seriesInfo">RFC 8126</span>, <span class="seriesInfo">DOI 10.17487/RFC8126</span>, <time datetime="2017-06">June 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8126">https://www.rfc-editor.org/info/rfc8126</a>&gt;</span>. </dd>
+<dt id="FIPS186-4">[DSS]</dt>
+        <dd>
+<span class="refAuthor">NIST</span>, <span class="refTitle">"Digital Signature Standard (DSS)"</span>, <span class="seriesInfo">FIPS 186-4</span>, <span class="seriesInfo">DOI 10.6028/NIST.FIPS.186-4</span>, <time datetime="2013-07">July 2013</time>, <span>&lt;<a href="https://csrc.nist.gov/publications/detail/fips/186/4/final">https://csrc.nist.gov/publications/detail/fips/186/4/final</a>&gt;</span>. </dd>
+<dt id="RFC7230">[HTTP]</dt>
+        <dd>
+<span class="refAuthor">Fielding, R., Ed.</span><span class="refAuthor"> and J. Reschke, Ed.</span>, <span class="refTitle">"Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing"</span>, <span class="seriesInfo">RFC 7230</span>, <span class="seriesInfo">DOI 10.17487/RFC7230</span>, <time datetime="2014-06">June 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7230">https://www.rfc-editor.org/info/rfc7230</a>&gt;</span>. </dd>
+<dt id="RFC7540">[HTTP2]</dt>
+        <dd>
+<span class="refAuthor">Belshe, M.</span><span class="refAuthor">, Peon, R.</span><span class="refAuthor">, and M. Thomson, Ed.</span>, <span class="refTitle">"Hypertext Transfer Protocol Version 2 (HTTP/2)"</span>, <span class="seriesInfo">RFC 7540</span>, <span class="seriesInfo">DOI 10.17487/RFC7540</span>, <time datetime="2015-05">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7540">https://www.rfc-editor.org/info/rfc7540</a>&gt;</span>. </dd>
+<dt id="POSIX.1">[POSIX.1]</dt>
+        <dd>
+<span class="refAuthor">IEEE</span><span class="refAuthor"> and The Open Group</span>, <span class="refTitle">"The Open Group Base Specifications Issue 7, 2018 edition"</span>, <span class="seriesInfo">IEEE Std 1003.1-2017</span>, <time datetime="2018">2018</time>, <span>&lt;<a href="https://pubs.opengroup.org/onlinepubs/9699919799/">https://pubs.opengroup.org/onlinepubs/9699919799/</a>&gt;</span>. </dd>
+<dt id="RFC2104">[RFC2104]</dt>
+        <dd>
+<span class="refAuthor">Krawczyk, H.</span><span class="refAuthor">, Bellare, M.</span><span class="refAuthor">, and R. Canetti</span>, <span class="refTitle">"HMAC: Keyed-Hashing for Message Authentication"</span>, <span class="seriesInfo">RFC 2104</span>, <span class="seriesInfo">DOI 10.17487/RFC2104</span>, <time datetime="1997-02">February 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2104">https://www.rfc-editor.org/info/rfc2104</a>&gt;</span>. </dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dt id="RFC3986">[RFC3986]</dt>
+        <dd>
+<span class="refAuthor">Berners-Lee, T.</span><span class="refAuthor">, Fielding, R.</span><span class="refAuthor">, and L. Masinter</span>, <span class="refTitle">"Uniform Resource Identifier (URI): Generic Syntax"</span>, <span class="seriesInfo">STD 66</span>, <span class="seriesInfo">RFC 3986</span>, <span class="seriesInfo">DOI 10.17487/RFC3986</span>, <time datetime="2005-01">January 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc3986">https://www.rfc-editor.org/info/rfc3986</a>&gt;</span>. </dd>
+<dt id="RFC4648">[RFC4648]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4648">https://www.rfc-editor.org/info/rfc4648</a>&gt;</span>. </dd>
+<dt id="RFC7541">[RFC7541]</dt>
+        <dd>
+<span class="refAuthor">Peon, R.</span><span class="refAuthor"> and H. Ruellan</span>, <span class="refTitle">"HPACK: Header Compression for HTTP/2"</span>, <span class="seriesInfo">RFC 7541</span>, <span class="seriesInfo">DOI 10.17487/RFC7541</span>, <time datetime="2015-05">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7541">https://www.rfc-editor.org/info/rfc7541</a>&gt;</span>. </dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+</dl>
+</section>
+<section id="section-7.2">
+        <h3 id="name-informative-references">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC3339">[RFC3339]</dt>
+        <dd>
+<span class="refAuthor">Klyne, G.</span><span class="refAuthor"> and C. Newman</span>, <span class="refTitle">"Date and Time on the Internet: Timestamps"</span>, <span class="seriesInfo">RFC 3339</span>, <span class="seriesInfo">DOI 10.17487/RFC3339</span>, <time datetime="2002-07">July 2002</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc3339">https://www.rfc-editor.org/info/rfc3339</a>&gt;</span>. </dd>
+<dt id="RFC6234">[RFC6234]</dt>
+        <dd>
+<span class="refAuthor">Eastlake 3rd, D.</span><span class="refAuthor"> and T. Hansen</span>, <span class="refTitle">"US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)"</span>, <span class="seriesInfo">RFC 6234</span>, <span class="seriesInfo">DOI 10.17487/RFC6234</span>, <time datetime="2011-05">May 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6234">https://www.rfc-editor.org/info/rfc6234</a>&gt;</span>. </dd>
+<dt id="RFC7239">[RFC7239]</dt>
+        <dd>
+<span class="refAuthor">Petersson, A.</span><span class="refAuthor"> and M. Nilsson</span>, <span class="refTitle">"Forwarded HTTP Extension"</span>, <span class="seriesInfo">RFC 7239</span>, <span class="seriesInfo">DOI 10.17487/RFC7239</span>, <time datetime="2014-06">June 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7239">https://www.rfc-editor.org/info/rfc7239</a>&gt;</span>. </dd>
+<dt id="RFC7518">[RFC7518]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Algorithms (JWA)"</span>, <span class="seriesInfo">RFC 7518</span>, <span class="seriesInfo">DOI 10.17487/RFC7518</span>, <time datetime="2015-05">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7518">https://www.rfc-editor.org/info/rfc7518</a>&gt;</span>. </dd>
+<dt id="RFC8017">[RFC8017]</dt>
+        <dd>
+<span class="refAuthor">Moriarty, K., Ed.</span><span class="refAuthor">, Kaliski, B.</span><span class="refAuthor">, Jonsson, J.</span><span class="refAuthor">, and A. Rusch</span>, <span class="refTitle">"PKCS #1: RSA Cryptography Specifications Version 2.2"</span>, <span class="seriesInfo">RFC 8017</span>, <span class="seriesInfo">DOI 10.17487/RFC8017</span>, <time datetime="2016-11">November 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8017">https://www.rfc-editor.org/info/rfc8017</a>&gt;</span>. </dd>
+<dt id="RFC8032">[RFC8032]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span><span class="refAuthor"> and I. Liusvaara</span>, <span class="refTitle">"Edwards-Curve Digital Signature Algorithm (EdDSA)"</span>, <span class="seriesInfo">RFC 8032</span>, <span class="seriesInfo">DOI 10.17487/RFC8032</span>, <time datetime="2017-01">January 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8032">https://www.rfc-editor.org/info/rfc8032</a>&gt;</span>. </dd>
+<dt id="RFC8446">[RFC8446]</dt>
+        <dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 8446</span>, <span class="seriesInfo">DOI 10.17487/RFC8446</span>, <time datetime="2018-08">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8446">https://www.rfc-editor.org/info/rfc8446</a>&gt;</span>. </dd>
+<dt id="WP-HTTP-Sig-Audit">[WP-HTTP-Sig-Audit]</dt>
+      <dd>
+<span class="refAuthor">Sporny, M.</span>, <span class="refTitle">"Security Considerations for HTTP Signatures"</span>, <time datetime="2013-06">June 2013</time>, <span>&lt;<a href="https://web-payments.org/specs/source/http-signatures-audit/">https://web-payments.org/specs/source/http-signatures-audit/</a>&gt;</span>. </dd>
+</dl>
+</section>
+</section>
+<section id="section-appendix.a">
+      <h2 id="name-examples">
+<a href="#section-appendix.a" class="section-number selfRef">Appendix A. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
+      </h2>
+<div id="example-keys">
+<section id="section-a.1">
+        <h2 id="name-example-keys">
+<a href="#section-a.1" class="section-number selfRef">A.1. </a><a href="#name-example-keys" class="section-name selfRef">Example Keys</a>
+        </h2>
+<p id="section-a.1-1">This section provides cryptographic keys that are referenced in example signatures throughout this document.  These keys <span class="bcp14">MUST NOT</span> be used for any purpose other than testing.<a href="#section-a.1-1" class="pilcrow">¶</a></p>
+<div id="example-key-rsa-test">
+<section id="section-a.1.1">
+          <h3 id="name-rsa-test">
+<a href="#section-a.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-rsa-test" class="section-name selfRef"><code>rsa-test</code></a>
+          </h3>
+<p id="section-a.1.1-1">The following key is a 2048-bit RSA public and private key pair:<a href="#section-a.1.1-1" class="pilcrow">¶</a></p>
+<div id="section-a.1.1-2">
+<pre class="sourcecode">
+-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEAhAKYdtoeoy8zcAcR874L8cnZxKzAGwd7v36APp7Pv6Q2jdsPBRrw
+WEBnez6d0UDKDwGbc6nxfEXAy5mbhgajzrw3MOEt8uA5txSKobBpKDeBLOsdJKFq
+MGmXCQvEG7YemcxDTRPxAleIAgYYRjTSd/QBwVW9OwNFhekro3RtlinV0a75jfZg
+kne/YiktSvLG34lw2zqXBDTC5NHROUqGTlML4PlNZS5Ri2U4aCNx2rUPRcKIlE0P
+uKxI4T+HIaFpv8+rdV6eUgOrB2xeI1dSFFn/nnv5OoZJEIB+VmuKn3DCUcCZSFlQ
+PSXSfBDiUGhwOw76WuSSsf1D4b/vLoJ10wIDAQAB
+-----END RSA PUBLIC KEY-----
+
+-----BEGIN RSA PRIVATE KEY-----
+MIIEqAIBAAKCAQEAhAKYdtoeoy8zcAcR874L8cnZxKzAGwd7v36APp7Pv6Q2jdsP
+BRrwWEBnez6d0UDKDwGbc6nxfEXAy5mbhgajzrw3MOEt8uA5txSKobBpKDeBLOsd
+JKFqMGmXCQvEG7YemcxDTRPxAleIAgYYRjTSd/QBwVW9OwNFhekro3RtlinV0a75
+jfZgkne/YiktSvLG34lw2zqXBDTC5NHROUqGTlML4PlNZS5Ri2U4aCNx2rUPRcKI
+lE0PuKxI4T+HIaFpv8+rdV6eUgOrB2xeI1dSFFn/nnv5OoZJEIB+VmuKn3DCUcCZ
+SFlQPSXSfBDiUGhwOw76WuSSsf1D4b/vLoJ10wIDAQABAoIBAG/JZuSWdoVHbi56
+vjgCgkjg3lkO1KrO3nrdm6nrgA9P9qaPjxuKoWaKO1cBQlE1pSWp/cKncYgD5WxE
+CpAnRUXG2pG4zdkzCYzAh1i+c34L6oZoHsirK6oNcEnHveydfzJL5934egm6p8DW
++m1RQ70yUt4uRc0YSor+q1LGJvGQHReF0WmJBZHrhz5e63Pq7lE0gIwuBqL8SMaA
+yRXtK+JGxZpImTq+NHvEWWCu09SCq0r838ceQI55SvzmTkwqtC+8AT2zFviMZkKR
+Qo6SPsrqItxZWRty2izawTF0Bf5S2VAx7O+6t3wBsQ1sLptoSgX3QblELY5asI0J
+YFz7LJECgYkAsqeUJmqXE3LP8tYoIjMIAKiTm9o6psPlc8CrLI9CH0UbuaA2JCOM
+cCNq8SyYbTqgnWlB9ZfcAm/cFpA8tYci9m5vYK8HNxQr+8FS3Qo8N9RJ8d0U5Csw
+DzMYfRghAfUGwmlWj5hp1pQzAuhwbOXFtxKHVsMPhz1IBtF9Y8jvgqgYHLbmyiu1
+mwJ5AL0pYF0G7x81prlARURwHo0Yf52kEw1dxpx+JXER7hQRWQki5/NsUEtv+8RT
+qn2m6qte5DXLyn83b1qRscSdnCCwKtKWUug5q2ZbwVOCJCtmRwmnP131lWRYfj67
+B/xJ1ZA6X3GEf4sNReNAtaucPEelgR2nsN0gKQKBiGoqHWbK1qYvBxX2X3kbPDkv
+9C+celgZd2PW7aGYLCHq7nPbmfDV0yHcWjOhXZ8jRMjmANVR/eLQ2EfsRLdW69bn
+f3ZD7JS1fwGnO3exGmHO3HZG+6AvberKYVYNHahNFEw5TsAcQWDLRpkGybBcxqZo
+81YCqlqidwfeO5YtlO7etx1xLyqa2NsCeG9A86UjG+aeNnXEIDk1PDK+EuiThIUa
+/2IxKzJKWl1BKr2d4xAfR0ZnEYuRrbeDQYgTImOlfW6/GuYIxKYgEKCFHFqJATAG
+IxHrq1PDOiSwXd2GmVVYyEmhZnbcp8CxaEMQoevxAta0ssMK3w6UsDtvUvYvF22m
+qQKBiD5GwESzsFPy3Ga0MvZpn3D6EJQLgsnrtUPZx+z2Ep2x0xc5orneB5fGyF1P
+WtP+fG5Q6Dpdz3LRfm+KwBCWFKQjg7uTxcjerhBWEYPmEMKYwTJF5PBG9/ddvHLQ
+EQeNC8fHGg4UXU8mhHnSBt3EA10qQJfRDs15M38eG2cYwB1PZpDHScDnDA0=
+-----END RSA PRIVATE KEY-----</pre><a href="#section-a.1.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<section id="section-a.2">
+        <h2 id="name-example-keyid-values">
+<a href="#section-a.2" class="section-number selfRef">A.2. </a><a href="#name-example-keyid-values" class="section-name selfRef">Example <code>keyId</code> Values</a>
+        </h2>
+<p id="section-a.2-1">The table below maps example <code>keyId</code> values to associated algorithms and/or keys.  These are example mappings that are valid only within the context of examples in examples within this and future documents that reference this section.  Unless otherwise specified, within the context of examples it should be assumed that the signer and verifier understand these <code>keyId</code> mappings.  These <code>keyId</code> values are not reserved, and deployments are free to use them, with these associations or others.<a href="#section-a.2-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-5">
+          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">
+                <code>keyId</code>
+</th>
+              <th class="text-left" rowspan="1" colspan="1">Algorithm</th>
+              <th class="text-left" rowspan="1" colspan="1">Verification Key</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>test-key-a</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>hs2019</code>, using RSASSA-PSS <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> and SHA-512 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">The public key specified in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a>.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>test-key-b</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>rsa-256</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">The public key specified in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a>.</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+<section id="section-a.3">
+        <h2 id="name-test-cases">
+<a href="#section-a.3" class="section-number selfRef">A.3. </a><a href="#name-test-cases" class="section-name selfRef">Test Cases</a>
+        </h2>
+<p id="section-a.3-1">This section provides non-normative examples that may be used as test cases to validate implementation correctness.  These examples are based on the following HTTP message:<a href="#section-a.3-1" class="pilcrow">¶</a></p>
+<div id="section-a.3-2">
+<pre class="sourcecode">
+POST /foo?param=value&amp;pet=dog HTTP/1.1
+Host: example.com
+Date: Tue, 07 Jun 2014 20:51:35 GMT
+Content-Type: application/json
+Digest: SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=
+Content-Length: 18
+
+{"hello": "world"}</pre><a href="#section-a.3-2" class="pilcrow">¶</a>
+</div>
+<section id="section-a.3.1">
+          <h3 id="name-signature-generation">
+<a href="#section-a.3.1" class="section-number selfRef">A.3.1. </a><a href="#name-signature-generation" class="section-name selfRef">Signature Generation</a>
+          </h3>
+<section id="section-a.3.1.1">
+            <h4 id="name-hs2019-signature-over-minim">
+<a href="#section-a.3.1.1" class="section-number selfRef">A.3.1.1. </a><a href="#name-hs2019-signature-over-minim" class="section-name selfRef"><code>hs2019</code> signature over minimal recommended content</a>
+            </h4>
+<p id="section-a.3.1.1-1">This presents metadata for a Signature using <code>hs2019</code>, over minimum recommended data to sign:<a href="#section-a.3.1.1-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-6">
+              <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
+<thead>
+                <tr>
+                  <th class="text-left" rowspan="1" colspan="1">Property</th>
+                  <th class="text-left" rowspan="1" colspan="1">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Algorithm</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>hs2019</code>, using RSASSA-PSS <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> using SHA-512 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Covered Content</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>(created) (request-target)</code>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Creation Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">8:51:35 PM GMT, June 7th, 2014</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Expiration Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">Undefined</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Verification Key Material</td>
+                  <td class="text-left" rowspan="1" colspan="1">The public key specified in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p id="section-a.3.1.1-3">The Signature Input is:<a href="#section-a.3.1.1-3" class="pilcrow">¶</a></p>
+<div id="section-a.3.1.1-4">
+<pre class="sourcecode">
+(created): 1402170695
+(request-target): post /foo?param=value&amp;pet=dog</pre><a href="#section-a.3.1.1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-a.3.1.1-5">The signature value is:<a href="#section-a.3.1.1-5" class="pilcrow">¶</a></p>
+<div id="section-a.3.1.1-6">
+<pre class="sourcecode">
+e3y37nxAoeuXw2KbaIxE2d9jpE7Z9okgizg6QbD2Z7fUVUvog+ZTKKLRBnhNglVIY6fAa
+YlHwx7ZAXXdBVF8gjWBPL6U9zRrB4PFzjoLSxHaqsvS0ZK9FRxpenptgukaVQ1aeva3PE
+1aD6zZ93df2lFIFXGDefYCQ+M/SrDGQOFvaVykEkte5mO6zQZ/HpokjMKvilfSMJS+vbv
+C1GJItQpjs636Db+7zB2W1BurkGxtQdCLDXuIDg4S8pPSDihkch/dUzL2BpML3PXGKVXw
+HOUkVG6Q2ge07IYdzya6N1fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg==</pre><a href="#section-a.3.1.1-6" class="pilcrow">¶</a>
+</div>
+<p id="section-a.3.1.1-7">A possible Signature header for this signature is:<a href="#section-a.3.1.1-7" class="pilcrow">¶</a></p>
+<div id="section-a.3.1.1-8">
+<pre class="sourcecode">
+Signature: keyId="test-key-a", created=1402170695,
+    headers="(created) (request-target)",
+    signature="e3y37nxAoeuXw2KbaIxE2d9jpE7Z9okgizg6QbD2Z7fUVUvog+ZTKK
+        LRBnhNglVIY6fAaYlHwx7ZAXXdBVF8gjWBPL6U9zRrB4PFzjoLSxHaqsvS0ZK
+        9FRxpenptgukaVQ1aeva3PE1aD6zZ93df2lFIFXGDefYCQ+M/SrDGQOFvaVyk
+        Ekte5mO6zQZ/HpokjMKvilfSMJS+vbvC1GJItQpjs636Db+7zB2W1BurkGxtQ
+        dCLDXuIDg4S8pPSDihkch/dUzL2BpML3PXGKVXwHOUkVG6Q2ge07IYdzya6N1
+        fIVA9eKI1Y47HT35QliVAxZgE0EZLo8mxq19ReIVvuFg=="</pre><a href="#section-a.3.1.1-8" class="pilcrow">¶</a>
+</div>
+</section>
+<section id="section-a.3.1.2">
+            <h4 id="name-hs2019-signature-covering-a">
+<a href="#section-a.3.1.2" class="section-number selfRef">A.3.1.2. </a><a href="#name-hs2019-signature-covering-a" class="section-name selfRef"><code>hs2019</code> signature covering all header fields</a>
+            </h4>
+<p id="section-a.3.1.2-1">This presents metadata for a Signature using <code>hs2019</code> that covers all header fields in the request:<a href="#section-a.3.1.2-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-7">
+              <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
+<thead>
+                <tr>
+                  <th class="text-left" rowspan="1" colspan="1">Property</th>
+                  <th class="text-left" rowspan="1" colspan="1">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Algorithm</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>hs2019</code>, using RSASSA-PSS <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> using SHA-512 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Covered Content</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>(created)</code>, <code>(request-target)</code>, <code>host</code>, <code>date</code>, <code>content-type</code>, <code>digest</code>, <code>content-length</code>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Creation Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">8:51:35 PM GMT, June 7th, 2014</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Expiration Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">Undefined</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Verification Key Material</td>
+                  <td class="text-left" rowspan="1" colspan="1">The public key specified in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p id="section-a.3.1.2-3">The Signature Input is:<a href="#section-a.3.1.2-3" class="pilcrow">¶</a></p>
+<div id="section-a.3.1.2-4">
+<pre class="sourcecode">
+(created): 1402170695
+(request-target): post /foo?param=value&amp;pet=dog
+host: example.com
+date: Tue, 07 Jun 2014 20:51:35 GMT
+content-type: application/json
+digest: SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=
+content-length: 18</pre><a href="#section-a.3.1.2-4" class="pilcrow">¶</a>
+</div>
+<p id="section-a.3.1.2-5">The signature value is:<a href="#section-a.3.1.2-5" class="pilcrow">¶</a></p>
+<div id="section-a.3.1.2-6">
+<pre class="sourcecode">
+KXUj1H3ZOhv3Nk4xlRLTn4bOMlMOmFiud3VXrMa9MaLCxnVmrqOX5BulRvB65YW/wQp0o
+T/nNQpXgOYeY8ovmHlpkRyz5buNDqoOpRsCpLGxsIJ9cX8XVsM9jy+Q1+RIlD9wfWoPHh
+qhoXt35ZkasuIDPF/AETuObs9QydlsqONwbK+TdQguDK/8Va1Pocl6wK1uLwqcXlxhPEb
+55EmdYB9pddDyHTADING7K4qMwof2mC3t8Pb0yoLZoZX5a4Or4FrCCKK/9BHAhq/RsVk0
+dTENMbTB4i7cHvKQu+o9xuYWuxyvBa0Z6NdOb0di70cdrSDEsL5Gz7LBY5J2N9KdGg==</pre><a href="#section-a.3.1.2-6" class="pilcrow">¶</a>
+</div>
+<p id="section-a.3.1.2-7">A possible Signature header for this signature is:<a href="#section-a.3.1.2-7" class="pilcrow">¶</a></p>
+<div id="section-a.3.1.2-8">
+<pre class="sourcecode">
+Signature: keyId="test-key-a", algorithm="hs2019",
+    created=1402170695,
+    headers="(request-target) (created) host date content-type digest
+        content-length",
+    signature="KXUj1H3ZOhv3Nk4xlRLTn4bOMlMOmFiud3VXrMa9MaLCxnVmrqOX5B
+        ulRvB65YW/wQp0oT/nNQpXgOYeY8ovmHlpkRyz5buNDqoOpRsCpLGxsIJ9cX8
+        XVsM9jy+Q1+RIlD9wfWoPHhqhoXt35ZkasuIDPF/AETuObs9QydlsqONwbK+T
+        dQguDK/8Va1Pocl6wK1uLwqcXlxhPEb55EmdYB9pddDyHTADING7K4qMwof2m
+        C3t8Pb0yoLZoZX5a4Or4FrCCKK/9BHAhq/RsVk0dTENMbTB4i7cHvKQu+o9xu
+        YWuxyvBa0Z6NdOb0di70cdrSDEsL5Gz7LBY5J2N9KdGg=="</pre><a href="#section-a.3.1.2-8" class="pilcrow">¶</a>
+</div>
+</section>
+</section>
+<section id="section-a.3.2">
+          <h3 id="name-signature-verification">
+<a href="#section-a.3.2" class="section-number selfRef">A.3.2. </a><a href="#name-signature-verification" class="section-name selfRef">Signature Verification</a>
+          </h3>
+<section id="section-a.3.2.1">
+            <h4 id="name-minimal-required-signature-">
+<a href="#section-a.3.2.1" class="section-number selfRef">A.3.2.1. </a><a href="#name-minimal-required-signature-" class="section-name selfRef">Minimal Required Signature Header</a>
+            </h4>
+<p id="section-a.3.2.1-1">This presents a Signature header containing only the minimal required parameters:<a href="#section-a.3.2.1-1" class="pilcrow">¶</a></p>
+<div id="section-a.3.2.1-2">
+<pre class="sourcecode">
+Signature: keyId="test-key-a", (created): 1402170695,
+    signature="V3SijFpJOvDUT8t1/EnYli/4TbF2AGqwBGiGUGrgClCkiOAIlOxxY7
+        2Mr13DccFkYzg3gX1jIOpKXzH70C5bru4b71SBG+ShiJLu34gHCG33iw44NLG
+        UvT5+F+LCKbbHberyk8eyYsZ+TLwtZAYKafxfNOWQXF4o3QaWslDMm8Tcgrd8
+        onM45ayFyR4nXRlcGad4PISYGz8PmO4Y+K8RYOyDkgsmRxKtftFQUYG41anyE
+        lccNLfEfLBKsyV6kxr36U1Q7FdUopLv8kqluQySrWD6kesvFxNvbEOi+1uZqT
+        uFlK8ZldITQiqtNYaabRjQFZio63gma2y+UAaTGLdM9A=="</pre><a href="#section-a.3.2.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-a.3.2.1-3">The corresponding signature metadata derived from this header field is:<a href="#section-a.3.2.1-3" class="pilcrow">¶</a></p>
+<table class="center" id="table-8">
+              <caption><a href="#table-8" class="selfRef">Table 8</a></caption>
+<thead>
+                <tr>
+                  <th class="text-left" rowspan="1" colspan="1">Property</th>
+                  <th class="text-left" rowspan="1" colspan="1">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Algorithm</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>hs2019</code>, using RSASSA-PSS <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> using SHA-256 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Covered Content</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>(created)</code>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Creation Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">8:51:35 PM GMT, June 7th, 2014</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Expiration Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">Undefined</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Verification Key Material</td>
+                  <td class="text-left" rowspan="1" colspan="1">The public key specified in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p id="section-a.3.2.1-5">The corresponding Signature Input is:<a href="#section-a.3.2.1-5" class="pilcrow">¶</a></p>
+<div id="section-a.3.2.1-6">
+<pre class="sourcecode">
+(created): 1402170695
+    </pre><a href="#section-a.3.2.1-6" class="pilcrow">¶</a>
+</div>
+</section>
+<section id="section-a.3.2.2">
+            <h4 id="name-minimal-recommended-signatu">
+<a href="#section-a.3.2.2" class="section-number selfRef">A.3.2.2. </a><a href="#name-minimal-recommended-signatu" class="section-name selfRef">Minimal Recommended Signature Header</a>
+            </h4>
+<p id="section-a.3.2.2-1">This presents a Signature header containing only the minimal required and recommended parameters:<a href="#section-a.3.2.2-1" class="pilcrow">¶</a></p>
+<div id="section-a.3.2.2-2">
+<pre class="sourcecode">
+Signature: algorithm="hs2019", keyId="test-key-a",
+    (created): 1402170695,
+    signature="V3SijFpJOvDUT8t1/EnYli/4TbF2AGqwBGiGUGrgClCkiOAIlOxxY7
+        2Mr13DccFkYzg3gX1jIOpKXzH70C5bru4b71SBG+ShiJLu34gHCG33iw44NLG
+        UvT5+F+LCKbbHberyk8eyYsZ+TLwtZAYKafxfNOWQXF4o3QaWslDMm8Tcgrd8
+        onM45ayFyR4nXRlcGad4PISYGz8PmO4Y+K8RYOyDkgsmRxKtftFQUYG41anyE
+        lccNLfEfLBKsyV6kxr36U1Q7FdUopLv8kqluQySrWD6kesvFxNvbEOi+1uZqT
+        uFlK8ZldITQiqtNYaabRjQFZio63gma2y+UAaTGLdM9A=="</pre><a href="#section-a.3.2.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-a.3.2.2-3">The corresponding signature metadata derived from this header field is:<a href="#section-a.3.2.2-3" class="pilcrow">¶</a></p>
+<table class="center" id="table-9">
+              <caption><a href="#table-9" class="selfRef">Table 9</a></caption>
+<thead>
+                <tr>
+                  <th class="text-left" rowspan="1" colspan="1">Property</th>
+                  <th class="text-left" rowspan="1" colspan="1">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Algorithm</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>hs2019</code>, using RSASSA-PSS <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span> using SHA-512 <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Covered Content</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>(created)</code>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Creation Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">8:51:35 PM GMT, June 7th, 2014</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Expiration Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">Undefined</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Verification Key Material</td>
+                  <td class="text-left" rowspan="1" colspan="1">The public key specified in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p id="section-a.3.2.2-5">The corresponding Signature Input is:<a href="#section-a.3.2.2-5" class="pilcrow">¶</a></p>
+<div id="section-a.3.2.2-6">
+<pre class="sourcecode">
+(created): 1402170695
+    </pre><a href="#section-a.3.2.2-6" class="pilcrow">¶</a>
+</div>
+</section>
+<section id="section-a.3.2.3">
+            <h4 id="name-minimal-signature-header-us">
+<a href="#section-a.3.2.3" class="section-number selfRef">A.3.2.3. </a><a href="#name-minimal-signature-header-us" class="section-name selfRef">Minimal Signature Header using <code>rsa-256</code></a>
+            </h4>
+<p id="section-a.3.2.3-1">This presents a minimal Signature header for a signature using the <code>rsa-256</code> algorithm:<a href="#section-a.3.2.3-1" class="pilcrow">¶</a></p>
+<div id="section-a.3.2.3-2">
+<pre class="sourcecode">
+Signature: algorithm="rsa-256", keyId="test-key-b",
+    headers="date",
+    signature="HtXycCl97RBVkZi66ADKnC9c5eSSlb57GnQ4KFqNZplOpNfxqk62Jz
+        Z484jXgLvoOTRaKfR4hwyxlcyb+BWkVasApQovBSdit9Ml/YmN2IvJDPncrlh
+        PDVDv36Z9/DiSO+RNHD7iLXugdXo1+MGRimW1RmYdenl/ITeb7rjfLZ4b9VNn
+        LFtVWwrjhAiwIqeLjodVImzVc5srrk19HMZNuUejK6I3/MyN3+3U8tIRW4LWz
+        x6ZgGZUaEEP0aBlBkt7Fj0Tt5/P5HNW/Sa/m8smxbOHnwzAJDa10PyjzdIbyw
+        lnWIIWtZKPPsoVoKVopUWEU3TNhpWmaVhFrUL/O6SN3w=="</pre><a href="#section-a.3.2.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-a.3.2.3-3">The corresponding signature metadata derived from this header field is:<a href="#section-a.3.2.3-3" class="pilcrow">¶</a></p>
+<table class="center" id="table-10">
+              <caption><a href="#table-10" class="selfRef">Table 10</a></caption>
+<thead>
+                <tr>
+                  <th class="text-left" rowspan="1" colspan="1">Property</th>
+                  <th class="text-left" rowspan="1" colspan="1">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Algorithm</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>rsa-256</code>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Covered Content</td>
+                  <td class="text-left" rowspan="1" colspan="1">
+                    <code>date</code>
+</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Creation Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">Undefined</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Expiration Time</td>
+                  <td class="text-left" rowspan="1" colspan="1">Undefined</td>
+                </tr>
+                <tr>
+                  <td class="text-left" rowspan="1" colspan="1">Verification Key Material</td>
+                  <td class="text-left" rowspan="1" colspan="1">The public key specified in <a href="#example-key-rsa-test" class="xref">Appendix A.1.1</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p id="section-a.3.2.3-5">The corresponding Signature Input is:<a href="#section-a.3.2.3-5" class="pilcrow">¶</a></p>
+<div id="section-a.3.2.3-6">
+<pre class="sourcecode">
+date: Tue, 07 Jun 2014 20:51:35 GMT</pre><a href="#section-a.3.2.3-6" class="pilcrow">¶</a>
+</div>
+</section>
+</section>
+</section>
+</section>
+<div id="wg-discuss">
+<section id="section-appendix.b">
+      <h2 id="name-topics-for-working-group-di">
+<a href="#section-appendix.b" class="section-number selfRef">Appendix B. </a><a href="#name-topics-for-working-group-di" class="section-name selfRef">Topics for Working Group Discussion</a>
+      </h2>
+<p id="section-appendix.b-1">This section is to be removed before publishing as an RFC.<a href="#section-appendix.b-1" class="pilcrow">¶</a></p>
+<p id="section-appendix.b-2">The goal of this draft document is to provide a starting point at feature parity and compatible with the cavage-12 draft. The draft has known issues that will need to be addressed during development, and in the spirit of keeping compatibility, these issues have been enumerated but not addressed in this version. The editor recommends the working group discuss the issues and features described in this section after adoption of the document by the working group.  Topics are not listed in any particular order.<a href="#section-appendix.b-2" class="pilcrow">¶</a></p>
+<section id="section-b.1">
+        <h2 id="name-issues">
+<a href="#section-b.1" class="section-number selfRef">B.1. </a><a href="#name-issues" class="section-name selfRef">Issues</a>
+        </h2>
+<div id="issue-alg-keyid">
+<section id="section-b.1.1">
+          <h3 id="name-confusing-guidance-on-algor">
+<a href="#section-b.1.1" class="section-number selfRef">B.1.1. </a><a href="#name-confusing-guidance-on-algor" class="section-name selfRef">Confusing guidance on algorithm and key identification</a>
+          </h3>
+<p id="section-b.1.1-1">The current draft encourages determining the Algorithm metadata property from the <code>keyId</code> field, both in the guidance for the use of <code>algorithm</code> and <code>keyId</code>, and the definition for the <code>hs2019</code> algorithm and deprecation of the other algorithms in the registry.  The current state arose from concern that a malicious party could change the value of the <code>algorithm</code> parameter, potentially tricking the verifier into accepting a signature that would not have been verified under the actual parameter.<a href="#section-b.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-b.1.1-2">Punting algorithm identification into <code>keyId</code> hurts interoperability, since we aren't defining the syntax or semantics of <code>keyId</code>.  It actually goes against that claim, as we are dictating that the signing algorithm must be specified by <code>keyId</code> or derivable from it.  It also renders the algorithm registry essentially useless.  Instead of this approach, we can protect against manipulation of the Signature header field by adding support for (and possibly mandating) including Signature metadata within the Signature Input.<a href="#section-b.1.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-b.1.2">
+          <h3 id="name-lack-of-definition-of-keyid">
+<a href="#section-b.1.2" class="section-number selfRef">B.1.2. </a><a href="#name-lack-of-definition-of-keyid" class="section-name selfRef">Lack of definition of <code>keyId</code> hurts interoperability</a>
+          </h3>
+<p id="section-b.1.2-1">The current text leaves the format and semantics of <code>keyId</code> completely up to the implementation.  This is primarily due to the fact that most implementers of Cavage have extensive investment in key distribution and management, and just need to plug an identifier into the header.  We should support those cases, but we also need to provide guidance for the developer that doesn't have that and just wants to know how to identify a key.  It may be enough to punt this to profiling specs, but this needs to be explored more.<a href="#section-b.1.2-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.3">
+          <h3 id="name-algorithm-registry-duplicat">
+<a href="#section-b.1.3" class="section-number selfRef">B.1.3. </a><a href="#name-algorithm-registry-duplicat" class="section-name selfRef">Algorithm Registry duplicates work of JWA</a>
+          </h3>
+<p id="section-b.1.3-1"><span><a href="#RFC7518" class="xref">JSON Web Algorithms (JWA)</a> [<a href="#RFC7518" class="xref">RFC7518</a>]</span> already defines an IANA registry for cryptographic algorithms.  This wasn't used by Cavage out of concerns about complexity of JOSE, and issues with JWE and JWS being too flexible, leading to insecure combinations of options.  Using JWA's definitions does not need to mean we're using JOSE, however.  We should look at if/how we can leverage JWA's work without introducing too many sharp edges for implementers.<a href="#section-b.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-b.1.3-2">In any use of JWS algorithms, this spec would define a way to create the JWS Signing Input string to be applied to the algorithm. It should be noted that this is incompatible with JWS itself, which requires the inclusion of a structured header in the signature input.<a href="#section-b.1.3-2" class="pilcrow">¶</a></p>
+<p id="section-b.1.3-3">A possible approach is to incorporate all elements of the JWA signature algorithm registry into this spec using a prefix or other marker, such as <code>jws-RS256</code> for the RSA 256 JSON Web Signature algorithm.<a href="#section-b.1.3-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.4">
+          <h3 id="name-algorithm-registry-should-n">
+<a href="#section-b.1.4" class="section-number selfRef">B.1.4. </a><a href="#name-algorithm-registry-should-n" class="section-name selfRef">Algorithm Registry should not be initialized with deprecated entries</a>
+          </h3>
+<p id="section-b.1.4-1">The initial entries in this document reflect those in Cavage.  The ones that are marked deprecated were done so because of the issue explained in <a href="#issue-alg-keyid" class="xref">Appendix B.1.1</a>, with the possible exception of <code>rsa-sha1</code>.  We should probably just remove that one.<a href="#section-b.1.4-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.5">
+          <h3 id="name-no-percent-encoding-normali">
+<a href="#section-b.1.5" class="section-number selfRef">B.1.5. </a><a href="#name-no-percent-encoding-normali" class="section-name selfRef">No percent-encoding normalization of path/query</a>
+          </h3>
+<p id="section-b.1.5-1">See: <a href="https://github.com/w3c-dvcg/http-signatures/issues/26">issue #26</a><a href="#section-b.1.5-1" class="pilcrow">¶</a></p>
+<p id="section-b.1.5-2">The canonicalization rules for <code>(request-target)</code> do not perform handle minor, semantically meaningless differences in percent-encoding, such that verification could fail if an intermediary normalizes the effective request URI prior to forwarding the message.<a href="#section-b.1.5-2" class="pilcrow">¶</a></p>
+<p id="section-b.1.5-3">At a minimum, they should be case and percent-encoding normalized as described in sections <a href="https://rfc-editor.org/rfc/rfc3986#section-6.2.2.1" class="relref">6.2.2.1</a> and <a href="https://rfc-editor.org/rfc/rfc3986#section-6.2.2.2" class="relref">6.2.2.2</a> of <span>[<a href="#RFC3986" class="xref">RFC3986</a>]</span>.<a href="#section-b.1.5-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.6">
+          <h3 id="name-misleading-name-for-headers">
+<a href="#section-b.1.6" class="section-number selfRef">B.1.6. </a><a href="#name-misleading-name-for-headers" class="section-name selfRef">Misleading name for <code>headers</code> parameter</a>
+          </h3>
+<p id="section-b.1.6-1">The Covered Content list contains identifiers for more than just headers, so the <code>header</code> parameter name is no longer appropriate.  Some alternatives: "content", "signed-content", "covered-content".<a href="#section-b.1.6-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.7">
+          <h3 id="name-changes-to-whitespace-in-he">
+<a href="#section-b.1.7" class="section-number selfRef">B.1.7. </a><a href="#name-changes-to-whitespace-in-he" class="section-name selfRef">Changes to whitespace in header field values break verification</a>
+          </h3>
+<p id="section-b.1.7-1">Some header field values contain RWS, OWS, and/or BWS.  Since the header field value canonicalization rules do not address whitespace, changes to it (e.g., removing OWS or BWS or replacing strings of RWS with a single space) can cause verification to fail.<a href="#section-b.1.7-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.8">
+          <h3 id="name-multiple-set-cookie-headers">
+<a href="#section-b.1.8" class="section-number selfRef">B.1.8. </a><a href="#name-multiple-set-cookie-headers" class="section-name selfRef">Multiple Set-Cookie headers are not well supported</a>
+          </h3>
+<p id="section-b.1.8-1">The Set-Cookie header can occur multiple times but does not adhere to the list syntax, and thus is not well supported by the header field value concatenation rules.<a href="#section-b.1.8-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.9">
+          <h3 id="name-covered-content-list-is-not">
+<a href="#section-b.1.9" class="section-number selfRef">B.1.9. </a><a href="#name-covered-content-list-is-not" class="section-name selfRef">Covered Content list is not signed</a>
+          </h3>
+<p id="section-b.1.9-1">The Covered Content list should be part of the Signature Input, to protect against malicious changes.<a href="#section-b.1.9-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.10">
+          <h3 id="name-algorithm-is-not-signed">
+<a href="#section-b.1.10" class="section-number selfRef">B.1.10. </a><a href="#name-algorithm-is-not-signed" class="section-name selfRef">Algorithm is not signed</a>
+          </h3>
+<p id="section-b.1.10-1">The Algorithm should be part of the Signature Input, to protect against malicious changes.<a href="#section-b.1.10-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.11">
+          <h3 id="name-verification-key-identifier">
+<a href="#section-b.1.11" class="section-number selfRef">B.1.11. </a><a href="#name-verification-key-identifier" class="section-name selfRef">Verification key identifier is not signed</a>
+          </h3>
+<p id="section-b.1.11-1">The Verification key identifier (e.g., the value used for the <code>keyId</code> parameter) should be part of the Signature Input, to protect against malicious changes.<a href="#section-b.1.11-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.12">
+          <h3 id="name-max-values-precision-for-in">
+<a href="#section-b.1.12" class="section-number selfRef">B.1.12. </a><a href="#name-max-values-precision-for-in" class="section-name selfRef">Max values, precision for Integer String and Decimal String not defined</a>
+          </h3>
+<p id="section-b.1.12-1">The definitions for Integer String and Decimal String do not specify a maximum value.  The definition for Decimal String (used to provide sub-second precision for Expiration Time) does not define minimum or maximum precision requirements.  It should set a sane requirement here (e.g., MUST support up to 3 decimal places and no more).<a href="#section-b.1.12-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.13">
+          <h3 id="name-keyid-parameter-value-could">
+<a href="#section-b.1.13" class="section-number selfRef">B.1.13. </a><a href="#name-keyid-parameter-value-could" class="section-name selfRef"><code>keyId</code> parameter value could break list syntax</a>
+          </h3>
+<p id="section-b.1.13-1">The <code>keyId</code> parameter value needs to be constrained so as to not break list syntax (e.g., by containing a comma).<a href="#section-b.1.13-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.14">
+          <h3 id="name-creation-time-and-expiratio">
+<a href="#section-b.1.14" class="section-number selfRef">B.1.14. </a><a href="#name-creation-time-and-expiratio" class="section-name selfRef">Creation Time and Expiration Time do not allow for clock skew</a>
+          </h3>
+<p id="section-b.1.14-1">The processing instructions for Creation Time and Expiration Time imply that verifiers are not permitted to account for clock skew during signature verification.<a href="#section-b.1.14-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.15">
+          <h3 id="name-should-require-lowercased-h">
+<a href="#section-b.1.15" class="section-number selfRef">B.1.15. </a><a href="#name-should-require-lowercased-h" class="section-name selfRef">Should require lowercased header field names as identifiers</a>
+          </h3>
+<p id="section-b.1.15-1">The current text allows mixed-case header field names when they are being used as content identifiers.  This is unnecessary, as header field names are case-insensitive, and creates opportunity for incompatibility.  Instead, content identifiers should always be lowercase.<a href="#section-b.1.15-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.16">
+          <h3 id="name-reconcile-date-header-and-c">
+<a href="#section-b.1.16" class="section-number selfRef">B.1.16. </a><a href="#name-reconcile-date-header-and-c" class="section-name selfRef">Reconcile Date header and Creation Time</a>
+          </h3>
+<p id="section-b.1.16-1">The draft is missing guidance on if/how the Date header relates to signature Creation Time.  There are cases where they may be different, such as if a signature was pre-created.  Should Creation Time default to the value in the Date header if the <code>created</code> parameter is not specified?<a href="#section-b.1.16-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.17">
+          <h3 id="name-remove-algorithm-specific-r">
+<a href="#section-b.1.17" class="section-number selfRef">B.1.17. </a><a href="#name-remove-algorithm-specific-r" class="section-name selfRef">Remove algorithm-specific rules for content identifiers</a>
+          </h3>
+<p id="section-b.1.17-1">The rules that restrict when the signer can or must include certain identifiers appear to be related to the pseudo-revving of the Cavage draft that happened when the <code>hs2019</code> algorithm was introduced.  We should drop these rules, as it can be expected that anyone implementing this draft will support all content identifiers.<a href="#section-b.1.17-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.18">
+          <h3 id="name-add-guidance-for-signing-co">
+<a href="#section-b.1.18" class="section-number selfRef">B.1.18. </a><a href="#name-add-guidance-for-signing-co" class="section-name selfRef">Add guidance for signing compressed headers</a>
+          </h3>
+<p id="section-b.1.18-1">The draft should provide guidance on how to sign headers when <span><a href="#RFC7541" class="xref">HTTP/2 header compression</a> [<a href="#RFC7541" class="xref">RFC7541</a>]</span> is used.  This guidance might be as simple as "sign the uncompressed header field value."<a href="#section-b.1.18-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.19">
+          <h3 id="name-transformations-to-via-head">
+<a href="#section-b.1.19" class="section-number selfRef">B.1.19. </a><a href="#name-transformations-to-via-head" class="section-name selfRef">Transformations to Via header field value break verification</a>
+          </h3>
+<p id="section-b.1.19-1">Intermediaries are permitted to strip comments from the Via header field value, and consolidate related sequences of entries.  The canonicalization rules do not account for these changes, and thus they cause signature verification to fail if the Via header is signed. At the very least, guidance on signing or not signing Via headers needs to be included.<a href="#section-b.1.19-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.20">
+          <h3 id="name-case-changes-to-case-insens">
+<a href="#section-b.1.20" class="section-number selfRef">B.1.20. </a><a href="#name-case-changes-to-case-insens" class="section-name selfRef">Case changes to case-insensitive header field values break verification</a>
+          </h3>
+<p id="section-b.1.20-1">Some header field values are case-insensitive, in whole or in part. The canonicalization rules do not account for this, thus a case change to a covered header field value causes verification to fail.<a href="#section-b.1.20-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.21">
+          <h3 id="name-need-more-examples-for-sign">
+<a href="#section-b.1.21" class="section-number selfRef">B.1.21. </a><a href="#name-need-more-examples-for-sign" class="section-name selfRef">Need more examples for Signature header</a>
+          </h3>
+<p id="section-b.1.21-1">Add more examples showing different cases e.g, where <code>created</code> or <code>expires</code> are not present.<a href="#section-b.1.21-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.1.22">
+          <h3 id="name-expiration-not-needed">
+<a href="#section-b.1.22" class="section-number selfRef">B.1.22. </a><a href="#name-expiration-not-needed" class="section-name selfRef">Expiration not needed</a>
+          </h3>
+<p id="section-b.1.22-1">In many cases, putting the expiration of the signature into the hands of the signer opens up more options for failures than necessary. Instead of the <code>expires</code>, any verifier can use the <code>created</code> field and an internal lifetime or offset to calculate expiration. We should consider dropping the <code>expires</code> field.<a href="#section-b.1.22-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+<section id="section-b.2">
+        <h2 id="name-features">
+<a href="#section-b.2" class="section-number selfRef">B.2. </a><a href="#name-features" class="section-name selfRef">Features</a>
+        </h2>
+<section id="section-b.2.1">
+          <h3 id="name-define-more-content-identif">
+<a href="#section-b.2.1" class="section-number selfRef">B.2.1. </a><a href="#name-define-more-content-identif" class="section-name selfRef">Define more content identifiers</a>
+          </h3>
+<p id="section-b.2.1-1">It should be possible to independently include the following content and metadata properties in Covered Content:<a href="#section-b.2.1-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-b.2.1-2.1">The signature's Algorithm<a href="#section-b.2.1-2.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-b.2.1-2.2">The signature's Covered Content<a href="#section-b.2.1-2.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-b.2.1-2.3">The value used for the <code>keyId</code> parameter<a href="#section-b.2.1-2.3" class="pilcrow">¶</a>
+</li>
+            <li id="section-b.2.1-2.4">Request method<a href="#section-b.2.1-2.4" class="pilcrow">¶</a>
+</li>
+            <li id="section-b.2.1-2.5">Individual components of the effective request URI: scheme, authority, path, query<a href="#section-b.2.1-2.5" class="pilcrow">¶</a>
+</li>
+            <li id="section-b.2.1-2.6">Status code<a href="#section-b.2.1-2.6" class="pilcrow">¶</a>
+</li>
+            <li id="section-b.2.1-2.7">Request body (currently supported via Digest header)<a href="#section-b.2.1-2.7" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+<section id="section-b.2.2">
+          <h3 id="name-multiple-signature-support">
+<a href="#section-b.2.2" class="section-number selfRef">B.2.2. </a><a href="#name-multiple-signature-support" class="section-name selfRef">Multiple signature support</a>
+          </h3>
+<p id="section-b.2.2-1">[[ Editor's note: I believe this use case is theoretical.  Please let me know if this is a use case you have. ]]<a href="#section-b.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-b.2.2-2">There may be scenarios where attaching multiple signatures to a single message is useful:<a href="#section-b.2.2-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-b.2.2-3.1">A gateway attaches a signature over headers it adds (e.g., Forwarded) to messages already signed by the user agent.<a href="#section-b.2.2-3.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-b.2.2-3.2">A signer attaches two signatures signed by different keys, to be verified by different entities.<a href="#section-b.2.2-3.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-b.2.2-4">This could be addressed by changing the Signature header syntax to accept a list of parameter sets for a single signature, e.g., by separating parameters with <code>";"</code> instead of <code>","</code>.  It may also be necessary to include a signature identifier parameter.<a href="#section-b.2.2-4" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.2.3">
+          <h3 id="name-support-for-incremental-sig">
+<a href="#section-b.2.3" class="section-number selfRef">B.2.3. </a><a href="#name-support-for-incremental-sig" class="section-name selfRef">Support for incremental signing of header field value list items</a>
+          </h3>
+<p id="section-b.2.3-1">[[ Editor's note: I believe this use case is theoretical.  Please let me know if this is a use case you have. ]]<a href="#section-b.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-b.2.3-2">Currently, signing a header field value is all-or-nothing: either the entire value is signed, or none of it is.  For header fields that use list syntax, it would be useful to be able to specify which items in the list are signed.<a href="#section-b.2.3-2" class="pilcrow">¶</a></p>
+<p id="section-b.2.3-3">A simple approach that allowed the signer to indicate the list size at signing time would allow a signer to sign header fields that are may be appended to by intermediaries as the message makes its way to the recipient.  Specifying list size in terms of number of items could introduce risks of list syntax is not strictly adhered to (e.g., a malicious party crafts a value that gets parsed by the application as 5 items, but by the verifier as 4).  Specifying list size in number of octets might address this, but more exploration is required.<a href="#section-b.2.3-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.2.4">
+          <h3 id="name-support-expected-authority-">
+<a href="#section-b.2.4" class="section-number selfRef">B.2.4. </a><a href="#name-support-expected-authority-" class="section-name selfRef">Support expected authority changes</a>
+          </h3>
+<p id="section-b.2.4-1">In some cases, the authority of the effective request URI may be expected to change, for example from "public-service-name.example.com" to "service-host-1.public-service-name.example.com".  This is commonly the case for services that are hosted behind a load-balancing gateway, where the client sends requests to a publicly known domain name for the service, and these requests are transformed by the gateway into requests to specific hosts in the service fleet.<a href="#section-b.2.4-1" class="pilcrow">¶</a></p>
+<p id="section-b.2.4-2">One possible way to handle this would be to special-case the Host header field to allow verifier to substitute a known expected value, or a value provided in another header field (e.g., Via) when generating the Signature Input, provided that the verifier also recognizes the real value in the Host header.  Alternatively, this logic could apply to an <code>(audience)</code> content identifier.<a href="#section-b.2.4-2" class="pilcrow">¶</a></p>
+</section>
+<section id="section-b.2.5">
+          <h3 id="name-support-for-signing-specifi">
+<a href="#section-b.2.5" class="section-number selfRef">B.2.5. </a><a href="#name-support-for-signing-specifi" class="section-name selfRef">Support for signing specific cookies</a>
+          </h3>
+<p id="section-b.2.5-1">A signer may only wish to sign one or a few cookies, for example if the website requires its authentication state cookie to be signed, but also sets other cookies (e.g., for analytics, ad tracking, etc.)<a href="#section-b.2.5-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+</section>
+</div>
+<div id="acknowledgements">
+<section id="section-appendix.c">
+      <h2 id="name-acknowledgements">
+<a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="section-appendix.c-1">This specification is based on the draft-cavage-http-signatures draft.  The editor would like to thank the authors of that draft, Mark Cavage and Manu Sporny, for their work on that draft and their continuing contributions.<a href="#section-appendix.c-1" class="pilcrow">¶</a></p>
+<p id="section-appendix.c-2">The editor would also like to thank the following individuals for feedback on and implementations of the draft-cavage-http-signatures draft (in alphabetical order):
+Mark Adamcin,
+Mark Allen,
+Paul Annesley,
+Karl Boehlmark,
+Stephane Bortzmeyer,
+Sarven Capadisli,
+Liam Dennehy,
+ductm54,
+Stephen Farrell,
+Phillip Hallam-Baker,
+Eric Holmes,
+Andrey Kislyuk,
+Adam Knight,
+Dave Lehn,
+Dave Longley,
+James H. Manger,
+Ilari Liusvaara,
+Mark Nottingham,
+Yoav Nir,
+Adrian Palmer,
+Lucas Pardue,
+Roberto Polli,
+Julian Reschke,
+Michael Richardson,
+Wojciech Rygielski,
+Adam Scarr,
+Cory J. Slep,
+Dirk Stein,
+Henry Story,
+Lukasz Szewc,
+Chris Webber, and
+Jeffrey Yasskin<a href="#section-appendix.c-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-appendix.d">
+      <h2 id="name-document-history">
+<a href="#name-document-history" class="section-name selfRef">Document History</a>
+      </h2>
+<p id="section-appendix.d-1">This section is to be removed before publishing as an RFC.<a href="#section-appendix.d-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-appendix.d-2.1">
+          <p id="section-appendix.d-2.1.1"><strong>draft-richanna-http-message-signatures</strong><a href="#section-appendix.d-2.1.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-appendix.d-2.1.2.1">
+              <p id="section-appendix.d-2.1.2.1.1"><strong>-00</strong><a href="#section-appendix.d-2.1.2.1.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-appendix.d-2.1.2.1.2.1">Converted to xml2rfc v3 and reformatted to comply with RFC style guides.<a href="#section-appendix.d-2.1.2.1.2.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.2">Removed <code>Signature</code> auth-scheme definition and related content.<a href="#section-appendix.d-2.1.2.1.2.2" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.3">Removed conflicting normative requirements for use of <code>algorithm</code> parameter. Now <span class="bcp14">MUST NOT</span> be relied upon.<a href="#section-appendix.d-2.1.2.1.2.3" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.4">Removed Extensions appendix.<a href="#section-appendix.d-2.1.2.1.2.4" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.5">Rewrote abstract and introduction to explain context and need, and challenges inherent in signing HTTP messages.<a href="#section-appendix.d-2.1.2.1.2.5" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.6">Rewrote and heavily expanded algorithm definition, retaining normative requirements.<a href="#section-appendix.d-2.1.2.1.2.6" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.7">Added definitions for key terms, referenced RFC 7230 for HTTP terms.<a href="#section-appendix.d-2.1.2.1.2.7" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.8">Added examples for canonicalization and signature generation steps.<a href="#section-appendix.d-2.1.2.1.2.8" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.9">Rewrote Signature header definition, retaining normative requirements.<a href="#section-appendix.d-2.1.2.1.2.9" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.10">Added default values for <code>algorithm</code> and <code>expires</code> parameters.<a href="#section-appendix.d-2.1.2.1.2.10" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.11">Rewrote HTTP Signature Algorithms registry definition.  Added change control policy and registry template.  Removed suggested URI.<a href="#section-appendix.d-2.1.2.1.2.11" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.12">Added IANA HTTP Signature Parameter registry.<a href="#section-appendix.d-2.1.2.1.2.12" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.13">Added additional normative and informative references.<a href="#section-appendix.d-2.1.2.1.2.13" class="pilcrow">¶</a>
+</li>
+                <li id="section-appendix.d-2.1.2.1.2.14">Added Topics for Working Group Discussion section, to be removed prior to publication as an RFC.<a href="#section-appendix.d-2.1.2.1.2.14" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+          </ul>
+</li>
+      </ul>
+</section>
+<div id="authors-addresses">
+<section id="section-appendix.e">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Annabelle Backman (<span class="role">editor</span>)</span></div>
+<div dir="auto" class="left"><span class="org">Amazon</span></div>
+<div dir="auto" class="left"><span class="street-address">P.O. Box 81226</span></div>
+<div dir="auto" class="left">
+<span class="locality">Seattle</span>, <span class="region">WA</span> <span class="postal-code">98108-1226</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:richanna@amazon.com" class="email">richanna@amazon.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://www.amazon.com/" class="url">https://www.amazon.com/</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Justin Richer</span></div>
+<div dir="auto" class="left"><span class="org">Bespoke Engineering</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:ietf@justin.richer.org" class="email">ietf@justin.richer.org</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://bspk.io/" class="url">https://bspk.io/</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Manu Sporny</span></div>
+<div dir="auto" class="left"><span class="org">Digital Bazaar</span></div>
+<div dir="auto" class="left"><span class="street-address">203 Roanoke Street W.</span></div>
+<div dir="auto" class="left">
+<span class="locality">Blacksburg</span>, <span class="region">VA</span> <span class="postal-code">24060</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="tel">
+<span>Phone:</span>
+<a href="tel:+1%20540%20961%204469" class="tel">+1 540 961 4469</a>
+</div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:msporny@digitalbazaar.com" class="email">msporny@digitalbazaar.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://manu.sporny.org/" class="url">https://manu.sporny.org/</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
