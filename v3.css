@@ -446,13 +446,13 @@ hr.addr {
   max-width: calc(100% - 16px);
 }
 @media (min-width: 600px) {
-  #authors-addresses {
+  #authors-addresses > section {
     display: relative;
     padding: 32px 0 0;
     column-count: 2;
     column-gap: 20px;
   }
-  #name-authors-addresses {
+  #name-authors-address {
     position: absolute;
     top: 0px;
     column-span: all;
@@ -460,6 +460,7 @@ hr.addr {
   /* hack for break-inside: avoid-column */
   #authors-addresses address {
     display: inline-block;
+    break-inside: avoid-column;
   }
 }
 
