@@ -136,7 +136,7 @@ use an integrated continuous integration system to maintain a copy.
 This requires that you sign in with [Circle](https://circleci.com/) or
 [Travis](https://travis-ci.org/).
 
-First [enable builds for the new repository](https://circleci.com/add-projects)
+First [enable builds for the new repository](https://onboarding.circleci.com/)
 (or on [Travis](https://travis-ci.org/profile), though Travis is less well
 supported on the whole).
 
