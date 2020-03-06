@@ -177,6 +177,9 @@ a[href]:hover {
 a[href].selfRef:hover {
   background-color: var(--highlight-color);
 }
+a.xref {
+  white-space: nowrap;
+}
 
 /* Figures */
 tt, code, pre {
@@ -368,6 +371,9 @@ hr {
   margin: 0.75em 0;
   padding-left: 1.2em;
   text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
 }
 /* references */
 .references dt {
