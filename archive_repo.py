@@ -46,9 +46,10 @@ if not args.githubToken and "GH_TOKEN" in os.environ.keys():
 if args.repo[-1] == "/":
     args.repo = args.repo[:-1]
 
-API_headers = {"user-agent": "MartinThomson/i-d-template/archive_repo.py"}
-
-API_headers["authorization"] = "bearer " + args.githubToken
+API_headers = {
+    "user-agent": "martinthomson/i-d-template/archive_repo.py",
+    "authorization": "bearer " + args.githubToken,
+}
 
 s = requests.Session()
 s.headers.update(API_headers)
@@ -664,4 +665,4 @@ else:
         output["pulls"] = [pr for (id, pr) in sorted(pr_ref.items())]
 
     with open(args.outFile, "w") as output_file:
-        json.dump(output, output_file, indent=4)
+        json.dump(output, output_file, indent=2)
