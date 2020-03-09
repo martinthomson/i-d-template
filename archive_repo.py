@@ -145,14 +145,12 @@ fragment issueFields on Issue {
 )
 
 gql_Issues_Query = (
-    """
-      nodes { ...issueFields }
-        """
+    "nodes { ...issueFields }"
     + gql_Paged
     + """
     }
   }
-  ... rateLimit
+  ...rateLimit
 }
 """
     + gql_Issue_Fields
@@ -283,9 +281,7 @@ fragment prFields on PullRequest {
 # ...author definition includes ...userFields
 
 gql_PullRequest_Query = (
-    """
-      nodes { ...prFields }
-        """
+    "nodes { ...prFields }"
     + gql_Paged
     + """
     }
