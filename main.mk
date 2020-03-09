@@ -166,6 +166,9 @@ $(TEST_REPORT):
 .PHONY: lint
 lint::
 	@err=0; for f in $(join $(drafts),$(draft_types)); do \
+	  if [ "${f#draft-}" != "$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
+	    echo "$$f does not include the string $${f%.*}-latest"; err=1; \
+	  fi; \
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
 	    echo "$$f has no newline on the last line"; err=1; \
 	  fi; \

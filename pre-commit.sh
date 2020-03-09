@@ -25,7 +25,8 @@ for f in "${files[@]}"; do
     tmpfiles+=("$tmp")
     txtfiles+=("${tmp%.*}.txt")
     # This makes a copy of the staged file.
-    (git show :"$f" 2>/dev/null || cat "$f") > "$tmp"
+    (git show :"$f" 2>/dev/null || cat "$f") \
+         | sed -e "s/${f%.*}-latest/${tmp%.*}-latest/g" > "$tmp"
 done
 [ "${#files[@]}" -eq 0 ] && exit 0
 
