@@ -15,9 +15,7 @@ import warnings
 parser = argparse.ArgumentParser(description="Archive repo issues and PRs.")
 parser.add_argument("repo", help="GitHub repo to archive (e.g. quicwg/base-drafts)")
 parser.add_argument("githubToken", help="GitHub OAuth token")
-parser.add_argument(
-    "outFile", default="archive_repo.json", nargs="?", help="destination for output"
-)
+parser.add_argument("outFile", default=None, nargs="?", help="destination for output")
 parser.add_argument(
     "--reference oldfile",
     dest="refFile",
@@ -99,6 +97,23 @@ fragment commentFields on Comment {
 }
 """
 
+gql_RateLimit = """
+fragment rateLimit on Query {
+    rateLimit {
+        remaining
+        resetAt
+    }
+}
+"""
+
+gql_Paged = """
+        pageInfo {
+            endCursor
+            hasNextPage
+        }
+        totalCount
+"""
+
 # Issues
 
 gql_Issue_Fields = (
@@ -118,11 +133,9 @@ fragment issueFields on Issue {
             ...author
             ...commentFields
         }
-        pageInfo {
-            endCursor
-            hasNextPage
-        }
-        totalCount
+        """
+    + gql_Paged
+    + """
     }
 }
 """
@@ -134,20 +147,16 @@ fragment issueFields on Issue {
 gql_Issues_Query = (
     """
       nodes { ...issueFields }
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      totalCount
+        """
+    + gql_Paged
+    + """
     }
   }
-  rateLimit {
-    remaining
-    resetAt
-  }
+  ... rateLimit
 }
 """
     + gql_Issue_Fields
+    + gql_RateLimit
 )
 
 gql_AllIssues_First = (
@@ -196,22 +205,18 @@ query($id: ID!, $cursor: String!){
                     ...author
                     ...commentFields
                 }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-                totalCount
+        """
+    + gql_Paged
+    + """
             }
         }
     }
-    rateLimit {
-        remaining
-        resetAt
-    }
+    ...rateLimit
 }
 """
     + gql_Comment_Fields
     + gql_AuthorFields
+    + gql_RateLimit
 )
 
 # Pull Requests
@@ -229,11 +234,9 @@ fragment reviewFields on PullRequestReview {
             originalPosition
             ...commentFields
         }
-        pageInfo {
-            endCursor
-            hasNextPage
-        }
-        totalCount
+        """
+    + gql_Paged
+    + """
     }
 }
 """
@@ -259,21 +262,17 @@ fragment prFields on PullRequest {
         nodes {
             ...author
             ...commentFields }
-        pageInfo {
-            endCursor
-            hasNextPage
-        }
-        totalCount
+        """
+    + gql_Paged
+    + """
     }
     reviews(first: 50) {
         nodes {
             ...reviewFields
         }
-        pageInfo {
-            endCursor
-            hasNextPage
-        }
-        totalCount
+        """
+    + gql_Paged
+    + """
     }
 }
 """
@@ -286,20 +285,16 @@ fragment prFields on PullRequest {
 gql_PullRequest_Query = (
     """
       nodes { ...prFields }
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      totalCount
+        """
+    + gql_Paged
+    + """
     }
   }
-  rateLimit {
-    remaining
-    resetAt
-  }
+  ...rateLimit
 }
 """
     + gql_PullRequest_Fields
+    + gql_RateLimit
 )
 
 gql_AllPRs_Initial = (
@@ -327,21 +322,16 @@ query($id: ID!, $cursor: String!){
         ...on PullRequest {
             comments(first:100, after:$cursor) {
                 nodes { ...commentFields }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-                totalCount
+        """
+    + gql_Paged
+    + """
             }
         }
-    }
-    rateLimit {
-        remaining
-        resetAt
     }
 }
 """
     + gql_Comment_Fields
+    + gql_RateLimit
 )
 
 gql_PR_Review_Query = (
@@ -351,21 +341,17 @@ query($id: ID!, $cursor: String!){
         ...on PullRequest {
             reviews(first:100, after:$cursor) {
                 nodes { ...reviewFields }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-                totalCount
+        """
+    + gql_Paged
+    + """
             }
         }
     }
-    rateLimit {
-        remaining
-        resetAt
-    }
+    ...rateLimit
 }
 """
     + gql_Review_Fields
+    + gql_RateLimit
 )
 
 gql_PR_ReviewComments_Query = (
@@ -378,21 +364,17 @@ query($id: ID!, $cursor: String!){
                     originalPosition
                     ...commentFields
                 }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-                totalCount
+        """
+    + gql_Paged
+    + """
             }
         }
     }
-    rateLimit {
-        remaining
-        resetAt
-    }
+    ...rateLimit
 }
 """
     + gql_Comment_Fields
+    + gql_RateLimit
 )
 
 ##########################
@@ -413,10 +395,9 @@ def submit_query(query, variables, display):
         bodyjson["variables"] = variables
     body = json.dumps(bodyjson)
 
-    if not args.quiet:
-        output = f"Submitting query for {display} with "
-        output += str(variables) if variables else "no parameters"
-        print(output)
+    output = f"Submitting query for {display} with "
+    output += str(variables) if variables else "no parameters"
+    log(output)
 
     for attempt in range(3):
         try:
@@ -441,13 +422,13 @@ def submit_query(query, variables, display):
                 time.sleep(time_to_sleep)
                 continue
             else:
-                print(e.request.url)
-                print(e.request.headers)
-                print(e.response.headers)
-                print(e.response.content)
+                log(e.request.url)
+                log(e.request.headers)
+                log(e.response.headers)
+                eprint(e.response.content)
                 if attempt != 2:
                     delay = 10 * (num_retries + 1)
-                    print(f"Retrying ({num_retries}) after {delay} seconds...")
+                    eprint(f"Retrying ({num_retries}) after {delay} seconds...")
                     time.sleep(delay)
                 else:
                     raise
@@ -461,7 +442,7 @@ def submit_query(query, variables, display):
                 # We're about to be rate-limited; STALL
                 reset = dp.parse(result["data"]["rateLimit"]["resetAt"])
                 time_to_sleep = int(reset - datetime.datetime.now()) + 1
-                print(
+                eprint(
                     "GitHub API rate-limited; waiting for "
                     + str(time_to_sleep)
                     + "seconds"
@@ -490,6 +471,22 @@ def followPagination(node, key, query, display):
     del node[key]["pageInfo"]
 
 
+def eprint(*str, **kwargs):
+    print(*str, file=sys.stderr, **kwargs)
+
+
+if args.quiet:
+
+    def log(**kwargs):
+        pass
+
+
+else:
+
+    def log(*str, **kwargs):
+        eprint(*str, **kwargs)
+
+
 #####################
 ## Body of program ##
 #####################
@@ -506,16 +503,12 @@ if args.refFile:
             raw_reference = json.load(ref_file)
 
             fileIsValid = True
-            for element in ("magic", "timestamp", "issues", "repo", "version"):
+            for element in ("magic", "timestamp", "issues", "repo"):
                 if element not in raw_reference:
                     fileIsValid = False
                     break
             if not fileIsValid or raw_reference["magic"] != "B8n2c@e8kvfx":
                 warnings.warn("Input file does not appear to be generated by this tool")
-                fileIsValid = False
-
-            if fileIsValid and raw_reference["version"] != "1.0":
-                warnings.warn("Input file was generated by an unknown version")
                 fileIsValid = False
 
             if fileIsValid and raw_reference["repo"] != args.repo:
@@ -657,12 +650,14 @@ else:
     output = {
         "magic": "B8n2c@e8kvfx",
         "timestamp": now.isoformat(),
-        "version": "1.0",
         "repo": args.repo,
         "issues": [issue for (id, issue) in sorted(issue_ref.items())],
     }
     if not args.issuesOnly:
         output["pulls"] = [pr for (id, pr) in sorted(pr_ref.items())]
 
-    with open(args.outFile, "w") as output_file:
-        json.dump(output, output_file, indent=2)
+    if args.outFile:
+        with open(args.outFile, "w") as output_file:
+            json.dump(output, output_file, indent=2)
+    else:
+        json.dump(output, sys.stdout, indent=2)
