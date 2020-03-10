@@ -650,6 +650,9 @@ if not args.issuesOnly:
                 if ref_updatedAt >= dl_updatedAt:
                     continue
 
+            # Collapse the labels
+            pr["labels"] = [label["name"] for label in pr["labels"]["nodes"]]
+
             # Issues only have comments; PRs have both comments and reviews,
             # and reviews themselves have comments.
             followPagination(
