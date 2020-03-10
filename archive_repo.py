@@ -373,6 +373,51 @@ query($id: ID!, $cursor: String!){
     + gql_RateLimit
 )
 
+# Labels
+
+gql_Labels_Query = (
+    """
+query($owner: String!, $repo: String!){
+    repository(owner: $owner, name: $repo) {
+        labels(first:100) {
+            nodes {
+                name
+                description
+                color
+            }
+        """
+    + gql_Paged
+    + """
+        }
+    }
+    ...rateLimit
+}
+"""
+    + gql_RateLimit
+)
+
+gql_MoreLabels_Query = (
+    """
+query($owner: String!, $repo: String!, $cursor: String!){
+    repository(owner: $owner, name: $repo) {
+        labels(first:100, after:$cursor) {
+            nodes {
+                name
+                description
+                color
+            }
+            """
+    + gql_Paged
+    + """
+        }
+    }
+    ...rateLimit
+}
+"""
+    + gql_RateLimit
+)
+
+
 ##########################
 ## Function definitions ##
 ##########################
@@ -561,6 +606,9 @@ while get_more_issues:
             f"additional comments on issue #{number}",
         )
 
+        # Collapse the labels
+        issue["labels"] = [label["name"] for label in issue["labels"]["nodes"]]
+
         # Delete the old instance; add this instance
         if issue["number"] in issue_ref.keys():
             del issue_ref[issue["number"]]
@@ -637,6 +685,24 @@ if not args.issuesOnly:
             if oldestRetrieved < lastSuccess:
                 get_more_issues = False
 
+# Fetch the Labels
+labels_ref = list()
+issue_cursor = None
+get_more_issues = True
+while get_more_issues:
+    query = gql_Labels_Query
+    variables = {"owner": owner, "repo": repo}
+    if issue_cursor is not None:
+        query = gql_MoreLabels_Query
+        variables["cursor"] = issue_cursor
+
+    labels = submit_query(query, variables, "labels")
+    labels_ref += labels["repository"]["labels"]["nodes"]
+
+    get_more_issues = labels["repository"]["labels"]["pageInfo"]["hasNextPage"]
+    issue_cursor = labels["repository"]["labels"]["pageInfo"]["endCursor"]
+
+
 ## Ready to output
 
 ## Pick up everything in the reference if nothing new was downloaded
@@ -647,6 +713,7 @@ else:
         "magic": "B8n2c@e8kvfx",
         "timestamp": now.isoformat(),
         "repo": args.repo,
+        "labels": labels_ref,
         "issues": [issue for (id, issue) in sorted(issue_ref.items())],
     }
     if not args.issuesOnly:
