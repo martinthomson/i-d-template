@@ -557,12 +557,12 @@ if args.refFile:
 
             if fileIsValid:
                 lastSuccess = dp.parse(raw_reference["timestamp"])
-                for issue in raw_reference["issues"]:
-                    issue_ref[issue["number"]] = issue
+                issue_ref = dict(
+                    [(issue["number"], issue) for issue in raw_reference["issues"]]
+                )
                 if "pulls" in raw_reference:
                     ref_is_issues_only = False
-                    for pr in raw_reference["pulls"]:
-                        pr_ref[pr["number"]] = pr
+                    pr_ref = dict([(pr["number"], pr) for pr in raw_reference["pulls"]])
     except:
         warnings.warn("Unable to read input file; proceeding without it")
         pass
@@ -609,9 +609,9 @@ while get_more_issues:
         issue["labels"] = [label["name"] for label in issue["labels"]["nodes"]]
 
         # Delete the old instance; add this instance
-        if issue["number"] in issue_ref.keys():
-            del issue_ref[issue["number"]]
-        issue_ref[issue["number"]] = issue
+        if number in issue_ref.keys():
+            del issue_ref[number]
+        issue_ref[number] = issue
         just_copy_old_issues = False
 
     get_more_issues = issues["pageInfo"]["hasNextPage"]
