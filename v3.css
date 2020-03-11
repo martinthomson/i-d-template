@@ -458,7 +458,7 @@ hr.addr {
     column-count: 2;
     column-gap: 20px;
   }
-  #name-authors-address {
+  #name-authors-addresses {
     position: absolute;
     top: 0px;
     column-span: all;
