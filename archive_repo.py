@@ -111,7 +111,6 @@ gql_Paged = """
             endCursor
             hasNextPage
         }
-        totalCount
 """
 
 # Issues
