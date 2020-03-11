@@ -87,7 +87,7 @@ $(XSLTDIR):
 	$(xml2rfc) $< -o $@ --raw
 else
 %.html: %.xml $(LIBDIR)/v3.css
-	$(xml2rfc) --css=$(LIBDIR)/v3.css $< -o $@ --html --metadata-js-url /dev/null
+	$(xml2rfc) --css=$(LIBDIR)/v3.css --metadata-js-url=/dev/null $< -o $@ --html
 
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
