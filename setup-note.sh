@@ -31,7 +31,7 @@ ml() {
     echo "https://mailarchive.ietf.org/arch/browse/$1/"
 }
 
-echo '<note title="Note to Readers">'
+echo '<note title="Discussion Venues" removeInRFC="true">'
 echo "<t>Discussion of this document takes place on the
   ${wg^^} Working Group mailing list (${ML:-${wg}@ietf.org}),
   which is archived at $(eref "$(ml "${wg}")").</t>"

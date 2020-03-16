@@ -177,6 +177,9 @@ a[href]:hover {
 a[href].selfRef:hover {
   background-color: var(--highlight-color);
 }
+a.xref {
+  white-space: nowrap;
+}
 
 /* Figures */
 tt, code, pre {
@@ -369,6 +372,9 @@ hr {
   padding-left: 1.2em;
   text-indent: -1.2em;
 }
+#toc a.xref {
+  white-space: normal;
+}
 /* references */
 .references dt {
   text-align: right;
@@ -452,7 +458,7 @@ hr.addr {
     column-count: 2;
     column-gap: 20px;
   }
-  #name-authors-address {
+  #name-authors-addresses {
     position: absolute;
     top: 0px;
     column-span: all;

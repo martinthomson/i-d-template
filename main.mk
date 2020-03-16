@@ -87,7 +87,7 @@ $(XSLTDIR):
 	$(xml2rfc) $< -o $@ --raw
 else
 %.html: %.xml $(LIBDIR)/v3.css
-	$(xml2rfc) --css=$(LIBDIR)/v3.css $< -o $@ --html --metadata-js-url /dev/null
+	$(xml2rfc) --css=$(LIBDIR)/v3.css --metadata-js-url=/dev/null $< -o $@ --html
 
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
@@ -166,6 +166,9 @@ $(TEST_REPORT):
 .PHONY: lint
 lint::
 	@err=0; for f in $(join $(drafts),$(draft_types)); do \
+	  if [ "${f#draft-}" != "$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
+	    echo "$$f does not include the string $${f%.*}-latest"; err=1; \
+	  fi; \
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
 	    echo "$$f has no newline on the last line"; err=1; \
 	  fi; \
