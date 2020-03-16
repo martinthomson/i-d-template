@@ -20,22 +20,21 @@ endif
 .PHONY: issues
 issues: archive.json
 archive.json: fetch-ghissues $(drafts_source)
-	@if [ -f archive.json ] &&\
-	   [ "$(call last_modified,archive.json)" -gt "$(call last_commit,$(GH_ISSUES),archive.json)" ] 2>/dev/null; then \
-	  echo 'Skipping update of archive.json (it is newer than the ones on the branch)'; exit; \
+	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(GH_ISSUES),$@)" ] 2>/dev/null; then \
+	  echo 'Skipping update of $@ (it is newer than the ones on the branch)'; exit; \
 	fi; \
 	skip=$(DISABLE_ISSUE_FETCH); \
 	if [ $(CI) = true -a "$$skip" != true -a \
-	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- archive.json)" ] 2>/dev/null; then \
-	    skip=true; echo 'Skipping update of archive.json (most recent update was in the last 8 hours)'; \
+	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- $@)" ] 2>/dev/null; then \
+	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
 	fi; \
 	if [ "$$skip" = true ]; then \
-		git show $(GH_ISSUES):archive.json > archive.json; \
+		git show $(GH_ISSUES):$@ > $@; \
 		exit; \
 	fi; \
 	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 	trap 'rm -f $$old_archive' EXIT; \
-	git show $(GH_ISSUES):archive.json > $$old_archive; \
+	git show $(GH_ISSUES):$@ > $$old_archive; \
 	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(GH_TOKEN) $@ --reference $$old_archive;
 
 
