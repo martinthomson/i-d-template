@@ -695,6 +695,8 @@ if not args.issuesOnly:
             collapse_single(pr, "labels", "name")
             collapse_single(pr, "assignees", "login")
             collapse(pr, "comments")
+            for comment in pr["comments"]:
+                comment["author"] = comment["author"]["login"]
             collapse(pr, "reviews")
             for review in pr["reviews"]:
                 review["author"] = review["author"]["login"]
