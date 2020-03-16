@@ -521,9 +521,11 @@ def followPagination(node, key, query, display):
         cursor = more["node"][key]["pageInfo"]["endCursor"]
     del node[key]["pageInfo"]
 
+
 def collapse_single(thing, key, name):
     "Collapse something in the form of { x: nodes [ { $name: 'stuff' }] }"
     thing[key] = [item[name] for item in thing[key]["nodes"]]
+
 
 def collapse(thing, key):
     "Collapse something in the form of { x: nodes [] }"
@@ -533,10 +535,15 @@ def collapse(thing, key):
 def eprint(*str, **kwargs):
     print(*str, file=sys.stderr, **kwargs)
 
+
 if args.quiet:
+
     def log(**kwargs):
         pass
+
+
 else:
+
     def log(*str, **kwargs):
         eprint(*str, **kwargs)
 
