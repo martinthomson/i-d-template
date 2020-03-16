@@ -11,6 +11,11 @@ ifneq (true,$(PUSH_GHPAGES))
 DISABLE_ISSUE_FETCH ?= true
 endif
 
+# Can't load issues without authentication.
+ifeq (,$(GH_TOKEN))
+DISABLE_ISSUE_FETCH := true
+endif
+
 ## Store a copy of any github issues
 .PHONY: issues
 issues: archive.json
