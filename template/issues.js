@@ -3,15 +3,26 @@ function setStatus(msg) {
   status.innerText = msg;
 }
 
+function date(s) {
+  const d = Date.parse(s);
+  if (isNaN(d)) {
+    return 0;
+  }
+  return d;
+}
+
 var sortKey = 'id';
 function sort(k) {
   k = k || sortKey;
   if (k === 'id') {
-    issues.sort((x, y) => x.number - y.number);
+    db.all.sort((x, y) => x.number - y.number);
     setStatus('sorted by ID');
   } else if (k === 'recent') {
-    issues.sort((x, y) => Date.parse(y.updated_at) - Date.parse(x.updated_at));
+    db.all.sort((x, y) => date(y.updatedAt) - date(x.updatedAt));
     setStatus('sorted by last modified');
+  } else if (k === 'closed') {
+    db.all.sort((x, y) => date(y.closedAt) - date(x.closedAt));
+    setStatus('sorted by time of closure');
   } else {
     setStatus('no idea how to sort like that');
     return;
@@ -19,63 +30,26 @@ function sort(k) {
   sortKey = k;
 }
 
-function getNext(response) {
-  const link = response.headers.get('link');
-  if (!link) {
-    return;
+var db;
+
+async function get() {
+  db = null;
+  const response = await fetch("archive.json");
+  if (Math.floor(response.status / 100) !== 2) {
+    throw new Error(`Error loading <${url}>: ${response.status}`);
   }
-
-  const m = link.match(/^<([^>]*)>\s*;[^,]*rel="?next"?/);
-  if (!m) {
-    return;
-  }
-  return m[1];
-}
-
-function buildUrl(wg, repo, type) {
-  if (wg && repo) {
-    console.log(`loading remote ${type} for ${wg}/${repo}`);
-    return `https://api.github.com/repos/${wg}/${repo}/${type}?state=all`;
-  }
-  return `${type}.json`;
-}
-
-async function getAll(url) {
-  let records = [];
-  do {
-    const response = await fetch(url);
-    if (Math.floor(response.status / 100) !== 2) {
-      throw new Error(`Error loading <${url}>: ${response.status}`);
-    }
-    records = records.concat(await response.json());
-    url = getNext(response);
-  } while (url);
-  return records;
-}
-
-var issues;
-
-async function get(wg, repo) {
-  issues = null;
-  var pulls = null;
-  [issues, pulls] = await Promise.all(
-    ['issues', 'pulls'].map(type => getAll(buildUrl(wg, repo, type))));
-  issues.forEach(issue => {
-    if (issue.pull_request) {
-      let pull = pulls.find(x => x.url == issue.pull_request.url);
-      if (pull) {
-        issue.pull_request = pull;
-      }
-    }
-  });
+  db = await response.json();
+  db.pulls.forEach(pr => pr.pr = true);
+  db.all = db.issues.concat(db.pulls);
+  db.labels = db.labels.reduce((all, l) => {
+    all[l.name] = l;
+    return all;
+  }, {});
   sort();
-  let m = issues[0].html_url.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\//);
-  if (m) {
-    document.title = m[1] + '/' + m[2] + ' Issues';
-  }
+  document.title = `${db.repo} Issues`;
   console.log('loaded all issues');
   console.log('Raw data for issues can be found in:');
-  console.log('  window.issues = all issues');
+  console.log('  window.db.all = all issues and pull requests');
   console.log('  window.subset = just the subset of issues that are shown');
   console.log('format(subset[, formatter]) to dump the current subset to the console');
 }
@@ -90,37 +64,37 @@ var issueFilters = {
   assigned_to: {
     args: ['string'],
     h: 'assigned to a specific user',
-    f: login => issue => issue.assignees.some(assignee => assignee.login === login),
+    f: login => issue => issue.assignees.some(assignee => assignee === login),
   },
 
   created_by: {
     args: ['string'],
     h: 'created by a specific user',
-    f: login => issue => issue.user.login === login,
+    f: login => issue => issue.author === login,
   },
 
   closed: {
     args: [],
     h: 'is closed',
-    f: issue => issue.closed_at,
+    f: issue => issue.state === "CLOSED",
   },
 
   open: {
     args: [],
     h: 'is open',
-    f: issue => !issue.closed_at,
+    f: issue => issue.state === "OPEN",
   },
 
   merged: {
     args: [],
     h: 'a merged pull request',
-    f: issue => issue.pull_request && issue.pull_request.merged_at,
+    f: issue => issue.state == "MERGED",
   },
 
   discarded: {
     args: [],
     h: 'a discarded pull request',
-    f: issue => issue.pull_request && !issue.pull_request.merged_at && issue.closed_at
+    f: issue => issue.pr && issue.state === "CLOSED"
   },
 
   n: {
@@ -132,7 +106,7 @@ var issueFilters = {
   label: {
     args: ['string'],
     h: 'has a specific label',
-    f: name => issue => issue.labels.some(label => label.name === name),
+    f: name => issue => issue.labels.some(label => label === name),
   },
 
   labelled: {
@@ -171,14 +145,14 @@ var issueFilters = {
   pr: {
     args: [],
     h: 'is a pull request',
-    f: issue => issue.pull_request,
+    f: issue => issue.pr,
   },
 
   issue: {
     args: [],
     h: 'is a plain issue, i.e., not(pr)',
     f: function(issue) {
-      return !issue.pull_request;
+      return !issue.pr;
     }
   },
 
@@ -211,13 +185,13 @@ var issueFilters = {
   closed_since: {
     args: ['date'],
     h: 'issues closed since the date and time',
-    f: since => issue => Date.parse(issue.closed_at) >= since,
+    f: since => issue => date(issue.closedAt) >= since,
   },
 
   updated_since: {
     args: ['date'],
     h: 'issues updated since the date and time',
-    f: since => issue => Date.parse(issue.updated_at) >= since,
+    f: since => issue => date(issue.updatedAt) >= since,
   }
 };
 
@@ -339,7 +313,7 @@ class Parser {
 
 var subset = [];
 function filterIssues(str) {
-  subset = issues;
+  subset = db.all;
   let parser = new Parser(str);
   let f = parser.parseFilter();
   while (f) {
@@ -395,7 +369,7 @@ function makeRow(issue) {
     let td = document.createElement('td');
     td.className = 'id';
     let a = document.createElement('a');
-    a.href = issue.html_url;
+    a.href = issue.url;
     a.innerText = issue.number;
     td.appendChild(a);
     return td;
@@ -417,13 +391,13 @@ function makeRow(issue) {
 
   function addUser(td, user, short) {
     let image = document.createElement('img');
-    image.src = user.avatar_url + '&s=32';
+    image.src = `https://github.com/${user}.png?size=16`;
     image.width = 16;
     image.height = 16;
     td.appendChild(image);
     let a = document.createElement('a');
-    a.href = user.html_url;
-    a.innerText = user.login;
+    a.href = `https://github.com/${user}`;
+    a.innerText = user;
     if (short) {
       a.classList.add('short');
     }
@@ -433,7 +407,7 @@ function makeRow(issue) {
   function cellUser() {
     let td = document.createElement('td');
     td.className = 'user';
-    addUser(td, issue.user);
+    addUser(td, issue.author);
     return td;
   }
 
@@ -448,28 +422,33 @@ function makeRow(issue) {
 
   function cellState() {
     let td = document.createElement('td');
-    if (issue.pull_request) {
-      if (issue.pull_request.merged_at) {
+    if (issue.pr) {
+      if (issue.state === "MERGED") {
         td.innerText = 'merged';
-      } else if (issue.pull_request.closed_at) {
+      } else if (issue.state === "CLOSED") {
         td.innerText = 'discarded';
       } else {
         td.innerText = 'pr';
       }
     } else {
-      td.innerText = issue.state;
+      td.innerText = issue.state.toLowerCase();
     }
     return td;
   }
 
   function cellLabels() {
     let td = document.createElement('td');
-    td.className = 'label';
     issue.labels.forEach(label => {
       let sp = document.createElement('span');
-      sp.style.backgroundColor = '#' + label.color;
-      sp.innerText = label.name;
+      sp.style.backgroundColor = '#' + db.labels[label].color;
+      sp.className = "swatch";
       td.appendChild(sp);
+      let spl = document.createElement('span');
+      spl.innerText = label;
+      if (db.labels[label].description) {
+        spl.title = db.labels[label].description;
+      }
+      td.appendChild(spl);
     });
     return td;
   }
@@ -500,7 +479,7 @@ var currentFilter = '';
 function filter(str, now) {
   try {
     filterIssues(str);
-    setStatus(`${issues.length} records selected`);
+    setStatus(`${db.all.length} records selected`);
     if (now) {
       window.location.hash = str;
       currentFilter = str;
@@ -520,16 +499,6 @@ function slashCmd(cmd) {
   } else if (cmd[0] === 'local') {
     setStatus('retrieving local JSON files');
     get().then(redraw);
-  } else if (cmd[0] === 'remote') {
-    if (cmd.length < 3) {
-      setStatus('need to specify github repo');
-    } else {
-      get(cmd[1], cmd[2]).then(redraw)
-        .then(
-          _ => status.innerText = `successfully loaded ${cmd[1]}/${cmd[2]} from GitHub`,
-          e => status.innerText = `Error: ${e.message}`);
-      setStatus(`fetching from GitHub for ${cmd[1]}/${cmd[2]}`);
-    }
   } else if (cmd[0]  === 'sort') {
     sort(cmd[1]);
     show(subset);
@@ -549,7 +518,7 @@ function redraw(now) {
     return;
   }
 
-  if (!issues) {
+  if (!db) {
     if (now) {
       showStatus('Still loading...');
     }
