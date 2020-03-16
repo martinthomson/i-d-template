@@ -83,9 +83,6 @@ fragment assignees on Assignable {
 gql_UserFields = """
 fragment userFields on Actor {
     login
-    ... on User {
-        email
-    }
 }
 """
 
@@ -524,19 +521,22 @@ def followPagination(node, key, query, display):
         cursor = more["node"][key]["pageInfo"]["endCursor"]
     del node[key]["pageInfo"]
 
+def collapse_name(thing, key):
+    "Collapse something in the form of { x: nodes [ { name: 'stuff' }] }"
+    thing[key] = [item["name"] for item in thing[key]["nodes"]]
+
+def collapse(thing, key):
+    "Collapse something in the form of { x: nodes [] }"
+    thing[key] = thing[key]["nodes"]
+
 
 def eprint(*str, **kwargs):
     print(*str, file=sys.stderr, **kwargs)
 
-
 if args.quiet:
-
     def log(**kwargs):
         pass
-
-
 else:
-
     def log(*str, **kwargs):
         eprint(*str, **kwargs)
 
@@ -619,8 +619,13 @@ while get_more_issues:
             f"additional comments on issue #{number}",
         )
 
-        # Collapse the labels
-        issue["labels"] = [label["name"] for label in issue["labels"]["nodes"]]
+        # Collapse some nodes
+        issue["author"] = issue["author"]["login"]
+        collapse_name(issue, "labels")
+        collapse_name(issue, "assignees")
+        collapse(issue, "comments")
+        for comment in issue["comments"]:
+            comment["author"] = comment["author"]["login"]
 
         # Delete the old instance; add this instance
         if number in issue_ref.keys():
@@ -663,9 +668,6 @@ if not args.issuesOnly:
                 if ref_updatedAt >= dl_updatedAt:
                     continue
 
-            # Collapse the labels
-            pr["labels"] = [label["name"] for label in pr["labels"]["nodes"]]
-
             # Issues only have comments; PRs have both comments and reviews,
             # and reviews themselves have comments.
             followPagination(
@@ -685,6 +687,18 @@ if not args.issuesOnly:
                     gql_PR_ReviewComments_Query,
                     f"additional review comments on PR#{number}",
                 )
+
+            # Collapse some nodes
+            pr["author"] = pr["author"]["login"]
+            if pr["mergedBy"] is not None:
+                pr["mergedBy"] = pr["mergedBy"]["login"]
+            collapse_name(pr, "labels")
+            collapse_name(pr, "assignees")
+            collapse(pr, "comments")
+            collapse(pr, "reviews")
+            for review in pr["reviews"]:
+                review["author"] = review["author"]["login"]
+                collapse(review, "comments")
 
             # Delete the old instance; add this instance
             if number in pr_ref:
