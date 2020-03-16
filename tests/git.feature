@@ -9,9 +9,9 @@ Feature: git integration
 
   Scenario:  make ghissues
     Given a configured git repo with a Kramdown draft
-     when make "ghissues" is run
+     when make "ghissues" is run with "PUSH_GHPAGES=false"
      then it succeeds
-     and a branch is created called "gh-pages" containing "archive_repo.json"
+     and a branch is created called "gh-pages" containing "archive.json"
 
   Scenario:  git pre-commit hook blocks broken drafts
     Given a configured git repo with a Kramdown draft
