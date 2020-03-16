@@ -89,4 +89,4 @@ setup-precommit: .git/hooks/pre-commit
 
 .PHONY: setup-ghpages
 setup-ghpages:
-	$(LIBDIR)/setup-branch.sh gh-pages index.html archive_repo.json
+	$(LIBDIR)/setup-branch.sh gh-pages index.html archive.json
