@@ -74,7 +74,7 @@ gql_AssigneeFields = """
 fragment assignees on Assignable {
     assignees(first: 5) {
         nodes {
-            name
+            login
         }
     }
 }
@@ -521,9 +521,9 @@ def followPagination(node, key, query, display):
         cursor = more["node"][key]["pageInfo"]["endCursor"]
     del node[key]["pageInfo"]
 
-def collapse_name(thing, key):
-    "Collapse something in the form of { x: nodes [ { name: 'stuff' }] }"
-    thing[key] = [item["name"] for item in thing[key]["nodes"]]
+def collapse_single(thing, key, name):
+    "Collapse something in the form of { x: nodes [ { $name: 'stuff' }] }"
+    thing[key] = [item[name] for item in thing[key]["nodes"]]
 
 def collapse(thing, key):
     "Collapse something in the form of { x: nodes [] }"
@@ -621,8 +621,8 @@ while get_more_issues:
 
         # Collapse some nodes
         issue["author"] = issue["author"]["login"]
-        collapse_name(issue, "labels")
-        collapse_name(issue, "assignees")
+        collapse_single(issue, "labels", "name")
+        collapse_single(issue, "assignees", "login")
         collapse(issue, "comments")
         for comment in issue["comments"]:
             comment["author"] = comment["author"]["login"]
@@ -692,8 +692,8 @@ if not args.issuesOnly:
             pr["author"] = pr["author"]["login"]
             if pr["mergedBy"] is not None:
                 pr["mergedBy"] = pr["mergedBy"]["login"]
-            collapse_name(pr, "labels")
-            collapse_name(pr, "assignees")
+            collapse_single(pr, "labels", "name")
+            collapse_single(pr, "assignees", "login")
             collapse(pr, "comments")
             collapse(pr, "reviews")
             for review in pr["reviews"]:

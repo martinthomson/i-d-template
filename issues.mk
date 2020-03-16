@@ -13,24 +13,24 @@ endif
 
 ## Store a copy of any github issues
 .PHONY: issues
-issues: archive_repo.json
-archive_repo.json: fetch-ghissues $(drafts_source)
-	@if [ -f archive_repo.json ] &&\
-	   [ "$(call last_modified,archive_repo.json)" -gt "$(call last_commit,$(GH_ISSUES),archive_repo.json)" ] 2>/dev/null; then \
-	  echo 'Skipping update of archive_repo.json (it is newer than the ones on the branch)'; exit; \
+issues: archive.json
+archive.json: fetch-ghissues $(drafts_source)
+	@if [ -f archive.json ] &&\
+	   [ "$(call last_modified,archive.json)" -gt "$(call last_commit,$(GH_ISSUES),archive.json)" ] 2>/dev/null; then \
+	  echo 'Skipping update of archive.json (it is newer than the ones on the branch)'; exit; \
 	fi; \
 	skip=$(DISABLE_ISSUE_FETCH); \
 	if [ $(CI) = true -a "$$skip" != true -a \
-	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- archive_repo.json)" ] 2>/dev/null; then \
-	    skip=true; echo 'Skipping update of archive_repo.json (most recent update was in the last 8 hours)'; \
+	     $$(($$(date '+%s')-28800)) -lt "$$(git log -n 1 --pretty=format:%ct $(GH_ISSUES) -- archive.json)" ] 2>/dev/null; then \
+	    skip=true; echo 'Skipping update of archive.json (most recent update was in the last 8 hours)'; \
 	fi; \
 	if [ "$$skip" = true ]; then \
-		git show $(GH_ISSUES):archive_repo.json > archive_repo.json; \
+		git show $(GH_ISSUES):archive.json > archive.json; \
 		exit; \
 	fi; \
 	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 	trap 'rm -f $$old_archive' EXIT; \
-	git show $(GH_ISSUES):archive_repo.json > $$old_archive; \
+	git show $(GH_ISSUES):archive.json > $$old_archive; \
 	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(GH_TOKEN) $@ --reference $$old_archive;
 
 
@@ -48,10 +48,10 @@ $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
 ## Commit and push the changes to $(GH_ISSUES)
 .PHONY: ghissues gh-issues
 gh-issues: ghissues
-ghissues: $(GHISSUES_ROOT)/archive_repo.json
+ghissues: $(GHISSUES_ROOT)/archive.json
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
-	git -C $(GHISSUES_ROOT) add -f archive_repo.json issues.html issues.js
-	if test `git -C $(GHISSUES_ROOT) status --porcelain archive_repo.json issues.js issues.html | wc -l` -gt 0; then \
+	git -C $(GHISSUES_ROOT) add -f archive.json issues.html issues.js
+	if test `git -C $(GHISSUES_ROOT) status --porcelain archive.json issues.js issues.html | wc -l` -gt 0; then \
 	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
@@ -65,8 +65,8 @@ else
 endif # PUSH_GHPAGES
 	-rm -rf $(GHISSUES_ROOT)
 
-## Save archive_repo.json to the CI_ARTIFACTS directory
+## Save archive.json to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))
 .PHONY: artifacts
-artifacts: archive_repo.json
+artifacts: archive.json
 endif
