@@ -70,6 +70,16 @@ fragment labels on Labelable {
 }
 """
 
+gql_AssigneeFields = """
+fragment assignees on Assignable {
+    assignees(first: 5) {
+        nodes {
+            name
+        }
+    }
+}
+"""
+
 gql_UserFields = """
 fragment userFields on Actor {
     login
@@ -124,6 +134,7 @@ fragment issueFields on Issue {
     url
     state
     ...author
+    ...assignees
     ...labels
     ...commentFields
     closedAt
@@ -139,6 +150,7 @@ fragment issueFields on Issue {
 }
 """
     + gql_AuthorFields
+    + gql_AssigneeFields
     + gql_Comment_Fields
     + gql_LabelFields
 )
@@ -249,8 +261,9 @@ fragment prFields on PullRequest {
     title
     url
     state
-    ...labels
     ...author
+    ...assignees
+    ...labels
     ...commentFields
     closedAt
     mergedAt
@@ -273,6 +286,7 @@ fragment prFields on PullRequest {
     }
 }
 """
+    + gql_AssigneeFields
     + gql_LabelFields
     + gql_Review_Fields
 )
@@ -467,8 +481,8 @@ def submit_query(query, variables, display):
                 log(e.response.headers)
                 eprint(e.response.content)
                 if attempt != 2:
-                    delay = 10 * (num_retries + 1)
-                    eprint(f"Retrying ({num_retries}) after {delay} seconds...")
+                    delay = 10 * (attempt + 1)
+                    eprint(f"Retrying ({attempt + 1}) after {delay} seconds...")
                     time.sleep(delay)
                 else:
                     raise
