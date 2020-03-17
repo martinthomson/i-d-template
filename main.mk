@@ -7,7 +7,7 @@ LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/ghpages.mk
-include $(LIBDIR)/issues.mk
+include $(LIBDIR)/archive.mk
 include $(LIBDIR)/upload.mk
 include $(LIBDIR)/update.mk
 
