@@ -451,7 +451,7 @@ def submit_query(query, variables, display):
             response.raise_for_status()
             result = response.json()
         except:
-            sleep(5)
+            time.sleep(5)
             pass
 
         if (
