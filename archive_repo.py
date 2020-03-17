@@ -421,6 +421,13 @@ query($owner: String!, $repo: String!, $cursor: String!){
 
 
 last_request_limit = 5000
+next_reset_time = datetime.now()
+
+
+def stall_until(time):
+    time_to_sleep = time - datetime.now().timestamp() + 1
+    print("GitHub API rate-limited; waiting for" + str(time_to_sleep) + "seconds")
+    time.sleep(time_to_sleep)
 
 
 def submit_query(query, variables, display):
@@ -442,50 +449,29 @@ def submit_query(query, variables, display):
             response = s.post(url, body)
             response.raise_for_status()
             break
-        except requests.exceptions.HTTPError as e:
-            # TODO:  This might not be what rate-limit looks like in GraphQL;
-            #   I haven't managed to hit the rate limit yet.
-            if (
-                e.response.status_code == "403"
-                and "x-ratelimit-reset" in e.response.headers.keys()
-            ):
-                # We're rate-limited; STALL
-                reset = int(e.response.headers["x-ratelimit-reset"])
-                time_to_sleep = reset - datetime.now().timestamp() + 1
-                print(
-                    "GitHub API rate-limited; waiting for"
-                    + str(time_to_sleep)
-                    + "seconds"
-                )
-                time.sleep(time_to_sleep)
-                continue
-            else:
-                log(e.request.url)
-                log(e.request.headers)
-                log(e.response.headers)
-                eprint(e.response.content)
-                if attempt != 2:
-                    delay = 10 * (attempt + 1)
-                    eprint(f"Retrying ({attempt + 1}) after {delay} seconds...")
-                    time.sleep(delay)
-                else:
-                    raise
+        except:
+            sleep(5)
+            pass
 
-    result = response.json()
+        result = response.json()
+
+        if "type" in result.keys() and result["type"] == "RATE_LIMITED":
+            # We're rate-limited; STALL
+            if next_reset_time > datetime.now():
+                stall_until(next_reset_time)
+            else:
+                # We haven't made a successful request, so we don't know how long to sleep.
+                # Guesstimate 10 minutes and try again.
+                sleep(600)
+            continue
 
     if "data" in result.keys() and result["data"] is not None:
         if "rateLimit" in result["data"]:
             last_request_limit = result["data"]["rateLimit"]["remaining"]
+            next_reset_time = dp.parse(result["data"]["rateLimit"]["resetAt"])
             if last_request_limit < 2:
                 # We're about to be rate-limited; STALL
-                reset = dp.parse(result["data"]["rateLimit"]["resetAt"])
-                time_to_sleep = int(reset - datetime.datetime.now()) + 1
-                eprint(
-                    "GitHub API rate-limited; waiting for "
-                    + str(time_to_sleep)
-                    + "seconds"
-                )
-                time.sleep(time_to_sleep)
+                stall_until(next_reset_time)
                 last_request_limit = 5000
 
             del result["data"]["rateLimit"]
