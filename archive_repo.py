@@ -63,9 +63,7 @@ now = datetime.now(timezone.utc)
 gql_LabelFields = """
 fragment labels on Labelable {
     labels(first: 5) {
-        nodes {
-            name
-        }
+        nodes { name }
     }
 }
 """
@@ -73,28 +71,17 @@ fragment labels on Labelable {
 gql_AssigneeFields = """
 fragment assignees on Assignable {
     assignees(first: 5) {
-        nodes {
-            login
-        }
+        nodes { login }
     }
 }
 """
 
-gql_UserFields = """
-fragment userFields on Actor {
-    login
-}
-"""
-
-gql_AuthorFields = (
-    """
+gql_AuthorFields = """
 fragment author on Comment {
-    author { ...userFields }
+    author { login }
     authorAssociation
 }
 """
-    + gql_UserFields
-)
 
 gql_Comment_Fields = """
 fragment commentFields on Comment {
@@ -114,10 +101,10 @@ fragment rateLimit on Query {
 """
 
 gql_Paged = """
-        pageInfo {
-            endCursor
-            hasNextPage
-        }
+pageInfo {
+    endCursor
+    hasNextPage
+}
 """
 
 # Issues
@@ -264,11 +251,12 @@ fragment prFields on PullRequest {
     ...commentFields
     closedAt
     mergedAt
-    mergedBy { ...userFields }
+    mergedBy { login }
     comments(first: 100) {
         nodes {
             ...author
-            ...commentFields }
+            ...commentFields
+        }
         """
     + gql_Paged
     + """
@@ -288,7 +276,6 @@ fragment prFields on PullRequest {
     + gql_Review_Fields
 )
 # ...reviewFields definition includes ...commentFields and ...author
-# ...author definition includes ...userFields
 
 gql_PullRequest_Query = (
     "nodes { ...prFields }"
