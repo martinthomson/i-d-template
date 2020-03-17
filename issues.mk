@@ -3,10 +3,6 @@ GH_ISSUES := gh-pages
 fetch-ghissues:
 	-git fetch -q origin $(GH_ISSUES):$(GH_ISSUES)
 
-ifneq (,$(GH_TOKEN))
-GITHUB_OAUTH := -H "Authorization: token $(GH_TOKEN)"
-endif
-
 ifneq (true,$(PUSH_GHPAGES))
 DISABLE_ISSUE_FETCH ?= true
 endif
@@ -14,6 +10,8 @@ endif
 # Can't load issues without authentication.
 ifeq (,$(GH_TOKEN))
 DISABLE_ISSUE_FETCH := true
+else
+GITHUB_OAUTH := -H "Authorization: token $(GH_TOKEN)"
 endif
 
 ## Store a copy of any github issues
@@ -50,13 +48,14 @@ $(GHISSUES_ROOT)/%.json: %.json $(GHISSUES_ROOT)
 	cp -f $< $@
 
 ## Commit and push the changes to $(GH_ISSUES)
-.PHONY: ghissues gh-issues
-gh-issues: ghissues
-ghissues: $(GHISSUES_ROOT)/archive.json
+.PHONY: ghissues gh-issues archive
+gh-issues gh-issues: archive
+archive: $(GHISSUES_ROOT)/archive.json
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(GHISSUES_ROOT)
+	git -C $(GHISSUES_ROOT) rm -f issues.json
 	git -C $(GHISSUES_ROOT) add -f archive.json issues.html issues.js
 	if test `git -C $(GHISSUES_ROOT) status --porcelain archive.json issues.js issues.html | wc -l` -gt 0; then \
-	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating issues at $(shell date -u +%FT%TZ). [ci skip]"; fi
+	  git -C $(GHISSUES_ROOT) $(CI_AUTHOR) commit -m "Script updating archive at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
 	git -C $(GHISSUES_ROOT) push https://github.com/$(GITHUB_REPO_FULL) $(GH_ISSUES)
