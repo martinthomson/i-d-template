@@ -443,12 +443,12 @@ def submit_query(query, variables, display):
     output = f"Submitting query for {display} with "
     output += str(variables) if variables else "no parameters"
     log(output)
+    result = dict()
 
     for attempt in range(3):
         try:
             response = s.post(url, body)
             response.raise_for_status()
-            break
         except:
             sleep(5)
             pass
@@ -464,6 +464,8 @@ def submit_query(query, variables, display):
                 # Guesstimate 10 minutes and try again.
                 sleep(600)
             continue
+
+        break
 
     if "data" in result.keys() and result["data"] is not None:
         if "rateLimit" in result["data"]:
