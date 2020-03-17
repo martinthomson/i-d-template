@@ -454,7 +454,7 @@ def submit_query(query, variables, display):
             sleep(5)
             pass
 
-        if "type" in result.keys() and result["type"] == "RATE_LIMITED":
+        if "errors" in result and "type" in result["errors"] and result["errors"]["type"] == "RATE_LIMITED":
             # We're rate-limited; STALL
             if next_reset_time > datetime.now():
                 stall_until(next_reset_time)
