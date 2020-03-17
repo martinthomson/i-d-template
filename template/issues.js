@@ -31,7 +31,6 @@ function sort(k) {
 }
 
 var db;
-
 async function get() {
   db = null;
   const response = await fetch("archive.json");
@@ -47,10 +46,10 @@ async function get() {
   }, {});
   sort();
   document.title = `${db.repo} Issues`;
-  console.log('loaded all issues');
+  console.log(`Loaded ${db.all.length} issues for ${db.repo}.`);
   console.log('Raw data for issues can be found in:');
-  console.log('  window.db.all = all issues and pull requests');
-  console.log('  window.subset = just the subset of issues that are shown');
+  console.log('  db.all = all issues and pull requests');
+  console.log('  subset = just the subset of issues that are shown');
   console.log('format(subset[, formatter]) to dump the current subset to the console');
 }
 
@@ -558,7 +557,7 @@ function addFileHelp() {
   p.className = 'warning';
   p.innerHTML = 'Important: Browsers display files inconsistently.' +
     ' You can work around this by running an HTTP server,' +
-    ' such as <code>python -m SimpleHTTPServer</code>,' +
+    ' such as <code>python3 -m http.server</code>,' +
     ' then view this file using that server.';
   h.insertBefore(p, h.firstChild);
 }
