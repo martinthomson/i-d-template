@@ -1,7 +1,8 @@
 FROM ubuntu:18.04
 LABEL maintainer="Martin Thomson <mt@lowentropy.net>"
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates coreutils curl git make ssh libxml2-utils xsltproc \
     python3-minimal python3-lxml python3-pip python3-setuptools python3-wheel \
     python3-dateutil mmark ruby \
