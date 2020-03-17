@@ -1,7 +1,7 @@
 ARCHIVE_BRANCH := gh-pages
 .PHONY: fetch-archive
 fetch-archive:
-	-git fetch -q origin $(ARCHIVE_BRANCH):$(ARCHIVE_BRANCH)
+	-git fetch -qf origin $(ARCHIVE_BRANCH):$(ARCHIVE_BRANCH)
 
 ## Aliases for old stuff for compatibility reasons (added 2020-03-17).
 .PHONY: issues ghissues gh-issues
