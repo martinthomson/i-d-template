@@ -449,11 +449,10 @@ def submit_query(query, variables, display):
         try:
             response = s.post(url, body)
             response.raise_for_status()
+            result = response.json()
         except:
             sleep(5)
             pass
-
-        result = response.json()
 
         if "type" in result.keys() and result["type"] == "RATE_LIMITED":
             # We're rate-limited; STALL
