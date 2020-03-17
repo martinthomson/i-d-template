@@ -7,7 +7,7 @@ Feature: git integration
      and a branch is created called "gh-pages" containing "index.html"
      and documents are added to gh-pages
 
-  Scenario:  make ghissues
+  Scenario:  make gharchive
     Given a configured git repo with a Kramdown draft
      when make "ghissues" is run with "PUSH_GHPAGES=false"
      then it succeeds
