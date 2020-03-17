@@ -76,7 +76,7 @@ jobs:
 
       - run:
           name: "Prepare for Caching"
-          command: "git gc --auto"
+          command: "git gc --auto --prune=now"
 
       - save_cache:
           name: "Saving Cache - Git"

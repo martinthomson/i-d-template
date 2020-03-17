@@ -77,6 +77,14 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	  git remote prune $$remote; \
 	done;
 
+# Drop old gh-pages commits (keep 30-60 days of history)
+	@KEEP=$$((`date '+%s'`-2592000)); CUTOFF=$$((`date '+%s'`-5184000)); \
+	ROOT=`git -C $(GHPAGES_TARGET) rev-list --max-parents=0 gh-pages`; \
+	if [ `git -C $(GHPAGES_ROOT) show -s --format=%ct $$ROOT` -lt $$CUTOFF ]; then \
+	  git -C $(GHPAGES_ROOT) replace --graft `git rev-list --min-age=$$KEEP --max-count=1 gh-pages` && \
+	  git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
+	fi
+
 # Clean up obsolete directories (2592000 = 30 days)
 	@CUTOFF=$$(($$(date '+%s')-2592000)); \
 	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_ROOT) | sed -e 's,.*/,,')`; \
@@ -94,7 +102,6 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_EXTRA)); \
 	fi
 
-
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
 ghpages: cleanup-ghpages $(GHPAGES_ALL)
@@ -103,13 +110,13 @@ ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
-	git -C $(GHPAGES_ROOT) push https://github.com/$(GITHUB_REPO_FULL) gh-pages
+	git -C $(GHPAGES_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) gh-pages
 else
-	@echo git -C $(GHPAGES_ROOT) push -q https://github.com/$(GITHUB_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_ROOT) push -q https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
+	@echo git -C $(GHPAGES_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) gh-pages
+	@git -C $(GHPAGES_ROOT) push -qf https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
 endif
 else
-	git -C $(GHPAGES_ROOT) push origin gh-pages
+	git -C $(GHPAGES_ROOT) push -f origin gh-pages
 endif # PUSH_GHPAGES
 	-rm -rf $(GHPAGES_ROOT)
 
