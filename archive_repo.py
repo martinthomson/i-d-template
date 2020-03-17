@@ -451,7 +451,7 @@ def submit_query(query, variables, display):
             ):
                 # We're rate-limited; STALL
                 reset = int(e.response.headers["x-ratelimit-reset"])
-                time_to_sleep = reset - datetime.datetime.now().timestamp() + 1
+                time_to_sleep = reset - datetime.now().timestamp() + 1
                 print(
                     "GitHub API rate-limited; waiting for"
                     + str(time_to_sleep)
