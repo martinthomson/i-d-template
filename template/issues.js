@@ -767,7 +767,9 @@ function issueOverlaySetup() {
 
 window.onload = () => {
   let cmd = document.getElementById('cmd');
-  cmd.onkeypress = debounce(redraw);
+  let redrawHandler = debounce(redraw);
+  cmd.addEventListener('input', redrawHandler);
+  cmd.addEventListener('keypress', redrawHandler);
   if (window.location.hash) {
     cmd.value = decodeURIComponent(window.location.hash.substring(1));
   }
