@@ -721,7 +721,7 @@ function issueOverlaySetup() {
   let overlay = document.getElementById('overlay');
   overlay.addEventListener('click', hideIssue);
   window.addEventListener('keyup', e => {
-    if (e.target.closest('input')) {
+    if (e.target.id === 'cmd') {
       if (e.key === 'Escape') {
         e.target.blur();
       }
@@ -741,6 +741,9 @@ function issueOverlaySetup() {
       step(1);
     } else if (e.key === '?') {
       showHelp();
+    } else if (e.key === '\'') {
+      hideIssue();
+      document.getElementById('cmd').focus();
     }
   })
 }
