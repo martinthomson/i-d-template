@@ -633,7 +633,7 @@ var currentFilter = '';
 function filter(str, now) {
   try {
     filterIssues(str);
-    setStatus(`${db.all.length} records selected`);
+    setStatus(`${subset.length} records selected`);
     if (now) {
       window.location.hash = str;
       currentFilter = str;
