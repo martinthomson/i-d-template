@@ -56,7 +56,7 @@ $(ARCHIVE_ROOT)/%.json: %.json $(ARCHIVE_ROOT)
 .PHONY: gh-archive
 gh-archive: $(ARCHIVE_ROOT)/archive.json
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(ARCHIVE_ROOT)
-	git -C $(ARCHIVE_ROOT) rm -f issues.json
+	@-git -C $(ARCHIVE_ROOT) rm -f issues.json
 	git -C $(ARCHIVE_ROOT) add -f archive.json issues.html issues.js
 	if test `git -C $(ARCHIVE_ROOT) status --porcelain archive.json issues.js issues.html | wc -l` -gt 0; then \
 	  git -C $(ARCHIVE_ROOT) $(CI_AUTHOR) commit -m "Script updating archive at $(shell date -u +%FT%TZ). [ci skip]"; fi
