@@ -508,22 +508,24 @@ function show(index) {
     refdate = cdate;
     cell(row, author(c), 'user');
 
-    let icon = document.createElement('span');
-    switch (c.state) {
-      case 'APPROVED':
-        icon.innerText = '\u2714';
-        icon.title = 'Approved';
-        break;
-      case 'CHANGES_REQUESTED':
-        icon.innerText = '\u2718';
-        icon.title = 'Changes Requested';
-        break;
-      default:
-        icon.innerText = '\uD83D\uDCAC';
-        icon.title = 'Comment';
-        break;
+    if (issue.pr) {
+      let icon = document.createElement('span');
+      switch (c.state) {
+        case 'APPROVED':
+          icon.innerText = '\u2714';
+          icon.title = 'Approved';
+          break;
+        case 'CHANGES_REQUESTED':
+          icon.innerText = '\u2718';
+          icon.title = 'Changes Requested';
+          break;
+        default:
+          icon.innerText = '\uD83D\uDCAC';
+          icon.title = 'Comment';
+          break;
+      }
+      cell(row, icon);
     }
-    cell(row, icon);
 
     let body = showBody(c);
     if (c.comments && c.comments.length > 0) {
