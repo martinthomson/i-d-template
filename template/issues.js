@@ -33,7 +33,7 @@ function sort(k) {
 var db;
 async function get() {
   db = null;
-  const response = await fetch("archive.json");
+  const response = await fetch('archive.json');
   if (Math.floor(response.status / 100) !== 2) {
     throw new Error(`Error loading <${url}>: ${response.status}`);
   }
@@ -75,25 +75,25 @@ var issueFilters = {
   closed: {
     args: [],
     h: 'is closed',
-    f: issue => issue.state === "CLOSED",
+    f: issue => issue.state === 'CLOSED',
   },
 
   open: {
     args: [],
     h: 'is open',
-    f: issue => issue.state === "OPEN",
+    f: issue => issue.state === 'OPEN',
   },
 
   merged: {
     args: [],
     h: 'a merged pull request',
-    f: issue => issue.state == "MERGED",
+    f: issue => issue.state == 'MERGED',
   },
 
   discarded: {
     args: [],
     h: 'a discarded pull request',
-    f: issue => issue.pr && issue.state === "CLOSED"
+    f: issue => issue.pr && issue.state === 'CLOSED'
   },
 
   n: {
@@ -352,7 +352,7 @@ function debounce(f) {
       window.clearTimeout(debounces[f.name]);
       delete debounces[f.name];
     }
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       r(true);
     } else {
       debounces[f.name] = window.setTimeout(_ => {
@@ -422,9 +422,9 @@ function makeRow(issue) {
   function cellState() {
     let td = document.createElement('td');
     if (issue.pr) {
-      if (issue.state === "MERGED") {
+      if (issue.state === 'MERGED') {
         td.innerText = 'merged';
-      } else if (issue.state === "CLOSED") {
+      } else if (issue.state === 'CLOSED') {
         td.innerText = 'discarded';
       } else {
         td.innerText = 'pr';
@@ -437,10 +437,11 @@ function makeRow(issue) {
 
   function cellLabels() {
     let td = document.createElement('td');
+    td.className = 'label';
     issue.labels.forEach(label => {
       let sp = document.createElement('span');
       sp.style.backgroundColor = '#' + db.labels[label].color;
-      sp.className = "swatch";
+      sp.className = 'swatch';
       td.appendChild(sp);
       let spl = document.createElement('span');
       spl.innerText = label;
