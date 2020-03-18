@@ -31,12 +31,13 @@ archive.json: fetch-archive $(drafts_source)
 	    skip=true; echo 'Skipping update of $@ (most recent update was in the last 8 hours)'; \
 	fi; \
 	if [ "$$skip" = true ]; then \
-		git show $(ARCHIVE_BRANCH):$@ > $@; \
-		exit; \
+	    echo 'Using existing copy of $@'; \
+	    git show $(ARCHIVE_BRANCH):$@ > $@ || true; \
+	    exit; \
 	fi; \
 	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 	trap 'rm -f $$old_archive' EXIT; \
-	git show $(ARCHIVE_BRANCH):$@ > $$old_archive; \
+	git show $(ARCHIVE_BRANCH):$@ > $$old_archive || true; \
 	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(GH_TOKEN) $@ --reference $$old_archive;
 
 
