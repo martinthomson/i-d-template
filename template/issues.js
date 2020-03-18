@@ -565,7 +565,7 @@ function step(n) {
     if (n > 0) {
       show(n - 1);
     } else {
-      show(db.all.length + n);
+      show(subset.length + n);
     }
   } else {
     show(displayed + n);
