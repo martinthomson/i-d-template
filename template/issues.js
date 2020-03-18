@@ -389,6 +389,7 @@ function author(x) {
   sp.classList.add('item');
   sp.classList.add('user');
   let image = document.createElement('img');
+  image.alt = '\uD83E\uDDD0';
   image.src = `https://github.com/${user}.png?size=16`;
   image.width = 16;
   image.height = 16;
