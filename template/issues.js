@@ -323,7 +323,7 @@ function filterIssues(str) {
 
 var formatter = {
   brief: x => `* ${x.title} (#${x.number})`,
-  md: x => `* [#${x.number}](${x.html_url}): ${x.title}`,
+  md: x => `* [#${x.number}](${x.url}): ${x.title}`,
 };
 
 function format(set, f) {
@@ -363,115 +363,203 @@ function debounce(f) {
   }
 }
 
+function cell(row, children, cellClass) {
+  let td = document.createElement('td');
+  if (cellClass) {
+    td.className = cellClass;
+  }
+  if (Array.isArray(children)) {
+    children.forEach(c => td.appendChild(c));
+  } else {
+    td.appendChild(children);
+  }
+  row.appendChild(td);
+}
+
+function author(x) {
+  let user = x.author || x;
+  let sp = document.createElement('span');
+  sp.classList.add('item');
+  sp.classList.add('user');
+  let image = document.createElement('img');
+  image.src = `https://github.com/${user}.png?size=16`;
+  image.width = 16;
+  image.height = 16;
+  sp.appendChild(image);
+  let a = document.createElement('a');
+  a.href = `https://github.com/${user}`;
+  a.innerText = user;
+  sp.appendChild(a);
+  return sp;
+}
+
+function issueState(issue) {
+  let st = document.createElement('span');
+  st.className = 'state';
+  if (issue.pr) {
+    switch (issue.state) {
+      case 'MERGED':
+        st.innerText = 'merged';
+        break;
+      case 'CLOSED':
+        st.innerText = 'discarded';
+        break;
+      default:
+        st.innerText = 'pr';
+        break;
+    }
+  } else {
+    st.innerText = issue.state.toLowerCase();
+  }
+  return st;
+}
+
+function showBody(item) {
+  let div = document.createElement('div');
+  div.className = 'body';
+  let body = item.body.trim().replace(/\r\n?/g, '\n');
+  body.split('\n\n').forEach(t => {
+    let p = document.createElement('p');
+    p.innerText = t;
+    div.appendChild(p)
+  });
+  return div;
+}
+
+// Make a fresh replacement element for the identified element.
+function freshReplacement(id) {
+  let e = document.getElementById(id);
+  let r = document.createElement(e.tagName);
+  r.id = id;
+  e.replaceWith(r);
+  return r;
+}
+
+function show(issue) {
+  document.getElementById('issuebg').classList.add('active');
+  let frame = freshReplacement('issue');
+  frame.classList.add('active');
+
+  function showTitle() {
+    let title = document.createElement('h2');
+    title.className = 'title';
+    let number = document.createElement('a');
+    number.className = 'number';
+    number.href = issue.url;
+    number.innerText = `#${issue.number}`;
+    title.appendChild(number);
+    title.appendChild(document.createTextNode(': '));
+    let name = document.createElement('a');
+    name.href = issue.url;
+    name.innerText = issue.title;
+    title.appendChild(name);
+    return title;
+  }
+
+  function showDate(d) {
+    let created = document.createElement('span');
+    created.classList.add('item');
+    created.classList.add('date');
+    created.innerText = new Date(d).toISOString();
+    return created;
+  }
+
+  function showMeta() {
+    let meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.appendChild(showDate(issue.createdAt));
+    meta.appendChild(author(issue));
+    meta.appendChild(issueState(issue));
+    if (issue.closedAt) {
+      meta.appendChild(showDate(issue.closedAt));
+    }
+    return meta;
+  }
+
+  function showComment(c) {
+    let row = document.createElement('tr');
+    cell(row, showDate(c.createdAt), 'date');
+    cell(row, author(c), 'user');
+    let icon = (c.state === 'APPROVED') ?
+      '\u2714' : (c.state === 'CHANGES_REQUESTED') ?
+        '\u2718' : '\uD83D\uDCAC';
+    cell(row, document.createTextNode(icon));
+    cell(row, showBody(c));
+    return row;
+  }
+
+  frame.appendChild(showTitle());
+  frame.appendChild(showMeta());
+  frame.appendChild(showBody(issue));
+
+  let allcomments = (issue.comments || []).concat(issue.reviews || []);
+  allcomments.sort((a, b) => date(a.createdAt) - date(b.createdAt));
+  let comments = document.createElement('table');
+  comments.className = 'comments';
+  allcomments.map(showComment).forEach(row => comments.appendChild(row));
+  frame.appendChild(comments);
+}
+
 function makeRow(issue) {
   function cellID() {
-    let td = document.createElement('td');
-    td.className = 'id';
     let a = document.createElement('a');
     a.href = issue.url;
     a.innerText = issue.number;
-    td.appendChild(a);
-    return td;
+    return a;
   }
 
   function cellTitle() {
-    let td = document.createElement('td');
-    let div = document.createElement('div');
-    div.innerText = issue.title;
-    div.onclick = e => e.target.parentNode.classList.toggle('active');
-    div.style.cursor = 'pointer';
-    td.appendChild(div);
-    div = document.createElement('div');
-    div.innerText = issue.body;
-    div.className = 'extra';
-    td.appendChild(div);
-    return td;
-  }
-
-  function addUser(td, user, short) {
-    let image = document.createElement('img');
-    image.src = `https://github.com/${user}.png?size=16`;
-    image.width = 16;
-    image.height = 16;
-    td.appendChild(image);
     let a = document.createElement('a');
-    a.href = `https://github.com/${user}`;
-    a.innerText = user;
-    if (short) {
-      a.classList.add('short');
-    }
-    td.appendChild(a);
-  }
-
-  function cellUser() {
-    let td = document.createElement('td');
-    td.className = 'user';
-    addUser(td, issue.author);
-    return td;
+    a.innerText = issue.title;
+    a.href = issue.url;
+    a.onclick = e => {
+      e.preventDefault();
+      show(issue);
+    };
+    return a;
   }
 
   function cellAssignees() {
-    let td = document.createElement('td');
-    td.className = 'user';
-    if (issue.assignees) {
-      issue.assignees.forEach(user => addUser(td, user, issue.assignees.length > 1));
-    }
-    return td;
-  }
-
-  function cellState() {
-    let td = document.createElement('td');
-    if (issue.pr) {
-      if (issue.state === 'MERGED') {
-        td.innerText = 'merged';
-      } else if (issue.state === 'CLOSED') {
-        td.innerText = 'discarded';
-      } else {
-        td.innerText = 'pr';
-      }
-    } else {
-      td.innerText = issue.state.toLowerCase();
-    }
-    return td;
+    return (issue.assignees || []).map(u => author(u));
   }
 
   function cellLabels() {
-    let td = document.createElement('td');
-    td.className = 'label';
-    issue.labels.forEach(label => {
+    return issue.labels.map(label => {
+      let item = document.createElement('span');
+      item.className = 'item';
       let sp = document.createElement('span');
       sp.style.backgroundColor = '#' + db.labels[label].color;
       sp.className = 'swatch';
-      td.appendChild(sp);
+      item.appendChild(sp);
       let spl = document.createElement('span');
       spl.innerText = label;
       if (db.labels[label].description) {
-        spl.title = db.labels[label].description;
+        item.title = db.labels[label].description;
       }
-      td.appendChild(spl);
+      item.appendChild(spl);
+      return item;
     });
-    return td;
   }
 
   let tr = document.createElement('tr');
-  tr.appendChild(cellID());
-  tr.appendChild(cellTitle());
-  tr.appendChild(cellState());
-  tr.appendChild(cellUser());
-  tr.appendChild(cellAssignees());
-  tr.appendChild(cellLabels());
+  cell(tr, cellID(), 'id');
+  cell(tr, cellTitle(), 'title');
+  cell(tr, issueState(issue), 'state');
+  cell(tr, author(issue), 'user');
+  cell(tr, cellAssignees(), 'assignees');
+  cell(tr, cellLabels(), 'labels');
   return tr;
 }
 
-function show(issues) {
+function list(issues) {
   if (!issues) {
     return;
   }
 
-  let tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
+  let body = freshReplacement('issuelist');
+  body.innerHTML = '';
   issues.forEach(issue => {
-    tbody.appendChild(makeRow(issue));
+    body.appendChild(makeRow(issue));
   });
 }
 
@@ -501,7 +589,7 @@ function slashCmd(cmd) {
     get().then(redraw);
   } else if (cmd[0]  === 'sort') {
     sort(cmd[1]);
-    show(subset);
+    list(subset);
   } else {
     setStatus('unknown command: /' + cmd.join(' '));
   }
@@ -528,7 +616,7 @@ function redraw(now) {
   document.getElementById('help').classList.add('hidden');
   document.getElementById('display').classList.remove('hidden');
   filter(cmd.value, now);
-  show(subset);
+  list(subset);
 }
 
 function generateHelp() {
@@ -563,6 +651,20 @@ function addFileHelp() {
   h.insertBefore(p, h.firstChild);
 }
 
+function issueOverlaySetup() {
+  let issuebg = document.getElementById('issuebg');
+  let hideIssue = _ => {
+    document.getElementById('issue').classList.remove('active');
+    issuebg.classList.remove('active');
+  }
+  issuebg.addEventListener('click', hideIssue);
+  window.addEventListener('keyup', e => {
+    if (e.key === 'Escape') {
+      hideIssue();
+    }
+  });
+}
+
 window.onload = () => {
   let cmd = document.getElementById('cmd');
   cmd.onkeypress = debounce(redraw);
@@ -570,5 +672,6 @@ window.onload = () => {
     cmd.value = decodeURIComponent(window.location.hash.substring(1));
   }
   generateHelp();
+  issueOverlaySetup();
   get().then(redraw).catch(addFileHelp);
 }
