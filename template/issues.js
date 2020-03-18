@@ -266,6 +266,10 @@ class Parser {
   }
 
   parseFilter() {
+    if (this.next === '-') {
+      this.parseSeparator('-');
+      return issueFilters.not.f.call(null, this.parseFilter());
+    }
     let name = this.parseName();
     if (!name) {
       let n = this.parseNumber();
