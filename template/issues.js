@@ -369,7 +369,10 @@ function cell(row, children, cellClass) {
     td.className = cellClass;
   }
   if (Array.isArray(children)) {
-    children.forEach(c => td.appendChild(c));
+    children.forEach(c => {
+      td.appendChild(c);
+      td.appendChild(document.createTextNode(' '));
+    });
   } else {
     td.appendChild(children);
   }
@@ -540,6 +543,8 @@ function show(index) {
   comments.className = 'comments';
   allcomments.map(showComment).forEach(row => comments.appendChild(row));
   frame.appendChild(comments);
+
+  frame.scroll(0, 0);
 }
 
 function hideIssue() {
@@ -643,7 +648,9 @@ function filter(str, now) {
 
 function showHelp() {
   setStatus('help shown');
-  document.getElementById('help').classList.add('active');
+  let h = document.getElementById('help');
+  h.classList.add('active');
+  h.scroll(0, 0);
   document.getElementById('overlay').classList.add('active');
 }
 
@@ -723,11 +730,13 @@ function issueOverlaySetup() {
   window.addEventListener('keyup', e => {
     if (e.target.id === 'cmd') {
       if (e.key === 'Escape') {
+        e.preventDefault();
         e.target.blur();
       }
       return;
     }
     if (e.key === 'Escape') {
+      e.preventDefault();
       hideIssue();
     }
   });
@@ -736,12 +745,16 @@ function issueOverlaySetup() {
       return;
     }
     if (e.key === 'p' || e.key === 'k') {
+      e.preventDefault();
       step(-1);
     } else if (e.key === 'n' || e.key === 'j') {
+      e.preventDefault();
       step(1);
     } else if (e.key === '?') {
+      e.preventDefault();
       showHelp();
     } else if (e.key === '\'') {
+      e.preventDefault();
       hideIssue();
       document.getElementById('cmd').focus();
     }
