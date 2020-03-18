@@ -395,7 +395,7 @@ query($owner: String!, $repo: String!){
 
 gql_MoreLabels_Query = (
     """
-query($owner: String!, $repo: String!, $cursor: String!){
+query($owner: String!, $repo: String!, $cursor: String!) {
     repository(owner: $owner, name: $repo) {
         labels(first:100, after:$cursor) {
             nodes {
@@ -465,7 +465,7 @@ def submit_query(query, variables, display):
             else:
                 # We haven't made a successful request, so we don't know how long to sleep.
                 # Guesstimate 10 minutes and try again.
-                sleep(600)
+                time.sleep(600)
             continue
 
         break
