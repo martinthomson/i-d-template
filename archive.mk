@@ -62,13 +62,13 @@ gh-archive: $(ARCHIVE_ROOT)/archive.json
 	  git -C $(ARCHIVE_ROOT) $(CI_AUTHOR) commit -m "Script updating archive at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
-	git -C $(ARCHIVE_ROOT) push https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
+	git -C $(ARCHIVE_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
 else
-	@echo git -C $(ARCHIVE_ROOT) push -q https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
-	@git -C $(ARCHIVE_ROOT) push -q https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1
+	@echo git -C $(ARCHIVE_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
+	@git -C $(ARCHIVE_ROOT) push -qf https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1
 endif
 else
-	git -C $(ARCHIVE_ROOT) push origin $(ARCHIVE_BRANCH)
+	git -C $(ARCHIVE_ROOT) push -f origin $(ARCHIVE_BRANCH)
 endif # PUSH_GHPAGES
 	-rm -rf $(ARCHIVE_ROOT)
 
