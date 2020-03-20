@@ -386,11 +386,10 @@ function cell(row, children, cellClass) {
 function author(x) {
   let user = x.author || x;
   let sp = document.createElement('span');
-  sp.classList.add('item');
-  sp.classList.add('user');
+  sp.classList.add('item', 'user');
   let image = document.createElement('img');
   image.alt = '\uD83E\uDDD0';
-  image.src = `https://github.com/${user}.png?size=16`;
+  image.src = `https://github.com/${user}.png?size=16`;  // TODO load async
   image.width = 16;
   image.height = 16;
   sp.appendChild(image);
@@ -401,24 +400,32 @@ function author(x) {
   return sp;
 }
 
-function issueState(issue) {
-  let st = document.createElement('span');
-  st.className = 'state';
+function issueState(issue, click) {
+  let text;
   if (issue.pr) {
     switch (issue.state) {
       case 'MERGED':
-        st.innerText = 'merged';
-        break;
+      text = 'merged';
+      break;
       case 'CLOSED':
-        st.innerText = 'discarded';
-        break;
+      text = 'discarded';
+      break;
       default:
-        st.innerText = 'pr';
-        break;
+      text = 'pr';
+      break;
     }
   } else {
-    st.innerText = issue.state.toLowerCase();
+    text = issue.state.toLowerCase();
   }
+  let st = document.createElement('span');
+  st.classList.add('item', 'state');
+  let a = document.createElement('a');
+  a.innerText = text;
+  a.href = `#${text}`;
+  if (click) {
+    a.addEventListener('click', click);
+  }
+  st.appendChild(a);
   return st;
 }
 
@@ -436,8 +443,7 @@ function showBody(item) {
 
 function showDate(d, reference) {
   let de = document.createElement('span');
-  de.classList.add('item');
-  de.classList.add('date');
+  de.classList.add('item', 'date');
   const full = d.toISOString();
   const parts = full.split(/[TZ\.]/);
   if (reference && parts[0] === reference.toISOString().split('T')[0]) {
@@ -449,7 +455,25 @@ function showDate(d, reference) {
   return de;
 }
 
-function showLabels(labels) {
+function narrowLabel(e) {
+  e.preventDefault();
+  hideIssue();
+  let cmd = document.getElementById('cmd');
+  let v = `${cmd.value} label(${e.target.innerText})`;
+  cmd.value = v.trim();
+  redraw(true);
+}
+
+function narrowState(e) {
+  e.preventDefault();
+  hideIssue();
+  let cmd = document.getElementById('cmd');
+  let v = `${cmd.value} ${e.target.innerText}`;
+  cmd.value = v.trim();
+  redraw(true);
+}
+
+function showLabels(labels, click) {
   return labels.map(label => {
     let item = document.createElement('span');
     item.className = 'item';
@@ -457,12 +481,16 @@ function showLabels(labels) {
     sp.style.backgroundColor = '#' + db.labels[label].color;
     sp.className = 'swatch';
     item.appendChild(sp);
-    let spl = document.createElement('span');
-    spl.innerText = label;
+    let a = document.createElement('a');
+    a.innerText = label;
+    a.href = `#label(${label})`;
+    if (click) {
+      a.addEventListener('click', click);
+    }
     if (db.labels[label].description) {
       item.title = db.labels[label].description;
     }
-    item.appendChild(spl);
+    item.appendChild(a);
     return item;
   });
 }
@@ -506,26 +534,39 @@ function show(index) {
     return title;
   }
 
-  function showMeta() {
+  function showIssueLabels() {
     let meta = document.createElement('div');
     meta.className = 'meta';
-    let created = new Date(issue.createdAt);
-    meta.appendChild(showDate(created));
+    showLabels(issue.labels, hideIssue).forEach(el => {
+      meta.appendChild(el);
+      meta.appendChild(document.createTextNode(' '));
+    });
+    return meta;
+  }
+
+  function showIssueUsers() {
+    let meta = document.createElement('div');
+    meta.className = 'meta';
     meta.appendChild(author(issue));
-    meta.appendChild(issueState(issue));
-    if (issue.closedAt) {
-      meta.appendChild(showDate(new Date(issue.closedAt), created));
+    if (issue.assignees && issue.assignees.length > 0) {
+      meta.appendChild(document.createTextNode(' \u279c'));
+      issue.assignees.map(u => author(u)).forEach(el => {
+        meta.appendChild(document.createTextNode(' '));
+        meta.appendChild(el);
+      });
     }
     return meta;
   }
 
-  function showIssueLabels() {
+  function showIssueDates() {
     let meta = document.createElement('div');
     meta.className = 'meta';
-    showLabels(issue.labels).forEach(l => {
-      meta.appendChild(l);
-      meta.appendChild(document.createTextNode(' '));
-    });
+    let created = new Date(issue.createdAt);
+    meta.appendChild(showDate(created));
+    meta.appendChild(issueState(issue, hideIssue));
+    if (issue.closedAt) {
+      meta.appendChild(showDate(new Date(issue.closedAt), created));
+    }
     return meta;
   }
 
@@ -569,8 +610,9 @@ function show(index) {
   }
 
   frame.appendChild(showTitle());
-  frame.appendChild(showMeta());
   frame.appendChild(showIssueLabels());
+  frame.appendChild(showIssueUsers());
+  frame.appendChild(showIssueDates());
   frame.appendChild(showBody(issue));
 
   let allcomments = (issue.comments || []).concat(issue.reviews || []);
@@ -621,18 +663,13 @@ function makeRow(issue, index) {
     return a;
   }
 
-  function cellAssignees() {
-    return (issue.assignees || []).map(u => author(u));
-  }
-
-
   let tr = document.createElement('tr');
   cell(tr, cellID(), 'id');
   cell(tr, cellTitle(), 'title');
-  cell(tr, issueState(issue), 'state');
+  cell(tr, issueState(issue, narrowState), 'state');
   cell(tr, author(issue), 'user');
-  cell(tr, cellAssignees(), 'assignees');
-  cell(tr, showLabels(issue.labels), 'labels');
+  cell(tr, (issue.assignees || []).map(u => author(u)), 'assignees');
+  cell(tr, showLabels(issue.labels, narrowLabel), 'labels');
   return tr;
 }
 
@@ -759,7 +796,7 @@ function issueOverlaySetup() {
       hideIssue();
     }
   });
-  window.addEventListener('keypress', e=> {
+  window.addEventListener('keypress', e => {
     if (e.target.closest('input')) {
       return;
     }
@@ -785,6 +822,10 @@ window.onload = () => {
   let redrawHandler = debounce(redraw);
   cmd.addEventListener('input', redrawHandler);
   cmd.addEventListener('keypress', redrawHandler);
+  window.addEventListener('hashchange', e => {
+    cmd.value = decodeURIComponent(window.location.hash.substring(1));
+    redrawHandler(e);
+  });
   if (window.location.hash) {
     cmd.value = decodeURIComponent(window.location.hash.substring(1));
   }
