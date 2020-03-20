@@ -11,23 +11,77 @@ function date(s) {
   return d;
 }
 
-var sortKey = 'id';
-function sort(k) {
-  k = k || sortKey;
-  if (k === 'id') {
-    db.all.sort((x, y) => x.number - y.number);
-    setStatus('sorted by ID');
-  } else if (k === 'recent') {
-    db.all.sort((x, y) => date(y.updatedAt) - date(x.updatedAt));
-    setStatus('sorted by last modified');
-  } else if (k === 'closed') {
-    db.all.sort((x, y) => date(y.closedAt) - date(x.closedAt));
-    setStatus('sorted by time of closure');
+function stateString(issue) {
+  let str;
+  if (issue.pr) {
+    switch (issue.state) {
+      case 'MERGED':
+      str = 'merged';
+      break;
+      case 'CLOSED':
+      str = 'discarded';
+      break;
+      default:
+      str = 'pr';
+      break;
+    }
   } else {
-    setStatus('no idea how to sort like that');
-    return;
+    str = issue.state.toLowerCase();
   }
+  return str;
+}
+
+function stateOrder(issue) {
+  return ['open', 'pr', 'closed', 'merged', 'discarded'].indexOf(stateString(issue));
+}
+
+var sortKey = 'id';
+var sortInvert = false;
+function invert(x) {
+  return x * (sortInvert ? -1 : 1);
+}
+function sort(k) {
+  sortInvert = (k === sortKey) ? !sortInvert : false;
+  k = k || sortKey;
+  let message = k;
+  switch (k) {
+    case 'id':
+      subset.sort((x, y) => invert(x.number - y.number));
+      message = 'ID';
+      break;
+    case 'recent':
+      subset.sort((x, y) => invert(date(y.updatedAt) - date(x.updatedAt)));
+      message = 'last modified';
+      break;
+    case 'closed':
+      subset.sort((x, y) => invert(date(y.closedAt) - date(x.closedAt)));
+      message = 'time of closure';
+      break;
+    case 'title':
+      subset.sort((x, y) => invert(x.title.localeCompare(y.title)));
+      break;
+    case 'state':
+      subset.sort((x, y) => invert(stateOrder(x) - stateOrder(y)));
+      break;
+    case 'author':
+      subset.sort((x, y) => invert(x.author.localeCompare(y.author)));
+    break;
+      default:
+      setStatus('no idea how to sort like that');
+      return;
+  }
+  setStatus(`sorted by ${message}${(sortInvert) ? ' (reversed)' : ''}`);
   sortKey = k;
+  list(subset);
+}
+
+function sortSetup() {
+  ['id', 'title', 'state', 'author'].forEach(k => {
+    let el = document.getElementById(`sort-${k}`);
+    el.addEventListener('click', _ => sort(k));
+    el.style.cursor = 'pointer';
+    el.title = `Sort by ${el.innerText}`;
+  });
 }
 
 var db;
@@ -55,21 +109,51 @@ async function get() {
 
 var issueFilters = {
   assigned: {
-    args: [],
-    h: 'has an assignee',
-    f: issue => issue.assignees.length > 0,
+    args: ['string'],
+    h: 'assigned to this user',
+    f: login => issue => {
+      if (login === '') {
+        return issue.assignees.length > 0;
+      } else {
+        return issue.assignees.some(assignee => assignee === login);
+      }
+    },
   },
 
-  assigned_to: {
+  author: {
     args: ['string'],
-    h: 'assigned to a specific user',
-    f: login => issue => issue.assignees.some(assignee => assignee === login),
-  },
-
-  created_by: {
-    args: ['string'],
-    h: 'created by a specific user',
+    h: 'created by this user',
     f: login => issue => issue.author === login,
+  },
+
+  commenter: {
+    args: ['string'],
+    h: 'commented on by this user',
+    f: login => issue => {
+      return issue.author === login ||
+        issue.comments.some(comment => comment.author === login) ||
+        (issue.reviews || []).some(review => review.author === login);
+    },
+  },
+
+  reviewer: {
+    args: ['string'],
+    h: 'reviewed by this user',
+    f: login => issue => {
+      return issue.reviews &&
+        issue.reviews.some(review => review.author === login);
+    },
+  },
+
+  user: {
+    args: ['string'],
+    h: 'mentions this user',
+    f: login => issue => {
+      return issue.author === login ||
+        issue.assignees.some(assignee => assignee === login) ||
+        issue.comments.some(comment => comment.author === login) ||
+        (issue.reviews || []).some(review => review.author === login);
+    },
   },
 
   closed: {
@@ -383,45 +467,36 @@ function cell(row, children, cellClass) {
   row.appendChild(td);
 }
 
-function author(x) {
+function author(x, click, userSearch) {
   let user = x.author || x;
   let sp = document.createElement('span');
   sp.classList.add('item', 'user');
-  let image = document.createElement('img');
-  image.alt = '\uD83E\uDDD0';
-  image.src = `https://github.com/${user}.png?size=16`;  // TODO load async
-  image.width = 16;
-  image.height = 16;
-  sp.appendChild(image);
-  let a = document.createElement('a');
-  a.href = `https://github.com/${user}`;
-  a.innerText = user;
-  sp.appendChild(a);
+  let ai = document.createElement('a');
+  ai.href = `https://github.com/${user}`;
+  ai.className = 'avatar';
+  let placeholder = document.createElement('span');
+  placeholder.className = 'swatch';
+  placeholder.innerText = '\uD83E\uDDD0';
+  let avatar = new Image(16, 16);
+  avatar.addEventListener('load', _ => placeholder.replaceWith(avatar));
+  avatar.src = `https://github.com/${user}.png?size=16`;  // TODO load async
+  ai.appendChild(placeholder);
+  sp.appendChild(ai);
+
+  let au = document.createElement('a');
+  au.href = `#${userSearch || 'user'}(${user})`;
+  au.innerText = user;
+  au.addEventListener('click', click);
+  sp.appendChild(au);
   return sp;
 }
 
 function issueState(issue, click) {
-  let text;
-  if (issue.pr) {
-    switch (issue.state) {
-      case 'MERGED':
-      text = 'merged';
-      break;
-      case 'CLOSED':
-      text = 'discarded';
-      break;
-      default:
-      text = 'pr';
-      break;
-    }
-  } else {
-    text = issue.state.toLowerCase();
-  }
   let st = document.createElement('span');
   st.classList.add('item', 'state');
   let a = document.createElement('a');
-  a.innerText = text;
-  a.href = `#${text}`;
+  a.innerText = stateString(issue);
+  a.href = `#${stateString(issue)}`;
   if (click) {
     a.addEventListener('click', click);
   }
@@ -455,22 +530,27 @@ function showDate(d, reference) {
   return de;
 }
 
-function narrowLabel(e) {
+function narrow(e, extra) {
   e.preventDefault();
   hideIssue();
   let cmd = document.getElementById('cmd');
-  let v = `${cmd.value} label(${e.target.innerText})`;
+  let v = `${cmd.value} ${extra}`;
   cmd.value = v.trim();
   redraw(true);
 }
 
+function narrowLabel(e) {
+  narrow(e, `label(${e.target.innerText})`);
+}
+
 function narrowState(e) {
-  e.preventDefault();
-  hideIssue();
-  let cmd = document.getElementById('cmd');
-  let v = `${cmd.value} ${e.target.innerText}`;
-  cmd.value = v.trim();
-  redraw(true);
+  narrow(e, e.target.innerText);
+}
+
+function narrowUser(userType) {
+  return function narrowUserInner(e) {
+    narrow(e, `${userType}(${e.target.innerText})`);
+  };
 }
 
 function showLabels(labels, click) {
@@ -547,10 +627,13 @@ function show(index) {
   function showIssueUsers() {
     let meta = document.createElement('div');
     meta.className = 'meta';
-    meta.appendChild(author(issue));
+    meta.appendChild(author(issue, hideIssue, 'author'));
     if (issue.assignees && issue.assignees.length > 0) {
-      meta.appendChild(document.createTextNode(' \u279c'));
-      issue.assignees.map(u => author(u)).forEach(el => {
+      let arrow = document.createElement('span');
+      arrow.innerText = ' \u279c';
+      arrow.title = 'Assigned to';
+      meta.appendChild(arrow);
+      issue.assignees.map(u => author(u, hideIssue, 'assigned')).forEach(el => {
         meta.appendChild(document.createTextNode(' '));
         meta.appendChild(el);
       });
@@ -576,7 +659,7 @@ function show(index) {
     let cdate = new Date(c.createdAt);
     cell(row, showDate(cdate, refdate), 'date');
     refdate = cdate;
-    cell(row, author(c), 'user');
+    cell(row, author(c, hideIssue, (c.commit) ? 'reviewer' : 'commenter'), 'user');
 
     if (issue.pr) {
       let icon = document.createElement('span');
@@ -667,8 +750,9 @@ function makeRow(issue, index) {
   cell(tr, cellID(), 'id');
   cell(tr, cellTitle(), 'title');
   cell(tr, issueState(issue, narrowState), 'state');
-  cell(tr, author(issue), 'user');
-  cell(tr, (issue.assignees || []).map(u => author(u)), 'assignees');
+  cell(tr, author(issue, narrowUser('author'), 'author'), 'user');
+  cell(tr, (issue.assignees || [])
+             .map(u => author(u, narrowUser('assigned'), 'assigned')), 'assignees');
   cell(tr, showLabels(issue.labels, narrowLabel), 'labels');
   return tr;
 }
@@ -712,13 +796,8 @@ function showHelp() {
 
 function slashCmd(cmd) {
   if (cmd[0] === 'help') {
+    document.getElementById('cmd').blur();
     showHelp();
-  } else if (cmd[0] === 'local') {
-    setStatus('retrieving local JSON files');
-    get().then(redraw);
-  } else if (cmd[0]  === 'sort') {
-    sort(cmd[1]);
-    list(subset);
   } else {
     setStatus('unknown command: /' + cmd.join(' '));
   }
@@ -813,6 +892,11 @@ function issueOverlaySetup() {
       e.preventDefault();
       hideIssue();
       document.getElementById('cmd').focus();
+    } else if (e.key === 'c') {
+      e.preventDefault();
+      hideIssue();
+      document.getElementById('cmd').value = '';
+      redraw(true);
     }
   })
 }
@@ -829,6 +913,7 @@ window.onload = () => {
   if (window.location.hash) {
     cmd.value = decodeURIComponent(window.location.hash.substring(1));
   }
+  sortSetup();
   generateHelp();
   issueOverlaySetup();
   get().then(redraw).catch(addFileHelp);
