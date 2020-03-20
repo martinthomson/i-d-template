@@ -449,6 +449,24 @@ function showDate(d, reference) {
   return de;
 }
 
+function showLabels(labels) {
+  return labels.map(label => {
+    let item = document.createElement('span');
+    item.className = 'item';
+    let sp = document.createElement('span');
+    sp.style.backgroundColor = '#' + db.labels[label].color;
+    sp.className = 'swatch';
+    item.appendChild(sp);
+    let spl = document.createElement('span');
+    spl.innerText = label;
+    if (db.labels[label].description) {
+      item.title = db.labels[label].description;
+    }
+    item.appendChild(spl);
+    return item;
+  });
+}
+
 // Make a fresh replacement element for the identified element.
 function freshReplacement(id) {
   let e = document.getElementById(id);
@@ -501,6 +519,16 @@ function show(index) {
     return meta;
   }
 
+  function showIssueLabels() {
+    let meta = document.createElement('div');
+    meta.className = 'meta';
+    showLabels(issue.labels).forEach(l => {
+      meta.appendChild(l);
+      meta.appendChild(document.createTextNode(' '));
+    });
+    return meta;
+  }
+
   let refdate = null;
   function showComment(c) {
     let row = document.createElement('tr');
@@ -542,6 +570,7 @@ function show(index) {
 
   frame.appendChild(showTitle());
   frame.appendChild(showMeta());
+  frame.appendChild(showIssueLabels());
   frame.appendChild(showBody(issue));
 
   let allcomments = (issue.comments || []).concat(issue.reviews || []);
@@ -596,23 +625,6 @@ function makeRow(issue, index) {
     return (issue.assignees || []).map(u => author(u));
   }
 
-  function cellLabels() {
-    return issue.labels.map(label => {
-      let item = document.createElement('span');
-      item.className = 'item';
-      let sp = document.createElement('span');
-      sp.style.backgroundColor = '#' + db.labels[label].color;
-      sp.className = 'swatch';
-      item.appendChild(sp);
-      let spl = document.createElement('span');
-      spl.innerText = label;
-      if (db.labels[label].description) {
-        item.title = db.labels[label].description;
-      }
-      item.appendChild(spl);
-      return item;
-    });
-  }
 
   let tr = document.createElement('tr');
   cell(tr, cellID(), 'id');
@@ -620,7 +632,7 @@ function makeRow(issue, index) {
   cell(tr, issueState(issue), 'state');
   cell(tr, author(issue), 'user');
   cell(tr, cellAssignees(), 'assignees');
-  cell(tr, cellLabels(), 'labels');
+  cell(tr, showLabels(issue.labels), 'labels');
   return tr;
 }
 
