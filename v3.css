@@ -10,7 +10,7 @@ html {
   --small-font-size: 14.5px;
 }
 body {
-  max-width: 624px;
+  max-width: 600px;
   margin: 75px auto;
   padding: 0 5px;
   color: var(--text-color);
@@ -188,7 +188,9 @@ tt, code, pre {
 }
 pre {
   border: 1px solid var(--line-color);
-  line-height: 17px;
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
   margin: 5px;
   padding: 5px;
 }
@@ -416,7 +418,7 @@ hr {
   font-weight: 700;
 }
 /* make the index two-column on all but the smallest screens */
-@media (min-width: 600px) {
+@media (min-width: 500px) {
   .index ul {
     column-count: 2;
     column-gap: 20px;
@@ -451,7 +453,7 @@ hr.addr {
   color: #ddd;
   max-width: calc(100% - 16px);
 }
-@media (min-width: 600px) {
+@media (min-width: 500px) {
   #authors-addresses > section {
     display: relative;
     padding: 32px 0 0;
@@ -494,7 +496,7 @@ hr.addr {
   font-style: italic;
 }
 /* alternative layout for smaller screens */
-@media screen and (max-width: 953px) {
+@media screen and (max-width: 929px) {
   #toc {
     position: fixed;
     z-index: 2;
@@ -560,9 +562,10 @@ hr.addr {
 }
 
 /* alternative layout for wide screens */
-@media screen and (min-width: 954px) {
+@media screen and (min-width: 930px) {
   body {
-    padding-right: 380px;
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
   }
   #toc {
     position: fixed;
@@ -704,16 +707,13 @@ dl.dlNewline > dt {
 }
 
 /* Provide styling for table cell text alignment */
-table td.text-left,
-table th.text-left {
+table .text-left, table .text-left {
   text-align: left;
 }
-table td.text-center,
-table th.text-center {
+table .text-center, table .text-center {
   text-align: center;
 }
-table td.text-right,
-table th.text-right {
+table .text-right, table .text-right {
   text-align: right;
 }
 
