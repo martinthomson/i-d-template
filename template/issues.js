@@ -852,8 +852,12 @@ function step(n) {
 function makeRow(issue, index) {
   function cellID() {
     let a = document.createElement('a');
-    a.href = issue.url;
     a.innerText = issue.number;
+    a.href = issue.url;
+    a.onclick = e => {
+      e.preventDefault();
+      show(index);
+    };
     return a;
   }
 
