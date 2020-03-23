@@ -468,7 +468,7 @@ function cell(row, children, cellClass) {
 }
 
 
-function loadImages(elements) {
+function loadAvatars(elements) {
   elements.forEach(e => {
     let avatar = new Image(16, 16);
     avatar.addEventListener('load', _ => e.target.replaceWith(avatar));
@@ -476,7 +476,7 @@ function loadImages(elements) {
     avatar.src = `https://github.com/${user}.png?size=16`;
   });
 }
-var intersection = new IntersectionObserver(loadImages, { rootMargin: '50px 0px 100px 0px' });
+var intersection = new IntersectionObserver(loadAvatars, { rootMargin: '50px 0px 100px 0px' });
 
 function author(x, click, userSearch) {
   let user = x.author || x;
