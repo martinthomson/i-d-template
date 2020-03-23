@@ -6,12 +6,12 @@
     <script src="issues.js"></script>
     <style>
 @import url("https://martinthomson.github.io/i-d-template/fonts.css");
-body { font-family: "Lora", serif; font-size: 15px; }
-h2, th, .item, .meta {
-  font-family: "Cabin Condensed", sans-serif; font-weight: 600; }
-h2 { font-size: 32px; }
-tt { font-family: "Oxygen Mono", monospace; font-size: 14px;
-     background-color: #eee; border-radius: 2px; padding: 0 2px; }
+body { font: 15px/20px "Lora", serif; }
+h2, h3, h4, h5, th, .item, .meta {
+  font-family: "Cabin Condensed", sans-serif; font-weight: 600; line-height: 150%; }
+tt { font: 14px/20px "Oxygen Mono", monospace; }
+pre { font: 12.5px/16px "Oxygen Mono", monospace; }
+tt, pre { background-color: #eee; border-radius: 2px; padding: 0 2px; }
 table { border: 1px solid #ddd; border-collapse: collapse; }
 td, th { border: 1px solid #eee; padding: 5px 2px;
          text-align: left; vertical-align: text-bottom; }
@@ -42,8 +42,10 @@ code { background-color: #eee; white-space: nowrap; }
   left: 50px; top: 20px; border: 1px solid #eee;
   background-color: #fff; padding: 20px 25px; border-radius: 5px;
   overflow-y: auto; overscroll-behavior: contain; }
-#issue > .title { margin: 20px 0 10px; }
-#issue > .title .number { display: inline-block; min-width: 50px; text-align: right; }
+h2 { margin: 20px 0 10px; } h3, h4, h5 { margin: 10px 0 5px; }
+h2 .number { display: inline-block; min-width: 50px; text-align: right; }
+h2 { font-size: 32px; } h3 { font-size: 20px; }
+h4 { font-size: 18px; } h5 { font-size: 16px; }
 .meta { margin: 2px 64px; font-size: 15px; color: #444; }
 .meta > span { margin: 0 5px; }
 .comments { margin: 5px; border: none; }
@@ -52,6 +54,9 @@ code { background-color: #eee; white-space: nowrap; }
 .body { max-width: 550px; border: none; }
 #issue > .body { margin: 20px 64px 20px 10px; }
 p { margin: 0 2px 0.8em; }
+blockquote { font-style: italic; margin: 0.5em 10px 1.3em;
+  padding: 0 5px; border-left: 3px solid #eee; }
+ul, ol { padding-left: 32px; }
     </style>
   </head>
   <body>

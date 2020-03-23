@@ -93,7 +93,7 @@ async function get() {
   }
   db = await response.json();
   db.pulls.forEach(pr => pr.pr = true);
-  db.all = db.issues.concat(db.pulls);
+  subset = db.all = db.issues.concat(db.pulls);
   db.labels = db.labels.reduce((all, l) => {
     all[l.name] = l;
     return all;
@@ -518,11 +518,123 @@ function showBody(item) {
   let div = document.createElement('div');
   div.className = 'body';
   let body = item.body.trim().replace(/\r\n?/g, '\n');
-  body.split('\n\n').forEach(t => {
-    let p = document.createElement('p');
-    p.innerText = t;
-    div.appendChild(p)
+
+  let list = null;
+  let el = null;
+  let pre = null;
+  function closeElement() {
+    if (el) {
+      if (list) {
+        list.appendChild(el);
+      } else {
+        div.appendChild(el);
+      }
+    }
+    el = null;
+    pre = null;
+  }
+  function closeBoth() {
+    closeElement();
+    if (list) {
+      div.appendChild(list);
+      list = null;
+    }
+  }
+  function addText(t) {
+    if (pre) {
+      el.appendChild(document.createTextNode(t + '\n'));
+      return;
+    }
+    if (el.innerText !== '') {
+      el.appendChild(document.createElement('br'));
+    }
+    if (t !== '') {
+      el.appendChild(document.createTextNode(t));
+    }
+  }
+
+  body.split('\n').forEach(t => {
+    if (t.charAt(0) === ' ') {
+      t = t.substring(1); // This fixes lots of problems.
+    }
+    if (t.indexOf('```') === 0) {
+      let needNew = !el || !pre;
+      closeBoth();
+      if (needNew) {
+        el = document.createElement('pre');
+        pre = 'q';
+        let language = t.substring(3).trim();
+        if (language) {
+          el.dataset.language = language;
+        }
+      }
+    } else if (pre === 'q') {
+      addText(t);
+    } else if (!el && t.indexOf('   ') === 0) {
+      if (!pre) {
+        closeBoth();
+        el = document.createElement('pre');
+        pre = 's';
+      }
+      addText(t.substring(3));
+    } else if (t.trim() === '') {
+      closeElement();
+    } else if (t.indexOf('# ') === 0) {
+      closeBoth();
+      el = document.createElement('h2');
+      addText(t.substring(2).trimLeft());
+      closeElement();
+    } else if (t.indexOf('## ') === 0) {
+      closeBoth();
+      el = document.createElement('h3');
+      addText(t.substring(3).trimLeft());
+      closeElement();
+    } else if (t.indexOf('### ') === 0) {
+      closeBoth();
+      el = document.createElement('h4');
+      addText(t.substring(4).trimLeft());
+      closeElement();
+    } else if (t.charAt(0) === '>') {
+      if (!el || el.tagName !== 'BLOCKQUOTE') {
+        closeElement();
+        el = document.createElement('blockquote');
+      }
+      addText(t.substring(1).trimLeft());
+    } else if (t.indexOf('* ') === 0 || t.indexOf('- ') === 0) {
+      if (list && list.tagName !== 'UL') {
+        closeBoth();
+      } else {
+        closeElement();
+      }
+      if (!list) {
+        list = document.createElement('ul');
+      }
+      el = document.createElement('li');
+      addText(t.substring(2).trimLeft());
+    } else if (t.match(/^(?:\(?\d+\)|\d+\.)/)) {
+      if (list && list.tagName !== 'OL') {
+        closeBoth();
+      } else {
+        closeElement();
+      }
+      if (!list) {
+        list = document.createElement('ol');
+      }
+      el = document.createElement('li');
+      let sep = t.match(/^(?:\(?\d+\)|\d+\.)/)[0].length;
+      addText(t.substring(sep).trimLeft());
+    } else {
+      if (list && !el) {
+        div.appendChild(list);
+        list = null;
+      }
+      if (!el) {
+        el = document.createElement('p');
+      }
+      addText(t);
+    }
   });
+  closeBoth();
   return div;
 }
 
