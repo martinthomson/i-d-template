@@ -467,6 +467,17 @@ function cell(row, children, cellClass) {
   row.appendChild(td);
 }
 
+
+function loadImages(elements) {
+  elements.forEach(e => {
+    let avatar = new Image(16, 16);
+    avatar.addEventListener('load', _ => e.target.replaceWith(avatar));
+    let user = e.target.dataset.user;
+    avatar.src = `https://github.com/${user}.png?size=16`;
+  });
+}
+var intersection = new IntersectionObserver(loadImages, { rootMargin: '50px 0px 100px 0px' });
+
 function author(x, click, userSearch) {
   let user = x.author || x;
   let sp = document.createElement('span');
@@ -477,9 +488,8 @@ function author(x, click, userSearch) {
   let placeholder = document.createElement('span');
   placeholder.className = 'swatch';
   placeholder.innerText = '\uD83E\uDDD0';
-  let avatar = new Image(16, 16);
-  avatar.addEventListener('load', _ => placeholder.replaceWith(avatar));
-  avatar.src = `https://github.com/${user}.png?size=16`;  // TODO load async
+  placeholder.dataset.user = user;
+  intersection.observe(placeholder);
   ai.appendChild(placeholder);
   sp.appendChild(ai);
 
