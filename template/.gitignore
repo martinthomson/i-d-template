@@ -10,6 +10,5 @@
 .refcache
 .targets.mk
 venv/
-issues.json
-pulls.json
+archive.json
 report.xml
