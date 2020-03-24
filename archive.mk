@@ -22,7 +22,8 @@ endif
 .PHONY: archive
 archive: archive.json
 archive.json: fetch-archive $(drafts_source)
-	@if [ -f $@ ] && [ "$(call last_modified,$@)" -gt "$(call last_commit,$(ARCHIVE_BRANCH),$@)" ] 2>/dev/null; then \
+	@if [ -f $@ ] && [ "$(call file_size,$@)" -gt 0 ] && \
+	    [ "$(call last_modified,$@)" -gt "$(call last_commit,$(ARCHIVE_BRANCH),$@)" ] 2>/dev/null; then \
 	  echo 'Skipping update of $@ (it is newer than the ones on the branch)'; exit; \
 	fi; \
 	skip=$(DISABLE_ARCHIVE_FETCH); \
