@@ -446,7 +446,7 @@ def submit_query(query, variables, display):
     log(output)
     result = dict()
 
-    for attempt in range(3):
+    for _attempt in range(3):
         try:
             response = s.post(url, body)
             response.raise_for_status()
