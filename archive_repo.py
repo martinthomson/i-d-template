@@ -435,7 +435,7 @@ def submit_query(query, variables, display):
 
     url = "https://api.github.com/graphql"
 
-    bodyjson = {"query": re.sub("\s+", " ", query).strip()}
+    bodyjson = {"query": re.sub(r"\s+", " ", query).strip()}
     if variables:
         bodyjson["variables"] = variables
     body = json.dumps(bodyjson)
