@@ -432,6 +432,7 @@ def stall_until(time):
 
 def submit_query(query, variables, display):
     global last_request_limit
+    global next_reset_time
 
     url = "https://api.github.com/graphql"
 
