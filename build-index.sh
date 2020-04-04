@@ -4,7 +4,13 @@
 
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
-master=${GITHUB_MASTER:-master}
+if DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null); then
+    DEFAULT_BRANCH="${DEFAULT_BRANCH#*/}"
+else
+    DEFAULT_BRANCH=master
+fi
+
+master=${GITHUB_MASTER:-$DEFAULT_BRANCH}
 root=$(realpath "${1:-.}")
 branch="${2:-$master}"
 user="${3:-<user>}"
@@ -51,7 +57,7 @@ function reldot() {
 
 function githubio() {
     d="${1%/}/"
-    echo "https://${user}.github.io/${repo}/${d#master/}${2}.txt"
+    echo "https://${user}.github.io/${repo}/${d#$master/}${2}.txt"
 }
 
 function list_dir() {
@@ -101,8 +107,8 @@ cat <<EOJS
 //  http://creativecommons.org/publicdomain/zero/1.0/
 // @licend
 window.onload = function() {
-  var referrer_branch = 'master';
-  // e.g., "https://github.com/user/repo/tree/master"
+  var referrer_branch = '$master';
+  // e.g., "https://github.com/user/repo/tree/$master"
   var chunks = document.referrer.split("/");
   if (chunks[2] === 'github.com' && chunks[5] === 'tree') {
     referrer_branch = chunks[6];

@@ -34,6 +34,14 @@ def step_impl(context):
         call(["git", "config", "user.email", "behave@example.com"])
 
 
+@given(u'the default branch is "{branch}"')
+def step_impl(context, branch):
+    with cd(context.working_dir):
+        call(["git", "checkout", "-b", branch])
+        call(["git", "push", "--set-upstream", "origin", branch])
+        call(["git", "remote", "set-head", "origin", branch])
+
+
 @given(u"a git repo with no origin")
 def step_impl(context):
     context.test_dir = os.getcwd()
