@@ -571,7 +571,7 @@ if args.refFile:
 ## Download from GitHub the full issues list (if no reference) or the updated issues list (if reference)
 issue_cursor = None
 get_more_issues = True
-just_copy_old_file = True if args.refFile else False
+just_copy_old_file = True if issue_ref and (pr_ref or args.issuesOnly) else False
 (owner, repo) = args.repo.split("/", 1)
 
 while get_more_issues:
@@ -617,7 +617,7 @@ while get_more_issues:
         if number in issue_ref.keys():
             del issue_ref[number]
         issue_ref[number] = issue
-        just_copy_old_issues = False
+        just_copy_old_file = False
 
     get_more_issues = issues["pageInfo"]["hasNextPage"]
     issue_cursor = issues["pageInfo"]["endCursor"]
