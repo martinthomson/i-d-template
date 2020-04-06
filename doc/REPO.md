@@ -80,7 +80,7 @@ XSLT](https://github.com/reschke/xml2rfc) for generating HTML, add
 The setup removes adds some files, updates `README.md` with the details of
 your draft, sets up a `gh-pages` branch for your editor's copy.  This pushes
 the `gh-pages` branch to `origin`.  If you don't want that, run `make -f
-lib/setup.mk setup-master` instead.
+lib/setup.mk setup-default-branch` instead.
 
 Finally, push:
 

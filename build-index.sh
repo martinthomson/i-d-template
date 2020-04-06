@@ -4,15 +4,15 @@
 
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
-if DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null); then
-    DEFAULT_BRANCH="${DEFAULT_BRANCH#*/}"
-else
-    DEFAULT_BRANCH=master
+default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
+if [ "$default_branch" = "HEAD" ]; then
+    # Do this conditionally so that users can manually configure it.
+    git remote set-head -a origin
+    default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
 fi
 
-master=${GITHUB_MASTER:-$DEFAULT_BRANCH}
 root=$(realpath "${1:-.}")
-branch="${2:-$master}"
+branch="${2:-$default_branch}"
 user="${3:-<user>}"
 repo="${4:-<repo>}"
 
@@ -57,7 +57,7 @@ function reldot() {
 
 function githubio() {
     d="${1%/}/"
-    echo "https://${user}.github.io/${repo}/${d#$master/}${2}.txt"
+    echo "https://${user}.github.io/${repo}/${d#$default_branch/}${2}.txt"
 }
 
 function list_dir() {
@@ -73,9 +73,9 @@ function list_dir() {
         p '<td><a href="'"$(reldot "$dir")/${file}"'.txt"'
         p '   class="txt '"$file"'">plain text</a></td>'
 	this_githubio=$(githubio "$branch${dir#$root}" "$file")
-        if [ "$2" != "$master" ]; then
-	    diff=$(rfcdiff $(githubio "$master/" "$file") "$this_githubio")
-            p '<td><a href='"$diff"'>diff with '"$master"'</a></td>'
+        if [ "$2" != "$default_branch" ]; then
+	    diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
+            p '<td><a href='"$diff"'>diff with '"$default_branch"'</a></td>'
         fi
 	diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         p '<td><a href="'"$diff"'" class="diff '"$file"'">'
@@ -86,7 +86,7 @@ function list_dir() {
 }
 
 branchlink="$gh"
-[ "$branch" = "$master" ] || branchlink="${branchlink}/tree/${branch}"
+[ "$branch" = "$default_branch" ] || branchlink="${branchlink}/tree/${branch}"
 p "<h1>Editor's drafts for ${branch} branch of <a href=\"${branchlink}\">${user}/${repo}</a></h1>"
 p "<p>View <a href=\"issues.html\">saved issues</a>,"
 p "  or the latest GitHub <a href=\"${gh}/issues\">issues</a>"
@@ -107,8 +107,8 @@ cat <<EOJS
 //  http://creativecommons.org/publicdomain/zero/1.0/
 // @licend
 window.onload = function() {
-  var referrer_branch = '$master';
-  // e.g., "https://github.com/user/repo/tree/$master"
+  var referrer_branch = '$default_branch';
+  // e.g., "https://github.com/user/repo/tree/$default_branch"
   var chunks = document.referrer.split("/");
   if (chunks[2] === 'github.com' && chunks[5] === 'tree') {
     referrer_branch = chunks[6];

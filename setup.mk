@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: setup-master setup-ghpages setup-precommit
+setup: setup-default-branch setup-ghpages setup-precommit
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
@@ -11,9 +11,6 @@ endif
 GIT_ORIG := $(shell git branch 2>/dev/null | grep '*' | cut -c 3-)
 ifneq (1,$(words $(GIT_ORIG)))
 $(error If you are just starting out, please commit something before starting)
-endif
-ifneq (master,$(GIT_ORIG))
-$(warning Using a branch called 'master' is recommended)
 endif
 
 LATEST_WARNING := $(strip $(foreach draft,$(join $(drafts),$(draft_types)),\
@@ -52,7 +49,7 @@ setup-files: $(TEMPLATE_FILES) README.md .note.xml
 	git add $^
 
 ifeq (true,$(USE_XSLT))
-setup-master: setup-makefile
+setup-default-branch: setup-makefile
 .PHONY: setup-makefile
 setup-makefile: Makefile
 	sed -i~ -e '1{h;s/^.*$$/USE_XSLT := true/;p;x;}' $<
@@ -79,7 +76,11 @@ README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FIL
 	git add $@
 
 .PHONY: setup-master
-setup-master: setup-files README.md setup-gitignore
+setup-master:
+	$(error The setup-master make target was renamed to setup-default-branch)
+
+.PHONY: setup-default-branch
+setup-default-branch: setup-files README.md setup-gitignore
 	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts)) using https://github.com/martinthomson/i-d-template"
 
 .PHONY: setup-precommit
