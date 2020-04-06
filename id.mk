@@ -70,7 +70,7 @@ endif
 # Github guesses
 GIT_REMOTE ?= origin
 export GIT_REMOTE
-DEFAULT_BRANCH := $(shell ./default-branch.sh $(GIT_REMOTE))
+DEFAULT_BRANCH := $(shell $(LIBDIR)/default-branch.sh $(GIT_REMOTE))
 ifeq (,$(CI_REPO_FULL))
 GITHUB_REPO_FULL := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
 		      sed -e 's/^.*github\.com.//;s/\.git$$//')

@@ -6,7 +6,7 @@ user="$1"
 repo="$2"
 shift 2
 
-default_branch=$(./default-branch.sh)
+default_branch=$($(dirname "$0")/default-branch.sh)
 githubio="https://${user}.github.io/${repo}/#go"
 
 function fixup_other_md() {
