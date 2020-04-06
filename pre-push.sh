@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 err=0
 tags=0

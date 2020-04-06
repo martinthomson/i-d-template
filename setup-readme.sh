@@ -6,13 +6,7 @@ user="$1"
 repo="$2"
 shift 2
 
-default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
-if [ "$default_branch" = "HEAD" ]; then
-    # Do this conditionally so that users can manually configure it.
-    git remote set-head -a origin
-    default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
-fi
-
+default_branch=$(./default-branch.sh)
 githubio="https://${user}.github.io/${repo}/#go"
 
 function fixup_other_md() {

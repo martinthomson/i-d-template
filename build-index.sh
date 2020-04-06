@@ -4,13 +4,7 @@
 
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
-default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
-if [ "$default_branch" = "HEAD" ]; then
-    # Do this conditionally so that users can manually configure it.
-    git remote set-head -a origin
-    default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
-fi
-
+default_branch=$(./default-branch.sh)
 root=$(realpath "${1:-.}")
 branch="${2:-$default_branch}"
 user="${3:-<user>}"
