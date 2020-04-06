@@ -98,11 +98,12 @@ README.  Then:
 ```sh
 $ git init unicorn-protocol
 $ cd unicorn-protocol
+$ git checkout --orphan main
 $ git remote add origin https://github.com/unicorn-wg/unicorn-protocol
 # Copy a template in place, change the filename and title.
 $ git add draft-*.{md,xml}
 $ git commit -m "Initial version blah blah blah" draft-*.{md,xml}
-$ git push -u origin master
+$ git push -u origin main
 $ git clone https://github.com/martinthomson/i-d-template lib
 $ make -f lib/setup.mk
 $ git push
