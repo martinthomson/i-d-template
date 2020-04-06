@@ -4,7 +4,7 @@
 
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
-default_branch=$(./default-branch.sh)
+default_branch=$($(dirname "$0")/default-branch.sh)
 root=$(realpath "${1:-.}")
 branch="${2:-$default_branch}"
 user="${3:-<user>}"
