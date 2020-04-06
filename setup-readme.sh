@@ -6,6 +6,13 @@ user="$1"
 repo="$2"
 shift 2
 
+default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
+if [ "$default_branch" = "HEAD" ]; then
+    # Do this conditionally so that users can manually configure it.
+    git remote set-head -a origin
+    default_branch=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null | sed 's,.*/,,')
+fi
+
 githubio="https://${user}.github.io/${repo}/#go"
 
 function fixup_other_md() {
@@ -13,6 +20,7 @@ function fixup_other_md() {
     s='s~{WG_NAME}~'"$1"'~g'
     s="$s"';s~{GITHUB_USER}~'"$user"'~g'
     s="$s"';s~{GITHUB_REPO}~'"$repo"'~g'
+    s="$s"';s~{GITHUB_BRANCH}~'"$default_branch"'~g'
     sed -i~ -e "$s" "${markdown[@]}"
     for i in "${markdown[@]}"; do
         rm -f "$i"~
@@ -87,5 +95,5 @@ This requires that you have the necessary software installed.  See
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/${user}/${repo}/blob/master/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/${user}/${repo}/blob/${default_branch}/CONTRIBUTING.md).
 EOF
