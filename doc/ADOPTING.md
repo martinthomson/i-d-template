@@ -40,7 +40,7 @@ $ git remote add origin https://github.com/new-owner/new-repo
 Then pull the contents of the old repo in:
 
 ```sh
-$ git pull https://github.com/old-owner/old-repo master
+$ git pull https://github.com/old-owner/old-repo $DEFAULT_BRANCH
 $ git push
 ```
 

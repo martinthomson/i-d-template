@@ -34,7 +34,7 @@ branches that have been merged.
 
 ```sh
 $ git config --global alias.trim '!f() { git branch --merged @ | sed -e '"'"'/^\*/d;s/^  //;/^\('"'"'$(git config --get trim.savebranch | sed -e '"'"'s/[, ]/\\|/g'"'"')'"'"'\)$/d'"'"' | xargs -r git branch -d; }; f'
-$ git config --global trim.savebranch master,gh-pages,gh-issues
+$ git config --global trim.savebranch main,gh-pages,gh-issues
 ```
 
 The `trim.savebranch` config item includes the names of branches that you

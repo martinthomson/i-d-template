@@ -50,7 +50,7 @@ $(GHPAGES_ROOT): fetch-ghpages
 	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
 	git clone -q -b gh-pages . $@
 
-GHPAGES_TARGET := $(GHPAGES_ROOT)$(filter-out /master,/$(SOURCE_BRANCH))
+GHPAGES_TARGET := $(GHPAGES_ROOT)$(filter-out /$(DEFAULT_BRANCH),/$(SOURCE_BRANCH))
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
 $(GHPAGES_TARGET): $(GHPAGES_ROOT)
 	mkdir -p $@
@@ -68,7 +68,7 @@ $(GHPAGES_TARGET)/index.html: $(GHPAGES_INSTALLED)
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
 GHPAGES_ALL += $(GHPAGES_ROOT)/index.html
 $(GHPAGES_ROOT)/index.html: $(GHPAGES_INSTALLED)
-	$(LIBDIR)/build-index.sh "$(dir $@)" master "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+	$(LIBDIR)/build-index.sh "$(dir $@)" $(DEFAULT_BRANCH) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 endif
 
 .PHONY: cleanup-ghpages

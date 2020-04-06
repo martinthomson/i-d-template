@@ -84,11 +84,8 @@ def step_impl(context):
 @then(u'a file is created called "{filename}" which contains "{text}"')
 def step_impl(context, filename, text):
     context.execute_steps(
-        u'then a branch is created called "master" containing "%s"' % filename
+        u'then a branch is created called "master" containing "%s" which contains "%s"' % (filename, text)
     )
-    with cd(context.working_dir):
-        content = check_output(["git", "show", "master:%s" % filename]).decode("utf-8")
-        assert text in content
 
 
 @then(u'a file is created called "{filename}"')
@@ -96,6 +93,16 @@ def step_impl(context, filename):
     context.execute_steps(
         u'then a branch is created called "master" containing "%s"' % filename
     )
+
+
+@then(u'a branch is created called "{branch}" containing "{filename}" which contains "{text}"')
+def step_impl(context, branch, filename, text):
+    context.execute_steps(
+        u'then a branch is created called "%s" containing "%s"' % (branch, filename)
+    )
+    with cd(context.working_dir):
+        content = check_output(["git", "show", "%s:%s" % (branch, filename)]).decode("utf-8")
+        assert text in content
 
 
 @then(u'a branch is created called "{branch}" containing "{filename}"')
