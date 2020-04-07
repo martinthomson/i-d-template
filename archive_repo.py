@@ -511,6 +511,14 @@ def collapse(thing, key):
     thing[key] = thing[key]["nodes"]
 
 
+def collapse_to_login(thing, key):
+    """Collapse something in the form of { x: {login: 'login'} }
+
+    Where the {login:...} can be null instead."""
+    if thing[key] is not None:
+        thing[key] = thing[key]["login"]
+
+
 def eprint(*str, **kwargs):
     print(*str, file=sys.stderr, **kwargs)
 
@@ -606,12 +614,12 @@ while get_more_issues:
         )
 
         # Collapse some nodes
-        issue["author"] = issue["author"]["login"]
+        collapse_to_login(issue, "author")
         collapse_single(issue, "labels", "name")
         collapse_single(issue, "assignees", "login")
         collapse(issue, "comments")
         for comment in issue["comments"]:
-            comment["author"] = comment["author"]["login"]
+            collapse_to_login(comment, "author")
 
         # Delete the old instance; add this instance
         if number in issue_ref.keys():
@@ -675,17 +683,16 @@ if not args.issuesOnly:
                 )
 
             # Collapse some nodes
-            pr["author"] = pr["author"]["login"]
-            if pr["mergedBy"] is not None:
-                pr["mergedBy"] = pr["mergedBy"]["login"]
+            collapse_to_login(pr, "author")
+            collapse_to_login(pr, "mergedBy")
             collapse_single(pr, "labels", "name")
             collapse_single(pr, "assignees", "login")
             collapse(pr, "comments")
             for comment in pr["comments"]:
-                comment["author"] = comment["author"]["login"]
+                collapse_to_login(comment, "author")
             collapse(pr, "reviews")
             for review in pr["reviews"]:
-                review["author"] = review["author"]["login"]
+                collapse_to_login(review, "author")
                 collapse(review, "comments")
 
             # Delete the old instance; add this instance
