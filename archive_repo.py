@@ -249,9 +249,16 @@ fragment prFields on PullRequest {
     ...assignees
     ...labels
     ...commentFields
+    baseRepository { nameWithOwner }
+    baseRefName
+    baseRefOid
+    headRepository { nameWithOwner }
+    headRefName
+    headRefOid
     closedAt
     mergedAt
     mergedBy { login }
+    mergeCommit { oid }
     comments(first: 100) {
         nodes {
             ...author
