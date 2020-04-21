@@ -518,12 +518,12 @@ def collapse(thing, key):
     thing[key] = thing[key]["nodes"]
 
 
-def collapse_to_login(thing, key):
-    """Collapse something in the form of { x: {login: 'login'} }
+def collapse_map(thing, key, name):
+    """Collapse something in the form of { x: {$name: 'login'} }
 
-    Where the {login:...} can be null instead."""
+    Where the {$name:...} can be null instead."""
     if thing[key] is not None:
-        thing[key] = thing[key]["login"]
+        thing[key] = thing[key][name]
 
 
 def eprint(*str, **kwargs):
@@ -627,12 +627,12 @@ while get_more_issues:
         )
 
         # Collapse some nodes
-        collapse_to_login(issue, "author")
+        collapse_map(issue, "author", "login")
         collapse_single(issue, "labels", "name")
         collapse_single(issue, "assignees", "login")
         collapse(issue, "comments")
         for comment in issue["comments"]:
-            collapse_to_login(comment, "author")
+            collapse_map(comment, "author", "login")
 
         # Delete the old instance; add this instance
         if number in issue_ref.keys():
@@ -696,16 +696,18 @@ if not args.issuesOnly:
                 )
 
             # Collapse some nodes
-            collapse_to_login(pr, "author")
-            collapse_to_login(pr, "mergedBy")
+            collapse_map(pr, "author", "login")
+            collapse_map(pr, "mergedBy", "login")
             collapse_single(pr, "labels", "name")
+            collapse_map(pr, "baseRepository", "nameWithOwner")
+            collapse_map(pr, "headRepository", "nameWithOwner")
             collapse_single(pr, "assignees", "login")
             collapse(pr, "comments")
             for comment in pr["comments"]:
-                collapse_to_login(comment, "author")
+                collapse_map(comment, "author", "login")
             collapse(pr, "reviews")
             for review in pr["reviews"]:
-                collapse_to_login(review, "author")
+                collapse_map(review, "author", "login")
                 collapse(review, "comments")
 
             # Delete the old instance; add this instance
