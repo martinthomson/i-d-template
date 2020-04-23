@@ -573,6 +573,10 @@ def getIssues(fields=gql_Issue_Fields, updateOld=False):
 
         for issue in issues["nodes"]:
             number = issue["number"]
+
+            if updateOld and number not in issue_ref:
+                continue
+
             # Are the comments on this issue complete?
             followPagination(
                 issue,
