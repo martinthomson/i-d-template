@@ -522,7 +522,7 @@ def collapse(thing, key):
 
 
 def collapse_map(thing, key, name):
-    """Collapse something in the form of { x: {$name: 'login'} }
+    """Collapse something in the form of { x: {$name: $value} } into {x: $value}
 
     Where the {$name:...} can be null instead."""
     if key in thing and thing[key] is not None:
