@@ -11,6 +11,8 @@ import re
 import dateutil.parser as dp
 import shutil
 import warnings
+from types import SimpleNamespace
+from collections import namedtuple
 
 parser = argparse.ArgumentParser(description="Archive repo issues and PRs.")
 parser.add_argument("repo", help="GitHub repo to archive (e.g. quicwg/base-drafts)")
@@ -545,8 +547,7 @@ else:
         eprint(*str, **kwargs)
 
 
-def getIssues(fields=gql_Issue_Fields, updateOld=False):
-    global just_copy_old_file
+def getIssues(refFile, fields=gql_Issue_Fields, updateOld=False):
     issue_cursor = None
     get_more_issues = True
 
@@ -555,14 +556,14 @@ def getIssues(fields=gql_Issue_Fields, updateOld=False):
             # Initial issue fetch
             query = gql_AllIssues_First
             variables = {"owner": owner, "repo": repo}
-            if lastSuccess and not updateOld:
-                variables["filters"] = {"since": lastSuccess.isoformat()}
+            if not updateOld and refFile.lastSuccess:
+                variables["filters"] = {"since": refFile.lastSuccess.isoformat()}
                 query = gql_UpdatedIssues_First
         else:
             # Fetching more issues
             query = gql_AllIssues_Subsequent
             variables = {"owner": owner, "repo": repo, "cursor": issue_cursor}
-            if lastSuccess and not updateOld:
+            if refFile.lastSuccess and not updateOld:
                 variables["filters"] = {"since": lastSuccess.isoformat()}
                 query = gql_UpdatedIssues_Subsequent
 
@@ -574,7 +575,7 @@ def getIssues(fields=gql_Issue_Fields, updateOld=False):
         for issue in issues["nodes"]:
             number = issue["number"]
 
-            if updateOld and number not in issue_ref:
+            if updateOld and number not in refFile.issues:
                 continue
 
             # Are the comments on this issue complete?
@@ -594,24 +595,23 @@ def getIssues(fields=gql_Issue_Fields, updateOld=False):
                 collapse_map(comment, "author", "login")
 
             # Delete the old instance; add this instance
-            if not updateOld and number in issue_ref.keys():
-                del issue_ref[number]
+            if not updateOld and number in refFile.issues:
+                del refFile.issues[number]
 
-            if number in issue_ref.keys():
-                issue_ref[number].update(issue)
+            if number in refFile.issues:
+                refFile.issues[number].update(issue)
             else:
-                issue_ref[number] = issue
+                refFile.issues[number] = issue
 
-            just_copy_old_file = False
+            refFile.canCopy = False
 
         get_more_issues = issues["pageInfo"]["hasNextPage"]
         issue_cursor = issues["pageInfo"]["endCursor"]
 
 
-def getPRs(fields=gql_PullRequest_Fields, updateOld=False):
+def getPRs(refFile, fields=gql_PullRequest_Fields, updateOld=False):
     issue_cursor = None
     get_more_issues = True
-    global just_copy_old_file
 
     # Since PRs can't be filtered by their update time, we retrieve
     # them in update-time order and cut off pagination once we're
@@ -634,12 +634,12 @@ def getPRs(fields=gql_PullRequest_Fields, updateOld=False):
 
             # Since we can't filter, check if we already have this one.
             if not updateOld:
-                if number in pr_ref:
-                    ref_updatedAt = dp.parse(pr_ref[number]["updatedAt"])
+                if number in refFile.prs:
+                    ref_updatedAt = dp.parse(refFile.prs[number]["updatedAt"])
                     dl_updatedAt = dp.parse(pr["updatedAt"])
                     if ref_updatedAt >= dl_updatedAt:
                         continue
-            elif number not in pr_ref:
+            elif number not in refFile.prs:
                 continue
 
             # Issues only have comments; PRs have both comments and reviews,
@@ -678,23 +678,92 @@ def getPRs(fields=gql_PullRequest_Fields, updateOld=False):
                 collapse(review, "comments")
 
             # Delete the old instance; add this instance
-            if not updateOld and number in pr_ref.keys():
-                del pr_ref[number]
+            if not updateOld and number in refFile.prs.keys():
+                del refFile.prs[number]
 
-            if number in pr_ref.keys():
-                pr_ref[number].update(pr)
+            if number in refFile.prs.keys():
+                refFile.prs[number].update(pr)
             else:
-                pr_ref[number] = pr
-            just_copy_old_file = False
+                refFile.prs[number] = pr
+            refFile.canCopy = False
 
         get_more_issues = prs["pageInfo"]["hasNextPage"]
         issue_cursor = prs["pageInfo"]["endCursor"]
 
         # Stop paginating if we've caught up to the last download
-        if not updateOld and prs["nodes"] and lastSuccess:
+        if not updateOld and prs["nodes"] and refFile.lastSuccess:
             oldestRetrieved = dp.parse(prs["nodes"][-1]["updatedAt"])
-            if oldestRetrieved < lastSuccess:
+            if oldestRetrieved < refFile.lastSuccess:
                 get_more_issues = False
+
+
+def newReferenceFile():
+    return SimpleNamespace(
+        magic=current_magic,
+        issues=dict(),
+        prs=dict(),
+        issues_only=True,
+        lastSuccess=None,
+        canCopy=False,
+        filename=None,
+    )
+
+
+def loadReference(filename):
+    fileIsValid = False
+    reference = newReferenceFile()
+    reference.filename = filename
+
+    if filename:
+        try:
+            with open(filename, "r") as ref_file:
+                raw_reference = json.load(ref_file)
+
+            fileIsValid = True
+            for element in ("magic", "timestamp", "issues", "repo"):
+                if element not in raw_reference:
+                    fileIsValid = False
+                    break
+
+            if fileIsValid and (
+                raw_reference["magic"] == current_magic
+                or raw_reference["magic"] in upgrades
+            ):
+                reference.magic = raw_reference["magic"]
+            else:
+                warnings.warn("Input file does not appear to be generated by this tool")
+                fileIsValid = False
+
+            if fileIsValid and raw_reference["repo"] != args.repo:
+                warnings.warn("Input file was generated from a different repo")
+                fileIsValid = False
+
+            if fileIsValid:
+                reference.lastSuccess = dp.parse(raw_reference["timestamp"])
+                reference.issues = dict(
+                    [(issue["number"], issue) for issue in raw_reference["issues"]]
+                )
+                if "pulls" in raw_reference:
+                    reference.issues_only = False
+                    reference.prs = dict(
+                        [(pr["number"], pr) for pr in raw_reference["pulls"]]
+                    )
+                else:
+                    reference.issues_only = True
+                    reference.prs = dict()
+
+        except:
+            warnings.warn("Unable to read input file; proceeding without it")
+            pass
+
+    if not fileIsValid:
+        return newReferenceFile()
+
+    reference.canCopy = bool(reference.issues) and bool(
+        reference.prs or args.issuesOnly
+    )
+
+    return upgradeReference(reference)
 
 
 #########################
@@ -703,92 +772,62 @@ def getPRs(fields=gql_PullRequest_Fields, updateOld=False):
 
 current_magic = "E!vIA5L86J2I"
 
+UpgradeInstruction = namedtuple("UpgradeInstruction", ["result", "issues", "prs"])
+
 upgrades = {
-    "B8n2c@e8kvfx": {
-        "result": "E!vIA5L86J2I",
-        "issues": None,
-        "prs": """
-fragment prFields on PullRequest {
-    number
-    baseRepository { nameWithOwner }
-    baseRefName
-    baseRefOid
-    headRepository { nameWithOwner }
-    headRefName
-    headRefOid
-    mergeCommit { oid }
+    "B8n2c@e8kvfx": UpgradeInstruction(
+        result="E!vIA5L86J2I",
+        issues=None,
+        prs="""
+            fragment prFields on PullRequest {
+                number
+                baseRepository { nameWithOwner }
+                baseRefName
+                baseRefOid
+                headRepository { nameWithOwner }
+                headRefName
+                headRefOid
+                mergeCommit { oid }
+            }""",
+    )
 }
-""",
-    }
-}
+
+
+def upgradeReference(reference):
+    try:
+        while reference.magic in upgrades:
+            if upgrades[reference.magic].issues:
+                getIssues(reference, upgrades[reference.magic].issues, True)
+            if upgrades[reference.magic].prs:
+                getPRs(reference, upgrades[reference.magic].prs, True)
+            reference.magic = upgrades[reference.magic].result
+    except:
+        pass
+
+    if reference.magic != current_magic:
+        warnings.warn(
+            "Unable to upgrade input file to current version; proceeding without it"
+        )
+        return newReferenceFile()
+
+    return reference
+
 
 #####################
 ## Body of program ##
 #####################
 
-just_copy_old_file = False
 (owner, repo) = args.repo.split("/", 1)
 
 ## Read in the reference files, if any
-issue_ref = dict()
-pr_ref = dict()
-lastSuccess = None
-ref_is_issues_only = True
-
-if args.refFile:
-    try:
-        with open(args.refFile, "r") as ref_file:
-            raw_reference = json.load(ref_file)
-
-        fileIsValid = True
-        for element in ("magic", "timestamp", "issues", "repo"):
-            if element not in raw_reference:
-                fileIsValid = False
-                break
-
-        if not fileIsValid or not (
-            raw_reference["magic"] == current_magic
-            or raw_reference["magic"] in upgrades
-        ):
-            warnings.warn("Input file does not appear to be generated by this tool")
-            fileIsValid = False
-
-        if fileIsValid and raw_reference["repo"] != args.repo:
-            warnings.warn("Input file was generated from a different repo")
-            fileIsValid = False
-
-        if fileIsValid:
-            lastSuccess = dp.parse(raw_reference["timestamp"])
-            issue_ref = dict(
-                [(issue["number"], issue) for issue in raw_reference["issues"]]
-            )
-            if "pulls" in raw_reference:
-                ref_is_issues_only = False
-                pr_ref = dict([(pr["number"], pr) for pr in raw_reference["pulls"]])
-
-        just_copy_old_file = (
-            True if issue_ref and (pr_ref or args.issuesOnly) else False
-        )
-
-        while raw_reference["magic"] in upgrades:
-            magic = raw_reference["magic"]
-            if upgrades[magic]["issues"]:
-                getIssues(upgrades[magic]["issues"], True)
-            if upgrades[magic]["prs"]:
-                getPRs(upgrades[magic]["prs"], True)
-            raw_reference["magic"] = upgrades[magic]["result"]
-
-    except:
-        warnings.warn("Unable to read input file; proceeding without it")
-        pass
-
+reference = loadReference(args.refFile)
 
 ## Download from GitHub the full issues list (if no reference) or the updated issues list (if reference)
-getIssues()
+getIssues(reference)
 
 ## Similar process with PRs, except they don't have a filter
 if not args.issuesOnly:
-    getPRs()
+    getPRs(reference)
 
 # Fetch the Labels fresh each time
 labels_ref = list()
@@ -811,7 +850,7 @@ while get_more_issues:
 ## Ready to output
 
 ## Pick up everything in the reference if nothing new was downloaded
-if just_copy_old_file:
+if reference.canCopy and args.outFile:
     shutil.copyfile(args.refFile, args.outFile)
 else:
     output = {
@@ -819,10 +858,10 @@ else:
         "timestamp": now.isoformat(),
         "repo": args.repo,
         "labels": labels_ref,
-        "issues": [issue for (id, issue) in sorted(issue_ref.items())],
+        "issues": [issue for (id, issue) in sorted(reference.issues.items())],
     }
     if not args.issuesOnly:
-        output["pulls"] = [pr for (id, pr) in sorted(pr_ref.items())]
+        output["pulls"] = [pr for (id, pr) in sorted(reference.prs.items())]
 
     if args.outFile:
         with open(args.outFile, "w") as output_file:
