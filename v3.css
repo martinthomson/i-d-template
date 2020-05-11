@@ -160,6 +160,9 @@ dl > dd > dl {
   margin-top: 0.5em;
   margin-bottom: 0em;
 }
+dd.break {
+  display: none;
+}
 
 /* links */
 a, a[href].selfRef:hover {
