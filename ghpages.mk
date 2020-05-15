@@ -81,8 +81,11 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	@KEEP=$$((`date '+%s'`-2592000)); CUTOFF=$$((`date '+%s'`-5184000)); \
 	ROOT=`git -C $(GHPAGES_TARGET) rev-list --max-parents=0 gh-pages`; \
 	if [ `git -C $(GHPAGES_ROOT) show -s --format=%ct $$ROOT` -lt $$CUTOFF ]; then \
-	  git -C $(GHPAGES_ROOT) replace --graft `git rev-list --min-age=$$KEEP --max-count=1 gh-pages` && \
-	  git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
+	  NEW_ROOT=`git -C $(GHPAGES_ROOT) rev-list --min-age=$$KEEP --max-count=1 gh-pages`; \
+	  if [ $$NEW_ROOT != $$ROOT ]; then \
+		git -C $(GHPAGES_ROOT) replace --graft $$NEW_ROOT && \
+		git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
+	  fi \
 	fi
 
 # Clean up obsolete directories (2592000 = 30 days)
