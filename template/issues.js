@@ -680,7 +680,9 @@ function showLabels(labels, click) {
     let item = document.createElement('span');
     item.className = 'item';
     let sp = document.createElement('span');
-    sp.style.backgroundColor = '#' + db.labels[label].color;
+    if (db.labels.hasOwnProperty(label)) {
+      sp.style.backgroundColor = '#' + db.labels[label].color;
+    }
     sp.className = 'swatch';
     item.appendChild(sp);
     let a = document.createElement('a');
