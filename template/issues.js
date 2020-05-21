@@ -680,9 +680,6 @@ function showLabels(labels, click) {
     let item = document.createElement('span');
     item.className = 'item';
     let sp = document.createElement('span');
-    if (db.labels.hasOwnProperty(label)) {
-      sp.style.backgroundColor = '#' + db.labels[label].color;
-    }
     sp.className = 'swatch';
     item.appendChild(sp);
     let a = document.createElement('a');
@@ -691,8 +688,11 @@ function showLabels(labels, click) {
     if (click) {
       a.addEventListener('click', click);
     }
-    if (db.labels[label].description) {
-      item.title = db.labels[label].description;
+    if (db.labels.hasOwnProperty(label)) {
+      sp.style.backgroundColor = '#' + db.labels[label].color;
+      if (db.labels[label].description) {
+        item.title = db.labels[label].description;
+      }
     }
     item.appendChild(a);
     return item;
