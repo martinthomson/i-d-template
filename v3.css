@@ -474,6 +474,9 @@ hr.addr {
   }
 }
 
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
 .cref {
   background-color: rgba(249, 232, 105, 0.3);
   padding: 2px 4px;
