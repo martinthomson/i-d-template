@@ -457,14 +457,10 @@ hr.addr {
 }
 @media (min-width: 500px) {
   #authors-addresses > section {
-    display: relative;
-    padding: 32px 0 0;
     column-count: 2;
     column-gap: 20px;
   }
-  #name-authors-addresses {
-    position: absolute;
-    top: 0px;
+  #authors-addresses > section > h2 {
     column-span: all;
   }
   /* hack for break-inside: avoid-column */
