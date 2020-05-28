@@ -474,22 +474,6 @@ hr.addr {
   }
 }
 
-/* temporary notes */
-.rfcEditorRemove::before {
-  position: absolute;
-  top: 0.2em;
-  right: 0.2em;
-  padding: 0.2em;
-  content: "The RFC Editor will remove this note";
-  color: #b76427;
-  background-color: rgba(249, 232, 105, 0.3);
-}
-.rfcEditorRemove {
-  position: relative;
-  padding-top: 1.8em;
-  background-color: rgba(249, 232, 105, 0.3);
-  border-radius: 3px;
-}
 .cref {
   background-color: rgba(249, 232, 105, 0.3);
   padding: 2px 4px;
