@@ -256,12 +256,14 @@ table {
   width: 100%;
   margin: 0 0 1em;
   border-collapse: collapse;
+}
+thead, tbody {
   border: 1px solid var(--line-color);
 }
 th, td {
   text-align: left;
   vertical-align: top;
-  padding: 0.5em 0.75em;
+  padding: 5px 10px;
 }
 th {
   text-align: left;
@@ -273,16 +275,15 @@ tr:nth-child(2n) > td {
 tr:nth-child(2n+1) > td {
   background-color: var(--highlight-color);
 }
-thead+tbody tr:nth-child(2n) > td {
+thead+tbody > tr:nth-child(2n) > td {
   background-color: var(--highlight-color);
 }
-thead+tbody tr:nth-child(2n+1) > td {
+thead+tbody > tr:nth-child(2n+1) > td {
   background-color: var(--background-color);
 }
 table caption {
   margin: 0;
   padding: 3px 1em;
-  border-top: 1px solid var(--line-color);
 }
 table p {
   /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
