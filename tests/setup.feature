@@ -55,7 +55,7 @@ Feature: Initial setup
      then it fails
      and generates a message "remote"
 
-  Scenario:  Run setup script on directory without pushing to master
+  Scenario:  Run setup script on directory without pushing
     Given a git repo with no origin
      and an empty origin remote is added
      and lib is cloned in
