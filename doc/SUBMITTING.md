@@ -43,12 +43,12 @@ you aren't certain.
 
 **Note**: Existing users will need to update their configuration to take
 advantage of this feature.  For Circle CI users, adding
-[.circleci/config.yml](https://github.com/martinthomson/i-d-template/blob/master/template/.circleci/config.yml)
+[.circleci/config.yml](https://github.com/martinthomson/i-d-template/blob/main/template/.circleci/config.yml)
 to your repository and removing any existing `circle.yml` file is recommended.
 [Travis
-support](https://github.com/martinthomson/i-d-template/blob/master/template/.travis.yml)
+support](https://github.com/martinthomson/i-d-template/blob/main/template/.travis.yml)
 is less well-tested (and slower).  Updating the
-[Makefile](https://github.com/martinthomson/i-d-template/blob/master/template/Makefile)
+[Makefile](https://github.com/martinthomson/i-d-template/blob/main/template/Makefile)
 provides a small additional speed improvement.
 
 **Bug**: Circle CI has a [bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)

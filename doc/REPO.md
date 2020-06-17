@@ -4,7 +4,7 @@ Make a [new organization](https://github.com/organizations/new) for your working
 group.  This guide will use the name `unicorn-wg` for your working group.
 
 There is a [more detailed
-guide](https://github.com/martinthomson/i-d-template/blob/master/doc/WG-SETUP.md)
+guide](https://github.com/martinthomson/i-d-template/blob/main/doc/WG-SETUP.md)
 for working groups.
 
 # New Draft Setup
@@ -30,8 +30,8 @@ it match the name of your draft. Don't include a version number in the name.  Ou
 example would be `draft-ietf-unicorn-protocol.md` in markdown.
 
 You can copy of one of the examples files
-([markdown](https://github.com/martinthomson/i-d-template/blob/master/doc/example.md) or
-[XML](https://github.com/martinthomson/i-d-template/blob/master/doc/example.xml))
+([markdown](https://github.com/martinthomson/i-d-template/blob/main/doc/example.md) or
+[XML](https://github.com/martinthomson/i-d-template/blob/main/doc/example.xml))
 if you are starting from scratch.
 
 Edit the draft so that it has both a title and the correct name.  These tools
