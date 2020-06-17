@@ -34,7 +34,7 @@ update:  auto_update
 	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
 	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
 	done
-	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile
+	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile && git commit -m "Update Makefile" Makefile
 	@dotgit=$$(git rev-parse --git-dir); \
 	  [ -L "$$dotgit"/hooks/pre-commit ] || \
 	    ln -s ../../$(LIBDIR)/pre-commit.sh "$$dotgit"/hooks/pre-commit; \
