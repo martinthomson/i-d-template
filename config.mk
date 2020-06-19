@@ -6,10 +6,6 @@
 #   https://pypi.python.org/pypi/xml2rfc
 xml2rfc ?= xml2rfc -q
 
-ifdef XML2RFC_REFCACHEDIR
-xml2rfc += --cache=$(XML2RFC_REFCACHEDIR)
-endif
-
 # If you are using markdown files use either kramdown-rfc2629 or mmark
 #   https://github.com/cabo/kramdown-rfc2629
 kramdown-rfc2629 ?= kramdown-rfc2629
@@ -48,3 +44,10 @@ SHELL := bash
 # For uploading draft "releases" to the datatracker.
 curl ?= curl -sS
 DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit
+
+ifdef XML2RFC_REFCACHEDIR
+xml2rfc += --cache=$(XML2RFC_REFCACHEDIR)
+ifndef KRAMDOWN_REFCACHEDIR
+export KRAMDOWN_REFCACHEDIR=$(XML2RFC_REFCACHEDIR)
+endif
+endif
