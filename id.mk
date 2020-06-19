@@ -34,8 +34,6 @@ last_modified = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c 
 file_size = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%z' || echo -c '%s') $(1))
 last_commit = $$(git rev-list -n 1 --timestamp $(1) -- $(2) | sed -e 's/ .*//')
 
-GITHUB_TOKEN ?= GH_TOKEN
-
 # CI config
 CI ?= false
 ifneq (,$(GITHUB_REPOSITORY))
@@ -93,4 +91,8 @@ else
 GITHUB_REPO_FULL := $(CI_REPO_FULL)
 GITHUB_USER := $(CI_USER)
 GITHUB_REPO := $(CI_REPO)
+endif
+
+ifneq (,$(and $(GITHUB_ACTOR),$(GITHUB_TOKEN)))
+GH_TOKEN ?= $(GITHUB_ACTOR):$(GITHUB_TOKEN)
 endif
