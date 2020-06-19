@@ -9,8 +9,6 @@ jobs:
     steps:
     - name: "Checkout"
       uses: actions/checkout@v2
-    - name: "Build Drafts"
-      uses: martinthomson/i-d-template@v1
     - name: "Upload to Datatracker"
       uses: martinthomson/i-d-template@v1
       with:

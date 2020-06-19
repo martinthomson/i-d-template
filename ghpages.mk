@@ -20,7 +20,7 @@ endif
 endif
 
 # Default to pushing if a key or token is available.
-ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY))
+ifneq (,$(GITHUB_TOKEN)$(CI_HAS_WRITE_KEY))
 PUSH_GHPAGES ?= true
 endif
 PUSH_GHPAGES ?= false
@@ -116,11 +116,11 @@ ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
-ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
+ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_TOKEN),,1)))
 	git -C $(GHPAGES_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) gh-pages
 else
 	@echo git -C $(GHPAGES_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_ROOT) push -qf https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
+	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
 endif
 else
 	git -C $(GHPAGES_ROOT) push -f origin gh-pages
