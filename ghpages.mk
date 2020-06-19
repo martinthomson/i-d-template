@@ -120,6 +120,7 @@ ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_TOKEN),,1)))
 	git -C $(GHPAGES_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) gh-pages
 else
 	@echo git -C $(GHPAGES_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) gh-pages
+	@echo Using GITHUB_TOKEN
 	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
 endif
 else
