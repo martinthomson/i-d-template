@@ -31,6 +31,7 @@ def step_impl(context):
 
     with cd(context.working_dir):
         call(["git", "clone", context.origin_dir, "."])
+        call(["git", "checkout", "--orphan", "main"])
         call(["git", "config", "user.name", "Behave Tests"])
         call(["git", "config", "user.email", "behave@example.com"])
 
