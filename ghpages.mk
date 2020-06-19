@@ -9,9 +9,13 @@ else
 SOURCE_BRANCH := $(TRAVIS_BRANCH)
 endif
 else
+ifdef GITHUB_REF
+SOURCE_BRANCH := $(notdir $(GITHUB_REF))
+else
 SOURCE_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 ifeq (HEAD,$(SOURCE_BRANCH))
 SOURCE_BRANCH := $(shell git rev-parse --short HEAD)
+endif
 endif
 endif
 

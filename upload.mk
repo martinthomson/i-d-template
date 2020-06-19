@@ -18,7 +18,8 @@ ifneq (,$(TRAVIS))
 latest:: $(addsuffix .xml,$(draft_releases))
 endif
 
-.PHONY: upload
+.PHONY: upload publish
+publish: upload
 upload: $(uploads)
 
 .%.upload: %.xml
