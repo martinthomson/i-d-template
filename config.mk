@@ -53,4 +53,7 @@ else
 XML2RFC_REFCACHEDIR ?= $(KRAMDOWN_REFCACHEDIR)
 endif
 xml2rfc += --cache=$(XML2RFC_REFCACHEDIR)
+ifneq (,$(shell mkdir -p $(KRAMDOWN_REFCACHEDIR)))
+$(info Created cache directory at $(KRAMDOWN_REFCACHEDIR))
+endif
 export KRAMDOWN_REFCACHEDIR
