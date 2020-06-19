@@ -83,7 +83,7 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 
 # Drop old gh-pages commits (keep 30-60 days of history)
 	@KEEP=$$((`date '+%s'`-2592000)); CUTOFF=$$((`date '+%s'`-5184000)); \
-	ROOT=`git -C $(GHPAGES_TARGET) rev-list --max-parents=0 gh-pages`; \
+	ROOT=`git -C $(GHPAGES_ROOT) rev-list --max-parents=0 gh-pages`; \
 	if [ `git -C $(GHPAGES_ROOT) show -s --format=%ct $$ROOT` -lt $$CUTOFF ]; then \
 	  NEW_ROOT=`git -C $(GHPAGES_ROOT) rev-list --min-age=$$KEEP --max-count=1 gh-pages`; \
 	  if [ $$NEW_ROOT != $$ROOT ]; then \
