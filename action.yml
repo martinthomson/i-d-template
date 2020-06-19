@@ -1,0 +1,14 @@
+name: 'Internet Draft CI'
+description: 'Greet someone and record the time'
+author: 'Martin Thomson <mt@lowentropy.net>'
+inputs:
+  make:  # id of input
+    description: 'The make target to build'
+    required: false
+    default: 'all'
+runs:
+  using: 'docker'
+  image: 'action/Dockerfile'
+branding:
+  icon: 'check-square'
+  color: 'green'

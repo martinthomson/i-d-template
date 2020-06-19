@@ -32,7 +32,8 @@ endif
 TEMPLATE_FILES := \
   Makefile .gitignore \
   CONTRIBUTING.md LICENSE.md \
-  .travis.yml .circleci/config.yml
+  .circleci/config.yml \
+  .github/workflows/ghpages.yml .github/workflows/publish.yml \
 
 TEMPLATE_FILE_MK := $(LIBDIR)/.template-files.mk
 include $(TEMPLATE_FILE_MK)
