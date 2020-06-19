@@ -51,8 +51,6 @@ RUN set -e; tool_install() { \
 RUN pip3 install --compile xml2rfc
 RUN gem install --no-doc certified kramdown-rfc2629 && certified-update
 
-ENV KRAMDOWN_REFCACHEDIR=/cache/xml2rfc
-RUN mkdir -p $KRAMDOWN_REFCACHEDIR
 RUN GIT_REFERENCE=/cache/git-reference; \
     git init $GIT_REFERENCE; \
     git -C $GIT_REFERENCE remote add i-d-template https://github.com/martinthomson/i-d-template; \
