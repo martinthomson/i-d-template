@@ -45,9 +45,12 @@ SHELL := bash
 curl ?= curl -sS
 DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit
 
-ifdef XML2RFC_REFCACHEDIR
+# Setup a shared cache for xml2rfc and kramdown-rfc2629
+ifeq (,$(KRAMDOWN_REFCACHEDIR))
+XML2RFC_REFCACHEDIR ?= ~/.cache/xml2rfc
+KRAMDOWN_REFCACHEDIR := $(XML2RFC_REFCACHEDIR)
+else
+XML2RFC_REFCACHEDIR ?= $(KRAMDOWN_REFCACHEDIR)
+endif
 xml2rfc += --cache=$(XML2RFC_REFCACHEDIR)
-ifndef KRAMDOWN_REFCACHEDIR
-export KRAMDOWN_REFCACHEDIR=$(XML2RFC_REFCACHEDIR)
-endif
-endif
+export KRAMDOWN_REFCACHEDIR
