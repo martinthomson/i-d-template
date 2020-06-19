@@ -6,7 +6,7 @@ inputs:
   make:  # id of input
     description: 'The make target to build'
     required: false
-    default: 'all'
+    default: 'latest'
 
 runs:
   using: 'docker'
