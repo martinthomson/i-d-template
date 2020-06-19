@@ -84,7 +84,7 @@ def step_impl(context):
 @then(u'a file is created called "{filename}" which contains "{text}"')
 def step_impl(context, filename, text):
     context.execute_steps(
-        u'then a branch is created called "master" containing "%s" which contains "%s"'
+        u'then a branch is created called "main" containing "%s" which contains "%s"'
         % (filename, text)
     )
 
@@ -92,7 +92,7 @@ def step_impl(context, filename, text):
 @then(u'a file is created called "{filename}"')
 def step_impl(context, filename):
     context.execute_steps(
-        u'then a branch is created called "master" containing "%s"' % filename
+        u'then a branch is created called "main" containing "%s"' % filename
     )
 
 

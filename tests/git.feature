@@ -7,7 +7,7 @@ Feature: git integration
      and a branch is created called "gh-pages" containing "index.html"
      and documents are added to gh-pages
 
-  Scenario:  make ghpages with a non-master default branch
+  Scenario:  make ghpages with a non-main default branch
     Given a configured git repo with a Kramdown draft
      and the default branch is "kerfuffle"
      when make "ghpages" is run

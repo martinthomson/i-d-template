@@ -125,44 +125,51 @@ $ make ghpages
 
 When you do that, you will need to push the `gh-pages` branch yourself.
 
-Or, you can setup an automatic commit hook using Circle or Travis CI, as described
-in the next section.
+The default template includes files that will enable [GitHub
+Actions](https://github.com/features/actions).  These will result in
+automatically enabling builds that update the editor's copy, publish tagged
+drafts to datatracker, and periodically save an archive of issues and pull
+requests.
+
+Or, you can disable GitHub Actions and use Circle CI, as described in the next
+section.
 
 
-# Automatic Update for Editor's Copy
+# Automatic Update for Editor's Copy with Circle CI
 
 Manual maintenance of `gh-pages` means that it will always be out of date.  You can
 use an integrated continuous integration system to maintain a copy.
 
-This requires that you sign in with [Circle](https://circleci.com/) or
-[Travis](https://travis-ci.org/).
+This requires that you sign in with [Circle](https://circleci.com/).
 
-First [enable builds for the new repository](https://onboarding.circleci.com/)
-(or on [Travis](https://travis-ci.org/profile), though Travis is less well
-supported on the whole).
+First [enable builds for the new repository](https://onboarding.circleci.com/).
 
 Then, you need to get yourself a [new GitHub application
 token](https://github.com/settings/tokens/new).  The application token only
 needs the `public_repo` privilege.  This will let it push updates to your
 `gh-pages` branch.
 
-You can add environment variables using the Travis or Circle interface.  Make
-a variable with the name `GH_TOKEN` and the value of your newly-created
-application token.  On Travis, make sure to leave the value of "Display value in
-build log" disabled, or you will be making your token public.
+You can add environment variables using the Circle interface.  Make a variable
+with the name `GH_TOKEN` or `GITHUB_TOKEN` and the value of your newly-created
+application token.
 
 **WARNING**: You might want to use a dummy account for application tokens to
 minimize the consequences of accidental leaks of your key.
 
 Once you enable pushes, be very careful merging pull requests that alter
-`circle.yml`, `.travis.yml`, or `Makefile`.  Those files can cause the value of
+`circle.yml` or `Makefile`.  Those files can cause the value of
 the token to be published for all to see.  You don't want that to happen.  Even
 though tokens can be revoked easily, discovering a leak might take some time.
 Only pushes to the main repository will be able to see the token, so don't worry
 about pull requests.
 
-Circle (or Travis) will now also check pull requests for errors, letting you
-know if things didn't work out so that you don't merge anything suspect.
+Circle will now also check pull requests for errors, letting you know if things
+didn't work out so that you don't merge anything suspect.
+
+A `.travis.yml` file exists
+([here](https://github.com/martinthomson/i-d-template/blob/main/template/.travis.yml))
+that can be used to setup [Travis](https://travis-ci.org).  However, that
+process is less well supported.
 
 
 # Regenerating README.md
