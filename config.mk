@@ -6,6 +6,10 @@
 #   https://pypi.python.org/pypi/xml2rfc
 xml2rfc ?= xml2rfc -q
 
+ifdef XML2RFC_REFCACHEDIR
+xml2rfc += --cache=$(XML2RFC_REFCACHEDIR)
+endif
+
 # If you are using markdown files use either kramdown-rfc2629 or mmark
 #   https://github.com/cabo/kramdown-rfc2629
 kramdown-rfc2629 ?= kramdown-rfc2629
