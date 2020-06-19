@@ -17,14 +17,13 @@ jobs:
         make: gh-pages
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      if: secrets.GITHUB_TOKEN
 
     - name: "Save HTML"
       uses: actions/upload-artifact@v2
       with:
-        path: *.html
+        path: "*.html"
 
     - name: "Save Text"
       uses: actions/upload-artifact@v2
       with:
-        path: *.txt
+        path: "*.txt"
