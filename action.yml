@@ -9,6 +9,7 @@ inputs:
 runs:
   using: 'docker'
   image: 'action/Dockerfile'
+  args: [ ${{ inputs.make }} ]
 branding:
   icon: 'check-square'
   color: 'green'
