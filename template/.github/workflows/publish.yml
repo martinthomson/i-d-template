@@ -1,7 +1,8 @@
 name: "Publish New Draft Version"
 on:
   push:
-    tags: ['draft-*']
+    tags:
+      - "draft-*"
 
 jobs:
   build:
@@ -10,6 +11,19 @@ jobs:
     steps:
     - name: "Checkout"
       uses: actions/checkout@v2
+
+    - name: "Get Date"
+      id: date
+      run: date -u '+::set-output name=date::%FT%T'
+
+    - name: "Cache References"
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.HOME }}/.cache/xml2rfc
+        key: refcache-${{ steps.date.outputs.date }}
+        restore-keys: |
+          refcache-${{ steps.date.outputs.date }}
+          refcache-
 
     - name: "Upload to Datatracker"
       uses: martinthomson/i-d-template@v1

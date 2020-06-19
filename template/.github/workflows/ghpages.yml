@@ -1,5 +1,6 @@
 name: "Upload Editor's Copy"
 on: [push, pull_request]
+
 jobs:
   build:
     name: "Update Editor's Copy"
@@ -7,6 +8,19 @@ jobs:
     steps:
     - name: "Checkout"
       uses: actions/checkout@v2
+
+    - name: "Get Date"
+      id: date
+      run: date -u '+::set-output name=date::%FT%T'
+
+    - name: "Cache References"
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.HOME }}/.cache/xml2rfc
+        key: refcache-${{ steps.date.outputs.date }}
+        restore-keys: |
+          refcache-${{ steps.date.outputs.date }}
+          refcache-
 
     - name: "Build Drafts"
       uses: martinthomson/i-d-template@v1
