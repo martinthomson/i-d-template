@@ -1,5 +1,15 @@
-name: "Upload Editor's Copy"
-on: [push, pull_request]
+name: "Update Editor's Copy"
+
+on:
+  push:
+    paths-ignore:
+    - README.md
+    - CONTRIBUTING.md
+    - LICENSE.md
+  pull_request:
+    paths:
+    - "draft-*"
+    - "Makefile"
 
 jobs:
   build:
