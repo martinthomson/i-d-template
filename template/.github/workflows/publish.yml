@@ -12,4 +12,4 @@ jobs:
     - name: "Upload to Datatracker"
       uses: martinthomson/i-d-template@v1
       with:
-        command: upload
+        make: upload
