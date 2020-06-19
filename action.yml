@@ -1,15 +1,19 @@
-name: 'Internet Draft CI'
-description: 'Greet someone and record the time'
+name: 'Internet-Draft CI'
+description: 'Tool for building Internet-Drafts as GitHub Actions'
 author: 'Martin Thomson <mt@lowentropy.net>'
+
 inputs:
   make:  # id of input
     description: 'The make target to build'
     required: false
     default: 'all'
+
 runs:
   using: 'docker'
   image: 'action/Dockerfile'
-  args: [ ${{ inputs.make }} ]
+  args:
+    - ${{ inputs.make }}
+
 branding:
   icon: 'check-square'
   color: 'green'
