@@ -33,7 +33,7 @@ TEMPLATE_FILES := \
   Makefile .gitignore \
   CONTRIBUTING.md LICENSE.md \
   .circleci/config.yml \
-  .github/workflows/ghpages.yml .github/workflows/publish.yml \
+  .github/workflows/ghpages.yml .github/workflows/publish.yml .github/workflows/archive.yml
 
 TEMPLATE_FILE_MK := $(LIBDIR)/.template-files.mk
 include $(TEMPLATE_FILE_MK)
