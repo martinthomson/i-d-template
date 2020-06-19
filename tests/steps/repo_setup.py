@@ -25,7 +25,8 @@ def step_impl(context):
     context.origin_dir = mkdtemp()
     with cd(context.origin_dir):
         call(["git", "init"])
-        # Need to checkout another branch so that pushes to master work.
+        call(["git", "checkout", "--orphan", "main"])
+        # Need to checkout another branch so that pushes to main work.
         call(["git", "checkout", "-b", "testing"])
 
     with cd(context.working_dir):
@@ -48,6 +49,7 @@ def step_impl(context):
     context.working_dir = mkdtemp()
     with cd(context.working_dir):
         call(["git", "init"])
+        call(["git", "checkout", "--orphan", "main"])
         call(["git", "config", "user.name", "Behave Tests"])
         call(["git", "config", "user.email", "behave@example.com"])
 
@@ -104,10 +106,10 @@ def step_impl(context, ignore):
         call(["git", "commit", "-am", "Create .gitignore with '{}'".format(ignore)])
 
 
-@given(u"pushed to origin/master")
+@given(u"pushed to origin/main")
 def step_impl(context):
     with cd(context.working_dir):
-        call(["git", "push", "origin", "master"])
+        call(["git", "push", "origin", "main"])
 
 
 @given(u"a git repo with a single Kramdown draft")
@@ -117,7 +119,7 @@ def step_impl(context):
         Given an empty git repo
         and lib is cloned in
         and a Kramdown draft is created
-        and pushed to origin/master"""
+        and pushed to origin/main"""
     )
 
 
@@ -127,7 +129,7 @@ def step_impl(context):
         u"""
         Given a git repo with a single Kramdown draft
         and a Kramdown draft is created
-        and pushed to origin/master"""
+        and pushed to origin/main"""
     )
 
 
