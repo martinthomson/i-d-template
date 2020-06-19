@@ -47,7 +47,7 @@ DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit
 
 # Setup a shared cache for xml2rfc and kramdown-rfc2629
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
-XML2RFC_REFCACHEDIR ?= ~/.cache/xml2rfc
+XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
 KRAMDOWN_REFCACHEDIR := $(XML2RFC_REFCACHEDIR)
 else
 XML2RFC_REFCACHEDIR ?= $(KRAMDOWN_REFCACHEDIR)

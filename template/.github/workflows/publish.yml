@@ -13,14 +13,17 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v2
 
-    - name: "Get Date"
-      id: date
-      run: date -u '+::set-output name=date::%FT%T'
+    - name: "Cache Setup"
+      id: cache-setup
+      run: |
+        mkdir -p "$HOME"/.cache/xml2rfc
+        echo "::set-output name=path::$HOME/.cache/xml2rfc"
+        date -u "+::set-output name=date::%FT%T"
 
     - name: "Cache References"
       uses: actions/cache@v2
       with:
-        path: ${{ env.HOME }}/.cache/xml2rfc
+        path: ${{ steps.cache-setup.outputs.path }}
         key: refcache-${{ steps.date.outputs.date }}
         restore-keys: |
           refcache-${{ steps.date.outputs.date }}
