@@ -13,10 +13,8 @@ RUN apt-get update && \
     python3-certifi \
     python3-chardet \
     python3-dateutil \
-    python3-html5lib \
     python3-idna \
     python3-intervaltree \
-    python3-kitchen \
     python3-lxml \
     python3-minimal \
     python3-pip \
@@ -49,13 +47,6 @@ RUN set -e; tool_install() { \
       75a9e83869885836c024a94f35128eaf292c6b9de3fd9d3361fbc62d46ec9f16
 
 RUN pip3 install --compile xml2rfc
-RUN gem install --no-doc certified kramdown-rfc2629 && certified-update
-
-RUN GIT_REFERENCE=/cache/git-reference; \
-    git init $GIT_REFERENCE; \
-    git -C $GIT_REFERENCE remote add i-d-template https://github.com/martinthomson/i-d-template; \
-    git -C $GIT_REFERENCE remote add rfc2629xslt https://github.com/reschke/xml2rfc; \
-    git -C $GIT_REFERENCE fetch --all
-ENV CLONE_ARGS --reference /cache/git-reference
+RUN gem install --no-doc kramdown-rfc2629
 
 ENTRYPOINT ["/usr/bin/make"]
