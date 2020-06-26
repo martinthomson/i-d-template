@@ -11,6 +11,7 @@ inputs:
 runs:
   using: 'docker'
   image: 'action/Dockerfile'
+  pre-entrypoint: '/usr/bin/make .targets.mk'
   args:
     - ${{ inputs.make }}
 
