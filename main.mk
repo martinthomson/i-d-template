@@ -3,9 +3,35 @@ latest:: txt html
 
 .DELETE_ON_ERROR:
 
+## Modularity
+# Basic files (these can't rely on details from .targets.mk)
 LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
+
+# Now build .targets.mk, which contains details of draft versions.
+targets_file := .targets.mk
+targets_drafts := TARGETS_DRAFTS := $(drafts)
+targets_tags := TARGETS_TAGS := $(drafts_tags)
+
+ifeq (,$(DISABLE_TARGETS_UPDATE))
+# Note that $(shell ) folds multiple lines into one, which is OK here.
+ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
+$(warning Forcing rebuild of $(targets_file))
+# Force an update of .targets.mk by setting a double-colon rule with no
+# prerequisites if the set of drafts or tags it contains is out of date.
+.PHONY: $(targets_file)
+endif
+endif # DISABLE_TARGETS_UPDATE
+
+.SILENT: $(targets_file)
+$(targets_file): $(LIBDIR)/build-targets.sh
+	echo "$(targets_drafts)" >$@
+	echo "$(targets_tags)" >>$@
+	$< $(drafts) >>$@
+include $(targets_file)
+
+# Now include the advanced stuff that can depend on draft information.
 include $(LIBDIR)/ghpages.mk
 include $(LIBDIR)/archive.mk
 include $(LIBDIR)/upload.mk
@@ -102,27 +128,6 @@ endif
 ## Build copies of drafts for submission
 .PHONY: submit
 submit:: $(drafts_next_txt) $(drafts_next_xml)
-
-targets_file := .targets.mk
-targets_drafts := TARGETS_DRAFTS := $(drafts)
-targets_tags := TARGETS_TAGS := $(drafts_tags)
-
-ifeq (,$(DISABLE_TARGETS_UPDATE))
-# Note that $(shell ) folds multiple lines into one, which is OK here.
-ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
-$(warning Forcing rebuild of $(targets_file))
-# Force an update of .targets.mk by setting a double-colon rule with no
-# prerequisites if the set of drafts or tags it contains is out of date.
-.PHONY: $(targets_file)
-endif
-endif # DISABLE_TARGETS_UPDATE
-
-.SILENT: $(targets_file)
-$(targets_file): $(LIBDIR)/build-targets.sh
-	echo "$(targets_drafts)" >$@
-	echo "$(targets_tags)" >>$@
-	$< $(drafts) >>$@
-include $(targets_file)
 
 ## Check for validity
 .PHONY: check idnits
