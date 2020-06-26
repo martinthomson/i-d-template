@@ -1,0 +1,37 @@
+name: "Update Docker Image for GitHub Action"
+
+on:
+  push:
+    paths:
+    - "docker/**"
+    - ".github/workflows/docker.yml"
+
+jobs:
+  build:
+    name: "Update Docker Image"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Get Tag"
+      id: tag
+      run: |
+        ref="${{ github.ref }}"
+        if [ "$ref" = "refs/heads/master" ]; then
+          echo "::set-output name=tag::latest"
+        elif [ "${ref#refs/tags/}" != "$ref" ]; then
+          echo "::set-output name=tag::${ref#refs/tags/}"
+        else
+          echo "::set-output name=tag::"
+        fi
+
+    - name: "Publish to Dockerhub"
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: martinthomson/i-d-template-action
+        path: action
+        tags: ${{ steps.tag.outputs.tag }}
+        push: ${{ steps.tag.outputs.tag != '' }}
