@@ -3,7 +3,7 @@ description: 'Tool for building Internet-Drafts as GitHub Actions'
 author: 'Martin Thomson <mt@lowentropy.net>'
 
 inputs:
-  make:  # id of input
+  make:
     description: 'The make target to build'
     required: false
     default: 'latest'
@@ -11,7 +11,8 @@ inputs:
 runs:
   using: 'docker'
   image: 'action/Dockerfile'
-  pre-entrypoint: '/usr/bin/make .targets.mk'
+  pre: '/usr/bin/make'
+  pre-if: "inputs.make != 'latest'"
   args:
     - ${{ inputs.make }}
 
