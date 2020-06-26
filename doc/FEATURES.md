@@ -69,11 +69,15 @@ It also creates the following files from a template: `.gitignore`,
 
 ## With Continuous Integration Services
 
-Using [circleci](http://circleci.com/) or [travis](https://travis-ci.org/)
-[configured](REPO.md#automatic-update-for-editors-copy) you can:
+Using [GitHub Actions](https://github.com/features/actions) you get automated
+continuous integration that can:
 
 * Check that commits and pull requests for errors.
-* Automatically maintain your `gh-pages` branch.
+* Automatically maintain a readable copy for display on GitHub Pages.
 * Automatically save a copy of GitHub issues and pull requests to the repository
   for offline access.  This includes a simple HTML viewer.
 * Automatically submit tagged versions of drafts to the IETF datatracker.
+
+Alternatively, you can also use [circleci](http://circleci.com/) or
+[travis](https://travis-ci.org/) [as described
+here](REPO.md#automatic-update-for-editors-copy).
