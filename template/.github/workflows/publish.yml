@@ -15,7 +15,7 @@ jobs:
 
     # See https://github.com/actions/checkout/issues/290
     - name: "Get Tag Annotations"
-      run: git fetch origin ${{ github.ref }}:${{ github.ref }}
+      run: git fetch -f origin ${{ github.ref }}:${{ github.ref }}
 
     - name: "Cache Setup"
       id: cache-setup
