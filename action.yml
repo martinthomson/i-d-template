@@ -11,8 +11,6 @@ inputs:
 runs:
   using: 'docker'
   image: 'action/Dockerfile'
-  pre: '/usr/bin/make'
-  pre-if: "inputs.make != 'latest'"
   args:
     - ${{ inputs.make }}
 

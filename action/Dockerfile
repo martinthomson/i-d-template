@@ -49,4 +49,5 @@ RUN set -e; tool_install() { \
 RUN pip3 install --compile xml2rfc
 RUN gem install --no-doc kramdown-rfc2629
 
-ENTRYPOINT ["/usr/bin/make"]
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
