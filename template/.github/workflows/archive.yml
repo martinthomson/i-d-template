@@ -2,7 +2,7 @@ name: "Archive Issues and Pull Requests"
 
 on:
   schedule:
-    - cron: '* * * * 0,2,4'
+    - cron: '0 0 * * 0,2,4'
   repository_dispatch:
     types: [archive]
 
