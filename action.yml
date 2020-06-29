@@ -10,7 +10,7 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'martinthomson/i-d-template-action:latest'
+  image: 'docker://martinthomson/i-d-template-action:latest'
   args:
     - ${{ inputs.make }}
 
