@@ -20,6 +20,9 @@ endif
 endif
 
 # Default to pushing if a key or token is available.
+ifeq (pull_request,$(GITHUB_EVENT_NAME))
+PUSH_GHPAGES ?= false
+endif
 ifneq (,$(GH_TOKEN)$(CI_HAS_WRITE_KEY))
 PUSH_GHPAGES ?= true
 endif
