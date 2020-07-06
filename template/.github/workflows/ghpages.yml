@@ -40,6 +40,7 @@ jobs:
 
     - name: "Update GitHub Pages"
       uses: martinthomson/i-d-template@v1
+      if: ${{ github.event_name == 'push' }}
       with:
         make: gh-pages
       env:
