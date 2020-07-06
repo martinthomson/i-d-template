@@ -6,10 +6,13 @@ on:
     - README.md
     - CONTRIBUTING.md
     - LICENSE.md
+    - .gitignore
   pull_request:
-    paths:
-    - "draft-*"
-    - "Makefile"
+    paths-ignore:
+    - README.md
+    - CONTRIBUTING.md
+    - LICENSE.md
+    - .gitignore
 
 jobs:
   build:
