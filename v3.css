@@ -250,9 +250,19 @@ cite {
 
 /* tables */
 table {
-  width: 100%;
+  max-width: 100%;
   margin: 0 0 1em;
   border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
 }
 thead, tbody {
   border: 1px solid var(--line-color);
@@ -263,8 +273,7 @@ th, td {
   padding: 5px 10px;
 }
 th {
-  text-align: left;
-  background-color: #eee;
+  background-color: var(--line-color);
 }
 tr:nth-child(2n) > td {
   background-color: var(--background-color);
@@ -283,8 +292,6 @@ table caption {
   padding: 3px 1em;
 }
 table p {
-  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
-     be allowed within tables more generally, it would be far better to select on a class. */
   margin: 0;
 }
 
@@ -740,21 +747,6 @@ address div.left {
 }
 address div.right {
   text-align: right;
-}
-
-/* Provide table alignment support.  We can't use the alignX classes above
-   since they do unwanted things with caption and other styling. */
-table.right {
- margin-left: auto;
- margin-right: 0;
-}
-table.center {
- margin-left: auto;
- margin-right: auto;
-}
-table.left {
- margin-left: 0;
- margin-right: auto;
 }
 
 /* Give the table caption label the same styling as the figcaption */
