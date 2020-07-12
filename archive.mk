@@ -41,7 +41,7 @@ archive.json: fetch-archive $(drafts_source)
 	fi; \
 	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 	trap 'rm -f $$old_archive' EXIT; \
-	(git show $(ARCHIVE_BRANCH):$@ || echo '{}') > $$old_archive; \
+	git show $(ARCHIVE_BRANCH):$@ > $$old_archive || true; \
 	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(ARCHIVE_TOKEN) $@ --reference $$old_archive;
 
 
