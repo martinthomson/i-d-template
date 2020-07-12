@@ -18,6 +18,9 @@ ifeq (,$(GH_TOKEN))
 DISABLE_ARCHIVE_FETCH := true
 endif
 
+# If we are running in GitHub Actions, just use GITHUB_TOKEN, else use GH_TOKEN.
+ARCHIVE_TOKEN := $(or $(GITHUB_TOKEN),$(GH_TOKEN))
+
 ## Store a copy of any GitHub issues and pull requests.
 .PHONY: archive
 archive: archive.json
@@ -39,7 +42,7 @@ archive.json: fetch-archive $(drafts_source)
 	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 	trap 'rm -f $$old_archive' EXIT; \
 	(git show $(ARCHIVE_BRANCH):$@ || echo '{}') > $$old_archive; \
-	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(GH_TOKEN) $@ --reference $$old_archive;
+	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(ARCHIVE_TOKEN) $@ --reference $$old_archive;
 
 
 ARCHIVE_ROOT := /tmp/gharchive$(shell echo $$$$)
