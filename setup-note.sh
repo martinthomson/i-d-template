@@ -24,9 +24,6 @@ else
     wg="${WG}"
 fi
 
-eref() {
-    echo "<eref target=\"$1\">$1</eref>"
-}
 ml() {
     echo "https://mailarchive.ietf.org/arch/browse/$1/"
 }
@@ -34,7 +31,7 @@ ml() {
 echo '<note title="Discussion Venues" removeInRFC="true">'
 echo "<t>Discussion of this document takes place on the
   ${wg^^} Working Group mailing list (${ML:-${wg}@ietf.org}),
-  which is archived at $(eref "$(ml "${wg}")").</t>"
+  which is archived at <eref target=\"$(ml "${wg}")\"/>.</t>"
 echo "<t>Source for this draft and an issue tracker can be found at
-  $(eref "https://github.com/${user}/${repo}").</t>"
+  <eref target=\"https://github.com/${user}/${repo}\"/>.</t>"
 echo '</note>'
