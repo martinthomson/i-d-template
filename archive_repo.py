@@ -40,8 +40,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-if not args.githubToken and "GH_TOKEN" in os.environ.keys():
-    args.githubToken = os.environ["GH_TOKEN"]
+if not args.githubToken and "GITHUB_API_TOKEN" in os.environ.keys():
+    args.githubToken = os.environ["GITHUB_API_TOKEN"]
 
 if args.repo[-1] == "/":
     args.repo = args.repo[:-1]

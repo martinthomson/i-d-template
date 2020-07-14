@@ -14,12 +14,9 @@ DISABLE_ARCHIVE_FETCH ?= true
 endif
 
 # Can't load issues without authentication.
-ifeq (,$(GH_TOKEN))
+ifeq (,$(GITHUB_API_TOKEN))
 DISABLE_ARCHIVE_FETCH := true
 endif
-
-# If we are running in GitHub Actions, just use GITHUB_TOKEN, else use GH_TOKEN.
-ARCHIVE_TOKEN := $(or $(GITHUB_TOKEN),$(GH_TOKEN))
 
 ## Store a copy of any GitHub issues and pull requests.
 .PHONY: archive
@@ -42,7 +39,7 @@ archive.json: fetch-archive $(drafts_source)
 	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 	trap 'rm -f $$old_archive' EXIT; \
 	git show $(ARCHIVE_BRANCH):$@ > $$old_archive || true; \
-	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(ARCHIVE_TOKEN) $@ --reference $$old_archive;
+	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN) $@ --reference $$old_archive;
 
 
 ARCHIVE_ROOT := /tmp/gharchive$(shell echo $$$$)
@@ -65,11 +62,11 @@ gh-archive: $(ARCHIVE_ROOT)/archive.json
 	if test `git -C $(ARCHIVE_ROOT) status --porcelain archive.json issues.js issues.html | wc -l` -gt 0; then \
 	  git -C $(ARCHIVE_ROOT) $(CI_AUTHOR) commit -m "Script updating archive at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
-ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GH_TOKEN),,1)))
+ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_PUSH_TOKEN),,1)))
 	git -C $(ARCHIVE_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
 else
 	@echo git -C $(ARCHIVE_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
-	@git -C $(ARCHIVE_ROOT) push -qf https://$(GH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1
+	@git -C $(ARCHIVE_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1
 endif
 else
 	git -C $(ARCHIVE_ROOT) push -f origin $(ARCHIVE_BRANCH)

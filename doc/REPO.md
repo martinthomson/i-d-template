@@ -102,7 +102,7 @@ $ git checkout --orphan main
 $ git remote add origin https://github.com/unicorn-wg/unicorn-protocol
 # Copy a template in place, change the filename and title.
 $ git add draft-*.{md,xml}
-$ git commit -m "Initial version blah blah blah" draft-*.{md,xml}
+$ git commit -m "Initial version blah blah blah"
 $ git push -u origin main
 $ git clone https://github.com/martinthomson/i-d-template lib
 $ make -f lib/setup.mk
@@ -112,9 +112,9 @@ $ git push
 
 # Updating The Editor's Copy
 
-Github will serve any HTML you check in on the `gh-pages` branch.  This can be
-useful for ensuring that the latest version of your draft is available in a
-usable form.
+GitHub serves any HTML you check in on the `gh-pages` branch by default.  This
+can be useful for ensuring that the latest version of your draft is available in
+a usable form.
 
 You can maintain `gh-pages` manually by running the following command
 occasionally.
@@ -131,14 +131,11 @@ automatically enabling builds that update the editor's copy, publish tagged
 drafts to datatracker, and periodically save an archive of issues and pull
 requests.
 
-Or, you can disable GitHub Actions and use Circle CI, as described in the next
-section.
+Or, you can disable GitHub Actions by deleting files under `.github/workflows`
+and use Circle CI, as described in the next section.
 
 
 # Automatic Update for Editor's Copy with Circle CI
-
-Manual maintenance of `gh-pages` means that it will always be out of date.  You can
-use an integrated continuous integration system to maintain a copy.
 
 This requires that you sign in with [Circle](https://circleci.com/).
 
@@ -150,20 +147,20 @@ needs the `public_repo` privilege.  This will let it push updates to your
 `gh-pages` branch.
 
 You can add environment variables using the Circle interface.  Make a variable
-with the name `GH_TOKEN` or `GITHUB_TOKEN` and the value of your newly-created
-application token.
+with the name `GH_TOKEN` and the value of your newly-created application token.
 
 **WARNING**: You might want to use a dummy account for application tokens to
 minimize the consequences of accidental leaks of your key.
 
 Once you enable pushes, be very careful merging pull requests that alter
-`circle.yml` or `Makefile`.  Those files can cause the value of
-the token to be published for all to see.  You don't want that to happen.  Even
-though tokens can be revoked easily, discovering a leak might take some time.
-Only pushes to the main repository will be able to see the token, so don't worry
-about pull requests.
+`.circleci/config.yml` or `Makefile`.  Changes to those files can cause the
+value of the token to be published for all to see.  You don't want that to
+happen.  Even though tokens can be revoked easily, discovering a leak might take
+some time.  Only pushes to the main repository will be able to see the token, so
+there is no need to worry about running CI on malicious pull requests (just
+don't merge them).
 
-Circle will now also check pull requests for errors, letting you know if things
+Circle will now check pull requests for errors, letting you know if things
 didn't work out so that you don't merge anything suspect.
 
 A `.travis.yml` file exists
