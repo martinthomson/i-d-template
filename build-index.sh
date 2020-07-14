@@ -7,7 +7,7 @@ hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 root=$(realpath "${1:-.}")
 user="${3:-<user>}"
 repo="${4:-<repo>}"
-default_branch=$($(dirname "$0")/default-branch.py ${user} ${repo})
+default_branch="${DEFAULT_BRANCH:-$($(dirname "$0")/default-branch.py)}"
 branch="${2:-$default_branch}"
 
 gh="https://github.com/${user}/${repo}"
