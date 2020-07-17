@@ -48,7 +48,7 @@ def main(args):
           print('<CODE ENDS>', file=outf)
         elif ytype == 'TREE':
           in_data = m.group('in_module')
-          cmd = ['pyang', '--format', 'tree', '--path', 'modules:.', in_data]
+          cmd = ['pyang', '--format', 'tree', '--tree-line-length', '69', '--path', 'modules:.', in_data]
           print('  inserting pyang tree: %s' % ' '.join(cmd))
           psub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
           out, err = psub.communicate()
