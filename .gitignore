@@ -7,3 +7,4 @@ rfc2629xslt
 draft-*
 issues.json
 pulls.json
+*.DS_Store
