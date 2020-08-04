@@ -97,7 +97,7 @@ $(LIBDIR)/clean-for-DTD.xslt: $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt $(LIBDIR)
 	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
 
 $(LIBDIR)/rfc2629-no-doctype.xslt: $(LIBDIR)/rfc2629xslt/rfc2629-no-doctype.xslt
- 	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
+	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
  	
 $(XSLTDIR)/clean-for-DTD.xslt $(XSLTDIR)/rfc2629.xslt: $(XSLTDIR)
 $(XSLTDIR):
