@@ -41,7 +41,7 @@ Once pip is installed, you can install xml2rfc.
 Using a `virtualenv`:
 
 ```sh
-$ virtualenv --no-site-packages venv
+$ virtualenv venv
 # remember also to activate the virtualenv before any 'make' run
 $ source venv/bin/activate
 $ pip3 install xml2rfc
