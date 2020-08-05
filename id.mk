@@ -1,5 +1,14 @@
 ## Identify drafts, types and versions
 
+$(warning *************************************************)
+$(warning ***                                           ***)
+$(warning ***   You are using the 'master' branch.      ***)
+$(warning ***   Please update to use 'main'.            ***)
+$(warning ***                                           ***)
+$(warning ***   sed -i~ s/master/main/ Makefile         ***)
+$(warning ***                                           ***)
+$(warning *************************************************)
+
 drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
 
 ifeq (0,$(words $(drafts)))
