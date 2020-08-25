@@ -537,7 +537,7 @@ def eprint(*str, **kwargs):
 
 if args.quiet:
 
-    def log(**kwargs):
+    def log(*str, **kwargs):
         pass
 
 
