@@ -117,6 +117,8 @@ $(XSLTDIR):
 else
 %.html: %.xml $(LIBDIR)/v3.css
 	$(xml2rfc) --css=$(LIBDIR)/v3.css --metadata-js-url=/dev/null $< -o $@ --html
+# Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
+	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
