@@ -26,6 +26,9 @@ jobs:
       - store_artifacts:
           path: /tmp/artifacts
 
+      - store_test_results:
+          path: /tmp/artifacts
+
 
 workflows:
   version: 2
