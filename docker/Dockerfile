@@ -35,7 +35,7 @@ RUN set -e; tool_install() { \
     tool_install rfcdiff 1.47 \
     75a9e83869885836c024a94f35128eaf292c6b9de3fd9d3361fbc62d46ec9f16
 
-RUN pip3 install --user --compile xml2rfc && \
+RUN pip3 install --user --compile xml2rfc python-magic && \
     ln -s $HOME/.local/bin/xml2rfc $BINDIR
 RUN gem install --no-doc --user-install --bindir $BINDIR \
     certified kramdown-rfc2629 && \
