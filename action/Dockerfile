@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 LABEL maintainer="Martin Thomson <mt@lowentropy.net>"
 
 RUN apt-get update && \
@@ -9,13 +9,13 @@ RUN apt-get update && \
     git \
     libxml2-utils \
     make \
-    mmark \
     python3-certifi \
     python3-chardet \
     python3-dateutil \
     python3-idna \
     python3-intervaltree \
     python3-lxml \
+    python3-magic \
     python3-minimal \
     python3-pip \
     python3-pycountry \
@@ -41,10 +41,10 @@ RUN set -e; tool_install() { \
       target="/usr/local/bin/${tool}"; \
       tar xzfO "$tmp" "${tool}-${version}/${tool}" >"$target"; rm -f "$tmp"; \
       chmod 755 "$target"; }; \
-    tool_install idnits 2.16.04 \
-      1eef34b131d9c0b45090192f972db0b5dae15047271a7962959c8019dd8cc06b && \
-    tool_install rfcdiff 1.47 \
-      75a9e83869885836c024a94f35128eaf292c6b9de3fd9d3361fbc62d46ec9f16
+    tool_install idnits 2.16.05 \
+      9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5 && \
+    tool_install rfcdiff 1.48 \
+      80c886e76803b889c444cd44781f8fa34cb23943a28f18cac0ea8a1458dca265
 
 RUN pip3 install --compile xml2rfc
 RUN gem install --no-doc kramdown-rfc2629

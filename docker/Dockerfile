@@ -1,11 +1,11 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 LABEL maintainer="Martin Thomson <mt@lowentropy.net>"
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates coreutils curl git make ssh libxml2-utils xsltproc \
     python3-minimal python3-lxml python3-pip python3-setuptools python3-wheel \
-    python3-dateutil mmark ruby \
+    python3-dateutil python3-magic ruby \
  && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
  && apt-get autoremove -y && apt-get clean -y
 
@@ -30,10 +30,10 @@ RUN set -e; tool_install() { \
       target="${BINDIR:-~/.local/bin}/${tool}"; \
       tar xzfO "$tmp" "${tool}-${version}/${tool}" >"$target"; rm -f "$tmp"; \
       chmod 755 "$target"; }; \
-    tool_install idnits 2.16.02 \
-    e9a501fc1f3a4584dda854067398eaebba29f128fb09f80048a760e950c35c49 && \
-    tool_install rfcdiff 1.47 \
-    75a9e83869885836c024a94f35128eaf292c6b9de3fd9d3361fbc62d46ec9f16
+    tool_install idnits 2.16.05 \
+    9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5 && \
+    tool_install rfcdiff 1.48 \
+    80c886e76803b889c444cd44781f8fa34cb23943a28f18cac0ea8a1458dca265
 
 RUN pip3 install --user --compile xml2rfc python-magic && \
     ln -s $HOME/.local/bin/xml2rfc $BINDIR
