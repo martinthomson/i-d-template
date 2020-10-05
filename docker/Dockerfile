@@ -9,6 +9,7 @@ RUN apt-get update && \
     git \
     libxml2-utils \
     make \
+    python-is-python3 \
     python3-certifi \
     python3-chardet \
     python3-dateutil \
