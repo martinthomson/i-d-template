@@ -10,6 +10,7 @@ workgroup: TODO Working Group
 keyword: Internet-Draft
 
 stand_alone: yes
+smart_quotes: no
 pi: [toc, sortrefs, symrefs]
 
 author:
