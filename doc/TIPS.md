@@ -61,3 +61,12 @@ have multiple repositories, this means that you only have a single global
 cache.  You will download the references for RFC 2119 far less often.  Also,
 this is where `xml2rfc` caches references, so both tools will prime the cache
 for the other.
+
+Always include the following in the YAML header of the markdown file:
+
+```yaml
+stand_alone: yes
+smart_quotes: no
+```
+
+These override defaults.
