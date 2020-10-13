@@ -55,7 +55,7 @@ MD_PRE += | $(MD_PREPROCESSOR)
 endif
 ifneq (1,$(words $(drafts)))
 NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
-MD_PTR += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
+MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
 MD_POST := | $(LIBDIR)/add-note.py
