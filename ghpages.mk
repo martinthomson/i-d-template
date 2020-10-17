@@ -68,14 +68,29 @@ GHPAGES_INSTALLED := $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_PUBLISHED))
 $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
+ifeq (true,$(MD_INDEX))
+GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.md
+else
 GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.html
+endif
+
 $(GHPAGES_TARGET)/index.html: $(GHPAGES_INSTALLED)
 	$(LIBDIR)/build-index.sh "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 
+$(GHPAGES_TARGET)/index.md: $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index-md.sh "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
+ifeq (true,$(MD_INDEX))
+GHPAGES_ALL += $(GHPAGES_ROOT)/index.md
+else
 GHPAGES_ALL += $(GHPAGES_ROOT)/index.html
+endif
 $(GHPAGES_ROOT)/index.html: $(GHPAGES_INSTALLED)
 	$(LIBDIR)/build-index.sh "$(dir $@)" $(DEFAULT_BRANCH) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+
+$(GHPAGES_ROOT)/index.md: $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index-md.sh "$(dir $@)" $(DEFAULT_BRANCH) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 endif
 
 .PHONY: cleanup-ghpages
