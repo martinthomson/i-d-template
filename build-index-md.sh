@@ -39,6 +39,8 @@ function githubio() {
 }
 
 function list_dir() {
+    p "| Draft |     |     |     |     |"
+    p "| ----- | --- | --- | --- | --- |"
     for file in "$1"/*.txt; do
         dir=$(dirname "$file")
         file=$(basename "$file" .txt)
