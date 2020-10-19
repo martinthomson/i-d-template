@@ -49,6 +49,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: ./action
+        file: ./action/Dockerfile
         push: ${{ steps.tag.outputs.tag != 'test' }}
         tags: |
           martinthomson/i-d-template-action:${{ steps.tag.outputs.tag }}
