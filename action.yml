@@ -10,7 +10,7 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/martinthomson/i-d-template-action:latest'
+  image: 'docker://ghcr.io/martinthomson/i-d-template-action:ghcr'
   args:
     - ${{ inputs.make }}
 
