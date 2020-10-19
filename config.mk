@@ -45,6 +45,10 @@ SHELL := bash
 curl ?= curl -sS
 DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit
 
+# The type of index that is created for gh-pages.
+# Supported options are 'html' and 'md'.
+INDEX_FORMAT ?= html
+
 # Setup a shared cache for xml2rfc and kramdown-rfc2629
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc

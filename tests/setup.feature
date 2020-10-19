@@ -38,6 +38,25 @@ Feature: Initial setup
      and gitignore lists xml files
      and a precommit hook is installed
 
+  Scenario:  Run setup script with INDEX_FORMAT set
+    Given a git repo with a single Kramdown draft
+     when the setup script is run with "INDEX_FORMAT=md"
+     then it succeeds
+     and a file is created called "Makefile" which contains "INDEX_FORMAT := md"
+     and a file is created called "README.md"
+     and a file is created called "CONTRIBUTING.md"
+     and a file is created called "LICENSE.md"
+     and a file is created called ".gitignore"
+     and a file is created called ".circleci/config.yml"
+     and a file is created called ".github/workflows/ghpages.yml"
+     and a file is created called ".github/workflows/publish.yml"
+     and a file is created called ".github/workflows/archive.yml"
+     and a file is created called ".note.xml"
+     and a branch is created called "gh-pages" containing "index.md"
+     and a branch is created called "gh-pages" containing "archive.json"
+     and gitignore lists xml files
+     and a precommit hook is installed
+
   Scenario:  Run setup script on directory with no draft
     Given an empty git repo
       and lib is cloned in
