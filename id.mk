@@ -13,7 +13,7 @@ endif
 
 draft_types := $(foreach draft,$(drafts),\
 		   $(suffix $(firstword $(wildcard $(draft).md $(draft).org $(draft).xml))))
-drafts_source := $(drafts_source)
+drafts_source := $(join $(drafts),$(draft_types))
 
 drafts_tags := $(shell git tag --sort=refname 2>/dev/null | grep '^draft-')
 f_prev_tag = $(lastword $(subst -, ,$(lastword $(filter $(draft)-%,$(drafts_tags)))))
