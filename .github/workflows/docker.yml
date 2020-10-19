@@ -45,13 +45,6 @@ jobs:
         username: ${{ secrets.GHCR_USERNAME }}
         password: ${{ secrets.GHCR_PASSWORD }}
 
-    - name: "Login to GitHub Packages"
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
     - name: "Build and Publish"
       uses: docker/build-push-action@v2
       with:
@@ -61,4 +54,3 @@ jobs:
         tags: |
           martinthomson/i-d-template-action:${{ steps.tag.outputs.tag }}
           ghcr.io/martinthomson/i-d-template-action:${{ steps.tag.outputs.tag }}
-          docker.pkg.github.com/martinthomson/i-d-template/action:${{ steps.tag.outputs.tag }}
