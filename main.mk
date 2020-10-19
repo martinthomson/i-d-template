@@ -140,6 +140,15 @@ check:: idnits
 idnits:: $(drafts_next_txt)
 	echo $^ | xargs -n 1 sh -c '$(idnits) $$0'
 
+CODESPELL_ARGS :=
+ifneq (,$(wildcard ./.ignore-words))
+CODESPELL_ARGS += -I .ignore-words
+endif
+
+.PHONY: spellcheck
+spellcheck:: $(drafts_source)
+	codespell $(CODESPELL_ARGS) $^
+
 ## Build diffs between the current draft versions and the most recent version
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
