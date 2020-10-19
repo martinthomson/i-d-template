@@ -45,7 +45,7 @@ html:: $(drafts_html)
 pdf:: $(addsuffix .pdf,$(drafts))
 
 ## Basic Recipes
-.INTERMEDIATE: $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts)))
+.INTERMEDIATE: $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts)))
 
 export XML_RESOURCE_ORG_PREFIX
 
@@ -175,7 +175,7 @@ $(TEST_REPORT):
 
 .PHONY: lint
 lint::
-	@err=0; for f in $(join $(drafts),$(draft_types)); do \
+	@err=0; for f in $(drafts_source); do \
 	  if [ "${f#draft-}" != "$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
 	    echo "$$f does not include the string $${f%.*}-latest"; err=1; \
 	  fi; \
@@ -189,10 +189,10 @@ lint::
 
 .PHONY: fix-lint
 fix-lint::
-	for f in $(join $(drafts),$(draft_types)); do \
+	for f in $(drafts_source); do \
 	  [  -z "$$(tail -c 1 "$$f")" ] || echo >>"$$f"; \
 	done
-	sed -i~ -e 's/ *$$//' $(join $(drafts),$(draft_types))
+	sed -i~ -e 's/ *$$//' $(drafts_source)
 
 ## Cleanup
 COMMA := ,
@@ -201,5 +201,5 @@ clean::
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
-	    $(filter-out $(join $(drafts),$(draft_types)),$(addsuffix .xml,$(drafts))) \
+	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
