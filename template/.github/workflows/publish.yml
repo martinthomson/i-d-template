@@ -33,6 +33,9 @@ jobs:
           refcache-${{ steps.date.outputs.date }}
           refcache-
 
+    - name: "Build Drafts"
+      uses: martinthomson/i-d-template@v1
+
     - name: "Upload to Datatracker"
       uses: martinthomson/i-d-template@v1
       with:

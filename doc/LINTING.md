@@ -48,7 +48,9 @@ when running in CI.
 
 One way to do this is to ensure that the binary is identified when running
 `make`.  Modifying `.github/workflows/*.yml` or `.circleci/config.yml` to
-include additional arguments to make should do this:
+include additional arguments to make should do this.  The following is a
+modified target in `.github/workflows/ghpages.yml` and
+`.github/workflows/publish.yml`:
 
 ```yaml
     - name: "Build Drafts"
@@ -58,7 +60,8 @@ include additional arguments to make should do this:
 ```
 
 Alternatively, you can attempt to detect that you are running in CI and adjust
-the installation process accordingly.
+the installation process accordingly.  Then the target will be run
+automatically.
 
 ```make
 sf-lint-install:
