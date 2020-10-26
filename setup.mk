@@ -50,13 +50,22 @@ setup-files: $(TEMPLATE_FILES) README.md .note.xml
 	git add $^
 
 ifeq (true,$(USE_XSLT))
-setup-default-branch: setup-makefile
-.PHONY: setup-makefile
-setup-makefile: Makefile
+setup-default-branch: setup-makefile-xslt
+.PHONY: setup-makefile-xslt
+setup-makefile-xslt: Makefile
 	sed -i~ -e '1{h;s/^.*$$/USE_XSLT := true/;p;x;}' $<
 	@-rm -f $<~
 	git add $<
 endif # USE_XSLT
+
+ifneq (html,$(INDEX_FORMAT))
+setup-default-branch: setup-makefile-index-format
+.PHONY: setup-makefile-index-format
+setup-makefile-index-format: Makefile
+	sed -i~ -e '1{h;s/^.*$$/INDEX_FORMAT := $(INDEX_FORMAT)/;p;x;}' $<
+	@-rm -f $<~
+	git add $<
+endif # INDEX_FORMAT
 
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
@@ -91,4 +100,4 @@ setup-precommit: .git/hooks/pre-commit
 
 .PHONY: setup-ghpages
 setup-ghpages:
-	$(LIBDIR)/setup-branch.sh gh-pages index.html archive.json
+	$(LIBDIR)/setup-branch.sh gh-pages index.$(INDEX_FORMAT) archive.json

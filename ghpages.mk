@@ -28,21 +28,6 @@ PUSH_GHPAGES ?= true
 endif
 PUSH_GHPAGES ?= false
 
-index.html: $(drafts_html) $(drafts_txt)
-ifeq (1,$(words $(drafts)))
-	cp $< $@
-else
-	@echo '<!DOCTYPE html>' >$@
-	@echo '<html>' >>$@
-	@echo '<head><title>$(GITHUB_REPO) drafts</title></head>' >>$@
-	@echo '<body><ul>' >>$@
-	@for draft in $(drafts); do \
-	  echo '<li><a href="'"$${draft}"'.html">'"$${draft}"'</a> (<a href="'"$${draft}"'.txt">txt</a>)</li>' >>$@; \
-	done
-	@echo '</ul></body>' >>$@
-	@echo '</html>' >>$@
-endif
-
 .IGNORE: fetch-ghpages
 .PHONY: fetch-ghpages
 fetch-ghpages:
@@ -68,14 +53,14 @@ GHPAGES_INSTALLED := $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_PUBLISHED))
 $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
-GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.html
-$(GHPAGES_TARGET)/index.html: $(GHPAGES_INSTALLED)
-	$(LIBDIR)/build-index.sh "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.$(INDEX_FORMAT)
+$(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
-GHPAGES_ALL += $(GHPAGES_ROOT)/index.html
-$(GHPAGES_ROOT)/index.html: $(GHPAGES_INSTALLED)
-	$(LIBDIR)/build-index.sh "$(dir $@)" $(DEFAULT_BRANCH) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+GHPAGES_ALL += $(GHPAGES_ROOT)/index.$(INDEX_FORMAT)
+$(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" $(DEFAULT_BRANCH) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
 endif
 
 .PHONY: cleanup-ghpages
