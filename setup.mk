@@ -13,7 +13,7 @@ ifneq (1,$(words $(GIT_ORIG)))
 $(error If you are just starting out, please commit something before starting)
 endif
 
-LATEST_WARNING := $(strip $(foreach draft,$(join $(drafts),$(draft_types)),\
+LATEST_WARNING := $(strip $(foreach draft,$(drafts_source),\
 	   $(shell grep -q $(basename $(draft))-latest $(draft) || \
 		echo $(draft) should include a name of $(basename $(draft))-latest. )))
 ifneq (,$(LATEST_WARNING))
@@ -46,7 +46,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 
 .PHONY: setup-files
 setup-files: $(TEMPLATE_FILES) README.md .note.xml
-	git add $(join $(drafts),$(draft_types))
+	git add $(drafts_source)
 	git add $^
 
 ifeq (true,$(USE_XSLT))
@@ -73,7 +73,7 @@ setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
 ifndef SUBMODULE
 	echo $(LIBDIR) >>$<
 endif
-	$(foreach x,$(filter-out .xml,$(join $(drafts),$(draft_types))),\
+	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
 	git add $<
 

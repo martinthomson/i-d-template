@@ -49,6 +49,9 @@ DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit
 # Supported options are 'html' and 'md'.
 INDEX_FORMAT ?= html
 
+# For spellchecking: pip install --user codespell
+codespell ?= codespell
+
 # Setup a shared cache for xml2rfc and kramdown-rfc2629
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
