@@ -148,7 +148,7 @@ if [[ "$format" = "html" ]]; then
 fi
 
 function list_dir() {
-    files=($(find "$1" -maxdepth 1 -name '*.txt' -print))
+    files=($(find "$1" -maxdepth 1 \( -name 'draft-*.txt' -o -name 'rfc*.txt' \) -print))
     if [[ "${#files[@]}" -eq 0 ]]; then
         return
     fi
