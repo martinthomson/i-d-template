@@ -44,9 +44,11 @@ sf-lint-install:
 
 Note that for things like python, the location that the file is installed to
 might not be on the path, so you will need to ensure that you modify the path
-when running in CI.  The best way to do this is to ensure that the binary is
-identified when running `make`.  Modifying `.github/workflows/*.yml` or
-`.circleci/config.yml` to include additional arguments to make should do this:
+when running in CI.
+
+One way to do this is to ensure that the binary is identified when running
+`make`.  Modifying `.github/workflows/*.yml` or `.circleci/config.yml` to
+include additional arguments to make should do this:
 
 ```yaml
     - name: "Build Drafts"
@@ -54,4 +56,14 @@ identified when running `make`.  Modifying `.github/workflows/*.yml` or
       with:
 	make: latest sf-rfc-validate=/root/.local/bin/sf-rfc-validate
 ```
+
+Alternatively, you can attempt to detect that you are running in CI and adjust
+the installation process accordingly.
+
+```make
+sf-lint-install:
+        @if [ "$CI" = true -a "$CIRCLECI" != true ]; then user=; else user=--user; fi; \
+	  hash sf-rfc-validate 2>/dev/null || pip3 install "$user" sf-rfc-validate
 ```
+
+Note that CircleCI builds don't run as root.
