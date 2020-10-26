@@ -56,7 +56,7 @@ modified target in `.github/workflows/ghpages.yml` and
     - name: "Build Drafts"
       uses: martinthomson/i-d-template@v1
       with:
-	make: latest sf-rfc-validate=/root/.local/bin/sf-rfc-validate
+        make: latest sf-rfc-validate=/root/.local/bin/sf-rfc-validate
 ```
 
 Alternatively, you can attempt to detect that you are running in CI and adjust
