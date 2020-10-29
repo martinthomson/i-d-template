@@ -27,7 +27,7 @@ if len(sys.argv) < 4:
     exit(1)
 
 url = f"https://api.github.com/repos/{sys.argv[1]}/{sys.argv[2]}"
-headers = {"Authorization": f"token {sys.argv[3]}"}
+headers = {"Authorization": f"bearer {sys.argv[3]}"}
 response = requests.get(url, headers=headers)
 response.raise_for_status()
 result = response.json()
