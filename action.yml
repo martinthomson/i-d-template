@@ -9,7 +9,7 @@ inputs:
     default: 'latest'
 
   token:
-    description: 'Set this to ${{ secrets.GITHUB_TOKEN }}'
+    description: 'Set this to secrets.GITHUB_TOKEN'
     required: false
 
 runs:
