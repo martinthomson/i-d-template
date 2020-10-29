@@ -152,7 +152,6 @@ function list_dir() {
     if [[ "${#files[@]}" -eq 0 ]]; then
         return
     fi
-    h2 "Preview for branch $(a "$2" "$2")"
     table_i "branch-$2"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
@@ -182,7 +181,9 @@ p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issue
 list_dir "${root}" $branch
 
 for dir in $(find "${root}" -mindepth 1 -type d \( -name '.*' -prune -o -print \)); do
-    list_dir "$dir" "${dir#$root/}"
+    let dir_branch="${dir#$root/}"
+    h2 "Preview for branch $(a "$dir_branch" "$dir_branch")"
+    list_dir "$dir" "$dir_branch"
 done
 
 if [ "$format" = "html" ]; then
