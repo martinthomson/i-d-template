@@ -46,8 +46,7 @@ jobs:
       if: ${{ github.event_name == 'push' }}
       with:
         make: gh-pages
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: "Save HTML"
       uses: actions/upload-artifact@v2
