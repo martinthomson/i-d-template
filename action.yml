@@ -8,11 +8,17 @@ inputs:
     required: false
     default: 'latest'
 
+  token:
+    description: 'Set this to ${{ secrets.GITHUB_TOKEN }}'
+    required: false
+
 runs:
   using: 'docker'
   image: 'docker://ghcr.io/martinthomson/i-d-template-action:latest'
   args:
     - ${{ inputs.make }}
+  env:
+    GITHUB_TOKEN: ${{ inputs.token }}
 
 branding:
   icon: 'check-square'
