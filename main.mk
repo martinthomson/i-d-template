@@ -1,5 +1,5 @@
 .PHONY: latest
-latest:: lint txt html
+latest:: txt html
 
 .DELETE_ON_ERROR:
 
