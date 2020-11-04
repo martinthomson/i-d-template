@@ -39,7 +39,7 @@ lint:: sf-lint
 
 .PHONY: sf-lint-install
 sf-lint-install:
-	@hash sf-rfc-validate 2>/dev/null || pip3 install --user sf-rfc-validate
+	@hash sf-rfc-validate.py 2>/dev/null || pip3 install --user sf-rfc-validate
 ```
 
 Note that for things like python, the location that the file is installed to
@@ -66,7 +66,7 @@ automatically.
 ```make
 sf-lint-install:
         @if [ "$CI" = true -a "$CIRCLECI" != true ]; then user=; else user=--user; fi; \
-	  hash sf-rfc-validate 2>/dev/null || pip3 install "$user" sf-rfc-validate
+	  hash sf-rfc-validate.py 2>/dev/null || pip3 install "$user" sf-rfc-validate
 ```
 
 Note that CircleCI builds don't run as root.
