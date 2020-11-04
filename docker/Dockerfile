@@ -33,6 +33,8 @@ RUN apt-get update && \
  && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
  && apt-get autoremove -y && apt-get clean -y
 
+RUN gem install cddl cbor-diag
+
 ENV USER idci
 ENV LOGNAME $USER
 ENV HOSTNAME $USER
