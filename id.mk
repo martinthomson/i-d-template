@@ -23,7 +23,6 @@ drafts_prev := $(foreach draft,$(drafts),$(draft)-$(f_prev_tag))
 drafts_with_prev := $(foreach draft,$(drafts),$(if $(f_prev_tag),$(draft)))
 
 drafts_txt := $(addsuffix .txt,$(drafts))
-drafts_raw := $(addsuffix .raw.txt,$(drafts))
 drafts_html := $(addsuffix .html,$(drafts))
 drafts_xml := $(addsuffix .xml,$(drafts))
 drafts_next_txt := $(addsuffix .txt,$(drafts_next))

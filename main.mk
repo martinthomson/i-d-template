@@ -38,9 +38,8 @@ include $(LIBDIR)/upload.mk
 include $(LIBDIR)/update.mk
 
 ## Basic Targets
-.PHONY: txt raw html pdf
+.PHONY: txt html pdf
 txt:: $(drafts_txt)
-raw:: $(drafts_raw)
 html:: $(drafts_html)
 pdf:: $(addsuffix .pdf,$(drafts))
 
@@ -111,9 +110,6 @@ $(XSLTDIR):
 
 %.txt: %.cleanxml
 	$(xml2rfc) $< -o $@ --text
-
-%.raw.txt: %.cleanxml
-	$(xml2rfc) $< -o $@ --raw
 else
 %.html: %.xml $(LIBDIR)/v3.css
 	$(xml2rfc) --css=$(LIBDIR)/v3.css --metadata-js-url=/dev/null $< -o $@ --html
@@ -122,9 +118,6 @@ else
 
 %.txt: %.xml
 	$(xml2rfc) $< -o $@ --text
-
-%.raw.txt: %.xml
-	$(xml2rfc) $< -o $@ --raw
 endif
 
 %.pdf: %.txt
@@ -208,7 +201,7 @@ COMMA := ,
 .PHONY: clean
 clean::
 	-rm -f .tags $(targets_file) issues.json \
-	    $(addsuffix .{txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
+	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
