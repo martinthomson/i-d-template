@@ -109,7 +109,7 @@ $(XSLTDIR):
 	$(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml
-	$(xml2rfc) $< -o $@ --text
+	$(xml2rfc) $< -o $@ --text --no-pagination
 else
 %.html: %.xml $(LIBDIR)/v3.css
 	$(xml2rfc) --css=$(LIBDIR)/v3.css --metadata-js-url=/dev/null $< -o $@ --html
@@ -117,7 +117,7 @@ else
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
 %.txt: %.xml
-	$(xml2rfc) $< -o $@ --text
+	$(xml2rfc) $< -o $@ --text --no-pagination
 endif
 
 %.pdf: %.txt
