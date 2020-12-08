@@ -11,7 +11,7 @@ jobs:
       - run:
           name: "Check Formatting"
           command: |
-            pip3 install --user black==19.3b0 && ln -s $HOME/.local/bin/black $BINDIR
+            pip3 install --user black && ln -s $HOME/.local/bin/black $BINDIR
             black --check .
 
       - run:
