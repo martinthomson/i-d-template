@@ -4,8 +4,13 @@ err=0
 tags=0
 while read local_ref local_sha remote_ref remote_sha; do
     if [[ "${local_ref#refs/tags/draft-}" != "${local_ref}" ]]; then
+	tag="${local_ref#refs/tags/}"
         if [[ -z "$(git for-each-ref --format '%(taggeremail)' "${local_ref}")" ]]; then
-            echo "pre-push: tag ${local_ref#refs/tags/} is not an annotated tag" 1>&2
+            echo "pre-push: tag $tag is not an annotated tag" 1>&2
+	    err=1
+	fi
+	if ! git ls-tree "$local_sha" | grep -q "^${tag%-*}\."; then
+	    echo "pre-push: tag $tag does not match an existing file" 1>&2
 	    err=1
 	fi
 	tags=$((tags+1))
