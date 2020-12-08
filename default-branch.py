@@ -22,7 +22,7 @@ get_branch(f"{remote}/HEAD")
 get_branch(f"refs/remotes/{remote}/HEAD")
 
 if len(sys.argv) < 4:
-    print(f"error: {sys.argv[0]} unable to determine default branch", file=sys.stderr)
+    print(f"warning: {sys.argv[0]} unable to determine default branch", file=sys.stderr)
     get_branch("HEAD")
     exit(1)
 
@@ -30,10 +30,10 @@ try:
     import requests
 except ImportError:
     print(
-        f"error: {sys.argv[0]} need 'requests' to determine default branch",
+        f"warning: {sys.argv[0]} need 'requests' to determine default branch",
         file=sys.stderr,
     )
-    print(f"error: 'pip3 install [--user] requests' to install", file=sys.stderr)
+    print(f"warning: 'pip3 install [--user] requests' to install", file=sys.stderr)
     get_branch("HEAD")
     exit(1)
 
