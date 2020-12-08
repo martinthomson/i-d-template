@@ -27,9 +27,12 @@ if len(sys.argv) < 4:
     exit(1)
 
 try:
-   import requests
+    import requests
 except ImportError:
-    print(f"error: {sys.argv[0]} need 'requests' to determine default branch", file=sys.stderr)
+    print(
+        f"error: {sys.argv[0]} need 'requests' to determine default branch",
+        file=sys.stderr,
+    )
     print(f"error: 'pip3 install [--user] requests' to install", file=sys.stderr)
     get_branch("HEAD")
     exit(1)
