@@ -8,6 +8,7 @@ RUN apt-get update && \
     curl \
     git \
     libxml2-utils \
+    locales \
     make \
     python-is-python3 \
     python3-certifi \
@@ -32,6 +33,11 @@ RUN apt-get update && \
     xsltproc \
  && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
  && apt-get autoremove -y && apt-get clean -y
+
+RUN sed -i -e '/en_US.UTF-8/s/^# *//g' /etc/locale.gen && locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 ENV USER idci
 ENV LOGNAME $USER
