@@ -9,7 +9,7 @@ while read local_ref local_sha remote_ref remote_sha; do
             echo "pre-push: tag $tag is not an annotated tag" 1>&2
 	    err=1
 	fi
-	if ! git ls-tree "$local_sha" | grep -q "^${tag%-*}\."; then
+	if ! git ls-tree --name-only "$local_sha" | grep -q "^${tag%-*}\."; then
 	    echo "pre-push: tag $tag does not match an existing file" 1>&2
 	    err=1
 	fi
