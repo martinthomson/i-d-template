@@ -175,8 +175,13 @@ $(TEST_REPORT):
 	done; \
 	echo '</testsuite>' >>$@
 
-.PHONY: lint
-lint::
+.PHONY: lint lint-whitespace lint-default-branch
+lint:: lint-whitespace
+ifneq (true,$(CI))
+lint:: lint-default-branch
+endif
+
+lint-whitespace::
 	@err=0; for f in $(drafts_source); do \
 	  if [ "${f#draft-}" != "$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
 	    echo "$$f does not include the string $${f%.*}-latest"; err=1; \
@@ -189,12 +194,24 @@ lint::
 	  fi; \
 	done; [ "$$err" -eq 0 ] || ! echo "Run 'make fix-lint' to automatically fix some errors" 1>&2
 
-.PHONY: fix-lint
-fix-lint::
+lint-default-branch::
+	@-if ! git rev-parse --abbrev-ref refs/remotes/$(GIT_REMOTE)/HEAD >/dev/null 2>&1; then \
+	  echo "warning: A default branch for '$(GIT_REMOTE)' is not recorded in this clone."; \
+	  echo "         Running 'make fix-lint' will set the default branch to '$$(git rev-parse --abbrev-ref HEAD)'."; \
+	fi
+
+.PHONY: fix-lint fix-lint-whitespace fix-lint-default-branch
+fix-lint:: fix-lint-whitespace fix-lint-default-branch
+fix-lint-whitespace::
 	for f in $(drafts_source); do \
 	  [  -z "$$(tail -c 1 "$$f")" ] || echo >>"$$f"; \
 	done
 	sed -i~ -e 's/ *$$//' $(drafts_source)
+
+fix-lint-default-branch:
+	if ! git rev-parse --abbrev-ref refs/remotes/$(GIT_REMOTE)/HEAD >/dev/null 2>&1; then \
+	  echo "ref: refs/remotes/$(GIT_REMOTE)/$$(git rev-parse --abbrev-ref HEAD)" > $$(git rev-parse --git-dir)/refs/remotes/$(GIT_REMOTE)/HEAD; \
+	fi
 
 ## Cleanup
 COMMA := ,
