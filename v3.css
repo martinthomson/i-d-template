@@ -39,11 +39,11 @@ body {
 }
 h1, h2, h3 {
   font-size: 22px;
-  line-height: 26px;
+  line-height: 27px;
 }
 h4, h5, h6 {
   font-size: 20px;
-  line-height: 23px;
+  line-height: 24px;
 }
 
 /* general structure */
@@ -199,6 +199,7 @@ img {
 }
 figure {
   margin: 0.5em 0;
+  padding: 0;
 }
 figure blockquote {
   margin: 0.8em 0.4em 0.4em;
