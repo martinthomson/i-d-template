@@ -33,12 +33,12 @@ upload: $(uploads)
 	@if $(MAKE) "$*".xml; then \
 	  $(MAKE) "$@"; \
 	else \
-	  echo "=============================-=============================================="; \
+	  echo "============================================================================"; \
 	  echo "Warning: A source file for '$*' does not exist."; \
 	  echo; \
 	  echo "If you applied this tag in error, remove it before adding another tag:"; \
 	  echo "    git tag -d '$*'"; \
 	  echo "    git push -f $(GIT_REMOTE) ':$*'"; \
-	  echo "=============================-=============================================="; \
+	  echo "============================================================================"; \
 	  false; \
 	fi
