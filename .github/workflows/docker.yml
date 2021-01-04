@@ -7,7 +7,7 @@ on:
     - ".github/workflows/docker.yml"
   schedule:
     # Once monthly at a randomly selected time.
-    - cron: "24 3 18 * *"
+    - cron: "24 2 3,18 * *"
 
 jobs:
   build:
