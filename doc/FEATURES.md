@@ -64,7 +64,8 @@ Download a copy of GitHub issues and pull requests.
 
 When you [setup a repository](REPO.md), this tool installs a stub `Makefile`.
 It also creates the following files from a template: `.gitignore`,
-`CONTRIBUTING.md`, `LICENSE.md`, `.travis.yml`, and `.circleci/config.yml`.
+`CONTRIBUTING.md`, `LICENSE.md`, `.travis.yml`, and GitHub Action configuration
+under `.github/workflows/` (see below).
 
 
 ## With Continuous Integration Services
