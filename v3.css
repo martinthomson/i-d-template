@@ -13,11 +13,11 @@ html {
 }
 @media (prefers-color-scheme: dark) {
 html {
-  --background-color: #181818;
+  --background-color: #121212;
   --text-color: #f0f0f0;
   --title-color: #fff;
   --link-color: #4da4f0;
-  --highlight-color: #323232;
+  --highlight-color: #282828;
   --line-color: #444;
   --pilcrow-weak: #444;
   --pilcrow-strong: #666;
