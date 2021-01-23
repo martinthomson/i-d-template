@@ -7,7 +7,21 @@ html {
   --link-color: #2a6496;
   --highlight-color: #f9f9f9;
   --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
   --small-font-size: 14.5px;
+}
+@media (prefers-color-scheme: dark) {
+html {
+  --background-color: #181818;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #323232;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+}
 }
 body {
   max-width: 600px;
@@ -298,14 +312,14 @@ a.pilcrow {
   opacity: 0.2;
   user-select: none;
 }
-a.pilcrow[href] { color: #ddd; }
+a.pilcrow[href] { color: var(--pilcrow-weak); }
 a.pilcrow[href]:hover { text-decoration: none; }
-@media screen {
+@media not print {
   :hover > a.pilcrow {
     opacity: 1;
   }
   a.pilcrow[href]:hover {
-    color: #bbb;
+    color: var(--pilcrow-strong);
     background-color: transparent;
   }
 }
