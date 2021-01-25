@@ -10,6 +10,7 @@ html {
   --pilcrow-weak: #ddd;
   --pilcrow-strong: #bbb;
   --small-font-size: 14.5px;
+  scrollbar-color: #bbb #eee;
 }
 @media (prefers-color-scheme: dark) {
 html {
@@ -21,6 +22,7 @@ html {
   --line-color: #444;
   --pilcrow-weak: #444;
   --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
 }
 }
 body {
