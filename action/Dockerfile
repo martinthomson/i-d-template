@@ -10,6 +10,7 @@ RUN apt-get update && \
     libxml2-utils \
     locales \
     make \
+    npm \
     python-is-python3 \
     python3-certifi \
     python3-chardet \
@@ -63,6 +64,17 @@ RUN set -e; v="2.2.9"; sha="b8c501be4118f79a294b658d963ec8c91595e94aea69c8efd0ea
 
 RUN pip3 install --compile xml2rfc
 RUN gem install --no-doc kramdown-rfc2629
+
+RUN npm install -g mathjax-node-cli
+
+RUN set -e; v="0.31.7"; sha="a2a21eccc2d7485f1807ec0e8f234d77dc622e5843c0bddd3ff63b4d80d4a735"; \
+    tmp=$(mktemp -t "asciitexXXXXXX"); target="${BINDIR:-/usr/local/bin}/asciitex"; \
+    curl -sSLf "https://github.com/larseggert/asciiTeX/releases/download/asciiTeX-${v}/asciitex" -o "$tmp"; \
+    [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
+    mv "$tmp" "$target"; \
+    chmod 755 "$target"
+
+RUN ls -lta /usr/local/bin
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
