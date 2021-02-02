@@ -74,7 +74,5 @@ RUN set -e; v="0.31.7"; sha="a2a21eccc2d7485f1807ec0e8f234d77dc622e5843c0bddd3ff
     mv "$tmp" "$target"; \
     chmod 755 "$target"
 
-RUN ls -lta /usr/local/bin
-
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
