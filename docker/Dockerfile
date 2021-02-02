@@ -10,6 +10,7 @@ RUN apt-get update && \
     libxml2-utils \
     locales \
     make \
+    npm \
     python-is-python3 \
     python3-certifi \
     python3-chardet \
@@ -51,7 +52,7 @@ USER $USER
 
 ENV BINDIR $HOME/bin
 RUN mkdir -p $BINDIR
-ENV PATH $BINDIR:/usr/local/bin:/usr/bin:/bin
+ENV PATH $BINDIR:$HOME/node_modules/.bin:/usr/local/bin:/usr/bin:/bin
 
 RUN set -e; tool_install() { \
       tool="$1";version="$2";sha="$3"; tmp=$(mktemp -t "${tool}XXXXX.tgz"); \
@@ -78,6 +79,15 @@ RUN pip3 install --user --compile xml2rfc python-magic && \
 RUN gem install --no-doc --user-install --bindir $BINDIR \
     certified kramdown-rfc2629 && \
     certified-update
+
+RUN npm install mathjax-node-cli
+
+RUN set -e; v="0.31.7"; sha="a2a21eccc2d7485f1807ec0e8f234d77dc622e5843c0bddd3ff63b4d80d4a735"; \
+    tmp=$(mktemp -t "asciitexXXXXXX"); target="${BINDIR:-~/.local/bin}/asciitex"; \
+    curl -sSLf "https://github.com/larseggert/asciiTeX/releases/download/asciiTeX-${v}/asciitex" -o "$tmp"; \
+    [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
+    mv "$tmp" "$target"; \
+    chmod 755 "$target"
 
 ENV KRAMDOWN_REFCACHEDIR=$HOME/.cache/xml2rfc
 RUN mkdir -p $KRAMDOWN_REFCACHEDIR
