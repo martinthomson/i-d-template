@@ -50,7 +50,7 @@ jobs:
         echo "::set-output name=driver_opts::$driver_opts"
         echo "::set-output name=label::$label"
         echo "::set-output name=action_tags::$action_tags"
-        echo "::set-output name=action_tags::$circle_tags"
+        echo "::set-output name=circle_tags::$circle_tags"
 
     - name: "Setup Docker Buildx"
       uses: docker/setup-buildx-action@v1
