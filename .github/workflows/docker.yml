@@ -45,12 +45,22 @@ jobs:
         username: ${{ secrets.GHCR_USERNAME }}
         password: ${{ secrets.GHCR_PASSWORD }}
 
-    - name: "Build and Publish"
+    - name: "Build and Publish GitHub Actions Image"
       uses: docker/build-push-action@v2
       with:
-        context: ./action
-        file: ./action/Dockerfile
+        context: ./docker/action
+        file: ./docker/action/Dockerfile
         push: ${{ steps.tag.outputs.tag != 'test' }}
         tags: |
           martinthomson/i-d-template-action:${{ steps.tag.outputs.tag }}
           ghcr.io/martinthomson/i-d-template-action:${{ steps.tag.outputs.tag }}
+
+    - name: "Build and Publish CircleCI Image"
+      uses: docker/build-push-action@v2
+      with:
+        context: ./docker/circleci
+        file: ./docker/circleci/Dockerfile
+        push: ${{ steps.tag.outputs.tag != 'test' }}
+        tags: |
+          martinthomson/i-d-template:${{ steps.tag.outputs.tag }}
+          ghcr.io/martinthomson/i-d-template:${{ steps.tag.outputs.tag }}
