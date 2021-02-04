@@ -60,6 +60,8 @@ jobs:
       with:
         context: ./docker/circleci
         file: ./docker/circleci/Dockerfile
+        build-args: |
+          VERSION=${{ steps.tag.outputs.tag }}
         push: ${{ steps.tag.outputs.tag != 'test' }}
         tags: |
           martinthomson/i-d-template:${{ steps.tag.outputs.tag }}
