@@ -1,5 +1,6 @@
+ARG REGISTRY
 ARG VERSION=latest
-FROM martinthomson/i-d-template-action:$VERSION
+FROM ${REGISTRY}martinthomson/i-d-template-action:${VERSION}
 
 ENV USER=idci \
     LOGNAME=idci \

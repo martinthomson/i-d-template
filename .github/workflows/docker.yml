@@ -39,14 +39,17 @@ jobs:
           echo "${1}martinthomson/i-d-template${2}:${label}"
         }
         if [ "$label" = "test" ]; then
-          action_tags="$(tag localhost:5000/ -action)"
-          circle_tags="$(tag localhost:5000/ "")"
+          registry=localhost:5000/
+          action_tags="$(tag "$registry" -action)"
+          circle_tags="$(tag "$registry" "")"
           driver_opts="network=host"
         else
+          registry=ghcr.io/
           action_tags="$(tag "" -action),$(tag ghcr.io/ -action)"
           circle_tags="$(tag "" ""),$(tag ghcr.io/ "")"
           driver_opts=
         fi
+        echo "::set-output name=registry::$registry"
         echo "::set-output name=driver_opts::$driver_opts"
         echo "::set-output name=label::$label"
         echo "::set-output name=action_tags::$action_tags"
@@ -86,6 +89,7 @@ jobs:
         context: ./docker/circleci
         file: ./docker/circleci/Dockerfile
         build-args: |
+          REGISTRY=${{ steps.config.outputs.registry }}
           VERSION=${{ steps.config.outputs.label }}
         push: true
         tags: ${{ steps.config.outputs.circle_tags }}
