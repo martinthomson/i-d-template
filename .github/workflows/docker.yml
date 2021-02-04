@@ -73,7 +73,6 @@ jobs:
         context: ./docker/action
         file: ./docker/action/Dockerfile
         push: true
-        load: true
         tags: ${{ steps.tag.outputs.action_tags }}
 
     - name: "Build and Publish CircleCI Image"
