@@ -41,7 +41,7 @@ RUN set -e; \
     tmp=$(mktemp -d /tmp/musl-locales-XXXXX); \
     git clone https://gitlab.com/rilian-la-te/musl-locales "$tmp"; \
     cd "$tmp"; \
-    cmake -DLOCALE_PROFILE=OFF -DCMAKE_INSTALL_PREFIX:PATH=/usr .; \
+    cmake -DCMAKE_BUILD_TYPE=Release -DLOCALE_PROFILE=OFF -DCMAKE_INSTALL_PREFIX:PATH=/usr .; \
     make; \
     make install; \
     cd /; \
