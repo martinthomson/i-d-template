@@ -32,7 +32,9 @@ jobs:
     - name: "Cache References"
       uses: actions/cache@v2
       with:
-        path: ${{ steps.cache-setup.outputs.path }}
+        path: |
+          ${{ steps.cache-setup.outputs.path }}
+          .targets.mk
         key: refcache-${{ steps.cache-setup.outputs.date }}
         restore-keys: |
           refcache-${{ steps.cache-setup.outputs.date }}
