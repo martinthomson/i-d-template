@@ -41,12 +41,14 @@ jobs:
         if [ "$label" = "test" ]; then
           registry=localhost:5000/
           action_tags="$(tag "$registry" -action)"
+          math_tags="$(tag "$registry" -math)"
           circle_tags="$(tag "$registry" "")"
           driver_opts="network=host"
         else
           registry=ghcr.io/
           action_tags="$(tag "" -action),$(tag ghcr.io/ -action)"
           circle_tags="$(tag "" ""),$(tag ghcr.io/ "")"
+          math_tags="$(tag ghcr.io/ -math)"
           driver_opts=
         fi
         echo "::set-output name=registry::$registry"
@@ -54,6 +56,7 @@ jobs:
         echo "::set-output name=label::$label"
         echo "::set-output name=action_tags::$action_tags"
         echo "::set-output name=circle_tags::$circle_tags"
+        echo "::set-output name=math_tags::$math_tags"
 
     - name: "Setup Docker Buildx"
       uses: docker/setup-buildx-action@v1
@@ -93,3 +96,14 @@ jobs:
           VERSION=${{ steps.config.outputs.label }}
         push: true
         tags: ${{ steps.config.outputs.circle_tags }}
+
+    - name: "Build and Publish Math Image"
+      uses: docker/build-push-action@v2
+      with:
+        context: ./docker/math
+        file: ./docker/math/Dockerfile
+        build-args: |
+          REGISTRY=${{ steps.config.outputs.registry }}
+          VERSION=${{ steps.config.outputs.label }}
+        push: true
+        tags: ${{ steps.config.outputs.math_tags }}
