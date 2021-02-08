@@ -34,11 +34,20 @@ You can copy of one of the examples files
 [XML](https://github.com/martinthomson/i-d-template/blob/main/doc/example.xml))
 if you are starting from scratch.
 
-Edit the draft so that it has both a title and the correct name.  These tools
-use the `-latest` suffix in place of the usual number ('-00', or '-08').  The
-number is generated automatically when you use `make submit`.
+Rename the draft.  These tools rely on the draft being in the form
+`draft-$source-$name.{xml|md|...}`.  The [official Internet-Draft naming
+guide](https://www.ietf.org/standards/ids/guidelines/#7) describes how the IETF
+(and related groups) name drafts.  Here, you drop the trailing version number
+from the draft name and include an extension indicating the type of file.  You
+will be using the same source file to produce multiple versions of the draft.
 
-In XML, you should have at least:
+You also need to include the name of your draft *inside* the document.  This
+usually includes the version number, but in this tool, replace that the '-00' or
+'-07' with '-latest' instead.  This allows the tool to generate a version number
+automatically.
+
+A complete draft isn't necessary at this point.  In XML, you should have at
+least:
 ```xml
 <rfc docName="draft-ietf-unicorn-protocol-latest">
   <front>
@@ -51,7 +60,7 @@ docname: draft-ietf-unicorn-protocol-latest
 title: The Unicorn Protocol
 ```
 
-Add, commit and push your changes:
+Add the draft, commit and push your changes:
 ```sh
 $ git add draft-ietf-unicorn-protocol.md
 $ git commit draft-ietf-unicorn-protocol.md
