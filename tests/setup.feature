@@ -57,6 +57,13 @@ Feature: Initial setup
      and gitignore lists xml files
      and a precommit hook is installed
 
+  Scenario:  Run setup script when the file contains the wrong name
+    Given a git repo with a single Kramdown draft
+     and drafts are modified with sed -e "s/-latest/-01/g"
+     when the setup script is run
+     then it fails
+     and generates a message "Check names"
+
   Scenario:  Run setup script on directory with no draft
     Given an empty git repo
       and lib is cloned in

@@ -89,7 +89,7 @@ def step_impl(context):
                 [
                     "sed",
                     "-e",
-                    "s/draft-hartke-xmpp-stupid/{}/".format(draft_name),
+                    f"s/draft-todo-your-name-here/{draft_name}/",
                     "lib/doc/example.md",
                 ],
                 stdout=newFile,
@@ -146,3 +146,8 @@ def step_impl(context):
     context.execute_steps(u"Given a git repo with multiple Kramdown drafts")
     with cd(context.working_dir):
         context.result = call(["make", "-f", "lib/setup.mk"])
+
+@given(u'drafts are modified with sed -e "{}"')
+def step_impl(context, script):
+    with cd(context.working_dir):
+        call(["sed", "-i~", "-e", script] + glob("draft-*"))
