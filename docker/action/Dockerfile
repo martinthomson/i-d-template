@@ -74,10 +74,9 @@ RUN set -e; v="2.2.9"; sha="b8c501be4118f79a294b658d963ec8c91595e94aea69c8efd0ea
     chmod 755 "$target"
 
 RUN pip3 install --compile xml2rfc
-RUN set -e; apk add --no-cache --virtual .json-deps musl-dev gcc ruby-dev; \
+RUN set -e; \
     gem install --no-doc kramdown-rfc2629; \
-    certified-update; \
-    apk del .json-deps
+    certified-update
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
