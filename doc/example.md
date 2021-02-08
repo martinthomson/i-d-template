@@ -1,7 +1,7 @@
 ---
 title: "TODO - Your title"
 abbrev: "TODO - Abbreviation"
-docname: draft-todo-your-name-here
+docname: draft-todo-your-name-here-latest
 category: info
 
 ipr: trust200902
