@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: martinthomson/i-d-template:latest
+      - image: ghcr.io/martinthomson/i-d-template-action:latest
     working_directory: ~/draft
 
     steps:
@@ -11,14 +11,14 @@ jobs:
       - run:
           name: "Check Formatting"
           command: |
-            pip3 install --user black && ln -s $HOME/.local/bin/black $BINDIR
+            apk add black
             black --check .
 
       - run:
           name: "Run Tests"
           command: |
             if [ -z "$CIRCLE_TAG" ]; then
-              pip3 install --user behave && ln -s $HOME/.local/bin/behave $BINDIR
+              pip3 install behave
               mkdir -p /tmp/artifacts
               behave --junit --junit-directory /tmp/artifacts tests/*.feature
             fi
