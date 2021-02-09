@@ -97,6 +97,9 @@ Finally, push:
 $ git push
 ```
 
+*Note:* The `gh-pages` branch will only contain empty files until you (or CI)
+updates the files there.
+
 
 # Fast Setup
 
