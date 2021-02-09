@@ -19,6 +19,7 @@ RUN set -e; \
       make \
       openssh \
       py3-appdirs \
+      py3-dateutil \
       py3-configargparse \
       py3-html5lib \
       py3-jinja2 \
