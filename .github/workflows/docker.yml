@@ -13,44 +13,97 @@ jobs:
   build:
     name: "Update Docker Image"
     runs-on: ubuntu-latest
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+
     steps:
     - name: "Checkout"
       uses: actions/checkout@v2
 
-    - name: "Get Tag"
-      id: tag
+    - name: "Configure"
+      id: config
       run: |
         ref="${{ github.ref }}"
         if [ "$ref" = "refs/heads/main" ]; then
-          echo "::set-output name=tag::latest"
+          label=latest
         elif [ "${ref#refs/tags/}" != "$ref" ]; then
-          echo "::set-output name=tag::${ref#refs/tags/}"
+          label="${ref#refs/tags/}"
         else
-          echo "::set-output name=tag::test"
+          label=test
         fi
+        tag() {
+          echo "${1}martinthomson/i-d-template${2}:${label}"
+        }
+        if [ "$label" = "test" ]; then
+          registry=localhost:5000/
+          action_tags="$(tag "$registry" -action)"
+          math_tags="$(tag "$registry" -math)"
+          circle_tags="$(tag "$registry" "")"
+          driver_opts="network=host"
+        else
+          registry=ghcr.io/
+          action_tags="$(tag "" -action),$(tag ghcr.io/ -action)"
+          circle_tags="$(tag "" ""),$(tag ghcr.io/ "")"
+          math_tags="$(tag ghcr.io/ -math)"
+          driver_opts=
+        fi
+        echo "::set-output name=registry::$registry"
+        echo "::set-output name=driver_opts::$driver_opts"
+        echo "::set-output name=label::$label"
+        echo "::set-output name=action_tags::$action_tags"
+        echo "::set-output name=circle_tags::$circle_tags"
+        echo "::set-output name=math_tags::$math_tags"
 
     - name: "Setup Docker Buildx"
       uses: docker/setup-buildx-action@v1
+      with:
+        driver-opts: ${{ steps.config.outputs.driver_opts }}
 
     - name: "Login to DockerHub"
+      if: ${{ steps.config.outputs.label != 'test' }}
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: "Login to GitHub Container Registry"
+      if: ${{ steps.config.outputs.label != 'test' }}
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
         username: ${{ secrets.GHCR_USERNAME }}
         password: ${{ secrets.GHCR_PASSWORD }}
 
-    - name: "Build and Publish"
+    - name: "Build and Publish GitHub Actions Image"
       uses: docker/build-push-action@v2
       with:
-        context: ./action
-        file: ./action/Dockerfile
-        push: ${{ steps.tag.outputs.tag != 'test' }}
-        tags: |
-          martinthomson/i-d-template-action:${{ steps.tag.outputs.tag }}
-          ghcr.io/martinthomson/i-d-template-action:${{ steps.tag.outputs.tag }}
+        context: ./docker/action
+        file: ./docker/action/Dockerfile
+        push: true
+        tags: ${{ steps.config.outputs.action_tags }}
+
+    - name: "Build and Publish CircleCI Image"
+      uses: docker/build-push-action@v2
+      with:
+        context: ./docker/circleci
+        file: ./docker/circleci/Dockerfile
+        build-args: |
+          REGISTRY=${{ steps.config.outputs.registry }}
+          VERSION=${{ steps.config.outputs.label }}
+        push: true
+        tags: ${{ steps.config.outputs.circle_tags }}
+
+    - name: "Build and Publish Math Image"
+      uses: docker/build-push-action@v2
+      with:
+        context: ./docker/math
+        file: ./docker/math/Dockerfile
+        build-args: |
+          REGISTRY=${{ steps.config.outputs.registry }}
+          VERSION=${{ steps.config.outputs.label }}
+        push: true
+        tags: ${{ steps.config.outputs.math_tags }}
