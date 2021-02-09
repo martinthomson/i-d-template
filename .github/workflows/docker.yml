@@ -36,21 +36,19 @@ jobs:
           label=test
         fi
         tag() {
-          echo "${1}martinthomson/i-d-template${2}:${label}"
+          echo "${1}/martinthomson/i-d-template${2}:${label}"
         }
         if [ "$label" = "test" ]; then
-          registry=localhost:5000/
-          action_tags="$(tag "$registry" -action)"
-          math_tags="$(tag "$registry" -math)"
+          registry=localhost:5000
           circle_tags="$(tag "$registry" "")"
           driver_opts="network=host"
         else
-          registry=ghcr.io/
-          action_tags="$(tag "" -action),$(tag ghcr.io/ -action)"
-          circle_tags="$(tag "" ""),$(tag ghcr.io/ "")"
-          math_tags="$(tag ghcr.io/ -math)"
+          registry=ghcr.io
+          circle_tags="$(tag docker.io ""),$(tag ghcr.io "")"
           driver_opts=
         fi
+        action_tags="$(tag "$registry" -action)"
+        math_tags="$(tag "$registry" -math)"
         echo "::set-output name=registry::$registry"
         echo "::set-output name=driver_opts::$driver_opts"
         echo "::set-output name=label::$label"
