@@ -1,6 +1,6 @@
-ARG REGISTRY
+ARG REGISTRY=ghcr.io
 ARG VERSION=latest
-FROM ${REGISTRY}martinthomson/i-d-template-action:${VERSION}
+FROM ${REGISTRY}/martinthomson/i-d-template-action:${VERSION}
 
 ENV USER=idci \
     LOGNAME=idci \
