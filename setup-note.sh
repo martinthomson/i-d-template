@@ -24,14 +24,27 @@ else
     wg="${WG}"
 fi
 
-ml() {
-    echo "https://mailarchive.ietf.org/arch/browse/$1/"
-}
+api="https://datatracker.ietf.org"
+wgmeta="$api/api/v1/group/group/?format=xml&acronym=$wg"
+tmp=$(mktemp)
+trap 'rm -f $tmp' EXIT
+if hash xmllint && curl -Ssf "$wgmeta" -o "$tmp"; then
+    group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
+    group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
+    group_type="$(curl -Ssf "${api}${group_type_url}?format=xml" | \
+                 xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
+    ml="$(xmllint --xpath '/response/objects/object[1]/list_email/text()' "$tmp")"
+    ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
+else
+    wgname="$(echo "$wg" | tr '[a-z]' '[A-Z]')"
+    ml="${ML:-${wg}@ietf.org}"
+    ml_arch="https://mailarchive.ietf.org/arch/browse/${wg}/"
+fi
 
 echo '<note title="Discussion Venues" removeInRFC="true">'
 echo "<t>Discussion of this document takes place on the
-  $(echo "${wg}" | tr '[a-z]' '[A-Z]') Working Group mailing list (${ML:-${wg}@ietf.org}),
-  which is archived at <eref target=\"$(ml "${wg}")\"/>.</t>"
+  ${group_name} ${group_type} mailing list (${ml}),
+  which is archived at <eref target=\"${ml_arch}\"/>.</t>"
 echo "<t>Source for this draft and an issue tracker can be found at
   <eref target=\"https://github.com/${user}/${repo}\"/>.</t>"
 echo '</note>'
