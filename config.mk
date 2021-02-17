@@ -7,6 +7,9 @@
 XML2RFC_RFC_BASE_URL := https://datatracker.ietf.org/doc/html/
 XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
 xml2rfc ?= xml2rfc -q -s 'Setting consensus="true" for IETF STD document' --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
+# Tell kramdown not to generate targets on references so the above takes effect.
+KRAMDOWN_NO_TARGETS := true
+export KRAMDOWN_NO_TARGETS
 
 # If you are using markdown files use either kramdown-rfc2629 or mmark
 #   https://github.com/cabo/kramdown-rfc2629
