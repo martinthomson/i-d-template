@@ -50,12 +50,9 @@ jobs:
         make: gh-pages
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: "Save HTML"
+    - name: "Archive Built Drafts"
       uses: actions/upload-artifact@v2
       with:
-        path: "*.html"
-
-    - name: "Save Text"
-      uses: actions/upload-artifact@v2
-      with:
-        path: "*.txt"
+        path: |
+          draft-*.html
+          draft-*.txt
