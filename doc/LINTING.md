@@ -70,3 +70,20 @@ sf-lint-install:
 ```
 
 Note that CircleCI builds don't run as root.
+
+
+## Using the Mega image in CI
+
+For GitHub Actions, the `martinthomson/i-d-template@v1m` tag identifies an
+alternative action that uses a different Docker image than the default.  This
+image includes additional tools, as shown in its
+[Dockerfile](https://github.com/martinthomson/i-d-template/blob/main/docker/math/Dockerfile).
+
+If you want to use the tools included in this image, use the
+`martinthomson/i-d-template@v1m` action.  If you want to add tools to this
+image, please send a pull request that modifies this Dockerfile.  Unlike the
+[core
+image](https://github.com/martinthomson/i-d-template/blob/main/docker/action/Dockerfile),
+which is kept deliberately lean, most requests to add content to this image will
+be accepted.  The cost is that CI runs using this image will take quite a bit
+longer as fetching the image takes more time.
