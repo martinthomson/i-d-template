@@ -60,7 +60,7 @@ $ sudo pip3 install xml2rfc
 ```
 
 xml2rfc might need development versions of [libxml2](http://xmlsoft.org/) and
-[libxslt1](http://xmlsoft.org/XSLT).  These packages are named `libxml2-dev` and
+[libxslt](http://xmlsoft.org/XSLT).  These packages are named `libxml2-dev` and
 `libxslt1-dev` (Debian, Ubuntu); `libxml2-devel` and `libxslt1-devel` (RedHat,
 Fedora); or `libxml2-devel` and `libxslt-devel` (Cygwin).
 
