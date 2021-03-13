@@ -68,7 +68,7 @@ for d in "$@"; do
     fi
     echo
     echo "* [Editor's Copy](${githubio}.${fullname}.html)"
-    echo "* [${status} Draft](https://tools.ietf.org/html/${fullname})"
+    echo "* [${status} Draft](https://datatracker.ietf.org/doc/html/${fullname})"
     echo "* [Compare Editor's Copy to ${status} Draft](${githubio}.${fullname}.diff)"
 done
 
