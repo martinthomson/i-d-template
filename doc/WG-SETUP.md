@@ -50,7 +50,7 @@ Since we're talking about a WG document here, we'll assume you've already got an
 
 WARNING: THIS IS THE PART THAT REQUIRES A COMMAND LINE.
 
-Full instructions for initializing the repository are [here](https://github.com/martinthomson/i-d-template/blob/main/REPO.md).
+Full instructions for initializing the repository are [here](./REPO.md).
 
 In essence, what you're doing is copying over the tooling from a template repository, and then creating the Internet-Draft either from your existing source file, or from a template.  Both XML and Markdown are supported as the draft source.  (There is also experimental support for the [outline2xml](https://github.com/martinthomson/i-d-template/pull/2) format, which has been used for netconf drafts.)
 
