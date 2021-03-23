@@ -45,7 +45,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 	  echo '	-cp $$< $$@' >>$@;)
 
 .PHONY: setup-files
-setup-files: $(TEMPLATE_FILES) README.md .note.xml
+setup-files: $(TEMPLATE_FILES) README.md .note.xml .github/CODEOWNERS
 	git add $(drafts_source)
 	git add $^
 
@@ -83,6 +83,10 @@ README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FIL
 
 .note.xml: $(LIBDIR)/setup-note.sh
 	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts) >$@
+	git add $@
+
+.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.sh $(drafts_xml)
+	$(LIBDIR)/setup-codeowners.sh $(filter %.xml,$^) >$@
 	git add $@
 
 .PHONY: setup-master
