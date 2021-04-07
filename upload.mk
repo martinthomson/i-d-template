@@ -21,6 +21,7 @@ endif
 .PHONY: upload publish
 publish: upload
 upload: $(uploads)
+	@[ -n "$^" ] || ! echo "error: No files to upload.  Did you use \`git tag -a\`?"
 
 .%.upload: %.xml
 	$(curl) -D $@ -F "user=$(shell git tag --list --format '%(taggeremail)' $(basename $<) | \
