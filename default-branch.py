@@ -21,7 +21,7 @@ remote = os.environ.get("GIT_REMOTE", default="origin")
 get_branch(f"{remote}/HEAD")
 get_branch(f"refs/remotes/{remote}/HEAD")
 
-if len(sys.argv) < 4:
+if len(sys.argv) < 3:
     print(f"warning: {sys.argv[0]} unable to determine default branch", file=sys.stderr)
     get_branch("HEAD")
     exit(1)
@@ -39,7 +39,9 @@ except ImportError:
 
 
 url = f"https://api.github.com/repos/{sys.argv[1]}/{sys.argv[2]}"
-headers = {"Authorization": f"bearer {sys.argv[3]}"}
+headers = {}
+if len(sys.argv) >= 4:
+    headers["Authorization"] = f"bearer {sys.argv[3]}"
 response = requests.get(url, headers=headers)
 response.raise_for_status()
 result = response.json()
