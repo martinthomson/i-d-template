@@ -114,8 +114,8 @@ elif [[ "$format" = "md" ]]; then
         echo
     }
     function table_i() {
-        echo "| Draft |     |     |     |     |"
-        echo "| ----- | --- | --- | --- | --- |"
+        echo "| Draft |     |     |     |     |     |"
+        echo "| ----- | --- | --- | --- | --- | --- |"
     }
     function table_o() {
         echo
