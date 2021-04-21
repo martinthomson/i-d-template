@@ -76,7 +76,7 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	  NEW_ROOT=`git -C $(GHPAGES_ROOT) rev-list --min-age=$$KEEP --max-count=1 gh-pages`; \
 	  if [ $$NEW_ROOT != $$ROOT ]; then \
 		git -C $(GHPAGES_ROOT) replace --graft $$NEW_ROOT && \
-		git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
+		FILTER_BRANCH_SQUELCH_WARNING=1 git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
 	  fi \
 	fi
 
