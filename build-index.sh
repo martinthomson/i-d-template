@@ -174,11 +174,15 @@ function list_dir() {
         fi
 	      diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
-        this_issue_label=$(./lib/extract-frontmatter.py ${file}.md github-issue-label)
-        if [[ "$this_issue_label" ]]; then
-            td "$(a $(githubcom labels/$this_issue_label) "issues" )"
-        else
+        if [[ "${#files[@]}" -eq 1 ]]; then
             td ""
+        else
+            this_issue_label=$(./lib/extract-frontmatter.py ${file}.md github-issue-label)
+            if [[ "$this_issue_label" ]]; then
+                td "$(a $(githubcom labels/$this_issue_label) "issues" )"
+            else
+                td ""
+            fi
         fi
         tr_o
     done
