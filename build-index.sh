@@ -28,8 +28,7 @@ function githubio() {
 }
 
 function githubcom() {
-    d="${1%/}/"
-    echo "https://github.com/${user}/${repo}/${d}"
+    echo "https://github.com/${user}/${repo}/${1}"
 }
 
 
