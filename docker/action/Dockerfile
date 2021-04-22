@@ -19,7 +19,6 @@ RUN set -e; \
       make \
       openssh \
       py3-appdirs \
-      py3-dateutil \
       py3-configargparse \
       py3-html5lib \
       py3-jinja2 \
@@ -74,7 +73,7 @@ RUN set -e; v="2.2.9"; sha="b8c501be4118f79a294b658d963ec8c91595e94aea69c8efd0ea
     rm -f "$tmp"; \
     chmod 755 "$target"
 
-RUN pip3 install --compile --no-cache-dir xml2rfc svgcheck
+RUN pip3 install --compile --no-cache-dir xml2rfc svgcheck archive-repo
 ENV KRAMDOWN_PERSISTENT=t
 RUN gem install --no-doc kramdown-rfc2629 net-http-persistent && certified-update
 
