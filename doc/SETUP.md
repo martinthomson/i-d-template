@@ -66,34 +66,6 @@ Fedora); `libxml2-devel` and `libxslt-devel` (Cygwin); or `libxml2` and
 `libxslt` (Mac Homebrew).
 
 
-## Archive-Repo
-
-The archive-repo script is used by CI jobs and `make archive` to create an
-archival copy of GitHub issues and pull requests.  It is not needed for most
-local authoring.
-
-If you need it, it can be installed with pip, as above.
-
-Using a `virtualenv`:
-
-```sh
-$ source venv/bin/activate
-$ pip3 install archive-repo
-```
-
-To your local user account:
-
-```sh
-$ pip3 install --user archive-repo
-```
-
-Or globally (not advisable):
-
-```sh
-$ sudo pip3 install archive-repo
-```
-
-
 ## Markdown
 
 If you use markdown, you will also need to install `kramdown-rfc2629` or `mmark`.
