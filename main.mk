@@ -58,10 +58,11 @@ MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))),
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
 MD_POST := | $(LIBDIR)/add-note.py
-ifeq (true,$(USE_XSLT))
-MD_POST +=  >
-else
-MD_POST += | $(xml2rfc) --v2v3 /dev/stdin -o
+ifneq (true,$(USE_XSLT))
+MD_POST += | $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
+endif
+ifneq (,$(XML_TIDY))
+MD_POST += | $(XML_TIDY)
 endif
 
 %.xml: %.md
@@ -69,11 +70,11 @@ endif
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) $@)'; \
-	  cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) >$@)'; \
+	  cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) $@)'; \
-	  cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) $@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) >$@)'; \
+	  cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) >$@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
