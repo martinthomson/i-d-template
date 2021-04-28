@@ -176,7 +176,7 @@ function list_dir() {
         if [[ "${#files[@]}" -eq 1 ]]; then
             td ""
         else
-            this_issue_label=$(./lib/extract-metadata.py ${file}.md github-issue-label)
+            this_issue_label=$(./lib/extract-metadata.py $(ls ${file}.{md,xml}) github-issue-label)
             if [[ "$this_issue_label" ]]; then
                 td "$(a $(githubcom labels/$this_issue_label) "issues" )"
             else
