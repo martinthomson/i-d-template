@@ -30,6 +30,7 @@ RUN set -e; \
       py3-requests \
       py3-setuptools \
       py3-six \
+      py3-yaml \
       python3 \
       ruby \
       sed

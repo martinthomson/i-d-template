@@ -27,6 +27,11 @@ function githubio() {
     echo "https://${user}.github.io/${repo}/${d#$default_branch/}${2}.txt"
 }
 
+function githubcom() {
+    echo "https://github.com/${user}/${repo}/${1}"
+}
+
+
 if [[ "$format" = "html" ]]; then
     indent=''
     function w() {
@@ -108,8 +113,8 @@ elif [[ "$format" = "md" ]]; then
         echo
     }
     function table_i() {
-        echo "| Draft |     |     |     |     |"
-        echo "| ----- | --- | --- | --- | --- |"
+        echo "| Draft |     |     |     |     |     |"
+        echo "| ----- | --- | --- | --- | --- | --- |"
     }
     function table_o() {
         echo
@@ -168,6 +173,16 @@ function list_dir() {
         fi
 	      diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
+        if [[ "${#files[@]}" -eq 1 ]]; then
+            td ""
+        else
+            this_issue_label=$(./lib/extract-metadata.py $(ls ${file}.{md,xml}) github-issue-label)
+            if [[ "$this_issue_label" ]]; then
+                td "$(a $(githubcom labels/$this_issue_label) "issues" )"
+            else
+                td ""
+            fi
+        fi
         tr_o
     done
     table_o
