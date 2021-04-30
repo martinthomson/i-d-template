@@ -39,7 +39,7 @@ archive.json: fetch-archive $(drafts_source)
 	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 	trap 'rm -f $$old_archive' EXIT; \
 	git show $(ARCHIVE_BRANCH):$@ > $$old_archive || true; \
-	$(LIBDIR)/archive_repo.py $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN) $@ --reference $$old_archive;
+	$(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN) $@ --reference $$old_archive;
 
 
 ARCHIVE_ROOT := /tmp/gharchive$(shell echo $$$$)
