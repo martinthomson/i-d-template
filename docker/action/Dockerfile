@@ -78,7 +78,9 @@ RUN pip3 install --compile --no-cache-dir \
     svgcheck \
     xml2rfc
 ENV KRAMDOWN_PERSISTENT=t
-RUN gem install --no-doc kramdown-rfc2629 net-http-persistent && certified-update
+RUN gem install --no-doc kramdown-rfc2629 net-http-persistent && \
+    certified-update && \
+    kramdown-rfc-cache-subseries-bibxml
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
