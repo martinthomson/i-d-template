@@ -102,8 +102,10 @@ on the first line of the file:
 manager, `gem`:
 
 ```sh
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc2629
+$ gem install --user-install -N -n ~/.local/bin kramdown-rfc2629 net-http-persistent
 ```
+
+Note: Installing net-http-persistent makes this a lot faster.
 
 
 ### mmark
@@ -133,7 +135,7 @@ quick set of shortcuts for these tools.
 
 ```sh
 $ pip3 install --user --upgrade xml2rfc archive-repo
-$ gem uninstall --user-install -n ~/.local/bin kramdown-rfc2629
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc2629
+$ gem uninstall --user-install -n ~/.local/bin kramdown-rfc2629 net-http-persistent
+$ gem install --user-install -N -n ~/.local/bin kramdown-rfc2629 net-http-persistent
 $ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
 ```
