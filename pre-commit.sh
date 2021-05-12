@@ -23,7 +23,7 @@ function abort() {
 trap abort ERR
 trap cleanup EXIT
 
-files=($(git status --porcelain draft-* | sed '/^[MARCU]/{s/.*draft-/draft-/;p;};d' | sort))
+files=($(git status --porcelain draft-* rfc* | sed '/^[MARCU]/{s/.*\(draft-\|rfc\)/\1/;p;};d' | sort))
 for f in "${files[@]}"; do
     tmp="${f%.*}"-tmp$$."${f##*.}"
     tmpfiles+=("$tmp")
