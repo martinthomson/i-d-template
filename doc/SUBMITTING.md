@@ -104,3 +104,13 @@ use is the full draft name including a revision number.
 $ git tag -a draft-ietf-unicorn-protocol-03
 $ git push origin draft-ietf-unicorn-protocol-03
 ```
+
+## New Manual Process
+
+There should be no tags currently in the system relating to the draft.
+
+```sh
+$ git tag -a draft-ietf-unicorn-protocol-XX && git push --tags
+```
+
+where XX is the next draft version number you want to publish.
