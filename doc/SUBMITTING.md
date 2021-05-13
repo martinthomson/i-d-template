@@ -85,7 +85,7 @@ the draft with and calculates the next version.  When there are no tags, it
 generates a `-00` version.
 
 ```sh
-$ make submit
+$ make next
 ```
 
 If you already have a tag in place or want to build a specific tag, you can

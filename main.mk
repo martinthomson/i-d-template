@@ -125,8 +125,26 @@ endif
 	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
 
 ## Build copies of drafts for submission
+.PHONY: next
+next:: $(drafts_next_txt) $(drafts_next_xml)
+
+## Remind people to use CI
 .PHONY: submit
-submit:: $(drafts_next_txt) $(drafts_next_xml)
+submit::
+	@echo "\`make submiti\` is not really necessary."
+	@echo "\`make\` on its own is a pretty good preview."
+	@echo "To upload a new draft to datatracker, try this:"
+	@echo
+	@for i in $(drafts_next); do \
+	  echo "    make tag -a $$i"; \
+	done
+	@for i in $(drafts_next); do \
+	  echo "    git push origin $$i"; \
+	done
+	@echo
+	@echo "Don't forget the \`-a\`."
+	@echo
+	@echo "To get a preview, use \`make next\`."
 
 ## Check for validity
 .PHONY: check idnits
