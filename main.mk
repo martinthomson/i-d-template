@@ -131,7 +131,7 @@ next:: $(drafts_next_txt) $(drafts_next_xml)
 ## Remind people to use CI
 .PHONY: submit
 submit::
-	@echo "\`make submiti\` is not really necessary."
+	@echo "\`make submit\` is not really necessary."
 	@echo "\`make\` on its own is a pretty good preview."
 	@echo "To upload a new draft to datatracker, try this:"
 	@echo
