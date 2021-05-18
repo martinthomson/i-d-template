@@ -1,13 +1,20 @@
 ## Identify drafts, types and versions
 
-$(warning *************************************************)
-$(warning ***                                           ***)
-$(warning ***   You are using the 'master' branch.      ***)
-$(warning ***   Please update to use 'main'.            ***)
-$(warning ***                                           ***)
-$(warning ***   sed -i~ s/master/main/ Makefile         ***)
-$(warning ***                                           ***)
-$(warning *************************************************)
+$(warning **************************************************************)
+$(warning ***                                                        ***)
+$(warning ***   You are on the 'master' branch of i-d-template.      ***)
+$(warning ***   This branch is not supported.                        ***)
+$(warning ***   Please update to use 'main'.                         ***)
+$(warning ***                                                        ***)
+ifneq (,$(shell git submodule status $(LIBDIR) 2>/dev/null))
+$(warning ***   git -C $(LIBDIR) fetch origin                        ***)
+$(warning ***   git -C $(LIBDIR) checkout main                       ***)
+else
+$(warning ***   sed -i~ s/master/main/ Makefile                      ***)
+$(warning ***   rm -rf $(LIBDIR)                                     ***)
+endif
+$(warning ***                                                        ***)
+$(warning **************************************************************)
 
 drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
 
