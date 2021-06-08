@@ -138,17 +138,22 @@ else
     exit 2
 fi
 
-declare -A issue_labels=()
+# Mac versions of bash are old and terrible.
+if declare -A test >/dev/null 2>&1; then
+    declare -A issue_labels=()
+else
+    disable_cache=true
+fi
 function issue_label() {
     file="$1"
-    if [[ -n "${issue_labels[file]}" ]]; then
+    if [[ -z "$disable_cache" && -n "${issue_labels[file]}" ]]; then
         echo "${issue_labels[file]:1}"
         return
     fi
     for i in "${all_drafts[@]}"; do
         if [[ "${i%.*}" == "$file" ]]; then
             label=$("${libdir}/extract-metadata.py" "$i" github-issue-label)
-            issue_labels[file]="x$label"
+            [[ -z "$disable_cache" ]] && issue_labels[file]="x$label"
             echo "$label"
             return
         fi
