@@ -16,7 +16,11 @@ git_commit = [
     "user.email=behave@example.com",
     "commit",
 ]
-offline_make_options = ["PUSH_GHPAGES=false", "FETCH_ISSUES=false"]
+offline_make_options = [
+    "PUSH_GHPAGES=false",
+    "FETCH_ISSUES=false",
+    "BRANCH_FETCH=false",
+]
 
 
 @contextmanager
@@ -44,12 +48,14 @@ def run_with_capture(context, command):
 
 @when(u"the setup script is run")
 def step_impl(context):
-    run_with_capture(context, ["make", "-f", "lib/setup.mk"])
+    run_with_capture(context, ["make", "-f", "lib/setup.mk"] + offline_make_options)
 
 
 @when(u'the setup script is run with "{option}"')
 def step_impl(context, option):
-    run_with_capture(context, ["make", "-f", "lib/setup.mk", option])
+    run_with_capture(
+        context, ["make", "-f", "lib/setup.mk", option] + offline_make_options
+    )
 
 
 @when(u"make is run")

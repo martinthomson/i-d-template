@@ -5,6 +5,14 @@ import os
 import subprocess
 import sys
 
+if os.environ.get("DEFAULT_BRANCH") is not None:
+    print(os.environ["DEFAULT_BRANCH"])
+    exit(0)
+
+
+def warn(m):
+    print(f"warning: {sys.argv[0]}: {m}", file=sys.stderr)
+
 
 def get_branch(rev):
     try:
@@ -17,17 +25,16 @@ def get_branch(rev):
         pass
 
 
-def warn(m):
-    print(f"warning: {sys.argv[0]}: {m}", file=sys.stderr)
-
-
 remote = os.environ.get("GIT_REMOTE", default="origin")
 get_branch(f"{remote}/HEAD")
 get_branch(f"refs/remotes/{remote}/HEAD")
 
 # We shouldn't get here...
 
-if len(sys.argv) < 3:
+if (
+    len(sys.argv) < 3
+    or os.environ.get("BRANCH_FETCH", default="true").lower() == "false"
+):
     warn("unable to determine default branch")
     get_branch("HEAD")
     exit(1)

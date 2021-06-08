@@ -97,5 +97,11 @@ endif
 # GITHUB_API_TOKEN is used in the GitHub API.
 GITHUB_API_TOKEN ?= $(or $(GITHUB_TOKEN),$(GH_TOKEN))
 
-DEFAULT_BRANCH ?= $(shell $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
+ifeq (,$(BRANCH_FETCH))
+BRANCH_FETCH := true
+endif
+export BRANCH_FETCH
+ifeq (,$(DEFAULT_BRANCH))
+DEFAULT_BRANCH := $(shell BRANCH_FETCH=$(BRANCH_FETCH) $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
+endif
 export DEFAULT_BRANCH

@@ -138,14 +138,14 @@ def step_impl(context):
 def step_impl(context):
     context.execute_steps("Given a git repo with a single Kramdown draft")
     with cd(context.working_dir):
-        context.result = call(["make", "-f", "lib/setup.mk"])
+        context.result = call(["make", "-f", "lib/setup.mk", "BRANCH_FETCH=false"])
 
 
 @given("a configured git repo with multiple Kramdown drafts")
 def step_impl(context):
     context.execute_steps("Given a git repo with multiple Kramdown drafts")
     with cd(context.working_dir):
-        context.result = call(["make", "-f", "lib/setup.mk"])
+        context.result = call(["make", "-f", "lib/setup.mk", "BRANCH_FETCH=false"])
 
 
 @given('drafts are modified with sed -e "{}"')
