@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Usage: $0 html [dir] [gh-user] [gh-repo] > index.html
-# Usage: $0 md [dir] [gh-user] [gh-repo] > index.md
+# Usage: $0 html [dir] [gh-user] [gh-repo] [draft source...] > index.html
+# Usage: $0 md [dir] [gh-user] [gh-repo] [draft source...] > index.md
 
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
@@ -11,6 +11,10 @@ user="${4:-<user>}"
 repo="${5:-<repo>}"
 default_branch="${DEFAULT_BRANCH:-$($(dirname "$0")/default-branch.py)}"
 branch="${3:-$default_branch}"
+libdir="${LIBDIR:-$(realpath $(dirname "$0"))}"
+shift 5
+# Remaining arguments (now $@) are source files
+all_drafts=("$@")
 
 gh="https://github.com/${user}/${repo}"
 
@@ -134,6 +138,23 @@ else
     exit 2
 fi
 
+declare -A issue_labels=()
+function issue_label() {
+    file="$1"
+    if [[ -n "${issue_labels[file]}" ]]; then
+        echo "${issue_labels[file]:1}"
+        return
+    fi
+    for i in "${all_drafts[@]}"; do
+        if [[ "${i%.*}" == "$file" ]]; then
+            label=$("${libdir}/extract-metadata.py" "$i" github-issue-label)
+            issue_labels[file]="x$label"
+            echo "$label"
+            return
+        fi
+    done
+}
+
 if [[ "$format" = "html" ]]; then
     w '<!DOCTYPE html>'
     wi '<html>'
@@ -168,17 +189,17 @@ function list_dir() {
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" != "$default_branch" ]]; then
-	          diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
+            diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
         fi
-	      diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
+        diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
         if [[ "${#files[@]}" -eq 1 ]]; then
             td ""
         else
-            this_issue_label=$(./lib/extract-metadata.py $(ls ${file}.{md,xml}) github-issue-label)
-            if [[ "$this_issue_label" ]]; then
-                td "$(a $(githubcom labels/$this_issue_label) "issues" )"
+            label=$(issue_label "$file")
+            if [[ -n "$label" ]]; then
+                td "$(a $(githubcom labels/$label) "issues")"
             else
                 td ""
             fi
