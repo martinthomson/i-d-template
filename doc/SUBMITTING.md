@@ -81,7 +81,8 @@ $ make next
 ```
 
 If you already have a tag in place or want to build a specific tag, you can
-identify the specific XML file directly.
+identify the specific XML file directly.  This works for any version you have
+submitted.
 
 ```sh
 $ make draft-ietf-unicorn-protocol-03.xml
