@@ -41,16 +41,6 @@ temporary](https://trac.tools.ietf.org/tools/ietfdb/ticket/2390)).  The email
 address that git uses can be found by calling `git config --get user.email`, if
 you aren't certain.
 
-**Note**: Existing users will need to update their configuration to take
-advantage of this feature.  For Circle CI users, adding
-[.circleci/config.yml](https://github.com/martinthomson/i-d-template/blob/main/template/.circleci/config.yml)
-to your repository and removing any existing `circle.yml` file is recommended.
-[Travis
-support](https://github.com/martinthomson/i-d-template/blob/main/template/.travis.yml)
-is less well-tested (and slower).  Updating the
-[Makefile](https://github.com/martinthomson/i-d-template/blob/main/template/Makefile)
-provides a small additional speed improvement.
-
 **Bug**: Circle CI has a [bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
 that prevents `git push --tags` from triggering builds if you have multiple drafts.
 Tag every draft, then push each tag individually.  (Tagging all drafts first means
@@ -63,8 +53,9 @@ a GitHub account token configured for this feature to be enabled.
 
 ## Semi-automated Process
 
-Rather than rely on the CI system, the `make upload` command can be used to
-upload a tagged draft to the datatracker.
+You should only really do this if you don't have CI enabled or if the CI build
+fails.  The `make upload` command can be used to upload a tagged draft to the
+datatracker.
 
 ```sh
 $ git tag -a draft-ietf-unicorn-protocol-03
@@ -72,16 +63,17 @@ $ git push origin draft-ietf-unicorn-protocol-03
 $ make upload
 ```
 
-This uses the same process as the CI system.  Note that if you have multiple
-tags pointing to the current HEAD, this will attempt to upload all of those
-drafts.
+This uses the same process that the CI system uses.  Note that if you have
+multiple tags pointing to the current HEAD, this will attempt to upload all of
+those drafts.
 
 
 ## Manual Process
 
-Make a submission version of your draft.  The makefile uses git tags to work out
-what version to create.  It looks for the last version number you have tagged
-the draft with and calculates the next version.  When there are no tags, it
+Again, if you don't have CI enabled, you can make a submission version of your
+draft and upload it yourself.  The makefile uses git tags to work out what
+version to create.  It looks for the last version number you have tagged the
+draft with and calculates the next version.  When there are no tags, it
 generates a `-00` version.
 
 ```sh
