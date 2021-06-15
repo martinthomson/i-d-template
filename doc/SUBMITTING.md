@@ -71,10 +71,14 @@ those drafts.
 ## Manual Process
 
 Again, if you don't have CI enabled, you can make a submission version of your
-draft and upload it yourself.  The makefile uses git tags to work out what
-version to create.  It looks for the last version number you have tagged the
-draft with and calculates the next version.  When there are no tags, it
-generates a `-00` version.
+draft and upload it yourself.  You can also submit a version manually before
+pushing tags, in which case the CI build will fail safely when you push the
+tags.  Datatracker will safely reject the second, automated submission.
+
+The makefile still needs git tags to work out what version to create.  Always
+use tags.  The tool looks for the last version number you have tagged the draft
+with and calculates the next version.  When there are no tags, it generates a
+`-00` version.
 
 ```sh
 $ make next
@@ -88,10 +92,11 @@ submitted.
 $ make draft-ietf-unicorn-protocol-03.xml
 ```
 
-[Submit the .xml file](https://datatracker.ietf.org/submit/).
+[Submit the .xml file](https://datatracker.ietf.org/submit/).  Don't submit the
+`.txt` file.
 
-Then you can tag your repository and upload the tags.  The tag you should
-use is the full draft name including a revision number.
+Then tag your repository (if you haven't already) and upload the tags.  The tag
+you should use is the full draft name including a revision number.
 
 ```sh
 $ git tag -a draft-ietf-unicorn-protocol-03
