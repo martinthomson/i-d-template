@@ -57,7 +57,7 @@ NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST := | $(LIBDIR)/add-note.py
+MD_POST := | ${python} $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
 MD_POST += | $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
 endif
@@ -231,6 +231,10 @@ fix-lint-default-branch:
 	if ! git rev-parse --abbrev-ref refs/remotes/$(GIT_REMOTE)/HEAD >/dev/null 2>&1; then \
 	  echo "ref: refs/remotes/$(GIT_REMOTE)/$$(git rev-parse --abbrev-ref HEAD)" > $$(git rev-parse --git-dir)/refs/remotes/$(GIT_REMOTE)/HEAD; \
 	fi
+
+.PHONY: update-docker
+update-docker:
+	docker image pull ghcr.io/larseggert/i-d-toolchain:latest
 
 ## Cleanup
 COMMA := ,
