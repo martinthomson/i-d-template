@@ -234,7 +234,7 @@ fix-lint-default-branch:
 
 .PHONY: update-docker
 update-docker:
-	docker image pull ghcr.io/larseggert/i-d-toolchain:latest
+	docker image pull ${DOCKER_IMAGE}
 
 ## Cleanup
 COMMA := ,
