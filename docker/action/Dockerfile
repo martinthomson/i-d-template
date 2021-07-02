@@ -68,7 +68,7 @@ RUN set -e; tool_install() { \
     tool_install rfcdiff 1.48 \
       80c886e76803b889c444cd44781f8fa34cb23943a28f18cac0ea8a1458dca265
 
-RUN set -e; v="2.2.9"; sha="b8c501be4118f79a294b658d963ec8c91595e94aea69c8efd0ea8788c7466c4f"; \
+RUN set -e; v="2.2.10"; sha="54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff"; \
     tmp=$(mktemp -t "mmarkXXXXXX.tgz"); target="${BINDIR:-/usr/local/bin}/mmark"; \
     curl -sSLf "https://github.com/mmarkdown/mmark/releases/download/v${v}/mmark_${v}_linux_amd64.tgz" -o "$tmp"; \
     [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
