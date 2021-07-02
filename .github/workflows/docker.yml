@@ -1,6 +1,7 @@
 name: "Update Docker Image for GitHub Action"
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - "docker/**"
