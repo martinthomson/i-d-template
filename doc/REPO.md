@@ -151,7 +151,9 @@ and use Circle CI, as described in the next section.
 
 This requires that you sign in with [Circle](https://circleci.com/).
 
+XXXX-onboarding.circleci.com is no longer a valid name! Instead go to???? 
 First [enable builds for the new repository](https://onboarding.circleci.com/).
+
 
 Then, you need to get yourself a [new GitHub application
 token](https://github.com/settings/tokens/new).  The application token only
