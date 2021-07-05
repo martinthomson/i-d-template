@@ -73,8 +73,8 @@ endif
 	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) >$@)'; \
 	  cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(mmark) -xml2 -page $(MD_POST) >$@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
+	  cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
