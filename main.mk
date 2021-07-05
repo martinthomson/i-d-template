@@ -133,10 +133,10 @@ next:: $(drafts_next_txt) $(drafts_next_xml)
 submit::
 	@echo "\`make submit\` is not really necessary."
 	@echo "\`make\` on its own is a pretty good preview."
-	@echo "To upload a new draft to datatracker, try this:"
+	@echo "To upload a new draft to datatracker, enable CI and try this:"
 	@echo
 	@for i in $(drafts_next); do \
-	  echo "    make tag -a $$i"; \
+	  echo "    git tag -a $$i"; \
 	done
 	@for i in $(drafts_next); do \
 	  echo "    git push origin $$i"; \
