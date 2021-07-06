@@ -2,22 +2,29 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cimg/base:latest
+      - image: cimg/base:stable
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
 
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 20.10.6
 
       - run:
           name: "Check Formatting"
           command: |
-            apk add black
+            pip3 install --user black
+            PATH="$PATH:~/.local/bin"
             black --check .
 
       - run:
           name: "Run Tests"
           command: |
             if [ -z "$CIRCLE_TAG" ]; then
-              pip3 install behave
+              pip3 install --user behave
+              PATH="$PATH:~/.local/bin"
               mkdir -p /tmp/artifacts
               behave --junit --junit-directory /tmp/artifacts tests/*.feature
             fi
