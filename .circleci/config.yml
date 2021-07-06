@@ -25,7 +25,9 @@ jobs:
             else
               tag="$CIRCLE_BRANCH"
             fi
-            docker build -t martinthomson/i-d-template:"$tag" docker/circleci
+            docker build -t docker.io/martinthomson/i-d-template-action:"$tag" docker/action
+            docker build -t docker.io/martinthomson/i-d-template:"$tag" \
+              --build-arg REGISTRY=docker.io --build-arg TAG="$tag" docker/circleci
 
       - run:
           name: "Run Tests"
@@ -46,7 +48,7 @@ jobs:
             docker run -d --name test \
               --mount type=bind,source=$(pwd),destination=/test \
               --mount type=bind,source=/tmp/artifacts,destination=/tmp/artifacts \
-              -w /test martinthomson/i-d-template:"$tag" sleep 30
+              -w /test docker.io/martinthomson/i-d-template:"$tag" sleep 30
             docker exec test pip install --user behave black
             docker exec test /home/idci/.local/bin/black --check .
             docker exec test /home/idci/.local/bin/behave --junit --junit-directory /tmp/artifacts tests
@@ -67,7 +69,7 @@ jobs:
             fi
             if [ -n "$DOCKER_PASSWORD" ]; then
               echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-              docker push martinthomson/i-d-template:"$tag"
+              docker push docker.io/martinthomson/i-d-template:"$tag"
             fi
 
       - store_artifacts:
