@@ -2,34 +2,33 @@ version: 2
 jobs:
   build:
     docker:
-      - image: martinthomson/i-d-template-action:latest
-    resource_class: small
-    working_directory: ~/draft
+      - image: cimg/base:latest
 
     steps:
       - checkout
 
+      # Build txt and html versions of drafts
       - run:
-          name: "Check Formatting"
+          name: "Build and Push Image"
           command: |
-            apk add black
-            black --check .
-
-      - run:
-          name: "Run Tests"
-          command: |
-            if [ -z "$CIRCLE_TAG" ]; then
-              pip3 install behave
-              mkdir -p /tmp/artifacts
-              behave --junit --junit-directory /tmp/artifacts tests/*.feature
+            if ! git show --name-only --format='' HEAD | diff -q '^\(docker\|.circleci\)/'; then
+              exit
             fi
-
-      - store_artifacts:
-          path: /tmp/artifacts
-
-      - store_test_results:
-          path: /tmp/artifacts
-
+            if [ -n "$CIRCLE_TAG" ]; then
+              tag="$CIRCLE_TAG"
+              push=y
+            elif [ "$CIRCLE_BRANCH" = "main" ]; then
+              tag=latest
+              push=y
+            else
+              tag="$CIRCLE_BRANCH"
+              push=n
+            fi
+            docker build -t martinthomson/i-d-template:$tag docker/circleci
+            if [ "$push" = y -a -n "$DOCKER_PASS" ]; then
+              echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+              docker push martinthomson/i-d-template:$tag
+            fi
 
 workflows:
   version: 2
