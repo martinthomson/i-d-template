@@ -1,5 +1,12 @@
 ## Identify drafts, types and versions
 
+
+
+
+
+
+
+
 $(warning **************************************************************)
 $(warning ***                                                        ***)
 $(warning ***   You are on the 'master' branch of i-d-template.      ***)
@@ -7,11 +14,11 @@ $(warning ***   This branch is not supported.                        ***)
 $(warning ***   Please update to use 'main'.                         ***)
 $(warning ***                                                        ***)
 ifneq (,$(shell git submodule status $(LIBDIR) 2>/dev/null))
-$(warning ***   git -C $(LIBDIR) fetch origin                        ***)
-$(warning ***   git -C $(LIBDIR) checkout main                       ***)
+$(warning ***   git -C $(LIBDIR) fetch origin                              ***)
+$(warning ***   git -C $(LIBDIR) checkout main                             ***)
 else
 $(warning ***   sed -i~ s/master/main/ Makefile                      ***)
-$(warning ***   rm -rf $(LIBDIR)                                     ***)
+$(warning ***   rm -rf $(LIBDIR)                                           ***)
 endif
 $(warning ***                                                        ***)
 $(warning **************************************************************)
