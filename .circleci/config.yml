@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.9
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
@@ -15,7 +15,7 @@ jobs:
       - run:
           name: "Check Formatting"
           command: |
-            pip3 install --user black
+            pip install --user black
             PATH="$PATH:~/.local/bin"
             black --check .
 
@@ -23,7 +23,7 @@ jobs:
           name: "Run Tests"
           command: |
             if [ -z "$CIRCLE_TAG" ]; then
-              pip3 install --user behave
+              pip install --user behave
               PATH="$PATH:~/.local/bin"
               mkdir -p /tmp/artifacts
               behave --junit --junit-directory /tmp/artifacts tests/*.feature
