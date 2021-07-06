@@ -7,9 +7,23 @@ jobs:
     steps:
       - checkout
 
-      # Build txt and html versions of drafts
       - run:
-          name: "Build and Push Image"
+          name: "Check Formatting"
+          command: |
+            apk add black
+            black --check .
+
+      - run:
+          name: "Run Tests"
+          command: |
+            if [ -z "$CIRCLE_TAG" ]; then
+              pip3 install behave
+              mkdir -p /tmp/artifacts
+              behave --junit --junit-directory /tmp/artifacts tests/*.feature
+            fi
+
+      - run:
+          name: "Build and Push Docker Image"
           command: |
             if ! git show --name-only --format='' HEAD | diff -q '^\(docker\|.circleci\)/'; then
               exit
@@ -24,11 +38,18 @@ jobs:
               tag="$CIRCLE_BRANCH"
               push=n
             fi
-            docker build -t martinthomson/i-d-template:$tag docker/circleci
-            if [ "$push" = y -a -n "$DOCKER_PASS" ]; then
-              echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-              docker push martinthomson/i-d-template:$tag
+            docker build -t martinthomson/i-d-template:"$tag" docker/circleci
+            if [ "$push" = y -a -n "$DOCKER_PASSWORD" ]; then
+              echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+              docker push martinthomson/i-d-template:"$tag"
             fi
+
+      - store_artifacts:
+          path: /tmp/artifacts
+
+      - store_test_results:
+          path: /tmp/artifacts
+
 
 workflows:
   version: 2
