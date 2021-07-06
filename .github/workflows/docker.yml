@@ -41,14 +41,15 @@ jobs:
         }
         if [ "$label" = "test" ]; then
           registry=localhost:5000
+          action_tags="$(tag "$registry" -action)"
           circle_tags="$(tag "$registry" "")"
           driver_opts="network=host"
         else
           registry=ghcr.io
-          circle_tags="$(tag docker.io ""),$(tag ghcr.io "")"
+          action_tags="$(tag docker.io -action),$(tag "$registry" -action)"
+          circle_tags="$(tag docker.io ""),$(tag "$registry" "")"
           driver_opts=
         fi
-        action_tags="$(tag "$registry" -action)"
         math_tags="$(tag "$registry" -math)"
         echo "::set-output name=registry::$registry"
         echo "::set-output name=driver_opts::$driver_opts"
