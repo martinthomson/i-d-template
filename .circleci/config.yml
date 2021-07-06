@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: ghcr.io/martinthomson/i-d-template-action:latest
+    resource_class: small
     working_directory: ~/draft
 
     steps:
