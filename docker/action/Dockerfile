@@ -52,7 +52,9 @@ RUN set -e; \
 ENV SHELL=/bin/bash \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8
+    LC_ALL=en_US.UTF-8 \
+    KRAMDOWN_PERSISTENT=t \
+    KRAMDOWN_REFCACHEDIR=/root/.cache/xml2rfc
 
 RUN set -e; tool_install() { \
       tool="$1";version="$2";sha="$3"; tmp=$(mktemp -t "${tool}XXXXX.tgz"); \
@@ -78,10 +80,10 @@ RUN pip3 install --compile --no-cache-dir \
     archive-repo \
     svgcheck \
     xml2rfc
-ENV KRAMDOWN_PERSISTENT=t
 RUN gem install --no-doc kramdown-rfc2629 net-http-persistent && \
     certified-update && \
-    kramdown-rfc-cache-subseries-bibxml
+    kramdown-rfc-cache-subseries-bibxml && \
+    mkdir -p $KRAMDOWN_REFCACHEDIR
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
