@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: martinthomson/i-d-template:latest
+    resource_class: small
     working_directory: ~/draft
 
     steps:
