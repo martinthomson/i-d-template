@@ -40,6 +40,8 @@ jobs:
             else
               tag="$CIRCLE_BRANCH"
             fi
+            pwd
+            ls
             mkdir -p /tmp/artifacts && chmod 777 /tmp/artifacts
             docker run -d --name test \
               --mount type=bind,source=$(pwd),destination=/test \
