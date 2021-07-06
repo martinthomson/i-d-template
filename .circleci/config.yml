@@ -20,33 +20,51 @@ jobs:
             black --check .
 
       - run:
-          name: "Run Tests"
-          command: |
-            if [ -z "$CIRCLE_TAG" ]; then
-              pip install --user behave
-              PATH="$PATH:~/.local/bin"
-              mkdir -p /tmp/artifacts
-              behave --junit --junit-directory /tmp/artifacts tests/*.feature
-            fi
-
-      - run:
-          name: "Build and Push Docker Image"
+          name: "Build Docker Image"
           command: |
             if ! git show --name-only --format='' HEAD | diff -q '^\(docker\|.circleci\)/'; then
               exit
             fi
             if [ -n "$CIRCLE_TAG" ]; then
               tag="$CIRCLE_TAG"
-              push=y
             elif [ "$CIRCLE_BRANCH" = "main" ]; then
               tag=latest
-              push=y
             else
               tag="$CIRCLE_BRANCH"
-              push=n
             fi
             docker build -t martinthomson/i-d-template:"$tag" docker/circleci
-            if [ "$push" = y -a -n "$DOCKER_PASSWORD" ]; then
+
+      - run:
+          name: "Run Tests"
+          command: |
+            if [ -n "$CIRCLE_TAG" ]; then
+              exit
+            fi
+            if [ "$CIRCLE_BRANCH" = "main" ]; then
+              tag=latest
+            else
+              tag="$CIRCLE_BRANCH"
+            fi
+            mkdir -p /tmp/artifacts
+            docker run -d --name test -v .:/test -v /tmp/artifacts -w /test martinthomson/i-d-template:"$tag" /bin/true
+            docker exec test pip install --user behave
+            docker exec test behave --junit --junit-directory /tmp/artifacts tests/*.feature
+            docker rm -f test
+
+      - run:
+          name: "Push Docker Image"
+          command: |
+            if ! git show --name-only --format='' HEAD | diff -q '^\(docker\|.circleci\)/'; then
+              exit
+            fi
+            if [ -n "$CIRCLE_TAG" ]; then
+              tag="$CIRCLE_TAG"
+            elif [ "$CIRCLE_BRANCH" = "main" ]; then
+              tag=latest
+            else
+              exit
+            fi
+            if [ -n "$DOCKER_PASSWORD" ]; then
               echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
               docker push martinthomson/i-d-template:"$tag"
             fi
