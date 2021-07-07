@@ -48,7 +48,7 @@ jobs:
             docker run -d --name test \
               -v $(pwd):/test -v /tmp/artifacts -w /test \
               docker.io/martinthomson/i-d-template:"$tag" sleep 30
-            docker exec test pip install --user behave black
+            docker exec test pip install --user wheel behave black
             docker exec test /home/idci/.local/bin/black --check .
             docker exec test /home/idci/.local/bin/behave --junit --junit-directory /tmp/artifacts tests
             docker rm -f test
