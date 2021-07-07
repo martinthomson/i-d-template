@@ -46,6 +46,10 @@ jobs:
             docker run -d --name test \
               -v $(pwd):/test -v /tmp/artifacts -w /test \
               docker.io/martinthomson/i-d-template:"$tag" sleep 30
+            echo ---
+            docker exec test pwd
+            docker exec test ls
+            echo ---
             docker exec -u 0 test apk add black
             docker exec test black --check .
             docker exec -u 0 test pip install behave
