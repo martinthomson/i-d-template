@@ -51,6 +51,13 @@ jobs:
             docker exec -w /test test black --check .
             docker exec -u 0 test pip install behave
             docker exec test mkdir /tmp/artifacts
+            echo -n id:
+            docker exec -w /test test id
+            echo -n pwd:
+            docker exec -w /test test pwd
+            echo ls -l:
+            docker exec -w /test test ls -l
+            echo '==='
             docker exec -w /test test behave --junit --junit-directory /tmp/artifacts /test/tests
 
       - run:
