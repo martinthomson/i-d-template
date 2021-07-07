@@ -42,6 +42,7 @@ jobs:
             else
               tag="$CIRCLE_BRANCH"
             fi
+            set -x
             cleanup() { set +e; docker cp test:/tmp/artifacts /tmp/artifacts; docker rm -f test; }
             trap cleanup EXIT
             docker run -d --name test \
