@@ -14,3 +14,6 @@ RUN set -e; \
     apk del .locale_build
 
 RUN apk add npm && npm install -g mathjax-node-cli
+
+# add pyang to meta
+RUN pip3 install --compile --no-cache-dir pyang
