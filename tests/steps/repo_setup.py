@@ -89,8 +89,8 @@ def step_impl(context):
                 [
                     "sed",
                     "-e",
-                    f"s/draft-todo-your-name-here/{draft_name}/",
-                    "lib/doc/example.md",
+                    f"s/draft-todo-yourname-protocol/{draft_name}/",
+                    "lib/example/draft-todo-yourname-protocol.md",
                 ],
                 stdout=newFile,
             )

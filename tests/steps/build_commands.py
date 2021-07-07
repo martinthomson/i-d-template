@@ -79,7 +79,7 @@ def step_impl(context):
         break_this = glob("draft-*.md")[0]
         run_with_capture(
             context,
-            ["sed", "-i", "-e", "s/{{RFC2119}}/{{broken-reference}}/", break_this],
+            ["sed", "-i", "-e", "s/TODO Security/{{broken-reference}}/", break_this],
         )
         context.broken_file = break_this
 
