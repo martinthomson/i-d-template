@@ -8,7 +8,7 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     environment:
       # Files that we use to determine whether to build.
-      DOCKER_BUILD_PATTERN: "^\(docker\|.circleci\)/"
+      DOCKER_BUILD_PATTERN: '^\(docker\|.circleci\)/'
 
     steps:
       - checkout
