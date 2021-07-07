@@ -42,16 +42,16 @@ jobs:
             else
               tag="$CIRCLE_BRANCH"
             fi
+            cleanup() { docker cp test:/tmp/artifacts /tmp/artifacts; docker rm -f test }
+            trap cleanup EXIT
             docker run -d --name test \
               docker.io/martinthomson/i-d-template:"$tag" sleep 30
             docker cp . test:/test
             docker exec -u 0 test apk add black
             docker exec test black --check /test
             docker exec -u 0 test pip install behave
-            docker exec -w /test test mkdir /tmp/artifacts
-            docker exec -w /test test behave --junit --junit-directory /tmp/artifacts tests
-            docker cp test:/tmp/artifacts /tmp/artifacts
-            docker rm -f test
+            docker exec test mkdir /tmp/artifacts
+            docker exec test behave --junit --junit-directory /tmp/artifacts /test/tests
 
       - run:
           name: "Push Docker Image"
