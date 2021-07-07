@@ -42,7 +42,7 @@ jobs:
             else
               tag="$CIRCLE_BRANCH"
             fi
-            cleanup() { docker cp test:/tmp/artifacts /tmp/artifacts; docker rm -f test }
+            cleanup() { set +e; docker cp test:/tmp/artifacts /tmp/artifacts; docker rm -f test; }
             trap cleanup EXIT
             docker run -d --name test \
               docker.io/martinthomson/i-d-template:"$tag" sleep 30
