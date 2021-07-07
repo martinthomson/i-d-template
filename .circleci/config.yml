@@ -42,18 +42,15 @@ jobs:
             else
               tag="$CIRCLE_BRANCH"
             fi
-            mkdir -p /tmp/artifacts && chmod 777 /tmp/artifacts
             docker run -d --name test \
-              -v $(pwd):/test -v /tmp/artifacts -w /test \
               docker.io/martinthomson/i-d-template:"$tag" sleep 30
-            echo ---
-            docker exec test pwd
-            docker exec test ls
-            echo ---
+            docker cp . test:/test
             docker exec -u 0 test apk add black
-            docker exec test black --check .
+            docker exec test black --check /test
             docker exec -u 0 test pip install behave
-            docker exec test behave --junit --junit-directory /tmp/artifacts tests
+            docker exec -w /test test mkdir /tmp/artifacts
+            docker exec -w /test test behave --junit --junit-directory /tmp/artifacts tests
+            docker cp test:/tmp/artifacts /tmp/artifacts
             docker rm -f test
 
       - run:
