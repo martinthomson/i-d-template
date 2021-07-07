@@ -47,6 +47,7 @@ jobs:
             docker run -d --name test \
               docker.io/martinthomson/i-d-template:"$tag" sleep 30
             docker cp . test:/test
+            docker exec -u 0 chown -R idci:idci /test
             docker exec -u 0 test apk add black
             docker exec -w /test test black --check .
             docker exec -u 0 test pip install behave
