@@ -30,8 +30,8 @@ it match the name of your draft. Don't include a version number in the name.  Ou
 example would be `draft-ietf-unicorn-protocol.md` in markdown.
 
 You can copy of one of the examples files
-([markdown](https://github.com/martinthomson/i-d-template/blob/main/doc/example.md) or
-[XML](https://github.com/martinthomson/i-d-template/blob/main/doc/example.xml))
+([markdown](https://github.com/martinthomson/i-d-template/blob/main/example/draft-todo-yourname-protocol.md) or
+[XML](https://github.com/martinthomson/i-d-template/blob/main/example/draft-todo-yourname-protocol.xml))
 if you are starting from scratch.
 
 Rename the draft.  These tools rely on the draft being in the form
