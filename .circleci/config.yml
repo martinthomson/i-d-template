@@ -6,6 +6,9 @@ jobs:
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
+    environment:
+      # Files that we use to determine whether to build.
+      DOCKER_BUILD_PATTERN: "^\(docker\|.circleci\)/"
 
     steps:
       - checkout
@@ -15,7 +18,7 @@ jobs:
       - run:
           name: "Build Docker Image"
           command: |
-            if ! git show --name-only --format='' HEAD | grep -q '^\(docker\|.circleci\)/'; then
+            if ! git show --name-only --format='' HEAD | grep -q "$DOCKER_BUILD_PATTERN"; then
               exit
             fi
             if [ -n "$CIRCLE_TAG" ]; then
@@ -35,7 +38,7 @@ jobs:
             if [ -n "$CIRCLE_TAG" ]; then
               exit
             fi
-            if ! git show --name-only --format='' HEAD | grep -q '^\(docker\|.circleci\)/'; then
+            if ! git show --name-only --format='' HEAD | grep -q "$DOCKER_BUILD_PATTERN"; then
               tag=latest
             elif [ "$CIRCLE_BRANCH" = "main" ]; then
               tag=latest
@@ -46,26 +49,19 @@ jobs:
             cleanup() { set +e; docker cp test:/tmp/artifacts /tmp/artifacts; docker rm -f test; }
             trap cleanup EXIT
             docker run -d --name test \
-              docker.io/martinthomson/i-d-template:"$tag" sleep 30
+              docker.io/martinthomson/i-d-template:"$tag" sleep 300
             docker cp . test:/test
             docker exec -u 0 test chown -R idci:idci /test
             docker exec -u 0 test apk add black
             docker exec -w /test test black --check .
             docker exec -u 0 test pip install behave
             docker exec test mkdir /tmp/artifacts
-            echo -n id:
-            docker exec -w /test test id
-            echo -n pwd:
-            docker exec -w /test test pwd
-            echo ls -l:
-            docker exec -w /test test ls -l
-            echo '==='
             docker exec -w /test test behave --junit --junit-directory /tmp/artifacts /test/tests
 
       - run:
           name: "Push Docker Image"
           command: |
-            if ! git show --name-only --format='' HEAD | grep -q '^\(docker\|.circleci\)/'; then
+            if ! git show --name-only --format='' HEAD | grep -q "$DOCKER_BUILD_PATTERN"; then
               exit
             fi
             if [ -n "$CIRCLE_TAG" ]; then
