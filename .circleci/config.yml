@@ -46,7 +46,7 @@ jobs:
             ls
             mkdir -p /tmp/artifacts && chmod 777 /tmp/artifacts
             docker run -d --name test \
-              -v $(pwd):/test -v /tmp/artifacts -w /test
+              -v $(pwd):/test -v /tmp/artifacts -w /test \
               docker.io/martinthomson/i-d-template:"$tag" sleep 30
             docker exec test pip install --user behave black
             docker exec test /home/idci/.local/bin/black --check .
