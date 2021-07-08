@@ -57,34 +57,45 @@ ENV SHELL=/bin/bash \
     KRAMDOWN_PERSISTENT=t \
     KRAMDOWN_REFCACHEDIR=/root/.cache/xml2rfc
 
-RUN set -e; tool_install() { \
-      tool="$1";version="$2";sha="$3"; tmp=$(mktemp -t "${tool}XXXXX.tgz"); \
-      curl -sSLf "https://tools.ietf.org/tools/${tool}/${tool}-${version}".tgz -o "$tmp"; \
-      [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
-      target="/usr/local/bin/${tool}"; \
-      tar xzfO "$tmp" "${tool}-${version}/${tool}" >"$target"; rm -f "$tmp"; \
-      chmod 755 "$target"; }; \
+RUN set -e; \
+    install() { \
+       file="$1"; url="$2"; sha="$3"; \
+       target="/usr/local/bin/$(basename "$file")"; \
+       tmp=$(mktemp -t "${tool}XXXXX.tgz"); \
+       curl -sSLf "$url" -o "$tmp"; \
+       [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
+       tar xzfO "$tmp" "$file" >"$target"; chmod 755 "$target"; \
+       rm -f "$tmp"; \
+    }; \
+    tool_install() { \
+      tool="$1"; version="$2"; sha="$3"; \
+      install "${tool}-${version}/${tool}" \
+        "https://tools.ietf.org/tools/${tool}/${tool}-${version}.tgz" \
+        "$sha" "${tool}-${version}/${tool}"; \
+    }; \
     tool_install idnits 2.16.05 \
-      9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5 && \
+      9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5; \
     tool_install rfcdiff 1.48 \
-      80c886e76803b889c444cd44781f8fa34cb23943a28f18cac0ea8a1458dca265
+      80c886e76803b889c444cd44781f8fa34cb23943a28f18cac0ea8a1458dca265; \
+    mmark="2.2.10"; \
+    install mmark \
+      "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
+      54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff
 
-RUN set -e; v="2.2.10"; sha="54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff"; \
-    tmp=$(mktemp -t "mmarkXXXXXX.tgz"); target="${BINDIR:-/usr/local/bin}/mmark"; \
-    curl -sSLf "https://github.com/mmarkdown/mmark/releases/download/v${v}/mmark_${v}_linux_amd64.tgz" -o "$tmp"; \
-    [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
-    tar xzfO "$tmp" mmark >"$target"; \
-    rm -f "$tmp"; \
-    chmod 755 "$target"
-
-RUN pip3 install --compile --no-cache-dir \
-    archive-repo \
-    svgcheck \
-    xml2rfc
-RUN gem install --no-doc kramdown-rfc2629 net-http-persistent && \
-    certified-update && \
-    kramdown-rfc-cache-subseries-bibxml && \
-    mkdir -p $KRAMDOWN_REFCACHEDIR
+RUN set -e; \
+    pip3 install --compile --no-cache-dir \
+      archive-repo \
+      pyang \
+      svgcheck \
+      xml2rfc \
+      ; \
+   gem install --no-doc \
+      kramdown-rfc2629 \
+      net-http-persistent \
+      ; \
+    certified-update; \
+    mkdir -p $KRAMDOWN_REFCACHEDIR; \
+    kramdown-rfc-cache-subseries-bibxml
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
