@@ -29,13 +29,12 @@ ifeq (,$(shell git show-ref $(GIT_REMOTE)/$(GIT_ORIG)))
 $(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push $(GIT_REMOTE) $(GIT_ORIG)")
 endif
 
-TEMPLATE_FILES := \
-  Makefile .gitignore \
-  CONTRIBUTING.md LICENSE.md \
-  .circleci/config.yml
+TEMPLATE_FILES := Makefile .gitignore CONTRIBUTING.md LICENSE.md
 ifneq (true,$(CI))
 # When this runs in CI, we can't change these due to GitHub permissions.
 TEMPLATE_FILES += $(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml)
+# Also exclude CircleCI config because CI setup is only GitHub Actions
+TEMPLATE_FILES += .circleci/config.yml
 endif
 
 TEMPLATE_FILE_MK := $(LIBDIR)/.template-files.mk
