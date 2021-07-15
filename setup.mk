@@ -32,8 +32,11 @@ endif
 TEMPLATE_FILES := \
   Makefile .gitignore \
   CONTRIBUTING.md LICENSE.md \
-  .circleci/config.yml \
-  $(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml)
+  .circleci/config.yml
+ifneq (true,$(CI))
+# When this runs in CI, we can't change these due to GitHub permissions.
+TEMPLATE_FILES += $(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml)
+endif
 
 TEMPLATE_FILE_MK := $(LIBDIR)/.template-files.mk
 include $(TEMPLATE_FILE_MK)
