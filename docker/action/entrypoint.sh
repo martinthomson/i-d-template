@@ -1,8 +1,13 @@
 #!/bin/sh
 set -e
-if [ ! -f Makefile ]; then
+if [ "$1" = "setup" ]; then
   echo "Running setup"
   exec make -f lib/setup.mk
 fi
+if [ ! -f Makefile ]; then
+  echo "Aborting build"
+  exit 1
+fi
+
 make .targets.mk
 exec make "$@"
