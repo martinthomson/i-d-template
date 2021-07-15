@@ -1,4 +1,8 @@
 #!/bin/sh
 set -e
-[ -f Makefile ] && make .targets.mk
+if [ ! -f Makefile ]; then
+  echo "Running setup"
+  exec make -f lib/setup.mk
+fi
+make .targets.mk
 exec make "$@"
