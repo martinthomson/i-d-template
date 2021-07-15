@@ -74,7 +74,16 @@ done
 
 cat <<EOF
 
-## Building the Draft
+
+## Contributing
+
+See the
+[guidelines for contributions](https://github.com/${user}/${repo}/blob/${default_branch}/CONTRIBUTING.md).
+
+Contributions can be made by editing markdown through the GitHub interface.
+
+
+## Command Line Usage
 
 Formatted text and HTML versions of the draft can be built using \`make\`.
 
@@ -85,9 +94,4 @@ $ make
 This requires that you have the necessary software installed.  See
 [the instructions](https://github.com/martinthomson/i-d-template/blob/main/doc/SETUP.md).
 
-
-## Contributing
-
-See the
-[guidelines for contributions](https://github.com/${user}/${repo}/blob/${default_branch}/CONTRIBUTING.md).
 EOF
