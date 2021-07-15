@@ -232,6 +232,11 @@ fix-lint-default-branch:
 	  echo "ref: refs/remotes/$(GIT_REMOTE)/$$(git rev-parse --abbrev-ref HEAD)" > $$(git rev-parse --git-dir)/refs/remotes/$(GIT_REMOTE)/HEAD; \
 	fi
 
+
+.PHONY: setup
+setup:
+	$(MAKE) -f $(LIBDIR)/setup.mk
+
 ## Cleanup
 COMMA := ,
 .PHONY: clean
