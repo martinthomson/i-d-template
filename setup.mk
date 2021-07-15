@@ -15,7 +15,7 @@ endif
 
 LATEST_WARNING := $(strip $(foreach draft,$(drafts_source),\
 	   $(shell grep -q $(basename $(draft))-latest $(draft) || \
-		echo $(draft) should include a name of $(basename $(draft))-latest. )))
+		echo $(draft) should include a name of $(basename $(draft))-latest)))
 ifneq (,$(LATEST_WARNING))
 $(error Check names: $(LATEST_WARNING))
 endif
