@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
-make .targets.mk
+[ -f Makefile ] && make .targets.mk
 exec make "$@"
