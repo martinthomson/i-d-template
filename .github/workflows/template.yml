@@ -18,7 +18,6 @@ jobs:
 
     - name: "Compare"
       run: |
-        set +e
         git clone https://github.com/martinthomson/internet-draft-template idt
         e=''
         for src in template/.github/workflows/*.yml; do
@@ -27,6 +26,5 @@ jobs:
           diff -u "$dst" "$src" || e="$e\n$dst is different"
         done
         if [ -n "$e" ]; then
-          printf "$e"
-          exit 1
+          ! printf "$e"
         fi
