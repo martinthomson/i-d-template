@@ -22,3 +22,18 @@ simple process.
 
 This uses all the same capabilities as the manual process, so contributors can
 still choose to use command-line tools if that suits them.
+
+Note: The newly created repository will run a few actions during this process
+that fail.  That's OK.  They will eventually start succeeding.  If it bothers
+you, delete the runs in the UI.
+
+<details>
+
+It is not possible to update workflows (the files GitHub Actions use) from an
+action unless you use custom personal access tokens.  Rather than complicate the
+setup process by requiring a token, this template includes all the necessary
+workflow files from the beginning, plus a special setup workflow.  Before the
+repository is properly setup, the other workflows will fail immediately (and
+safely).  The setup workflow removes itself once it is successful.
+
+</details>
