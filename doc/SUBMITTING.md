@@ -25,8 +25,8 @@ be either `draft-ietf-unicorn-protocol.md` or
 For this feature to work you also need to use an annotated tag (that's the `-a`
 option above).  Annotated tags require a comment (use `-m` to set this on the
 command line).  An annotated tag associates your email address with the
-submission.  Lightweight tags don't have an email address and will be ignored
-by the CI build.
+submission.  Lightweight tags don't have an email address and the first author
+listed in the draft will be attributed instead.
 
 **Important**: Push the commit that you intend to tag before you push the tag
 to check that the draft can be built correctly.  Pushing the tag won't also
@@ -49,6 +49,18 @@ that cross references will work.)
 Once the CI system has built the draft, it will upload it automatically and you
 will receive an email asking you to confirm submission.  You don't need to have
 a GitHub account token configured for this feature to be enabled.
+
+
+## GitHub Release
+
+Creating a GitHub release using the intended draft name is an easy way to submit
+versions without using the command line.  Simply publish a new release that uses
+a tag in the form `draft-<author>-<wg>-<name>-<vv>`.  GitHub Actions will take
+care of generating XML and submitting it to the datatracker.
+
+This will attribute the submission to the first author listed in the draft, no
+matter who generated the release.  Only annotated tags result in proper
+attribution.
 
 
 ## Semi-automated Process

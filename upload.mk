@@ -1,14 +1,7 @@
-# This only works for tags that are created with `git tag -a`.  Using an
-# annotated tag associates an email address, which this uses in the upload.
 ifneq (,$(CIRCLE_TAG)$(TRAVIS_TAG))
 draft_releases := $(CIRCLE_TAG)$(TRAVIS_TAG)
 else
-draft_releases := $(shell git tag --list --points-at HEAD --format '%(tag),%(taggeremail)' | grep '^draft-.*,<.*>$$' | cut -f 1 -d , -)
-endif
-
-ifneq ($(foreach tag,$(draft_releases),$(shell git tag --list --format='%(tag)' $(tag))),$(draft_releases))
-$(warning Attempting upload for a lightweight tag: $(draft_releases))
-$(error Only annotated tags \(created with `git tag -a`\) are supported)
+draft_releases := $(shell git tag --list --points-at HEAD 'draft-*')
 endif
 
 uploads := $(addprefix .,$(addsuffix .upload,$(draft_releases)))
@@ -24,9 +17,11 @@ upload: $(uploads)
 	@[ -n "$^" ] || ! echo "error: No files to upload.  Did you use \`git tag -a\`?"
 
 .%.upload: %.xml
-	$(curl) -D $@ -F "user=$(shell git tag --list --format '%(taggeremail)' $(basename $<) | \
-				 sed -e 's/^<//;s/>$$//')" -F "xml=@$<" \
-		"$(DATATRACKER_UPLOAD_URL)" && echo && \
+	set -ex; email="$(shell git tag --list --format '%(taggeremail)' $(basename $<) | \
+	  sed -e 's/^<//;s/>$$//')"; \
+	[ -z "$$email" ] && email=$$(xmllint --xpath '/rfc/front/author[1]/address/email/text()' $< 2>/dev/null); \
+	[ -z "$$email" ] && ! echo "Unable to find email to use for submission." 1>&2; \
+	$(curl) -D $@ -F "user=$$email" -F "xml=@$<" "$(DATATRACKER_UPLOAD_URL)" && echo && \
 	  (grep -q ' 200 OK' $@ >/dev/null 2>&1 || ! cat $@ 1>&2)
 
 # This ignomonious hack ensures that we can catch missing files properly.
