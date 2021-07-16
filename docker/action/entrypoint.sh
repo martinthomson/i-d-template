@@ -5,7 +5,7 @@ if [ "$1" = "setup" ]; then
   exec make -f lib/setup.mk
 fi
 if [ ! -f Makefile ]; then
-  echo "Aborting build"
+  echo "Repository isn't setup, aborting..."
   exit 1
 fi
 
