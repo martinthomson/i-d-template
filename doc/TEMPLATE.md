@@ -6,15 +6,15 @@ help people get started with this tool.  With that repository, setup is a very
 simple process.
 
 1. [Create a new repository using the
-   template](https://github.com/martinthomson/internet-draft-template/generate)
+   template](https://github.com/martinthomson/internet-draft-template/generate).
 
 2. Rename your draft and add a title.  The newly created repository will contain
    a link to a page where you can do this using the GitHub editor.
 
-3. Enable GitHub Pages in the settings for the repository: ![choose the gh-pages
+3. Enable GitHub Pages in the settings for the repository:<br>![choose the gh-pages
    branch and / (root), then hit "Save"](enable-gh-pages.png)
 
-4. Edit the draft.
+4. Edit the draft using whatever process you like.
 
 5. [Create a new
    release](https://github.com/martinthomson/i-d-template/blob/main/doc/SUBMITTING.md#github-release)
