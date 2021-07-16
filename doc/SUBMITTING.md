@@ -34,19 +34,17 @@ push the commit it references and so the build will not run. Circle (and maybe
 Travis) will then refuse to build that tag ever again.
 
 **Note**: The email address you use for making this submission needs to match a
-valid datatracker account email address ([create one
-here](https://datatracker.ietf.org/accounts/create/)).  The email address must
-also match one of the author addresses (this condition [might be
-temporary](https://trac.tools.ietf.org/tools/ietfdb/ticket/2390)).  The email
-address that git uses can be found by calling `git config --get user.email`, if
-you aren't certain.
+verified datatracker account email address ([create one
+here](https://datatracker.ietf.org/accounts/create/)).  The email address that
+git uses can be found by calling `git config --get user.email`, if you aren't
+certain.
 
 **Bug**: Circle CI has a [bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
 that prevents `git push --tags` from triggering builds if you have multiple drafts.
 Tag every draft, then push each tag individually.  (Tagging all drafts first means
 that cross references will work.)
 
-Once the CI system has built the draft, it will upload it automatically and you
+Once the CI system has built the draft, it will publish it automatically and you
 will receive an email asking you to confirm submission.  You don't need to have
 a GitHub account token configured for this feature to be enabled.
 
@@ -62,22 +60,24 @@ This will attribute the submission to the first author listed in the draft, no
 matter who generated the release.  Only annotated tags result in proper
 attribution.
 
+Whomever is attributed must have a datatracker account with that email address;
+see above.
+
 
 ## Semi-automated Process
 
 You should only really do this if you don't have CI enabled or if the CI build
-fails.  The `make upload` command can be used to upload a tagged draft to the
+fails.  The `make publish` command can be used to upload a tagged draft to the
 datatracker.
 
 ```sh
 $ git tag -a draft-ietf-unicorn-protocol-03
 $ git push origin draft-ietf-unicorn-protocol-03
-$ make upload
+$ make publish
 ```
 
-This uses the same process that the CI system uses.  Note that if you have
-multiple tags pointing to the current HEAD, this will attempt to upload all of
-those drafts.
+This uses the same process that the CI system uses.  If you have multiple tags
+pointing to the current HEAD, this will attempt to publish all of those drafts.
 
 
 ## Manual Process
@@ -114,3 +114,6 @@ you should use is the full draft name including a revision number.
 $ git tag -a draft-ietf-unicorn-protocol-03
 $ git push origin draft-ietf-unicorn-protocol-03
 ```
+
+Don't worry if you have CI enabled.  CI might try to build and publish the
+draft.  This will fail, but that's OK.
