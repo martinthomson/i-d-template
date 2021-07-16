@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
+    - ".github/workflows/template.yml"
     - "template/.github/workflows/**"
 
 jobs:
@@ -21,7 +22,7 @@ jobs:
         git clone https://github.com/martinthomson/internet-draft-template idt
         e=''
         for src in template/.github/workflows/*.yml; do
-          dst="idt/${i#*/}"
+          dst="idt/${src#*/}"
           [ -f "$dst" ] || e="$e\n$dst is missing"
           diff -u "$dst" "$src" || e="$e\n$dst is different"
         done
