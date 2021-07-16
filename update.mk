@@ -43,3 +43,11 @@ update:  auto_update
 	    ln -s ../../$(LIBDIR)/pre-push.sh "$$dotgit"/hooks/pre-push
 
 endif # CI
+
+.PHONY: update-readme
+update-readme:
+	git rm -f README.md
+	git commit -m "Remove old README"
+	$(MAKE) -f $(LIBDIR)/setup.mk README.md
+	git add README.md
+	git commit --amend -m "Automatic update of README"

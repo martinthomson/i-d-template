@@ -1,0 +1,19 @@
+name: "Rewrite README"
+on: workflow_dispatch
+
+jobs:
+  build:
+    name: "Update README"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Rewrite README.md"
+      uses: martinthomson/i-d-template@v1
+      with:
+        make: update-readme
+        token: ${{ github.token }}
+
+    - name: "Push Update"
+      run: git push
