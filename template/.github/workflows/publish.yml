@@ -38,7 +38,7 @@ jobs:
     - name: "Build Drafts"
       uses: martinthomson/i-d-template@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ github.token }}
 
     - name: "Upload to Datatracker"
       uses: martinthomson/i-d-template@v1
