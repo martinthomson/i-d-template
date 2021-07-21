@@ -7,14 +7,12 @@ simple process.
 
 1. [Create a new repository using the
    template](https://github.com/martinthomson/internet-draft-template/generate).
+   Check "Include all branches", or you will need to enable GitHub Pages
+   manually.
 
 2. Rename your draft and add a title.  The newly created repository will contain
    a link to a page where you can do this using the GitHub editor.  Setup will
-   automatically run (it takes about 30 seconds).
-
-3. Enable GitHub Pages in the settings for the repository:<br>![choose the gh-pages
-   branch and / (root), then hit "Save"](enable-gh-pages.png)<br>An editor's
-   draft will become available in a couple of minutes.
+   automatically run.  Setup should be done in less than a minute.
 
 Now you are set to work on the document, using whatever process you choose.
 This uses all the same capabilities as the manual process, so contributors can
@@ -25,8 +23,8 @@ release](https://github.com/martinthomson/i-d-template/blob/main/doc/SUBMITTING.
 and the draft will be submitted to the datatracker automatically.
 
 Note: The newly created repository will run a few actions during this process
-that fail.  That's OK.  They will eventually start succeeding.  If it bothers
-you, delete the runs in the UI.
+that fail.  That's OK.  They will succeed once you edit the draft.  If it
+bothers you, delete the runs in the UI.
 
 <details>
 
