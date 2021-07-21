@@ -28,10 +28,10 @@ command line).  An annotated tag associates your email address with the
 submission.  Lightweight tags don't have an email address and the first author
 listed in the draft will be attributed instead.
 
-**Important**: Push the commit that you intend to tag before you push the tag
-to check that the draft can be built correctly.  Pushing the tag won't also
-push the commit it references and so the build will not run. Circle (and maybe
-Travis) will then refuse to build that tag ever again.
+**Important**: Push the commit that you intend to tag before you push the tag.
+This will check that the draft can be built correctly so that you don't tag a
+broken state.  Pushing the tag won't also push the commit it references and so
+the build will not run, perhaps not ever.
 
 **Note**: The email address you use for making this submission needs to match a
 verified datatracker account email address ([create one
@@ -62,6 +62,13 @@ attribution.
 
 Whomever is attributed must have a datatracker account with that email address;
 see above.
+
+
+## If the Build Fails
+
+Sometimes the build will fail.  Some errors can be worked around by retrying the
+build.  Both GitHub Actions and CircleCI offer options to restart the build.
+If you think that an error isn't your fault, try running the build again.
 
 
 ## Semi-automated Process
