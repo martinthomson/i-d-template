@@ -15,9 +15,9 @@ if [[ -z "$WG" ]]; then
         if [[ -z "$wg" ]]; then
             wg="$d"
         elif [[ "$wg" != "$d" ]]; then
-	    echo "Found conflicting working group names in drafts" 1>&2
-	    echo "  $wg != $d" 1>&2
-	    exit 1
+            echo "Found conflicting working group names in drafts" 1>&2
+            echo "  $wg != $d" 1>&2
+            exit 1
         fi
     done
 else
@@ -42,9 +42,11 @@ else
 fi
 
 echo '<note title="Discussion Venues" removeInRFC="true">'
-echo "<t>Discussion of this document takes place on the
-  ${group_name} ${group_type} mailing list (${ml}),
-  which is archived at <eref target=\"${ml_arch}\"/>.</t>"
+if [[ -n "$wg" ]]; then
+  echo "<t>Discussion of this document takes place on the
+    ${group_name} ${group_type} mailing list (${ml}),
+    which is archived at <eref target=\"${ml_arch}\"/>.</t>"
+fi
 echo "<t>Source for this draft and an issue tracker can be found at
-  <eref target=\"https://github.com/${user}/${repo}\"/>.</t>"
+    <eref target=\"https://github.com/${user}/${repo}\"/>.</t>"
 echo '</note>'
