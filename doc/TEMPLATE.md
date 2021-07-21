@@ -8,7 +8,7 @@ simple process.
 1. [Create a new repository using the
    template](https://github.com/martinthomson/internet-draft-template/generate).
    Check "Include all branches", or you will need to enable GitHub Pages
-   manually.
+   manually after step 2.
 
 2. Rename your draft and add a title.  The newly created repository will contain
    a link to a page where you can do this using the GitHub editor.  Setup will
@@ -23,7 +23,7 @@ release](https://github.com/martinthomson/i-d-template/blob/main/doc/SUBMITTING.
 and the draft will be submitted to the datatracker automatically.
 
 Note: The newly created repository will run a few actions during this process
-that fail.  That's OK.  They will succeed once you edit the draft.  If it
+that might fail.  That's OK.  They will succeed once you edit the draft.  If it
 bothers you, delete the runs in the UI.
 
 <details>
