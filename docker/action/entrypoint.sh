@@ -5,8 +5,9 @@ if [ "$1" = "setup" ]; then
   exec make -f lib/setup.mk
 fi
 if [ ! -f Makefile ]; then
-  echo "Repository isn't setup, aborting..."
-  exit 1
+  echo "Cloning i-d-template into lib for default configuration."
+  git clone https://github.com/martinthomson/i-d-template lib
+  ln -s lib/template/Makefile Makefile
 fi
 
 make .targets.mk
