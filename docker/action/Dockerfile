@@ -95,7 +95,7 @@ RUN set -e; \
       ; \
     certified-update; \
     mkdir -p $KRAMDOWN_REFCACHEDIR; \
-    kramdown-rfc-cache-subseries-bibxml
+    kramdown-rfc-cache-subseries-bibxml || echo 'rfc-editor.org is down again'
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
