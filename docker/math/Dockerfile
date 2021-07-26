@@ -9,6 +9,8 @@ RUN set -e; \
     cd "$tmp"; \
     cmake -DCMAKE_BUILD_TYPE=Release -DDISABLE_TESTING=On -DCMAKE_INSTALL_PREFIX:PATH=/usr .; \
     make install; \
+    cd /; \
+    rm -rf "$tmp"; \
     tmp=$(mktemp -d /tmp/kgt-XXXXX); \
     git clone --recursive https://github.com/katef/kgt.git "$tmp"; \
     cd "$tmp"; \
