@@ -98,7 +98,7 @@ $(LIBDIR)/clean-for-DTD.xslt: $(LIBDIR)/rfc2629xslt/clean-for-DTD.xslt $(LIBDIR)
 
 $(LIBDIR)/rfc2629-no-doctype.xslt: $(LIBDIR)/rfc2629xslt/rfc2629-no-doctype.xslt
 	$(xsltproc) $(XSLTDIR)/to-1.0-xslt.xslt $< > $@
- 	
+
 $(XSLTDIR)/clean-for-DTD.xslt $(XSLTDIR)/rfc2629.xslt: $(XSLTDIR)
 $(XSLTDIR):
 	git clone --depth 10 $(CLONE_ARGS) -b master https://github.com/reschke/xml2rfc $@
@@ -112,8 +112,8 @@ $(XSLTDIR):
 %.txt: %.cleanxml
 	$(xml2rfc) $< -o $@ --text --no-pagination
 else
-%.html: %.xml $(LIBDIR)/v3.css
-	$(xml2rfc) --css=$(LIBDIR)/v3.css --metadata-js-url=/dev/null $< -o $@ --html
+%.html: %.xml $(XML2RFC_CSS)
+	$(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
