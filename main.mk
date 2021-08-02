@@ -1,4 +1,5 @@
-.PHONY: latest
+.PHONY: all latest
+all:: latest lint
 latest:: txt html
 
 .DELETE_ON_ERROR:
