@@ -1,5 +1,8 @@
 # Using the Template Repository
 
+For creating and managing an [Internet
+Draft](https://github.com/ietf/id-guidelines).
+
 A separate [template
 repository](https://github.com/martinthomson/internet-draft-template) exists to
 help people get started with this tool.  With that repository, setup is a very
