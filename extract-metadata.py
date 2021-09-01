@@ -69,11 +69,11 @@ if __name__ == "__main__":
     if os.path.isfile(filename):
         fileext = os.path.splitext(filename)[1]
         extract_func = extract_funcs.get(fileext, lambda a: {})
-        frontmatter = extract_func(filename)
-        if target == "title" and frontmatter.get("abbrev", None) != None:
-            value = frontmatter["abbrev"]
+        metadata = extract_func(filename)
+        if target == "abbrev" and metadata.get("abbrev", None) == None:
+            value = metadata["title"]
         else:
-            value = frontmatter.get(target, "")
+            value = metadata.get(target, "")
     else:
         value = ""
     print(value)
