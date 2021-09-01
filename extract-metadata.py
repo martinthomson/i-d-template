@@ -20,7 +20,7 @@ def extract_md(filename):
 
 def extract_xml(filename):
     parser = xml.sax.make_parser()
-    handler = MdHandler()
+    handler = XmlHandler()
     parser.setContentHandler(handler)
     parser.parse(filename)
     return handler.md
