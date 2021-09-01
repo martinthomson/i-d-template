@@ -23,7 +23,7 @@ def extract_xml(filename):
     handler = XmlHandler()
     parser.setContentHandler(handler)
     parser.parse(filename)
-    return handler.md
+    return handler.metadata
 
 
 class MdHandler(xml.sax.handler.ContentHandler):
