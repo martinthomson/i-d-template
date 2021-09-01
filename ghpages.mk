@@ -53,6 +53,16 @@ GHPAGES_INSTALLED := $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_PUBLISHED))
 $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
+GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.$(INDEX_FORMAT)
+$(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
+
+ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
+GHPAGES_ALL += $(GHPAGES_ROOT)/index.$(INDEX_FORMAT)
+$(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(DEFAULT_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
+endif
+
 # GHPAGES_COMMIT_TTL is the number of days worth of commits to keep on the gh-pages branch.
 GHPAGES_COMMIT_TTL ?= 30
 # GHPAGES_BRANCH_TTL is the number of days to retain a directory on gh-pages
@@ -96,19 +106,9 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	  git -C $(GHPAGES_ROOT) rm -fq --ignore-unmatch -- $(GHPAGES_TARGET)/draft-*.html $(GHPAGES_TARGET)/draft-*.txt $(addprefix $(GHPAGES_TARGET)/,$(GHPAGES_EXTRA)); \
 	fi
 
-GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.$(INDEX_FORMAT)
-$(GHPAGES_TARGET)/index.$(INDEX_FORMAT): cleanup-ghpages $(GHPAGES_INSTALLED)
-	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
-
-ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
-GHPAGES_ALL += $(GHPAGES_ROOT)/index.$(INDEX_FORMAT)
-$(GHPAGES_ROOT)/index.$(INDEX_FORMAT): cleanup-ghpages $(GHPAGES_INSTALLED)
-	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(DEFAULT_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
-endif
-
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
-ghpages: $(GHPAGES_ALL)
+ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
