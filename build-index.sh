@@ -186,10 +186,11 @@ function list_dir() {
     table_i "branch-$2"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
+        title=$("${libdir}/extract-metadata.py" "$i" title)
         file=$(basename "$file" .txt)
 
         tr_i
-        th "${file}"
+        th "${title}"
         td "$(a "$(reldot "$dir")/${file}.html" html html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
