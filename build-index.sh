@@ -117,8 +117,8 @@ elif [[ "$format" = "md" ]]; then
         echo
     }
     function table_i() {
-        echo "| Draft |     |     |     |     |     |"
-        echo "| ----- | --- | --- | --- | --- | --- |"
+        echo "| Draft |     |     |     |     |     |     |"
+        echo "| ----- | --- | --- | --- | --- | --- | --- |"
     }
     function table_o() {
         echo
@@ -197,6 +197,7 @@ function list_dir() {
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
         fi
+	td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
         diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
         if [[ "${#files[@]}" -eq 1 ]]; then
