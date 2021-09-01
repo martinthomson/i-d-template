@@ -189,15 +189,14 @@ function list_dir() {
         file=$(basename "$file" .txt)
 
         tr_i
-        th "${file}"
-        td "$(a "$(reldot "$dir")/${file}.html" html html "$file")"
+        td "$(a "$(reldot "$dir")/${file}.html" "${file}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
+        td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" != "$default_branch" ]]; then
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
         fi
-	td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
         diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
         if [[ "${#files[@]}" -eq 1 ]]; then
@@ -218,7 +217,7 @@ function list_dir() {
 branchlink="$gh"
 [[ "$branch" = "$default_branch" ]] || branchlink="${branchlink}/tree/${branch}"
 h1 "Editor's drafts for ${branch} branch of $(a "$branchlink" "${user}/${repo}")"
-p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests")."
+p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests") in the $(a "${gh}" repo)."
 
 list_dir "${root}" $branch
 
