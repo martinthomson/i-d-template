@@ -189,7 +189,8 @@ function list_dir() {
         file=$(basename "$file" .txt)
 
         tr_i
-        title=$("${libdir}/extract-metadata.py" $(ls "$file".{md,xml} | head -1) abbrev)
+        src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
+        title=$("${libdir}/extract-metadata.py" "$src" abbrev)
         td "$(a "$(reldot "$dir")/${file}.html" "${title}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
         td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
