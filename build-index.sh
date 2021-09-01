@@ -189,8 +189,7 @@ function list_dir() {
         file=$(basename "$file" .txt)
 
         tr_i
-        th "${file}"
-        td "$(a "$(reldot "$dir")/${file}.html" html html "$file")"
+        td "$(a "$(reldot "$dir")/${file}.html" "${file}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" != "$default_branch" ]]; then
