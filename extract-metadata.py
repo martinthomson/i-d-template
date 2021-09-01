@@ -74,7 +74,9 @@ if __name__ == "__main__":
         extract_func = extract_funcs.get(fileext, lambda a: {})
         metadata = extract_func(filename)
         if target == "abbrev":
-            value = metadata.get("abbrev", metadata.get("title", ""))
+            value = metadata.get("abbrev", None)
+            if value == None:
+                value = metadata.get("title", "")
         else:
             value = metadata.get(target, "")
     else:
