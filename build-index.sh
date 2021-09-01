@@ -191,12 +191,12 @@ function list_dir() {
         tr_i
         td "$(a "$(reldot "$dir")/${file}.html" "${file}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
+        td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" != "$default_branch" ]]; then
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
         fi
-	td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
         diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
         if [[ "${#files[@]}" -eq 1 ]]; then
