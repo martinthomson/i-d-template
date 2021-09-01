@@ -186,10 +186,10 @@ function list_dir() {
     table_i "branch-$2"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
-        title=$("${libdir}/extract-metadata.py" "$file" abbrev)
         file=$(basename "$file" .txt)
 
         tr_i
+        title=$("${libdir}/extract-metadata.py" $(ls "$file".{md,xml} | head -1) abbrev)
         td "$(a "$(reldot "$dir")/${file}.html" "${title}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
         td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
