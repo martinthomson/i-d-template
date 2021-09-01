@@ -2,6 +2,7 @@
 
 import os
 import os.path
+import re
 import sys
 import xml
 import xml.sax
@@ -28,6 +29,8 @@ def extract_xml(filename):
 
 class XmlHandler(xml.sax.handler.ContentHandler):
     interesting_elements = ["title", "area", "workgroup"]
+    wsp = re.compile("\s+")
+
     def __init__(self):
         self.metadata = {}
         self.stack = []
@@ -49,7 +52,7 @@ class XmlHandler(xml.sax.handler.ContentHandler):
         if self.in_front and name in self.interesting_elements:
             if name == "title" and self.attrs.get("abbrev", "").strip() != "":
                 self.metadata["abbrev"] = self.attrs["abbrev"]
-            self.metadata[name] = self.content.strip()
+            self.metadata[name] = self.wsp.sub(" ", self.content.strip())
         self.content = ""
         self.attrs = {}
 
