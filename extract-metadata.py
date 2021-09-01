@@ -26,7 +26,7 @@ def extract_xml(filename):
     return handler.metadata
 
 
-class MdHandler(xml.sax.handler.ContentHandler):
+class XmlHandler(xml.sax.handler.ContentHandler):
     interesting_elements = ["title", "area", "workgroup"]
     def __init__(self):
         self.metadata = {}
