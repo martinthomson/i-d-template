@@ -29,7 +29,7 @@ def extract_xml(filename):
 class MdHandler(xml.sax.handler.ContentHandler):
     interesting_elements = ["title", "area", "workgroup"]
     def __init__(self):
-        self.md = {}
+        self.metadata = {}
         self.stack = []
         self.content = ""
         self.attrs = {}
@@ -48,8 +48,8 @@ class MdHandler(xml.sax.handler.ContentHandler):
             self.in_front = False
         if self.in_front and name in self.interesting_elements:
             if name == "title" and self.attrs.get("abbrev", "").strip() != "":
-                self.md["abbrev"] = self.attrs["abbrev"]
-            self.md[name] = self.content.strip()
+                self.metadata["abbrev"] = self.attrs["abbrev"]
+            self.metadata[name] = self.content.strip()
         self.content = ""
         self.attrs = {}
 
@@ -57,7 +57,7 @@ class MdHandler(xml.sax.handler.ContentHandler):
         self.content += data
 
     def processingInstruction(self, target, data):
-        self.md[target.strip()] = data.strip()
+        self.metadata[target.strip()] = data.strip()
 
 
 extract_funcs = {".md": extract_md, ".xml": extract_xml}
