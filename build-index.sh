@@ -186,7 +186,7 @@ function list_dir() {
     table_i "branch-$2"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
-        title=$("${libdir}/extract-metadata.py" "$i" abbrev)
+        title=$("${libdir}/extract-metadata.py" "$file" abbrev)
         file=$(basename "$file" .txt)
 
         tr_i
