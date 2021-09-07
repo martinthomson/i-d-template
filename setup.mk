@@ -77,6 +77,7 @@ ifndef SUBMODULE
 endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
+	sort $< | uniq > $<
 	git add $<
 
 README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))

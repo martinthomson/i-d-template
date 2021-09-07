@@ -1,7 +1,7 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
-	         ([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull)
+		 ([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull)
 FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
@@ -55,9 +55,9 @@ for f in $(1); do \
     amend=; orig=@; \
   fi; \
   $(MAKE) -f $(LIBDIR)/setup.mk "$$f"; \
-  if ! git diff --quiet "$$orig" "$$f"; then \
+  git add "$$f"; \
+  if ! git diff --quiet "$$orig" -- "$$f"; then \
     echo "Updating $$f"; \
-    git add "$$f"; \
     git commit $$amend -m "Automatic update of $$f"; \
   elif [ -n "$$amend" ]; then \
     git reset "$$orig" --hard; \
@@ -71,8 +71,8 @@ update-readme:
 
 .PHONY: update-files
 update-files:
-	$(call regenerate,.github/CODEOWNERS .note.xml README.md)
-	# .gitignore is fiddly and therefore special
+	$(call regenerate,README.md Makefile .github/CODEOWNERS .note.xml)
+	# .gitignore is fiddly and therefore requires special handling
 	$(MAKE) -f $(LIBDIR)/setup.mk setup-gitignore
 	@if ! git diff --quiet @ .gitignore; then \
 	  git add .gitignore; \
