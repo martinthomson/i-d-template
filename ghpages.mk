@@ -10,7 +10,15 @@ SOURCE_BRANCH := $(TRAVIS_BRANCH)
 endif
 else
 ifdef GITHUB_REF
+ifneq (,$(filter refs/heads/%,$(GITHUB_REF)))
+SOURCE_BRANCH := $(patsubst refs/heads/%,%,$(GITHUB_REF))
+else
+ifneq (,$(filter refs/tags/%,$(GITHUB_REF)))
+SOURCE_BRANCH := $(patsubst refs/tags/%,%,$(GITHUB_REF))
+else
 SOURCE_BRANCH := $(notdir $(GITHUB_REF))
+endif
+endif
 else
 SOURCE_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 ifeq (HEAD,$(SOURCE_BRANCH))
