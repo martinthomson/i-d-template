@@ -830,6 +830,7 @@ function show(index) {
   frame.appendChild(comments);
 
   frame.scroll(0, 0);
+  frame.focus();
 }
 
 function hideIssue() {
@@ -919,6 +920,7 @@ function showHelp() {
   let h = document.getElementById('help');
   h.classList.add('active');
   h.scroll(0, 0);
+  h.focus();
   document.getElementById('overlay').classList.add('active');
 }
 
