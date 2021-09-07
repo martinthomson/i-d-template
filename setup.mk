@@ -14,12 +14,12 @@ $(error If you are just starting out, please commit something before starting)
 endif
 
 LATEST_WARNING := $(strip $(foreach draft,$(drafts_source),\
-	   $(shell grep -q $(basename $(draft))-latest $(draft) || \
-		echo $(draft) should include a name of $(basename $(draft))-latest)))
+  $(shell grep -q $(basename $(draft))-latest $(draft) || \
+      echo $(draft) should include a name of $(basename $(draft))-latest)))
 ifneq (,$(LATEST_WARNING))
 $(error Check names: $(LATEST_WARNING))
 endif
-ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | egrep -v '^.. (.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
+ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | egrep -v '^.. (.gitignore|.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
 $(error You have uncommitted changes or untracked files, please commit them before running setup)
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))

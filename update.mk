@@ -1,7 +1,7 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
-                 ([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull)
+	         ([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull)
 FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
@@ -44,10 +44,37 @@ update:  auto_update
 
 endif # CI
 
+define regenerate
+@set -ex; \
+for f in $(1); do \
+  if [ -n "$$(git ls-tree -r @ --name-only "$$f")" ]; then \
+    amend=--amend; orig=@~; \
+    git rm -f "$$f" && \
+    git commit -m "Remove old "$$f""; \
+  else \
+    amend=; orig=@; \
+  fi; \
+  $(MAKE) -f $(LIBDIR)/setup.mk "$$f"; \
+  if ! git diff --quiet "$$orig" "$$f"; then \
+    echo "Updating $$f"; \
+    git add "$$f"; \
+    git commit $$amend -m "Automatic update of $$f"; \
+  elif [ -n "$$amend" ]; then \
+    git reset "$$orig" --hard; \
+  fi; \
+done
+endef
+
 .PHONY: update-readme
 update-readme:
-	git rm -f README.md
-	git commit -m "Remove old README"
-	$(MAKE) -f $(LIBDIR)/setup.mk README.md
-	git add README.md
-	git commit --amend -m "Automatic update of README"
+	$(call regenerate,README.md)
+
+.PHONY: update-files
+update-files:
+	$(call regenerate,.github/CODEOWNERS .note.xml README.md)
+	# .gitignore is fiddly and therefore special
+	$(MAKE) -f $(LIBDIR)/setup.mk setup-gitignore
+	@if ! git diff --quiet @ .gitignore; then \
+	  git add .gitignore; \
+	  git commit -m "Automatic update of .gitignore"; \
+	fi
