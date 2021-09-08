@@ -71,13 +71,12 @@ endif # INDEX_FORMAT
 
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
-	tmp=`mktemp`; cat $^ | sort -u >$$tmp && mv -f $$tmp $<
 ifndef SUBMODULE
 	echo $(LIBDIR) >>$<
 endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
-	sort $< | uniq > $<
+	tmp=`mktemp`; cat $^ | sort -u >$$tmp && mv -f $$tmp $<
 	git add $<
 
 README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
