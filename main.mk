@@ -195,30 +195,34 @@ $(TEST_REPORT):
 	done; \
 	echo '</testsuite>' >>$@
 
-.PHONY: lint lint-whitespace lint-default-branch
-lint:: lint-whitespace
+.PHONY: lint lint-whitespace lint-default-branch lint-docname
+lint:: lint-whitespace lint-docname
 ifneq (true,$(CI))
 lint:: lint-default-branch
 endif
 
 lint-whitespace::
 	@err=0; for f in $(drafts_source); do \
-	  if [ "${f#draft-}" != "$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
-	    echo "$$f does not include the string $${f%.*}-latest"; err=1; \
-	  fi; \
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
 	    echo "$$f has no newline on the last line"; err=1; \
 	  fi; \
 	  if grep -n $$' \r*$$' "$$f"; then \
 	    echo "$$f contains trailing whitespace"; err=1; \
 	  fi; \
-	done; [ "$$err" -eq 0 ] || ! echo "Run 'make fix-lint' to automatically fix some errors" 1>&2
+	done; [ "$$err" -eq 0 ] || ! echo "*** Run 'make fix-lint' to automatically fix some errors" 1>&2
 
 lint-default-branch::
 	@-if ! git rev-parse --abbrev-ref refs/remotes/$(GIT_REMOTE)/HEAD >/dev/null 2>&1; then \
 	  echo "warning: A default branch for '$(GIT_REMOTE)' is not recorded in this clone."; \
 	  echo "         Running 'make fix-lint' will set the default branch to '$$(git rev-parse --abbrev-ref HEAD)'."; \
 	fi
+
+lint-docname::
+	@err=(); for f in $(drafts_source); do \
+	  if [ "$${f#draft-}" != "$$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
+	    echo "$$f does not contain its own name ($${f%.*}-latest)"; err=1; \
+	  fi; \
+	done; [ "$${#err}" -eq 0 ] || ! echo "*** Correct the name of drafts in docname or similar fields" 1>&2
 
 .PHONY: fix-lint fix-lint-whitespace fix-lint-default-branch
 fix-lint:: fix-lint-whitespace fix-lint-default-branch
