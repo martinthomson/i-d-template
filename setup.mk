@@ -29,7 +29,7 @@ ifeq (,$(shell git show-ref $(GIT_REMOTE)/$(GIT_ORIG)))
 $(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push $(GIT_REMOTE) $(GIT_ORIG)")
 endif
 
-TEMPLATE_FILES := Makefile .gitignore CONTRIBUTING.md LICENSE.md
+TEMPLATE_FILES := Makefile .gitignore CONTRIBUTING.md LICENSE.md .editorconfig
 ifneq (true,$(CI))
 # When this runs in CI, we can't change these due to GitHub permissions.
 TEMPLATE_FILES += $(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml)
