@@ -65,11 +65,13 @@ for f in $(1); do \
 done
 endef
 
-.PHONY: update-readme
+.PHONY: update-readme update-codeowners update-files
 update-readme:
 	$(call regenerate,README.md)
 
-.PHONY: update-files
+update-codeowners:
+	$(call regenerate,.github/CODEOWNERS)
+
 update-files:
 	$(call regenerate,README.md Makefile .github/CODEOWNERS .note.xml)
 	# .gitignore is fiddly and therefore requires special handling

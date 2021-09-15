@@ -87,8 +87,8 @@ README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FIL
 	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts) >$@
 	git add $@
 
-.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.sh $(drafts_xml)
-	$(LIBDIR)/setup-codeowners.sh $(filter %.xml,$^) >$@
+.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml)
+	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
 	git add $@
 
 .PHONY: setup-master
