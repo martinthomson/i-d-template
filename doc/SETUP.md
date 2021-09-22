@@ -115,7 +115,8 @@ Note: Installing net-http-persistent makes this a lot faster.
 assumes that you have Golang setup already.
 
 ```sh
-$ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
+$ go get github.com/mmarkdown/mmark
+$ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark
 ```
 
 You might want to set aside a directory for your go code other than the default,
