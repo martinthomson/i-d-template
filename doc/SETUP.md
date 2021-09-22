@@ -138,5 +138,6 @@ quick set of shortcuts for these tools.
 $ pip3 install --user --upgrade xml2rfc archive-repo
 $ gem uninstall --user-install -n ~/.local/bin kramdown-rfc2629 net-http-persistent
 $ gem install --user-install -N -n ~/.local/bin kramdown-rfc2629 net-http-persistent
+$ go get -u github.com/mmarkdown/mmark@latest
 $ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
 ```

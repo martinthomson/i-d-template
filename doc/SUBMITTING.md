@@ -11,9 +11,9 @@ upload a draft to the datatracker.  All you have to do is tag the repository,
 push the tag, and await an email with further instructions.
 
 ```sh
-$ git tag -a draft-ietf-unicorn-protocol-03
+$ git tag -a draft-ietf-unicorn-protocol-00
 $ git push origin <branchname>
-$ git push origin draft-ietf-unicorn-protocol-03
+$ git push origin draft-ietf-unicorn-protocol-00
 ```
 
 This tag has to include the full name of the draft without any file extension.
@@ -108,7 +108,7 @@ identify the specific XML file directly.  This works for any version you have
 submitted.
 
 ```sh
-$ make draft-ietf-unicorn-protocol-03.xml
+$ make draft-ietf-unicorn-protocol-05.xml
 ```
 
 [Submit the .xml file](https://datatracker.ietf.org/submit/).  Don't submit the
@@ -118,8 +118,8 @@ Then tag your repository (if you haven't already) and upload the tags.  The tag
 you should use is the full draft name including a revision number.
 
 ```sh
-$ git tag -a draft-ietf-unicorn-protocol-03
-$ git push origin draft-ietf-unicorn-protocol-03
+$ git tag -a draft-ietf-unicorn-protocol-05
+$ git push origin draft-ietf-unicorn-protocol-05
 ```
 
 Don't worry if you have CI enabled.  CI might try to build and publish the
