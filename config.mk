@@ -18,7 +18,7 @@ export KRAMDOWN_PERSISTENT
 #   https://github.com/cabo/kramdown-rfc2629
 kramdown-rfc2629 ?= kramdown-rfc2629
 
-#  mmark (https://github.com/miekg/mmark)
+#  mmark (https://github.com/mmarkdown/mmark)
 mmark ?= mmark
 
 # If you are using outline files:
