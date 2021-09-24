@@ -106,14 +106,15 @@ if [ -n "$wg_all" ]; then
     wgmeta="${api}/api/v1/group/group/?format=xml&acronym=${wg_all}"
     tmp=$(mktemp)
     trap 'rm -f $tmp' EXIT
-    if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp"; then
+    if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp" &&
+       [ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]; then
         group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
         group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
         # Getting the abbreviation for the group type is pure haxx
         group_type_abbr="${group_type_url%/}"
         group_type_abbr="${group_type_abbr##*/}"
         group_type="$(curl -Ssf "${api}${group_type_url}?format=xml" | \
-                            xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
+                    xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
         ml="$(xmllint --xpath '/response/objects/object[1]/list_email/text()' "$tmp")"
         ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
         ml_sub="$(xmllint --xpath '/response/objects/object[1]/list_subscribe/text()' "$tmp")"

@@ -15,11 +15,11 @@ if [[ -z "$WG" ]]; then
         d="${d%%-*}"
         if $first; then
             wg="$d"
-	    first=false
+            first=false
         elif [[ "$wg" != "$d" ]]; then
             echo "Found conflicting working group names in drafts" 1>&2
             echo "  $wg != $d" 1>&2
-	    wg=""
+            wg=""
             exit 1
         fi
     done
@@ -31,11 +31,12 @@ api="https://datatracker.ietf.org"
 wgmeta="$api/api/v1/group/group/?format=xml&acronym=$wg"
 tmp=$(mktemp)
 trap 'rm -f $tmp' EXIT
-if [[ -n "$wg" ]] && hash xmllint && curl -SsLf "$wgmeta" -o "$tmp"; then
+if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp" &&
+   [ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]; then
     group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
     group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
     group_type="$(curl -Ssf "${api}${group_type_url}?format=xml" | \
-                 xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
+                xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
     ml="$(xmllint --xpath '/response/objects/object[1]/list_email/text()' "$tmp")"
     ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
 else
