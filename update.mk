@@ -35,7 +35,7 @@ update:  auto_update
 	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
 	done
 	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile && \
-	  [ `git status --porcelain Makefile | grep '^[A-Z]' | wc -l` -eq 0 ] || git commit -m "Update Makefile" Makefile
+	  [ `git status --porcelain Makefile | grep '^[A-Z]' | wc -l` -eq 0 ] || git $(CI_AUTHOR) commit -m "Update Makefile" Makefile
 	@dotgit=$$(git rev-parse --git-dir); \
 	  [ -L "$$dotgit"/hooks/pre-commit ] || \
 	    ln -s ../../$(LIBDIR)/pre-commit.sh "$$dotgit"/hooks/pre-commit; \
@@ -50,7 +50,7 @@ for f in $(1); do \
   if [ -n "$$(git ls-tree -r @ --name-only "$$f")" ]; then \
     amend=--amend; orig=@~; \
     git rm -f "$$f" && \
-    git commit -m "Remove old "$$f""; \
+    git $(CI_AUTHOR) commit -m "Remove old "$$f""; \
   else \
     amend=; orig=@; \
   fi; \
@@ -58,7 +58,7 @@ for f in $(1); do \
   git add "$$f"; \
   if ! git diff --quiet "$$orig" -- "$$f"; then \
     echo "Updating $$f"; \
-    git commit $$amend -m "Automatic update of $$f"; \
+    git $(CI_AUTHOR) commit $$amend -m "Automatic update of $$f"; \
   elif [ -n "$$amend" ]; then \
     git reset "$$orig" --hard; \
   fi; \
@@ -78,5 +78,5 @@ update-files:
 	$(MAKE) -f $(LIBDIR)/setup.mk setup-gitignore
 	@if ! git diff --quiet @ .gitignore; then \
 	  git add .gitignore; \
-	  git commit -m "Automatic update of .gitignore"; \
+	  git $(CI_AUTHOR) commit -m "Automatic update of .gitignore"; \
 	fi
