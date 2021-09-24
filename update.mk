@@ -56,7 +56,7 @@ for f in $(1); do \
   fi; \
   $(MAKE) -f $(LIBDIR)/setup.mk "$$f"; \
   git add "$$f"; \
-  if ! git diff --quiet "$$orig" -- "$$f"; then \
+  if ! git diff --quiet --cached "$$orig"; then \
     echo "Updating $$f"; \
     git $(CI_AUTHOR) commit $$amend -m "Automatic update of $$f"; \
   elif [ -n "$$amend" ]; then \
