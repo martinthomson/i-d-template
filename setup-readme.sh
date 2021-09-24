@@ -44,10 +44,10 @@ for d in "$@"; do
         fixup_other_md "$wg"
 
         if [ "$author" = "ietf" ]; then
-	    status="Working Group"
+            status="Working Group"
             status_full="IETF [${wgupper} Working Group](https://datatracker.ietf.org/wg/${wg}/documents/) Internet-Draft"
         else
-	    status="Individual"
+            status="Individual"
             status_full="individual Internet-Draft"
         fi
         if [ $# -gt 1 ]; then
@@ -59,7 +59,10 @@ for d in "$@"; do
         fi
         echo
         echo "This is the working area for ${status_full}."
+        wg_all="$wg"
         first=false
+    elif [ "$wg" != "$wg_all" ]; then
+        wg_all=""
     fi
 
     if [ $# -gt 1 ]; then
@@ -81,7 +84,8 @@ cat <<EOF
 See the
 [guidelines for contributions](https://github.com/${user}/${repo}/blob/${default_branch}/CONTRIBUTING.md).
 
-Contributions can be made by editing markdown through the GitHub interface.
+Contributions can be made by creating pull requests.
+The GitHub interface supports creating pull requests using the Edit (✏) button.
 
 
 ## Command Line Usage
@@ -92,7 +96,42 @@ Formatted text and HTML versions of the draft can be built using \`make\`.
 $ make
 \`\`\`
 
-This requires that you have the necessary software installed.  See
+Command line usage requires that you have the necessary software installed.  See
 [the instructions](https://github.com/martinthomson/i-d-template/blob/main/doc/SETUP.md).
 
 EOF
+
+if [ -n "$wg_all" ]; then
+    api="https://datatracker.ietf.org"
+    wgmeta="${api}/api/v1/group/group/?format=xml&acronym=${wg_all}"
+    tmp=$(mktemp)
+    trap 'rm -f $tmp' EXIT
+    if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp"; then
+        group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
+        group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
+        # Getting the abbreviation for the group type is pure haxx
+        group_type_abbr="${group_type_url%/}"
+        group_type_abbr="${group_type_abbr##*/}"
+        group_type="$(curl -Ssf "${api}${group_type_url}?format=xml" | \
+                            xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
+        ml="$(xmllint --xpath '/response/objects/object[1]/list_email/text()' "$tmp")"
+        ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
+
+        cat >>CONTRIBUTING.md <<EOF
+
+## Working Group Information
+
+Discussion of this work occurs on the [${group_name}
+${group_type} mailing list](mailto:${ml})
+([archive](${ml_arch})).
+In addition to contributions in GitHub, you are encouraged to participate in
+discussions there.
+
+**Note**: Some working groups adopt a policy whereby substantive discussion of
+technical issues needs to occur on the mailing list.
+
+You might also like to familiarize yourself with other
+[${group_type} documents](https://datatracker.ietf.org/${group_type_abbr}/${wg_all}/documents/).
+EOF
+    fi
+fi

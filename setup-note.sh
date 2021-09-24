@@ -28,7 +28,7 @@ api="https://datatracker.ietf.org"
 wgmeta="$api/api/v1/group/group/?format=xml&acronym=$wg"
 tmp=$(mktemp)
 trap 'rm -f $tmp' EXIT
-if hash xmllint && curl -Ssf "$wgmeta" -o "$tmp"; then
+if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp"; then
     group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
     group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
     group_type="$(curl -Ssf "${api}${group_type_url}?format=xml" | \
@@ -36,9 +36,7 @@ if hash xmllint && curl -Ssf "$wgmeta" -o "$tmp"; then
     ml="$(xmllint --xpath '/response/objects/object[1]/list_email/text()' "$tmp")"
     ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
 else
-    wgname="$(echo "$wg" | tr '[a-z]' '[A-Z]')"
-    ml="${ML:-${wg}@ietf.org}"
-    ml_arch="https://mailarchive.ietf.org/arch/browse/${wg}/"
+    wg=''
 fi
 
 echo '<note title="Discussion Venues" removeInRFC="true">'
