@@ -116,6 +116,7 @@ if [ -n "$wg_all" ]; then
                             xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
         ml="$(xmllint --xpath '/response/objects/object[1]/list_email/text()' "$tmp")"
         ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
+        ml_sub="$(xmllint --xpath '/response/objects/object[1]/list_subscribe/text()' "$tmp")"
 
         cat >>CONTRIBUTING.md <<EOF
 
@@ -123,7 +124,8 @@ if [ -n "$wg_all" ]; then
 
 Discussion of this work occurs on the [${group_name}
 ${group_type} mailing list](mailto:${ml})
-([archive](${ml_arch})).
+([archive](${ml_arch}),
+[subscribe](${ml_sub})).
 In addition to contributions in GitHub, you are encouraged to participate in
 discussions there.
 
