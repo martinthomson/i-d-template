@@ -70,9 +70,9 @@ RUN set -e; \
     }; \
     tool_install() { \
       tool="$1"; version="$2"; sha="$3"; \
-      install "${tool}-${version}/${tool}" \
-        "https://tools.ietf.org/tools/${tool}/${tool}-${version}.tgz" \
-        "$sha" "${tool}-${version}/${tool}"; \
+      # install "${tool}-${version}/${tool}" \
+      #  "https://tools.ietf.org/tools/${tool}/${tool}-${version}.tgz" \
+      #  "$sha" "${tool}-${version}/${tool}"; \
     }; \
     tool_install idnits 2.16.05 \
       9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5; \
@@ -82,9 +82,7 @@ RUN set -e; \
     install mmark \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
       54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff; \
-    npm install -g aasvg
-
-RUN set -e; \
+    npm install -g aasvg; \
     pip3 install --compile --no-cache-dir \
       archive-repo \
       pyang \
