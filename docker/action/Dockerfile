@@ -17,6 +17,7 @@ RUN set -e; \
       libxml2-utils \
       libxslt \
       make \
+      nodejs \
       openssh \
       py3-appdirs \
       py3-configargparse \
@@ -80,7 +81,8 @@ RUN set -e; \
     mmark="2.2.10"; \
     install mmark \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
-      54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff
+      54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff; \
+    npm install -g aasvg
 
 RUN set -e; \
     pip3 install --compile --no-cache-dir \
