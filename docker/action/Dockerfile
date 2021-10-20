@@ -59,7 +59,7 @@ ENV SHELL=/bin/bash \
     KRAMDOWN_PERSISTENT=t \
     KRAMDOWN_REFCACHEDIR=/root/.cache/xml2rfc
 
-RUN set -e; \
+RUN set -ex; \
     install() { \
        file="$1"; url="$2"; sha="$3"; \
        target="/usr/local/bin/$(basename "$file")"; \
