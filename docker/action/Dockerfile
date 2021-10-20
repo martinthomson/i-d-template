@@ -18,6 +18,7 @@ RUN set -e; \
       libxslt \
       make \
       nodejs \
+      npm \
       openssh \
       py3-appdirs \
       py3-configargparse \
