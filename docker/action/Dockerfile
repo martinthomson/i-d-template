@@ -59,7 +59,7 @@ ENV SHELL=/bin/bash \
     KRAMDOWN_PERSISTENT=t \
     KRAMDOWN_REFCACHEDIR=/root/.cache/xml2rfc
 
-RUN set -ex; \
+RUN set -e; \
     install() { \
        file="$1"; url="$2"; sha="$3"; \
        target="/usr/local/bin/$(basename "$file")"; \
@@ -75,6 +75,7 @@ RUN set -ex; \
       #  "https://tools.ietf.org/tools/${tool}/${tool}-${version}.tgz" \
       #  "$sha" "${tool}-${version}/${tool}"; \
     }; \
+    set -x; \
     tool_install idnits 2.16.05 \
       9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5; \
     tool_install rfcdiff 1.48 \
