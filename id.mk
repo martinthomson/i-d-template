@@ -1,10 +1,7 @@
 ## Identify drafts, types and versions
 
 drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
-
-ifeq (0,$(words $(drafts)))
-drafts := $(sort $(basename $(wildcard rfc[0-9]*.xml)))
-endif
+drafts += $(sort $(basename $(wildcard $(foreach ext,xml org md,rfc[0-9]*.$(ext)))))
 
 ifeq (0,$(words $(drafts)))
 $(warning No file named draft-*.md or draft-*.xml or draft-*.org)
@@ -18,9 +15,9 @@ drafts_source := $(join $(drafts),$(draft_types))
 drafts_tags := $(shell git tag --sort=refname 2>/dev/null | grep '^draft-')
 f_prev_tag = $(lastword $(subst -, ,$(lastword $(filter $(draft)-%,$(drafts_tags)))))
 f_next_tag = $(if $(f_prev_tag),$(shell printf "%.2d" $$(( 1$(f_prev_tag) - 99)) ),00)
-drafts_next := $(foreach draft,$(drafts),$(draft)-$(f_next_tag))
-drafts_prev := $(foreach draft,$(drafts),$(draft)-$(f_prev_tag))
-drafts_with_prev := $(foreach draft,$(drafts),$(if $(f_prev_tag),$(draft)))
+drafts_next := $(foreach draft,$(filter draft-%,$(drafts)),$(draft)-$(f_next_tag))
+drafts_prev := $(foreach draft,$(filter draft-%,$(drafts)),$(draft)-$(f_prev_tag))
+drafts_with_prev := $(foreach draft,$(filter draft-%,$(drafts)),$(if $(f_prev_tag),$(draft)))
 
 drafts_txt := $(addsuffix .txt,$(drafts))
 drafts_html := $(addsuffix .html,$(drafts))
@@ -100,5 +97,11 @@ endif
 # GITHUB_API_TOKEN is used in the GitHub API.
 GITHUB_API_TOKEN ?= $(or $(GITHUB_TOKEN),$(GH_TOKEN))
 
-DEFAULT_BRANCH ?= $(shell $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
+ifeq (,$(BRANCH_FETCH))
+BRANCH_FETCH := true
+endif
+export BRANCH_FETCH
+ifeq (,$(DEFAULT_BRANCH))
+DEFAULT_BRANCH := $(shell BRANCH_FETCH=$(BRANCH_FETCH) $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
+endif
 export DEFAULT_BRANCH

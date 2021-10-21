@@ -1,0 +1,30 @@
+name: "Validate Workflows in Template"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+    - ".github/workflows/template.yml"
+    - "template/.github/workflows/**"
+
+jobs:
+  build:
+    name: "Validate Workflows"
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Compare"
+      run: |
+        git clone https://github.com/martinthomson/internet-draft-template idt
+        e=''
+        for src in template/.github/workflows/*.yml; do
+          dst="idt/${src#*/}"
+          [ -f "$dst" ] || e="$e\n$dst is missing"
+          diff -u "$dst" "$src" || e="$e\n$dst is different"
+        done
+        if [ -n "$e" ]; then
+          ! printf "$e"
+        fi

@@ -10,7 +10,15 @@ SOURCE_BRANCH := $(TRAVIS_BRANCH)
 endif
 else
 ifdef GITHUB_REF
+ifneq (,$(filter refs/heads/%,$(GITHUB_REF)))
+SOURCE_BRANCH := $(patsubst refs/heads/%,%,$(GITHUB_REF))
+else
+ifneq (,$(filter refs/tags/%,$(GITHUB_REF)))
+SOURCE_BRANCH := $(patsubst refs/tags/%,%,$(GITHUB_REF))
+else
 SOURCE_BRANCH := $(notdir $(GITHUB_REF))
+endif
+endif
 else
 SOURCE_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 ifeq (HEAD,$(SOURCE_BRANCH))
@@ -55,33 +63,42 @@ $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 
 GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.$(INDEX_FORMAT)
 $(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
-	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
 GHPAGES_ALL += $(GHPAGES_ROOT)/index.$(INDEX_FORMAT)
 $(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
-	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" $(DEFAULT_BRANCH) "$(GITHUB_USER)" "$(GITHUB_REPO)" >$@
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(DEFAULT_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 endif
 
+# GHPAGES_COMMIT_TTL is the number of days worth of commits to keep on the gh-pages branch.
+GHPAGES_COMMIT_TTL ?= 30
+# GHPAGES_BRANCH_TTL is the number of days to retain a directory on gh-pages
+# after the corresponding branch has been deleted. This is measured from the last change.
+GHPAGES_BRANCH_TTL ?= 30
 .PHONY: cleanup-ghpages
 cleanup-ghpages: $(GHPAGES_ROOT)
 	-@for remote in `git remote`; do \
 	  git remote prune $$remote; \
 	done;
 
-# Drop old gh-pages commits (keep 30-60 days of history)
-	@KEEP=$$((`date '+%s'`-2592000)); CUTOFF=$$((`date '+%s'`-5184000)); \
+# Drop old gh-pages commits
+# Retain $(GHPAGES_COMMIT_TTL) days of history.
+# Only run this if more than $(GHPAGES_COMMIT_TTL)*2 days of history exists.
+	@KEEP=$$((`date '+%s'`-($(GHPAGES_COMMIT_TTL)*86400))); \
+	CUTOFF=$$((`date '+%s'`-($(GHPAGES_COMMIT_TTL)*172800))); \
 	ROOT=`git -C $(GHPAGES_ROOT) rev-list --max-parents=0 gh-pages`; \
 	if [ `git -C $(GHPAGES_ROOT) show -s --format=%ct $$ROOT` -lt $$CUTOFF ]; then \
 	  NEW_ROOT=`git -C $(GHPAGES_ROOT) rev-list --min-age=$$KEEP --max-count=1 gh-pages`; \
 	  if [ $$NEW_ROOT != $$ROOT ]; then \
 		git -C $(GHPAGES_ROOT) replace --graft $$NEW_ROOT && \
-		git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
+		FILTER_BRANCH_SQUELCH_WARNING=1 git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
 	  fi \
 	fi
 
-# Clean up obsolete directories (2592000 = 30 days)
-	@CUTOFF=$$(($$(date '+%s')-2592000)); \
+# Clean up obsolete directories
+# Keep old branches for $(GHPAGES_BRANCH_TTL) days after the last changes (on the gh-pages branch).
+	@CUTOFF=$$(($$(date '+%s')-($(GHPAGES_BRANCH_TTL)*86400))); \
 	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_ROOT) | sed -e 's,.*/,,')`; \
 	for item in $$MAYBE_OBSOLETE; do \
 	  if [ -d "$(GHPAGES_ROOT)/$$item" ] && \

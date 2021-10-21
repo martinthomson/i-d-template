@@ -5,6 +5,14 @@ import os
 import subprocess
 import sys
 
+if os.environ.get("DEFAULT_BRANCH") is not None:
+    print(os.environ["DEFAULT_BRANCH"])
+    exit(0)
+
+
+def warn(m):
+    print(f"warning: {sys.argv[0]}: {m}", file=sys.stderr)
+
 
 def get_branch(rev):
     try:
@@ -21,19 +29,21 @@ remote = os.environ.get("GIT_REMOTE", default="origin")
 get_branch(f"{remote}/HEAD")
 get_branch(f"refs/remotes/{remote}/HEAD")
 
-if len(sys.argv) < 3:
-    print(f"warning: {sys.argv[0]} unable to determine default branch", file=sys.stderr)
+# We shouldn't get here...
+
+if (
+    len(sys.argv) < 3
+    or os.environ.get("BRANCH_FETCH", default="true").lower() == "false"
+):
+    warn("unable to determine default branch")
     get_branch("HEAD")
     exit(1)
 
 try:
     import requests
 except ImportError:
-    print(
-        f"warning: {sys.argv[0]} need 'requests' to determine default branch",
-        file=sys.stderr,
-    )
-    print(f"warning: 'pip3 install [--user] requests' to install", file=sys.stderr)
+    warn("need 'requests' to determine default branch")
+    warn("    'pip3 install [--user] requests' to install")
     get_branch("HEAD")
     exit(1)
 
@@ -46,4 +56,12 @@ response = requests.get(url, headers=headers)
 response.raise_for_status()
 result = response.json()
 
+# Fix it
+head = f"refs/remotes/{remote}/HEAD"
+ref = f"refs/remotes/{remote}/{result['default_branch']}"
+warn("correcting the default branch locally:")
+warn(f"    git symbolic-ref {head} {ref}")
+subprocess.check_output(["git", "symbolic-ref", head, ref])
+
+# Report it
 print(result["default_branch"])

@@ -11,9 +11,9 @@ upload a draft to the datatracker.  All you have to do is tag the repository,
 push the tag, and await an email with further instructions.
 
 ```sh
-$ git tag -a draft-ietf-unicorn-protocol-03
+$ git tag -a draft-ietf-unicorn-protocol-00
 $ git push origin <branchname>
-$ git push origin draft-ietf-unicorn-protocol-03
+$ git push origin draft-ietf-unicorn-protocol-00
 ```
 
 This tag has to include the full name of the draft without any file extension.
@@ -25,82 +25,102 @@ be either `draft-ietf-unicorn-protocol.md` or
 For this feature to work you also need to use an annotated tag (that's the `-a`
 option above).  Annotated tags require a comment (use `-m` to set this on the
 command line).  An annotated tag associates your email address with the
-submission.  Lightweight tags don't have an email address and will be ignored
-by the CI build.
+submission.  Lightweight tags don't have an email address and the first author
+listed in the draft will be attributed instead.
 
-**Important**: Push the commit that you intend to tag before you push the tag
-to check that the draft can be built correctly.  Pushing the tag won't also
-push the commit it references and so the build will not run. Circle (and maybe
-Travis) will then refuse to build that tag ever again.
+**Important**: Push the commit that you intend to tag before you push the tag.
+This will check that the draft can be built correctly so that you don't tag a
+broken state.  Pushing the tag won't also push the commit it references and so
+the build will not run, perhaps not ever.
 
 **Note**: The email address you use for making this submission needs to match a
-valid datatracker account email address ([create one
-here](https://datatracker.ietf.org/accounts/create/)).  The email address must
-also match one of the author addresses (this condition [might be
-temporary](https://trac.tools.ietf.org/tools/ietfdb/ticket/2390)).  The email
-address that git uses can be found by calling `git config --get user.email`, if
-you aren't certain.
-
-**Note**: Existing users will need to update their configuration to take
-advantage of this feature.  For Circle CI users, adding
-[.circleci/config.yml](https://github.com/martinthomson/i-d-template/blob/main/template/.circleci/config.yml)
-to your repository and removing any existing `circle.yml` file is recommended.
-[Travis
-support](https://github.com/martinthomson/i-d-template/blob/main/template/.travis.yml)
-is less well-tested (and slower).  Updating the
-[Makefile](https://github.com/martinthomson/i-d-template/blob/main/template/Makefile)
-provides a small additional speed improvement.
+verified datatracker account email address ([create one
+here](https://datatracker.ietf.org/accounts/create/)).  The email address that
+git uses can be found by calling `git config --get user.email`, if you aren't
+certain.
 
 **Bug**: Circle CI has a [bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
 that prevents `git push --tags` from triggering builds if you have multiple drafts.
 Tag every draft, then push each tag individually.  (Tagging all drafts first means
 that cross references will work.)
 
-Once the CI system has built the draft, it will upload it automatically and you
+Once the CI system has built the draft, it will publish it automatically and you
 will receive an email asking you to confirm submission.  You don't need to have
 a GitHub account token configured for this feature to be enabled.
 
 
+## GitHub Release
+
+Creating a GitHub release using the intended draft name is an easy way to submit
+versions without using the command line.  Simply publish a new release that uses
+a tag in the form `draft-<author>-<wg>-<name>-<vv>`.  GitHub Actions will take
+care of generating XML and submitting it to the datatracker.
+
+This will attribute the submission to the first author listed in the draft, no
+matter who generated the release.  Only annotated tags result in proper
+attribution.
+
+Whomever is attributed must have a datatracker account with that email address;
+see above.
+
+
+## If the Build Fails
+
+Sometimes the build will fail.  Some errors can be worked around by retrying the
+build.  Both GitHub Actions and CircleCI offer options to restart the build.
+If you think that an error isn't your fault, try running the build again.
+
+
 ## Semi-automated Process
 
-Rather than rely on the CI system, the `make upload` command can be used to
-upload a tagged draft to the datatracker.
+You should only really do this if you don't have CI enabled or if the CI build
+fails.  The `make publish` command can be used to upload a tagged draft to the
+datatracker.
 
 ```sh
 $ git tag -a draft-ietf-unicorn-protocol-03
 $ git push origin draft-ietf-unicorn-protocol-03
-$ make upload
+$ make publish
 ```
 
-This uses the same process as the CI system.  Note that if you have multiple
-tags pointing to the current HEAD, this will attempt to upload all of those
-drafts.
+This uses the same process that the CI system uses.  If you have multiple tags
+pointing to the current HEAD, this will attempt to publish all of those drafts.
 
 
 ## Manual Process
 
-Make a submission version of your draft.  The makefile uses git tags to work out
-what version to create.  It looks for the last version number you have tagged
-the draft with and calculates the next version.  When there are no tags, it
-generates a `-00` version.
+Again, if you don't have CI enabled, you can make a submission version of your
+draft and upload it yourself.  You can also submit a version manually before
+pushing tags, in which case the CI build will fail safely when you push the
+tags.  Datatracker will safely reject the second, automated submission.
+
+The makefile still needs git tags to work out what version to create.  Always
+use tags.  The tool looks for the last version number you have tagged the draft
+with and calculates the next version.  When there are no tags, it generates a
+`-00` version.
 
 ```sh
-$ make submit
+$ make next
 ```
 
 If you already have a tag in place or want to build a specific tag, you can
-identify the specific XML file directly.
+identify the specific XML file directly.  This works for any version you have
+submitted.
 
 ```sh
-$ make draft-ietf-unicorn-protocol-03.xml
+$ make draft-ietf-unicorn-protocol-05.xml
 ```
 
-[Submit the .xml file](https://datatracker.ietf.org/submit/).
+[Submit the .xml file](https://datatracker.ietf.org/submit/).  Don't submit the
+`.txt` file.
 
-Then you can tag your repository and upload the tags.  The tag you should
-use is the full draft name including a revision number.
+Then tag your repository (if you haven't already) and upload the tags.  The tag
+you should use is the full draft name including a revision number.
 
 ```sh
-$ git tag -a draft-ietf-unicorn-protocol-03
-$ git push origin draft-ietf-unicorn-protocol-03
+$ git tag -a draft-ietf-unicorn-protocol-05
+$ git push origin draft-ietf-unicorn-protocol-05
 ```
+
+Don't worry if you have CI enabled.  CI might try to build and publish the
+draft.  This will fail, but that's OK.

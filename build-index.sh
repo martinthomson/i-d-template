@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Usage: $0 html [dir] [gh-user] [gh-repo] > index.html
-# Usage: $0 md [dir] [gh-user] [gh-repo] > index.md
+# Usage: $0 html [dir] [gh-user] [gh-repo] [draft source...] > index.html
+# Usage: $0 md [dir] [gh-user] [gh-repo] [draft source...] > index.md
 
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
@@ -11,6 +11,10 @@ user="${4:-<user>}"
 repo="${5:-<repo>}"
 default_branch="${DEFAULT_BRANCH:-$($(dirname "$0")/default-branch.py)}"
 branch="${3:-$default_branch}"
+libdir="${LIBDIR:-$(realpath $(dirname "$0"))}"
+shift 5
+# Remaining arguments (now $@) are source files
+all_drafts=("$@")
 
 gh="https://github.com/${user}/${repo}"
 
@@ -26,6 +30,11 @@ function githubio() {
     d="${1%/}/"
     echo "https://${user}.github.io/${repo}/${d#$default_branch/}${2}.txt"
 }
+
+function githubcom() {
+    echo "https://github.com/${user}/${repo}/${1}"
+}
+
 
 if [[ "$format" = "html" ]]; then
     indent=''
@@ -108,8 +117,8 @@ elif [[ "$format" = "md" ]]; then
         echo
     }
     function table_i() {
-        echo "| Draft |     |     |     |     |"
-        echo "| ----- | --- | --- | --- | --- |"
+        echo "| Draft |     |     |     |     |     |     |"
+        echo "| ----- | --- | --- | --- | --- | --- | --- |"
     }
     function table_o() {
         echo
@@ -128,6 +137,28 @@ else
     echo "Unknown format: $format" 2>&1
     exit 2
 fi
+
+# Mac versions of bash are old and terrible.
+if declare -A test >/dev/null 2>&1; then
+    declare -A issue_labels=()
+else
+    disable_cache=true
+fi
+function issue_label() {
+    file="$1"
+    if [[ -z "$disable_cache" && -n "${issue_labels[file]}" ]]; then
+        echo "${issue_labels[file]:1}"
+        return
+    fi
+    for i in "${all_drafts[@]}"; do
+        if [[ "${i%.*}" == "$file" ]]; then
+            label=$("${libdir}/extract-metadata.py" "$i" github-issue-label)
+            [[ -z "$disable_cache" ]] && issue_labels[file]="x$label"
+            echo "$label"
+            return
+        fi
+    done
+}
 
 if [[ "$format" = "html" ]]; then
     w '<!DOCTYPE html>'
@@ -158,16 +189,28 @@ function list_dir() {
         file=$(basename "$file" .txt)
 
         tr_i
-        th "${file}"
-        td "$(a "$(reldot "$dir")/${file}.html" html html "$file")"
+        src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
+        title=$("${libdir}/extract-metadata.py" "$src" abbrev)
+        td "$(a "$(reldot "$dir")/${file}.html" "${title}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
+        td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" != "$default_branch" ]]; then
-	          diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
+            diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
         fi
 	      diff=$(rfcdiff "$file" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
+        if [[ "${#files[@]}" -eq 1 ]]; then
+            td ""
+        else
+            label=$(issue_label "$file")
+            if [[ -n "$label" ]]; then
+                td "$(a $(githubcom labels/$label) "issues")"
+            else
+                td ""
+            fi
+        fi
         tr_o
     done
     table_o
@@ -176,7 +219,7 @@ function list_dir() {
 branchlink="$gh"
 [[ "$branch" = "$default_branch" ]] || branchlink="${branchlink}/tree/${branch}"
 h1 "Editor's drafts for ${branch} branch of $(a "$branchlink" "${user}/${repo}")"
-p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests")."
+p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests") in the $(a "${gh}" repo)."
 
 list_dir "${root}" $branch
 

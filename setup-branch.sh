@@ -37,4 +37,5 @@ git config --global --get user.email >/dev/null || user+=(-c user.email='idbot@e
 git -C "$tmp" add .gitignore "$@"
 git -C "$tmp" "${user[@]}" commit -m "Automatic setup of $branch."
 git -C "$tmp" push origin "$branch"
-git push --set-upstream origin "$branch"
+git push --set-upstream origin "$branch" || \
+    echo "Not pushing $branch because it might already exist."

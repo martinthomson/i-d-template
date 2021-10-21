@@ -14,12 +14,12 @@ $(error If you are just starting out, please commit something before starting)
 endif
 
 LATEST_WARNING := $(strip $(foreach draft,$(drafts_source),\
-	   $(shell grep -q $(basename $(draft))-latest $(draft) || \
-		echo $(draft) should include a name of $(basename $(draft))-latest. )))
+  $(shell grep -q $(basename $(draft))-latest $(draft) || \
+      echo $(draft) should include a name of $(basename $(draft))-latest)))
 ifneq (,$(LATEST_WARNING))
 $(error Check names: $(LATEST_WARNING))
 endif
-ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | egrep -v '^.. (.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
+ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | egrep -v '^.. (.gitignore|.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
 $(error You have uncommitted changes or untracked files, please commit them before running setup)
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
@@ -29,11 +29,13 @@ ifeq (,$(shell git show-ref $(GIT_REMOTE)/$(GIT_ORIG)))
 $(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push $(GIT_REMOTE) $(GIT_ORIG)")
 endif
 
-TEMPLATE_FILES := \
-  Makefile .gitignore \
-  CONTRIBUTING.md LICENSE.md \
-  .circleci/config.yml \
-  $(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml)
+TEMPLATE_FILES := Makefile .gitignore CONTRIBUTING.md LICENSE.md .editorconfig
+ifneq (true,$(CI))
+# When this runs in CI, we can't change these due to GitHub permissions.
+TEMPLATE_FILES += $(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml update.yml)
+# Also exclude CircleCI config because CI setup is only GitHub Actions
+TEMPLATE_FILES += .circleci/config.yml
+endif
 
 TEMPLATE_FILE_MK := $(LIBDIR)/.template-files.mk
 include $(TEMPLATE_FILE_MK)
@@ -69,12 +71,12 @@ endif # INDEX_FORMAT
 
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
-	tmp=`mktemp`; cat $^ | sort -u >$$tmp && mv -f $$tmp $<
 ifndef SUBMODULE
 	echo $(LIBDIR) >>$<
 endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
+	tmp=`mktemp`; cat $^ | sort -u >$$tmp && mv -f $$tmp $<
 	git add $<
 
 README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
@@ -85,8 +87,8 @@ README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FIL
 	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts) >$@
 	git add $@
 
-.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.sh $(drafts_xml)
-	$(LIBDIR)/setup-codeowners.sh $(filter %.xml,$^) >$@
+.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml)
+	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
 	git add $@
 
 .PHONY: setup-master

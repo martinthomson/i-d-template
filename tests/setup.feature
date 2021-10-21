@@ -15,6 +15,7 @@ Feature: Initial setup
      and a file is created called ".github/workflows/archive.yml"
      and a file is created called ".github/CODEOWNERS"
      and a file is created called ".note.xml"
+     and a file is created called ".editorconfig"
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "archive.json"
      and gitignore lists xml files
@@ -35,6 +36,7 @@ Feature: Initial setup
      and a file is created called ".github/workflows/archive.yml"
      and a file is created called ".github/CODEOWNERS"
      and a file is created called ".note.xml"
+     and a file is created called ".editorconfig"
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "archive.json"
      and gitignore lists xml files
@@ -55,6 +57,7 @@ Feature: Initial setup
      and a file is created called ".github/workflows/archive.yml"
      and a file is created called ".github/CODEOWNERS"
      and a file is created called ".note.xml"
+     and a file is created called ".editorconfig"
      and a branch is created called "gh-pages" containing "index.md"
      and a branch is created called "gh-pages" containing "archive.json"
      and gitignore lists xml files

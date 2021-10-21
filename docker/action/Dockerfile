@@ -17,6 +17,8 @@ RUN set -e; \
       libxml2-utils \
       libxslt \
       make \
+      nodejs \
+      npm \
       openssh \
       py3-appdirs \
       py3-configargparse \
@@ -30,6 +32,8 @@ RUN set -e; \
       py3-requests \
       py3-setuptools \
       py3-six \
+      py3-wheel \
+      py3-yaml \
       python3 \
       ruby \
       sed
@@ -51,31 +55,49 @@ RUN set -e; \
 ENV SHELL=/bin/bash \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8
+    LC_ALL=en_US.UTF-8 \
+    KRAMDOWN_PERSISTENT=t \
+    KRAMDOWN_REFCACHEDIR=/root/.cache/xml2rfc
 
-RUN set -e; tool_install() { \
-      tool="$1";version="$2";sha="$3"; tmp=$(mktemp -t "${tool}XXXXX.tgz"); \
-      curl -sSLf "https://tools.ietf.org/tools/${tool}/${tool}-${version}".tgz -o "$tmp"; \
-      [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
-      target="/usr/local/bin/${tool}"; \
-      tar xzfO "$tmp" "${tool}-${version}/${tool}" >"$target"; rm -f "$tmp"; \
-      chmod 755 "$target"; }; \
-    tool_install idnits 2.16.05 \
-      9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5 && \
-    tool_install rfcdiff 1.48 \
-      80c886e76803b889c444cd44781f8fa34cb23943a28f18cac0ea8a1458dca265
-
-RUN set -e; v="2.2.9"; sha="b8c501be4118f79a294b658d963ec8c91595e94aea69c8efd0ea8788c7466c4f"; \
-    tmp=$(mktemp -t "mmarkXXXXXX.tgz"); target="${BINDIR:-/usr/local/bin}/mmark"; \
-    curl -sSLf "https://github.com/mmarkdown/mmark/releases/download/v${v}/mmark_${v}_linux_amd64.tgz" -o "$tmp"; \
-    [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
-    tar xzfO "$tmp" mmark >"$target"; \
-    rm -f "$tmp"; \
-    chmod 755 "$target"
-
-RUN pip3 install --compile --no-cache-dir xml2rfc svgcheck archive-repo
-ENV KRAMDOWN_PERSISTENT=t
-RUN gem install --no-doc kramdown-rfc2629 net-http-persistent && certified-update
+RUN set -e; \
+    install() { \
+       file="$1"; url="$2"; sha="$3"; \
+       target="/usr/local/bin/$(basename "$file")"; \
+       tmp=$(mktemp -t "${tool}XXXXX.tgz"); \
+       curl -sSLf "$url" -o "$tmp"; \
+       [ $(sha256sum -b "$tmp" | cut -d ' ' -f 1 -) = "$sha" ]; \
+       tar xzfO "$tmp" "$file" >"$target"; chmod 755 "$target"; \
+       rm -f "$tmp"; \
+    }; \
+    tool_install() { \
+      tool="$1"; version="$2"; sha="$3"; \
+      curl -SSLf -o "/usr/local/bin/${tool}" \
+        "https://raw.githubusercontent.com/ietf-tools/${tool}-mirror/${version}/${tool}"; \
+      [ $(sha256sum -b "/usr/local/bin/${tool}" | cut -d ' ' -f 1 -) = "$sha" ]; \
+    }; \
+    set -x; \
+    tool_install idnits bfda9518d5b4e8a682f2e6f34a449c2d3ea74539 \
+      0ea07cdc982645a85622ccc2636a4d21cde54137269f0e8a204e1bc519b48818; \
+    tool_install rfcdiff 1649bbe969670838d8c91d7ba4eafbc5dd96b477 \
+      631fd8aa310c8c1a7efde148441efd96fb33e2b04aef6e326473904d15087760; \
+    mmark="2.2.10"; \
+    install mmark \
+      "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
+      54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff; \
+    npm install -g aasvg; \
+    pip3 install --compile --no-cache-dir \
+      archive-repo \
+      pyang \
+      svgcheck \
+      xml2rfc \
+      ; \
+   gem install --no-doc \
+      kramdown-rfc2629 \
+      net-http-persistent \
+      ; \
+    certified-update; \
+    mkdir -p $KRAMDOWN_REFCACHEDIR; \
+    kramdown-rfc-cache-subseries-bibxml || echo 'rfc-editor.org is down again'
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

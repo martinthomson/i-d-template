@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: martinthomson/i-d-template:latest
+    resource_class: small
     working_directory: ~/draft
 
     steps:
@@ -42,7 +43,7 @@ jobs:
       # Build txt and html versions of drafts
       - run:
           name: "Build Drafts"
-          command: "make 'CLONE_ARGS=--reference ~/git-reference'"
+          command: make
 
       # Update editor's copy on gh-pages
       - run:

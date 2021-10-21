@@ -76,21 +76,29 @@ build_target() {
 }
 
 for draft in "${drafts[@]%.*}"; do
-    tags=($(git tag --list "${draft}-[0-9][0-9]"))
+    if [ "${draft#draft-}" != "$draft" ]; then
+        tags=($(git tag --list "${draft}-[0-9][0-9]"))
+    else
+	tags=($(git tag --list "$draft"))
+    fi
     for i in "${tags[@]}"; do
         build_target "$i" "$i"
     done
 
     if [ "${#tags[@]}" -gt 0 ]; then
         next_draft=$(next "${tags[$((${#tags[@]}-1))]}")
-    else
+    elif [ "${draft#draft-}" != "$draft" ]; then
         next_draft="${draft}-00"
+    else
+        next_draft=""
     fi
-    build_target HEAD "$next_draft"
+    if [ -n "$next_draft" ]; then
+        build_target HEAD "$next_draft"
 
-    if [ "${#tags[@]}" -gt 0 ]; then
-        # Write out a diff target
-        printf "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt\n"
-        printf "\t-\$(rfcdiff) --html --stdout \$^ > \$@\n"
+        if [ "${#tags[@]}" -gt 0 ]; then
+            # Write out a diff target
+            printf "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt\n"
+            printf "\t-\$(rfcdiff) --html --stdout \$^ > \$@\n"
+        fi
     fi
 done
