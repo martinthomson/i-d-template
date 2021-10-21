@@ -199,7 +199,7 @@ function list_dir() {
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
         fi
-	      diff=$(rfcdiff "$file" "$this_githubio")
+        diff=$(rfcdiff "$file" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
         if [[ "${#files[@]}" -eq 1 ]]; then
             td ""
