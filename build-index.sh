@@ -15,7 +15,7 @@ branch="${3:-$default_branch}"
 gh="https://github.com/${user}/${repo}"
 
 function rfcdiff() {
-    echo "https://tools.ietf.org/rfcdiff?url1=${1}&amp;url2=${2}"
+    echo "https://www.ietf.org/rfcdiff?url1=${1}&amp;url2=${2}"
 }
 
 function reldot() {
@@ -166,7 +166,7 @@ function list_dir() {
 	          diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
         fi
-	      diff=$(rfcdiff "https://tools.ietf.org/id/${file}.txt" "$this_githubio")
+	      diff=$(rfcdiff "$file" "$this_githubio")
         td "$(a "$diff" 'diff with last submission' diff "$file")"
         tr_o
     done
