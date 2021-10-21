@@ -71,15 +71,15 @@ RUN set -e; \
     }; \
     tool_install() { \
       tool="$1"; version="$2"; sha="$3"; \
-      # install "${tool}-${version}/${tool}" \
-      #  "https://tools.ietf.org/tools/${tool}/${tool}-${version}.tgz" \
-      #  "$sha" "${tool}-${version}/${tool}"; \
+      curl -SSLf -o "/usr/local/bin/${tool}" \
+        "https://raw.githubusercontent.com/ietf-tools/${tool}-mirror/${version}/${tool}"; \
+      [ $(sha256sum -b "/usr/local/bin/${tool}" | cut -d ' ' -f 1 -) = "$sha" ]; \
     }; \
     set -x; \
-    tool_install idnits 2.16.05 \
-      9f30827e0cf7cf02245e248266ece9557886d33ec7a90cc704b450e70f2cead5; \
-    tool_install rfcdiff 1.48 \
-      80c886e76803b889c444cd44781f8fa34cb23943a28f18cac0ea8a1458dca265; \
+    tool_install idnits bfda9518d5b4e8a682f2e6f34a449c2d3ea74539 \
+      0ea07cdc982645a85622ccc2636a4d21cde54137269f0e8a204e1bc519b48818; \
+    tool_install rfcdiff 1649bbe969670838d8c91d7ba4eafbc5dd96b477 \
+      631fd8aa310c8c1a7efde148441efd96fb33e2b04aef6e326473904d15087760; \
     mmark="2.2.10"; \
     install mmark \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
