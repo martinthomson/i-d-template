@@ -991,3 +991,4 @@ svg [fill="black"], svg [fill^="#000"], svg :not([fill]) {
 svg [stroke="fill"], svg [fill^="#fff"] {
   fill: var(--background-color);
 }
+}
