@@ -14,7 +14,7 @@ $ make diff
 ```
 
 Show changes since your last draft submission using
-[rfcdiff](https://tools.ietf.org/tools/rfcdiff/).
+[rfcdiff](https://www.ietf.org/rfcdiff).
 
 ```sh
 $ make gh-pages
@@ -51,7 +51,7 @@ hook so that it runs before each commit.
 $ make idnits
 ```
 
-Check for nits using the [idnits](https://tools.ietf.org/tools/idnits/) tool.
+Check for nits using the [idnits](https://www.ietf.org/tools/idnits) tool.
 
 ```sh
 $ make issues

@@ -30,11 +30,11 @@ oxtradoc ?= oxtradoc.in
 xsltproc ?= xsltproc
 
 # For sanity checkout your draft:
-#   https://tools.ietf.org/tools/idnits/
+#   https://www.ietf.org/tools/idnits
 idnits ?= idnits
 
 # For diff:
-#   https://tools.ietf.org/tools/rfcdiff/
+#   https://www.ietf.org/rfcdiff
 rfcdiff ?= rfcdiff
 
 # For generating PDF:
