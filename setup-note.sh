@@ -20,7 +20,7 @@ if [[ -z "$WG" ]]; then
             echo "Found conflicting working group names in drafts" 1>&2
             echo "  $wg != $d" 1>&2
             wg=""
-            exit 1
+            exit 0
         fi
     done
 else
