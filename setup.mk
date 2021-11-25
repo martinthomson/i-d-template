@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: setup-default-branch setup-ghpages setup-precommit setup-note
+setup: setup-default-branch setup-ghpages setup-precommit
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
@@ -97,7 +97,7 @@ setup-master:
 	$(error The setup-master make target was renamed to setup-default-branch)
 
 .PHONY: setup-default-branch
-setup-default-branch: setup-files README.md setup-gitignore
+setup-default-branch: setup-files README.md setup-gitignore setup-note
 	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts)) using https://github.com/martinthomson/i-d-template"
 
 .PHONY: setup-precommit
