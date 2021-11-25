@@ -85,7 +85,7 @@ README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FIL
 
 .PHONY: setup-note
 setup-note: $(LIBDIR)/setup-note.sh
-	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts) >.note.xml
+	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts_source) >.note.xml
 	[ -s $@ ] && git add .note.xml
 
 .github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml)
