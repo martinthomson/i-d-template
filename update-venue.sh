@@ -29,11 +29,11 @@ for d in "$@"; do
         cmds=""
         cmds="s/^ *group: .*/  group: $group_name/;"
         sed -i -e '/^venue:/,/^[^ ]/{'"
-s|^ *group: .*|  group: $wg_name|
-s|^ *type: .*|  type: $wg_type|
-s|^ *mail: .*|  mail: $wg_mail|
-s|^ *arch: .*|  arch: $wg_arch|
-s|^ *github: .*|  github: $user/$repo|
+s|^ *group: .*|  group: \"$wg_name\"|
+s|^ *type: .*|  type: \"$wg_type\"|
+s|^ *mail: .*|  mail: \"$wg_mail\"|
+s|^ *arch: .*|  arch: \"$wg_arch\"|
+s|^ *github: .*|  github: \"$user/$repo\"|
 "'}' "$d"
         last_wg="$w"
     fi
