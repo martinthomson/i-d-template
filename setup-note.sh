@@ -2,52 +2,54 @@
 
 # Usage: $0 <user> <repo> [drafts...]
 
+set -e
+
 user="$1"
 repo="$2"
 shift 2
+
+# Determine if the draft is a kramdown draft with a venue section.
+hasvenue() {
+    head -1 "$1" | grep -q "^---" && \
+        sed -e '2,/^---/p;d' "$1" | grep -q '^venue:'
+}
 
 if [[ -z "$WG" ]]; then
     # Guess the working group name from the drafts
     first=true
     for d in "$@"; do
-        d="${d#draft-}"
-        d="${d#*-}"
-        d="${d%%-*}"
+        # If a kramdown has a venue section, skip it.
+        if hasvenue "$d"; then
+            continue
+        fi
+
+        w="${d#draft-}"
+        w="${w#*-}"
+        w="${w%%-*}"
         if $first; then
-            wg="$d"
+            wg="$w"
             first=false
-        elif [[ "$wg" != "$d" ]]; then
+        elif [[ "$wg" != "$w" ]]; then
             echo "Found conflicting working group names in drafts" 1>&2
-            echo "  $wg != $d" 1>&2
+            echo "  $wg != $w" 1>&2
             wg=""
-            exit 0
+            break
         fi
     done
 else
     wg="${WG}"
 fi
 
-api="https://datatracker.ietf.org"
-wgmeta="$api/api/v1/group/group/?format=xml&acronym=$wg"
-tmp=$(mktemp)
-trap 'rm -f $tmp' EXIT
-if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp" &&
-   [ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]; then
-    group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
-    group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
-    group_type="$(curl -Ssf "${api}${group_type_url}?format=xml" | \
-                xmllint --xpath '/object/verbose_name/text()' /dev/stdin)"
-    ml="$(xmllint --xpath '/response/objects/object[1]/list_email/text()' "$tmp")"
-    ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
-else
+. $(dirname "$0")/wg-meta.sh
+if ! wgmeta "$wg"; then
     wg=""
 fi
 
 echo '<note title="Discussion Venues" removeInRFC="true">'
 if [[ -n "$wg" ]]; then
   echo "<t>Discussion of this document takes place on the
-    ${group_name} ${group_type} mailing list (${ml}),
-    which is archived at <eref target=\"${ml_arch}\"/>.</t>"
+    ${wg_name} ${wg_type} mailing list (${wg_mail}),
+    which is archived at <eref target=\"${wg_arch}\"/>.</t>"
 fi
 echo "<t>Source for this draft and an issue tracker can be found at
     <eref target=\"https://github.com/${user}/${repo}\"/>.</t>"

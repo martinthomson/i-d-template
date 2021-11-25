@@ -65,7 +65,7 @@ for f in $(1); do \
 done
 endef
 
-.PHONY: update-readme update-codeowners update-files
+.PHONY: update-readme update-codeowners update-files update-venue
 update-readme:
 	$(call regenerate,README.md)
 
@@ -79,4 +79,11 @@ update-files:
 	@if ! git diff --quiet @ .gitignore; then \
 	  git add .gitignore; \
 	  git $(CI_AUTHOR) commit -m "Automatic update of .gitignore"; \
+	fi
+
+update-venue: $(drafts_source)
+	./lib/update-venue.sh $^
+	@if ! git diff --quiet @ $^; then \
+	  git add $^; \
+	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \
 	fi
