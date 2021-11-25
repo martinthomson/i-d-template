@@ -82,7 +82,7 @@ update-files:
 	fi
 
 update-venue: $(drafts_source)
-	./lib/update-venue.sh $^
+	./lib/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $^
 	@if ! git diff --quiet @ $^; then \
 	  git add $^; \
 	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \
