@@ -28,13 +28,17 @@ for d in "$@"; do
     if [[ "$w" == "$last_wg"  ]] || wgmeta "$w"; then
         cmds=""
         cmds="s/^ *group: .*/  group: $group_name/;"
-        sed -i -e '/^venue:/,/^[^ ]/{'"
-s|^ *group: .*|  group: \"$wg_name\"|
-s|^ *type: .*|  type: \"$wg_type\"|
-s|^ *mail: .*|  mail: \"$wg_mail\"|
-s|^ *arch: .*|  arch: \"$wg_arch\"|
-s|^ *github: .*|  github: \"$user/$repo\"|
-"'}' "$d"
+        sed -i -e '1,/^---/ {
+s|^area: .*|area: "'"$wg_area"'"|
+s|^workgroup: .*|workgroup: "'"$wg_name"'"|
+/^venue:/,/^[^ ]/{
+s|^ *group: .*|  group: "'"$wg_name"'"|
+s|^ *type: .*|  type: "'"$wg_type"'"|
+s|^ *mail: .*|  mail: "'"$wg_mail"'"|
+s|^ *arch: .*|  arch: "'"$wg_arch"'"|
+s|^ *github: .*|  github: "'"$user/$repo"'"|
+}
+}' "$d"
         last_wg="$w"
     fi
 done
