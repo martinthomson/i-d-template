@@ -95,7 +95,6 @@ RUN set -e; \
       kramdown-rfc2629 \
       net-http-persistent \
       ; \
-    certified-update; \
     mkdir -p $KRAMDOWN_REFCACHEDIR; \
     kramdown-rfc-cache-subseries-bibxml || echo 'rfc-editor.org is down again'
 
