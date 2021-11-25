@@ -1,5 +1,5 @@
 .PHONY: setup
-setup: setup-default-branch setup-ghpages setup-precommit
+setup: setup-default-branch setup-ghpages setup-precommit setup-note
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
@@ -47,7 +47,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 	  echo '	-cp $$< $$@' >>$@;)
 
 .PHONY: setup-files
-setup-files: $(TEMPLATE_FILES) setup-note README.md .github/CODEOWNERS
+setup-files: $(TEMPLATE_FILES) README.md .github/CODEOWNERS
 	git add $(drafts_source)
 	git add $^
 
@@ -86,7 +86,7 @@ README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FIL
 .PHONY: setup-note
 setup-note: $(LIBDIR)/setup-note.sh
 	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts_source) >.note.xml
-	[ -s $@ ] && git add .note.xml
+	if [ -s .note.xml ]; then git add .note.xml; fi
 
 .github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml)
 	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@

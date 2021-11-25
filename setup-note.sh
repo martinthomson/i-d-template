@@ -40,6 +40,10 @@ else
     wg="${WG}"
 fi
 
+if $first; then
+    exit 0
+fi
+
 . $(dirname "$0")/wg-meta.sh
 if ! wgmeta "$wg"; then
     wg=""
