@@ -77,7 +77,7 @@ if [[ "$format" = "html" ]]; then
         wo "</tr>"
     }
     function table_i() {
-        wi '<table id="'"$1"'">'
+        wi '<table id="branch-'"$1"'">'
     }
     function table_o() {
         wo '</table>'
@@ -105,20 +105,24 @@ elif [[ "$format" = "md" ]]; then
         echo "[$2]($1)"
     }
     function td() {
-        echo -n "$1 |"
+        echo -n " $1 |"
     }
     function th() {
-        echo -n "$1 |"
+        echo -n " $1 |"
     }
     function tr_i() {
-        echo -n "| "
+        echo -n "|"
     }
     function tr_o() {
         echo
     }
     function table_i() {
-        echo "| Draft |     |     |     |     |     |     |"
-        echo "| ----- | --- | --- | --- | --- | --- | --- |"
+        extra=""
+        if [[ "$1" == "$2" ]]; then
+            extra=" --- | --- |"
+        fi
+        echo "| Draft |     |     |     |${extra//-/ }"
+        echo "| ----- | --- | --- | --- |${extra}"
     }
     function table_o() {
         echo
@@ -183,7 +187,7 @@ function list_dir() {
     if [[ "${#files[@]}" -eq 0 ]]; then
         return
     fi
-    table_i "branch-$2"
+    table_i "$2" "$default_branch"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
         file=$(basename "$file" .txt)
@@ -193,23 +197,24 @@ function list_dir() {
         title=$("${libdir}/extract-metadata.py" "$src" abbrev)
         td "$(a "$(reldot "$dir")/${file}.html" "${title}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
-        td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
-        if [[ "$2" != "$default_branch" ]]; then
+        if [[ "$2" == "$default_branch" ]]; then
+            td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
+            diff=$(rfcdiff "$file" "$this_githubio")
+            td "$(a "$diff" 'diff with last submission' diff "$file")"
+            if [[ "${#files[@]}" -eq 1 ]]; then
+                td ""
+            else
+                label=$(issue_label "$file")
+                if [[ -n "$label" ]]; then
+                    td "$(a $(githubcom labels/$label) "issues")"
+                else
+                    td ""
+                fi
+            fi
+        else
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch")"
-        fi
-        diff=$(rfcdiff "$file" "$this_githubio")
-        td "$(a "$diff" 'diff with last submission' diff "$file")"
-        if [[ "${#files[@]}" -eq 1 ]]; then
-            td ""
-        else
-            label=$(issue_label "$file")
-            if [[ -n "$label" ]]; then
-                td "$(a $(githubcom labels/$label) "issues")"
-            else
-                td ""
-            fi
         fi
         tr_o
     done
