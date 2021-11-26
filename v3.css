@@ -598,36 +598,8 @@ hr {
 }
 
 /* index */
-.index ul {
-  margin: 0 0 0 1em;
-  padding: 0;
-  list-style: none;
-}
-.index ul ul {
-  margin: 0;
-}
-.index li {
-  margin: 0;
-  text-indent: -2em;
-  padding-left: 2em;
-  padding-bottom: 5px;
-}
-.indexIndex {
-  margin: 0.5em 0 1em;
-}
-.index a {
-  font-weight: 700;
-}
-/* make the index two-column on all but the smallest screens */
-@media (min-width: 500px) {
-  .index ul {
-    column-count: 2;
-    column-gap: 20px;
-  }
-  .index ul ul {
-    column-count: 1;
-    column-gap: 0;
-  }
+#rfc\.index\.index + ul {
+  margin-left: 0;
 }
 
 /* authors */
