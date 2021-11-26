@@ -10,15 +10,10 @@ user="$1"
 repo="$2"
 shift 2
 
-# Determine if the draft is a kramdown draft with a venue section.
-hasvenue() {
-    head -1 "$1" | grep -q "^---" && \
-        sed -e '2,/^---/p;d' "$1" | grep -q '^venue:'
-}
-
 last_wg=
 for d in "$@"; do
     if ! head -1 "$d" | grep -q "^---"; then
+	# This only works for kramdown-rfc2629 drafts
         continue
     fi
     w="${d#draft-}"
