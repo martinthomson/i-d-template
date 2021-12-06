@@ -26,7 +26,7 @@ trap cleanup EXIT
 files=($(git status --porcelain draft-* rfc* | sed '/^[MAU]/{s/^.. //;p;};/^[RC]/{s/.* -> //;p;};d' | sort))
 for f in "${files[@]}"; do
     tmp="${f%.*}"-tmp$$."${f##*.}"
-    tmpfiles+=("$tmp")
+    tmpfiles+=("$tmp" "${tmp%.*}.xml")
     htmlfiles+=("${tmp%.*}.html")
     # This makes a copy of the staged file.
     (git show :"$f" 2>/dev/null || cat "$f") \
