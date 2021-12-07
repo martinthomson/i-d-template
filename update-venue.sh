@@ -32,6 +32,7 @@ s|^ *type: .*|  type: "'"$wg_type"'"|
 s|^ *mail: .*|  mail: "'"$wg_mail"'"|
 s|^ *arch: .*|  arch: "'"$wg_arch"'"|
 s|^ *github: .*|  github: "'"$user/$repo"'"|
+s|^ *latest: .*|  latest: "'"https://$user.github.io/$repo/${d%.*}.html"'"|
 }
 }' "$d"
         last_wg="$w"
