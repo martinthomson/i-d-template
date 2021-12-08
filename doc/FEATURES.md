@@ -68,7 +68,7 @@ It also creates the following files from a template: `README.md`, `.gitignore`,
 under `.github/workflows/` (see below).
 
 
-## With Continuous Integration Services
+## Automation Features
 
 Using [GitHub Actions](https://github.com/features/actions) you get automated
 continuous integration that can:
