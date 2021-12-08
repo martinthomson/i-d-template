@@ -63,8 +63,8 @@ Download a copy of GitHub issues and pull requests.
 ## Setup a Repository
 
 When you [setup a repository](REPO.md), this tool installs a stub `Makefile`.
-It also creates the following files from a template: `.gitignore`,
-`CONTRIBUTING.md`, `LICENSE.md`, `.travis.yml`, and GitHub Action configuration
+It also creates the following files from a template: `README.md`, `.gitignore`,
+`CONTRIBUTING.md`, `LICENSE.md`, files for GitHub pages, and GitHub Action configuration
 under `.github/workflows/` (see below).
 
 
