@@ -21,8 +21,8 @@ upload: $(uploads)
 	  sed -e 's/^<//;s/>$$//')"; \
 	[ -z "$$email" ] && email=$$(xmllint --xpath '/rfc/front/author[1]/address/email/text()' $< 2>/dev/null); \
 	[ -z "$$email" ] && ! echo "Unable to find email to use for submission." 1>&2; \
-	$(curl) -D $@ -F "user=$$email" -F "xml=@$<" "$(DATATRACKER_UPLOAD_URL)" && echo && \
-	  (grep -q ' 200 OK' $@ >/dev/null 2>&1 || ! cat $@ 1>&2)
+	$(curl) -D "$@" -F "user=$$email" -F "xml=@$<" "$(DATATRACKER_UPLOAD_URL)" && echo && \
+	  (head -1 "$@" | grep -q '^HTTP/\S\S* 200\b' || ! cat "$@" 1>&2)
 
 # This ignomonious hack ensures that we can catch missing files properly.
 .%.upload:
