@@ -14,9 +14,9 @@ export KRAMDOWN_NO_TARGETS
 KRAMDOWN_PERSISTENT := true
 export KRAMDOWN_PERSISTENT
 
-# If you are using markdown files use either kramdown-rfc2629 or mmark
-#   https://github.com/cabo/kramdown-rfc2629
-kramdown-rfc2629 ?= kramdown-rfc2629
+# If you are using markdown files use either kramdown-rfc or mmark
+#   https://github.com/cabo/kramdown-rfc
+kramdown-rfc ?= kramdown-rfc2629
 
 #  mmark (https://github.com/mmarkdown/mmark)
 mmark ?= mmark
@@ -62,7 +62,7 @@ INDEX_FORMAT ?= html
 # For spellchecking: pip install --user codespell
 codespell ?= codespell
 
-# Setup a shared cache for xml2rfc and kramdown-rfc2629
+# Setup a shared cache for xml2rfc and kramdown-rfc
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
 KRAMDOWN_REFCACHEDIR := $(XML2RFC_REFCACHEDIR)

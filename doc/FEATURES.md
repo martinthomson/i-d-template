@@ -6,7 +6,7 @@ $ make
 
 Turn internet-draft source into text and HTML.  This supports XML files using
 [xml2rfc](https://xml2rfc.tools.ietf.org/), markdown files using either
-[kramdown-rfc2629](https://github.com/cabo/kramdown-rfc2629) or
+[kramdown-rfc](https://github.com/cabo/kramdown-rfc) or
 [mmark](https://github.com/miekg/mmark)
 
 ```sh

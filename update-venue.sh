@@ -13,7 +13,7 @@ shift 2
 last_wg=
 for d in "$@"; do
     if ! head -1 "$d" | grep -q "^---"; then
-        # This only works for kramdown-rfc2629 drafts
+        # This only works for kramdown-rfc drafts
         continue
     fi
     w="${d#draft-}"

@@ -11,7 +11,7 @@ jobs:
           name: "Print Configuration"
           command: |
             xml2rfc --version
-            gem list -q kramdown-rfc2629
+            gem list -q kramdown-rfc
             echo -n 'mmark '; mmark --version
 
       - restore_cache:

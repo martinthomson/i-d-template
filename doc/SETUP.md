@@ -85,24 +85,24 @@ $ pip3 install --user archive-repo
 
 ## Markdown
 
-If you use markdown, you will also need to install `kramdown-rfc2629` or `mmark`.
+If you use markdown, you will also need to install `kramdown-rfc` or `mmark`.
 
 The template stuff tries to work out which of these you are working with based
 on the first line of the file:
 
-* `kramdown-rfc2629` files must start with '---'
+* `kramdown-rfc` files must start with '---'
 
 * `mmark` files must start with '%%%'
 
 
-### kramdown-rfc2629
+### kramdown-rfc
 
-[`kramdown-rfc2629`](https://github.com/cabo/kramdown-rfc2629) requires
+[`kramdown-rfc`](https://github.com/cabo/kramdown-rfc) requires
 [Ruby](https://www.ruby-lang.org/) and can be installed using the Ruby package
 manager, `gem`:
 
 ```sh
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc2629 net-http-persistent
+$ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
 ```
 
 Note: Installing net-http-persistent makes this a lot faster.
@@ -136,8 +136,8 @@ quick set of shortcuts for these tools.
 
 ```sh
 $ pip3 install --user --upgrade xml2rfc archive-repo
-$ gem uninstall --user-install -n ~/.local/bin kramdown-rfc2629 net-http-persistent
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc2629 net-http-persistent
+$ gem uninstall --user-install -n ~/.local/bin kramdown-rfc net-http-persistent
+$ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
 $ go get -u github.com/mmarkdown/mmark@latest
 $ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
 ```

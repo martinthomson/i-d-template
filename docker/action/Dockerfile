@@ -92,7 +92,7 @@ RUN set -e; \
       xml2rfc \
       ; \
    gem install --no-doc \
-      kramdown-rfc2629 \
+      kramdown-rfc \
       net-http-persistent \
       ; \
     mkdir -p $KRAMDOWN_REFCACHEDIR; \
