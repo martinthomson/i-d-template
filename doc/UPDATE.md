@@ -11,9 +11,11 @@ $ make update
 This will pull an updated copy of this repository and ensure that its
 dependencies are also updated.
 
-This will also install git hooks that help prevent some common mistakes.
+This will also install [git
+hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) that catch some
+common mistakes.
 
-If you run `make`, then it will update itself every 2 weeks.
+If you run `make`, then `make update` will run automatically every 2 weeks.
 
 ## Automatically Generated Files
 
