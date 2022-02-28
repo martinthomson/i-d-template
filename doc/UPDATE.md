@@ -32,8 +32,8 @@ This updates all of the files below, plus `.gitignore`, `Makefile`, and
 
 This erases any customizations that have been made to those files.
 
-The `make update-files` rule can be manually run using the "Update generated
-files" GitHub Action.
+The `make update-files` rule can be manually run using the "Update Generated
+Files" GitHub Action.
 
 Special targets can be run individually:
 
