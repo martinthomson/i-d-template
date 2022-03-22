@@ -6,6 +6,8 @@ are often not great.
 
 Firstly, **do not create a fork**.  There are better options.
 
+You can rename the draft before or after transferring the repository.
+
 
 ## Best Option - Transfer the Repository
 
@@ -55,23 +57,22 @@ $ make -f lib/setup.mk setup-ghpages setup-ghissues
 
 ## Cleanup
 
-After transfering or copying you might want to rebuild the README:
-
+Any copies of the repository should have any clone that references the old
+location updated.  The old location will continue to work, but it's good pratice
+to change:
+ 
 ```sh
-$ make -f lib/setup.mk README.md
-$ git commit -m "Update README" README.md
+$ git remote set-url origin https://github.com/new/repo
 ```
 
- If you have made changes to the README, you can just update the intro text and
- the links.
+After the draft is renamed and the origin is updated, you might want to rebuild
+the README:
+
+```sh
+$ make update-readme
+```
+
+This will overwrite the contents of README.md.  If you have made changes to the
+README, you can just update the intro text and the links instead.
  
- Any copies of the repository should have any clone that references the old
- location updated.  The old location will continue to work, but it's good pratice
- to change:
- 
- ```sh
- $ git remote set-url origin https://github.com/new/repo
- ```
- 
- You should also update any CI configuration and links to your repo from other
- places.
+You should also update any links to your repo from other places.
