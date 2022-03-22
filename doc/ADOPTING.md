@@ -6,7 +6,9 @@ are often not great.
 
 Firstly, **do not create a fork**.  There are better options.
 
-You can rename the draft before or after transferring the repository.
+You can rename the draft before or after transferring the repository.  Don't
+forget to change both the filename and the name of the draft (in the docname field,
+for example).
 
 
 ## Best Option - Transfer the Repository
