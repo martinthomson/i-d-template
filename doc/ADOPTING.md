@@ -14,7 +14,7 @@ for example).
 ## Best Option - Transfer the Repository
 
 A transfer means that all the pull requests, issues and any CI configuration are moved
-in addition to the code (the drafts).
+in addition to the code (the drafts), its history, and tags.
 
 To do this, make the owner of the repository part of the working group organization.
 You need to give them the ability to create repositories in order for this to be
