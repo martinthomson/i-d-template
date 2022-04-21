@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+git config --global --add safe.directory "$GITHUB_WORKSPACE"
 if [ "$1" = "setup" ]; then
   echo "Running setup"
   exec make -f lib/setup.mk
