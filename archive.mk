@@ -69,7 +69,11 @@ else
 	@git -C $(ARCHIVE_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1
 endif
 else
+ifeq (true,$(CI))
+	@echo "*** Warning: pushing to the gh-pages branch is disabled."
+else
 	git -C $(ARCHIVE_ROOT) push -f origin $(ARCHIVE_BRANCH)
+endif
 endif # PUSH_GHPAGES
 	-rm -rf $(ARCHIVE_ROOT)
 
