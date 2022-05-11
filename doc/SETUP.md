@@ -26,8 +26,10 @@ free to do, but a user-based install is easier to manage without invoking
 ## make
 
 Mac users might need to install [Homebrew](https://brew.sh) to get a version of
-[`make`](https://www.gnu.org/software/make/) that works properly (the version
-shipped with XCode is subtly broken).
+[`make`](https://www.gnu.org/software/make/) that fully supports all of the template
+features.  Apple ships an old version of GNU make which can fail in in
+mysterious ways.  Some effort has been made to avoid this bustage, so most
+features work fine, but no warranty is made if something breaks.
 
 ```sh
 brew install make
