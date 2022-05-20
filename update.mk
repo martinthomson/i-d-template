@@ -54,7 +54,7 @@ for f in $(1); do \
   else \
     amend=; orig=@; \
   fi; \
-  $(MAKE) -f $(LIBDIR)/setup.mk "$$f"; \
+  $(MAKE) -f $(LIBDIR)/setup.mk CHECK_BRANCH=false "$$f"; \
   git add "$$f"; \
   if ! git diff --quiet --cached "$$orig"; then \
     echo "Updating $$f"; \
@@ -65,17 +65,21 @@ for f in $(1); do \
 done
 endef
 
-.PHONY: update-readme update-codeowners update-files update-venue
+.PHONY: update-readme update-codeowners update-files update-venue update-ci
 update-readme:
 	$(call regenerate,README.md)
 
 update-codeowners:
 	$(call regenerate,.github/CODEOWNERS)
 
+ifneq (true,$(CI))
+update-files: update-ci
+else
 update-files:
-	$(call regenerate,README.md Makefile .github/CODEOWNERS .note.xml)
+endif
+	$(call regenerate,README.md Makefile .github/CODEOWNERS)
 	# .gitignore is fiddly and therefore requires special handling
-	$(MAKE) -f $(LIBDIR)/setup.mk setup-gitignore
+	$(MAKE) -f $(LIBDIR)/setup.mk CHECK_BRANCH=false setup-gitignore
 	@if ! git diff --quiet @ .gitignore; then \
 	  git add .gitignore; \
 	  git $(CI_AUTHOR) commit -m "Automatic update of .gitignore"; \
@@ -87,3 +91,6 @@ update-venue: $(drafts_source)
 	  git add $^; \
 	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \
 	fi
+
+update-ci:
+	$(call regenerate,$(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml update.yml))

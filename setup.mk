@@ -25,8 +25,10 @@ endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
 $(error Please configure a remote called '$(GIT_REMOTE)' before running setup)
 endif
+ifneq (false,$(CHECK_BRANCH))
 ifeq (,$(shell git show-ref $(GIT_REMOTE)/$(GIT_ORIG)))
 $(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push $(GIT_REMOTE) $(GIT_ORIG)")
+endif
 endif
 
 TEMPLATE_FILES := Makefile .gitignore CONTRIBUTING.md LICENSE.md .editorconfig
@@ -89,6 +91,7 @@ setup-note: $(LIBDIR)/setup-note.sh
 	if [ -s .note.xml ]; then git add .note.xml; fi
 
 .github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml)
+	mkdir -p $(dir $@)
 	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
 	git add $@
 
