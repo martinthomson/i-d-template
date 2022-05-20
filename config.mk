@@ -62,6 +62,9 @@ INDEX_FORMAT ?= html
 # For spellchecking: pip install --user codespell
 codespell ?= codespell
 
+# Tracing tool
+trace := $(LIBDIR)/trace.sh
+
 # Setup a shared cache for xml2rfc and kramdown-rfc
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc

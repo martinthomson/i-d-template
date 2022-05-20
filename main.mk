@@ -1,3 +1,21 @@
+ifeq (,$(TRACE_FILE))
+
+SUMMARY_REPORT ?= $(GITHUB_STEP_SUMMARY)
+ifneq (,$(SUMMARY_REPORT))
+TRACE_FILE := $(shell mktemp)
+export TRACE_FILE
+
+.PHONY: $(SUMMARY_REPORT) # Not really, but you know.
+$(SUMMARY_REPORT): $(LIBDIR)/format-trace.sh
+	@$(MAKE) -k; \
+	  STATUS=$$?; \
+	  $(LIBDIR)/format-trace.sh $(TRACE_FILE) $$STATUS >$@; \
+	  rm -f $(TRACE_FILE); \
+	  exit $$STATUS
+endif
+
+endif # Summary
+
 .PHONY: all latest
 all:: latest lint
 latest:: txt html
@@ -49,21 +67,21 @@ pdf:: $(addsuffix .pdf,$(drafts))
 
 export XML_RESOURCE_ORG_PREFIX
 
-MD_PRE :=
+MD_PRE =
 ifneq (,$(MD_PREPROCESSOR))
-MD_PRE += | $(MD_PREPROCESSOR)
+MD_PRE += | $(trace) $@ -s preprocessor $(MD_PREPROCESSOR)
 endif
 ifneq (1,$(words $(drafts)))
 NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST := | $(LIBDIR)/add-note.py
+MD_POST = | $(trace) $@ -s venue $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
-MD_POST += | $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
+MD_POST += | $(trace) $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
 endif
 ifneq (,$(XML_TIDY))
-MD_POST += | $(XML_TIDY)
+MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
 %.xml: %.md
@@ -72,10 +90,10 @@ endif
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
 	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@; \
+	  cat $< $(MD_PRE) | $(trace) $@ -s krandowm-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
 	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@; \
+	  cat $< $(MD_PRE) | $(trace) $@ -s mmark $(mmark) $(MD_POST) >$@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
@@ -87,7 +105,7 @@ ifdef REFCACHEDIR
 endif
 
 %.xml: %.org
-	$(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
+	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 ifeq (true,$(USE_XSLT))
@@ -105,25 +123,25 @@ $(XSLTDIR):
 	git clone --depth 10 $(CLONE_ARGS) -b master https://github.com/reschke/xml2rfc $@
 
 %.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
-	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
+	$(trace) $@ -s xslt-clean $(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
 
 %.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
-	$(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
+	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml
-	$(xml2rfc) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 else
 %.html: %.xml $(XML2RFC_CSS)
-	$(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
+	$(trace) $@ -s xml2rfc-html $(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
 %.txt: %.xml
-	$(xml2rfc) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 endif
 
 %.pdf: %.txt
-	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
+	$(trace) $@ -s enscript $(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
 
 ## Build copies of drafts for submission
 .PHONY: next
@@ -151,7 +169,7 @@ submit::
 .PHONY: check idnits
 check:: idnits
 idnits:: $(drafts_next_txt)
-	echo $^ | xargs -n 1 sh -c '$(idnits) $$0'
+	echo $^ | xargs -n 1 sh -c '$(trace) $$0 -s idnits $(idnits) $$0'
 
 CODESPELL_ARGS :=
 ifneq (,$(wildcard ./.ignore-words))
@@ -160,7 +178,7 @@ endif
 
 .PHONY: spellcheck
 spellcheck:: $(drafts_source)
-	codespell $(CODESPELL_ARGS) $^
+	$(trace) $@ codespell $(CODESPELL_ARGS) $^
 
 ## Build diffs between the current draft versions and the most recent version
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
@@ -204,10 +222,10 @@ endif
 lint-whitespace::
 	@err=0; for f in $(drafts_source); do \
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
-	    echo "$$f has no newline on the last line"; err=1; \
+	    $(trace) $$f -s nl ! echo "$$f has no newline on the last line"; err=1; \
 	  fi; \
 	  if grep -n $$' \r*$$' "$$f"; then \
-	    echo "$$f contains trailing whitespace"; err=1; \
+	    $(trace) $$f -s ws ! echo "$$f contains trailing whitespace"; err=1; \
 	  fi; \
 	done; [ "$$err" -eq 0 ] || ! echo "*** Run 'make fix-lint' to automatically fix some errors" 1>&2
 
@@ -220,7 +238,7 @@ lint-default-branch::
 lint-docname::
 	@err=(); for f in $(drafts_source); do \
 	  if [ "$${f#draft-}" != "$$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
-	    echo "$$f does not contain its own name ($${f%.*}-latest)"; err=1; \
+	    $(trace) $$f -s lint-docname ! echo "$$f does not contain its own name ($${f%.*}-latest)"; err=1; \
 	  fi; \
 	done; [ "$${#err}" -eq 0 ] || ! echo "*** Correct the name of drafts in docname or similar fields" 1>&2
 
