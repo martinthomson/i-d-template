@@ -116,7 +116,7 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
-ifeq (,$(MAKE_TRACE))
+ifneq (,$(MAKE_TRACE))
 ghpages:
 	@$(call MAKE_TRACE,ghpages)
 else

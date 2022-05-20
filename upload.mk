@@ -28,7 +28,7 @@ endif
 	  sed -e 's/^<//;s/>$$//')"; \
 	[ -z "$$email" ] && email=$$(xmllint --xpath '/rfc/front/author[1]/address/email/text()' $< 2>/dev/null); \
 	[ -z "$$email" ] && ! echo "Unable to find email to use for submission." 1>&2; \
-	$(trace) $< -s upload-request $(curl) -D "$@" \
+	$(if $(TRACE_FILE),$(trace) $< -s upload-request )$(curl) -D "$@" \
 	  -F "user=$$email" -F "xml=@$<" "$(DATATRACKER_UPLOAD_URL)" && echo && \
 	  (head -1 "$@" | grep -q '^HTTP/\S\S* 200\b' || $(trace) $< -s upload-result ! cat "$@" 1>&2)
 
