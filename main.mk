@@ -5,13 +5,17 @@ ifneq (,$(SUMMARY_REPORT))
 TRACE_FILE := $(shell mktemp)
 export TRACE_FILE
 
+define MAKE_TRACE
+$(MAKE) -k $(1); \
+  STATUS=$$?; \
+  $(LIBDIR)/format-trace.sh $(TRACE_FILE) $$STATUS >$(SUMMARY_REPORT); \
+  echo rm -f $(TRACE_FILE); \
+  exit $$STATUS
+endef
+
 .PHONY: $(SUMMARY_REPORT) # Not really, but you know.
 $(SUMMARY_REPORT): $(LIBDIR)/format-trace.sh
-	@$(MAKE) -k; \
-	  STATUS=$$?; \
-	  $(LIBDIR)/format-trace.sh $(TRACE_FILE) $$STATUS >$@; \
-	  rm -f $(TRACE_FILE); \
-	  exit $$STATUS
+	@$(call MAKE_TRACE,all)
 endif
 
 endif # Summary
