@@ -1,3 +1,4 @@
+.PHONY: all latest
 ifeq (,$(TRACE_FILE))
 
 SUMMARY_REPORT ?= $(GITHUB_STEP_SUMMARY)
@@ -13,15 +14,14 @@ $(MAKE) -k $(1); \
   exit $$STATUS
 endef
 
-.PHONY: $(SUMMARY_REPORT) # Not really, but you know.
-$(SUMMARY_REPORT): $(LIBDIR)/format-trace.sh
-	@$(call MAKE_TRACE,all)
+all::
+	@$(call MAKE_TRACE,latest lint)
+else
+all:: latest lint
 endif
 
 endif # Summary
 
-.PHONY: all latest
-all:: latest lint
 latest:: txt html
 
 .DELETE_ON_ERROR:
