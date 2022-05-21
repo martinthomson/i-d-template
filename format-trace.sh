@@ -12,10 +12,10 @@ echo
 tmp=$(mktemp)
 trap 'rm -f $tmp' EXIT
 cut -f1 -d' ' "$trace" | sort | uniq | while read f; do
-    failed=false
+    failed=
     grep "^$f " "$trace" | cut -f2- -d' ' | sort | uniq >"$tmp"
     while read -r j s; do
-        if [[ "$s" != "0" ]]; then
+        if [[ "$failed" != "$j" && "$s" != "0" ]]; then
             echo "<details><summary>❌ $f: step '$j' failed</summary>"
             echo
             echo '```'
@@ -23,7 +23,7 @@ cut -f1 -d' ' "$trace" | sort | uniq | while read f; do
             echo '```'
             echo "</details>"
             echo
-            failed=true
+            failed=$j
         fi
     done <"$tmp"
     if ! "$failed"; then

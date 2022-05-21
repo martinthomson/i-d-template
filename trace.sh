@@ -21,7 +21,7 @@ if [[ "$1" == "!" ]]; then
     ! "$@"
 else
     "$@"
-fi | tee -a "$tmp"
+fi > >(tee -a "$tmp") 2> >(tee -a "$tmp" 1>&2)
 status="$?"
 echo "$file $stage $status" >>"$TRACE_FILE"
 if [[ "$status" -ne 0 ]]; then

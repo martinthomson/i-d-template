@@ -94,7 +94,7 @@ endif
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
 	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(trace) $@ -s krandowm-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
+	  cat $< $(MD_PRE) | $(trace) $@ -s kramdowm-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
 	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
 	  cat $< $(MD_PRE) | $(trace) $@ -s mmark $(mmark) $(MD_POST) >$@; \
@@ -173,7 +173,7 @@ submit::
 .PHONY: check idnits
 check:: idnits
 idnits:: $(drafts_next_txt)
-	echo $^ | xargs -n 1 sh -c '$(trace) $$0 -s idnits $(idnits) $$0'
+	echo $^ | xargs -n 1 sh -c '$(trace) "$$0" -s idnits $(idnits) "$$0"'
 
 CODESPELL_ARGS :=
 ifneq (,$(wildcard ./.ignore-words))
@@ -226,10 +226,11 @@ endif
 lint-whitespace::
 	@err=0; for f in $(drafts_source); do \
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
-	    $(trace) $$f -s nl ! echo "$$f has no newline on the last line"; err=1; \
+	    $(trace) "$$f" -s nl ! echo "$$f has no newline on the last line"; err=1; \
 	  fi; \
-	  if grep -n $$' \r*$$' "$$f"; then \
-	    $(trace) $$f -s ws ! echo "$$f contains trailing whitespace"; err=1; \
+	  if ! $(trace) "$$f" -s ws ! grep -n $$' \r*$$' "$$f"; then \
+	    $(if $(TRACE_FILE),echo "$${f%.*} ws $$f contains trailing whitespace" >>$(TRACE_FILE);) \
+	    echo "$$f contains trailing whitespace"; err=1; \
 	  fi; \
 	done; [ "$$err" -eq 0 ] || ! echo "*** Run 'make fix-lint' to automatically fix some errors" 1>&2
 
@@ -242,7 +243,7 @@ lint-default-branch::
 lint-docname::
 	@err=(); for f in $(drafts_source); do \
 	  if [ "$${f#draft-}" != "$$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
-	    $(trace) $$f -s lint-docname ! echo "$$f does not contain its own name ($${f%.*}-latest)"; err=1; \
+	    $(trace) "$$f" -s lint-docname ! echo "$$f does not contain its own name ($${f%.*}-latest)"; err=1; \
 	  fi; \
 	done; [ "$${#err}" -eq 0 ] || ! echo "*** Correct the name of drafts in docname or similar fields" 1>&2
 
