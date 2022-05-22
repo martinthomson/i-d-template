@@ -10,7 +10,12 @@ else
 fi
 
 if [[ -z "$TRACE_FILE" ]]; then
-    exec "$@"
+    if [[ "$1" != "!" ]]; then
+        exec "$@"
+    fi
+    shift
+    "$@"
+    exec test "$?" -ne 0
 fi
 
 tmp=$(mktemp)
