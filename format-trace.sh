@@ -26,7 +26,7 @@ cut -f1 -d' ' "$trace" | sort | uniq | while read f; do
             failed=$j
         fi
     done <"$tmp"
-    if ! "$failed"; then
+    if [[ -z  "$failed" ]]; then
         echo "✅ $f"
         echo
     fi
