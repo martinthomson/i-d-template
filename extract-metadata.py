@@ -7,12 +7,23 @@ import sys
 import xml
 import xml.sax
 import yaml
-
+import toml
 
 def extract_md(filename):
     try:
         with open(filename, "r") as fh:
-            return next(yaml.safe_load_all(fh))
+            section_header = fh.readline().strip()
+            if (section_header == r'%%%'):
+                header_data = ""
+                for line in fh:
+                    if line.strip() == r"%%%":
+                        break
+                    header_data += line
+                return toml.loads(header_data)
+            elif (section_header == r'---'):
+                return next(yaml.safe_load_all(fh))
+            else:
+                raise Exception("Unexpected file section header at top of file \"{0}\": expected `\%\%\%` or `---` ".format(section_header))
     except IOError:
         return {}
     except yaml.YAMLError:
