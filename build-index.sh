@@ -194,7 +194,7 @@ function list_dir() {
 
         tr_i
         src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
-        title=$("${libdir}/extract-metadata.py" "$src" abbrev)
+        title=$("${libdir}/extract-metadata.py" "$src" title)
         td "$(a "$(reldot "$dir")/${file}.html" "${title}" html "$file")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
