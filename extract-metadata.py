@@ -28,6 +28,8 @@ def extract_md(filename):
         return {}
     except yaml.YAMLError:
         return {}
+    except toml.TomlDecodeError:
+        return {}
 
 
 def extract_xml(filename):
