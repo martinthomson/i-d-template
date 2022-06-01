@@ -127,10 +127,10 @@ these, I set `GOPATH=~/gocode`.
 
 ## Other tools
 
-If you wish to build GitHub Pages, you will also need to install the `toml` Python package:
+If you wish to build GitHub Pages, you will also need to install the Python packages `yaml` (for kramdown-rfc Markdown) and/or `toml` (for mmark Markdown):
 
 ```sh
-$ pip3 install --user toml
+$ pip3 install --user toml yaml
 ```
 
 Some other helpful tools are listed in `config.mk`.
