@@ -402,12 +402,15 @@ figcaption, caption {
   /* Auto-collapse boilerplate. */
   #status-of-memo p, #copyright p {
     margin: -2px 0;
-    max-height: 0; transition: max-height 2s ease, margin 0.5s ease;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease;
     overflow: hidden;
   }
   #status-of-memo:hover p, #copyright:hover p,
   #status-of-memo h2:target ~ p, #copyright h2:target ~ p {
-    margin: 0.5em 0; max-height: 500px; overflow: auto;
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
   }
   pre, svg {
     display: inline-block;
