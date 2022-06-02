@@ -96,7 +96,6 @@ on the first line of the file:
 
 * `mmark` files must start with '%%%'
 
-
 ### kramdown-rfc
 
 [`kramdown-rfc`](https://github.com/cabo/kramdown-rfc) requires
@@ -128,8 +127,13 @@ these, I set `GOPATH=~/gocode`.
 
 ## Other tools
 
-Some other helpful tools are listed in `config.mk`.
+If you wish to build GitHub Pages, you will also need to install the Python packages `yaml` (for kramdown-rfc Markdown) and/or `toml` (for mmark Markdown):
 
+```sh
+$ pip3 install --user toml yaml
+```
+
+Some other helpful tools are listed in `config.mk`.
 
 # Update
 
