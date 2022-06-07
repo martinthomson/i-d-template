@@ -206,17 +206,20 @@ function list_dir() {
     if [[ "${#files[@]}" -eq 0 ]]; then
         return
     fi
-    table_i "$2" "$default_branch"
+    branch="$2"
+    table_i "$branch" "$default_branch"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
         file=$(basename "$file" .txt)
 
         tr_i
-        src=$(git ls-tree --name-only "$dir" -- "$file".md "$file".xml 2>/dev/null | head -1)
-        if [[ -n "$src" ]]; then
-            tmp="$(mktemp "XXXXX.${src##*.}")"
+        src="${branch}:$(git ls-tree --name-only "$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
+        [[ -n "${src##*:}" ]] || \
+            src="origin/${branch}:$(git ls-tree --name-only "origin/$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
+        if [[ -n "${src##*:}" ]]; then
+            tmp="$(mktemp "/tmp/build-index$$-XXXXXX.${src##*.}")"
             tmpfiles+=("$tmp")
-            git show "$dir:$src" >"$tmp"
+            git show "$src" >"$tmp"
             src="$tmp"
         else
             # Fallback to the file in the current directory.
