@@ -98,10 +98,12 @@ if [[ "$format" = "html" ]]; then
     }
 elif [[ "$format" = "md" ]]; then
     function q() {
-        v="${1//[/\\[}"
-        v="${v//]/\\]}"
-        v="${v//(/\\(}"
-        echo "${v//)/\\)}"
+        v="$1"
+        shift
+        for c in "$@"; do
+            v="${v//${c}/\\${c}}"
+        done
+        echo "$v"
     }
     function w() {
         echo "$@"
@@ -116,8 +118,8 @@ elif [[ "$format" = "md" ]]; then
         url="$1"
         txt="$2"
         ttl="$4"
-        [[ -n "$ttl" ]] && ttl=" ($(q "$ttl"))"
-        echo "[$(q "$txt")]($(q "$url")$ttl)"
+        [[ -n "$ttl" ]] && ttl=" \"$(q "$ttl" '"')\""
+        echo "[$(q "$txt" "]")]($(q "$url" ")")$ttl)"
     }
     function td() {
         echo -n " $1 |"
