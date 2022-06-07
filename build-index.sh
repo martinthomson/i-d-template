@@ -103,9 +103,6 @@ elif [[ "$format" = "md" ]]; then
         v="${v//(/\\(}"
         echo "${v//)/\\)}"
     }
-    function qq() {
-        q '"'"$1"'"'
-    }
     function w() {
         echo "$@"
     }
@@ -119,7 +116,7 @@ elif [[ "$format" = "md" ]]; then
         url="$1"
         txt="$2"
         ttl="$4"
-        [[ -n "$ttl" ]] && ttl=" $(qq "$ttl")"
+        [[ -n "$ttl" ]] && ttl=" ($(q "$ttl"))"
         echo "[$(q "$txt")]($(q "$url")$ttl)"
     }
     function td() {
@@ -218,7 +215,7 @@ function list_dir() {
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" "txt $file" "$title (Text)")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" == "$default_branch" ]]; then
-            td $(a "https://datatracker.ietf.org/doc/${file}" datatracker "dt $file" "Datatracker for $file")
+            td "$(a "https://datatracker.ietf.org/doc/${file}" datatracker "dt $file" "Datatracker for $file")"
             diff=$(rfcdiff "$file" "$this_githubio")
             td "$(a "$diff" 'diff with last submission' "diff $file")"
             if [[ "${#files[@]}" -eq 1 ]]; then
