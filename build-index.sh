@@ -19,7 +19,7 @@ all_drafts=("$@")
 gh="https://github.com/${user}/${repo}"
 
 function rfcdiff() {
-    echo "https://www.ietf.org/rfcdiff?url1=${1}&amp;url2=${2}"
+    echo "https://www.ietf.org/rfcdiff?url1=${1}&url2=${2}"
 }
 
 function reldot() {
@@ -38,6 +38,13 @@ function githubcom() {
 
 if [[ "$format" = "html" ]]; then
     indent=''
+    function q() {
+        v="${1//&/&amp;}"
+        echo "${v//</&lt;}"
+    }
+    function qq() {
+        q '"'"$1"'"'
+    }
     function w() {
         echo -n "$indent";echo "$@"
     }
@@ -57,9 +64,9 @@ if [[ "$format" = "html" ]]; then
         txt="$2"
         cls="$3"
         ttl="$4"
-        [[ -n "$cls" ]] && cls=' class="'"$cls"'"'
-        [[ -n "$ttl" ]] && ttl=' title="'"$ttl"'"'
-        echo '<a href="'"$url"'"'"$cls$ttl"'>'"$txt"'</a>'
+        [[ -n "$cls" ]] && cls=" class=$(qq "$cls")"
+        [[ -n "$ttl" ]] && ttl=" title=$(qq "$ttl")"
+        echo "<a href=$(qq $url)$cls$ttl>$(q "$txt")</a>"
     }
 
     function td() {
@@ -75,7 +82,7 @@ if [[ "$format" = "html" ]]; then
         wo "</tr>"
     }
     function table_i() {
-        wi '<table id="branch-'"$1"'">'
+        wi "<table id=$(qq "branch-$1")>"
     }
     function table_o() {
         wo '</table>'
@@ -90,21 +97,30 @@ if [[ "$format" = "html" ]]; then
       e p "$@"
     }
 elif [[ "$format" = "md" ]]; then
+    function q() {
+        v="${1//[/\\[}"
+        v="${v//]/\\]}"
+        v="${v//(/\\(}"
+        echo "${v//)/\\)}"
+    }
+    function qq() {
+        q '"'"$1"'"'
+    }
     function w() {
         echo "$@"
     }
     function wi() {
-        true
+        :
     }
     function wo() {
-        true
+        :
     }
     function a() {
         url="$1"
         txt="$2"
         ttl="$4"
-        [[ -n "$ttl" ]] && ttl=' "'"${ttl}"'"'
-        echo "[$txt]($url $ttl)"
+        [[ -n "$ttl" ]] && ttl=" $(qq "$ttl")"
+        echo "[$(q "$txt")]($(q "$url")$ttl)"
     }
     function td() {
         echo -n " $1 |"
@@ -226,10 +242,10 @@ function list_dir() {
 
 branchlink="$gh"
 [[ "$branch" = "$default_branch" ]] || branchlink="${branchlink}/tree/${branch}"
-h1 "Editor's drafts for ${branch} branch of $(a "$branchlink" "${user}/${repo}")"
+h1 "Editor's drafts for $(q "$branch") branch of $(a "$branchlink" "${user}/${repo}")"
 p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests") in the $(a "${gh}" repo)."
 
-list_dir "${root}" $branch
+list_dir "${root}" "$branch"
 
 for dir in $(find "${root}" -mindepth 1 -type d \( -name '.*' -prune -o -print \)); do
     dir_branch="${dir#$root/}"
