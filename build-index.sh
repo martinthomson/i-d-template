@@ -202,7 +202,7 @@ function list_dir() {
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" "txt $file" "$title (Text)")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" == "$default_branch" ]]; then
-            td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' "dt $file" "Datatracker for $file")
+            td $(a "https://datatracker.ietf.org/doc/${file}" datatracker "dt $file" "Datatracker for $file")
             diff=$(rfcdiff "$file" "$this_githubio")
             td "$(a "$diff" 'diff with last submission' "diff $file")"
             if [[ "${#files[@]}" -eq 1 ]]; then
@@ -210,7 +210,7 @@ function list_dir() {
             else
                 label=$(issue_label "$file")
                 if [[ -n "$label" ]]; then
-                    td "$(a $(githubcom labels/$label) "issues $file")"
+                    td "$(a "$(githubcom labels/$label)" issues "issues $file")"
                 else
                     td ""
                 fi
