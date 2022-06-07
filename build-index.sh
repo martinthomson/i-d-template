@@ -103,7 +103,7 @@ elif [[ "$format" = "md" ]]; then
         url="$1"
         txt="$2"
         ttl="$4"
-        [[ -n "$ttl" ]] && ttl=" $ttl"
+        [[ -n "$ttl" ]] && ttl=' "'"${ttl}"'"'
         echo "[$txt]($url $ttl)"
     }
     function td() {
