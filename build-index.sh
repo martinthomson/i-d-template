@@ -199,6 +199,8 @@ if [[ "$format" = "html" ]]; then
     wi '<body>'
 fi
 
+tmpfiles=()
+trap 'rm -f "${tmpfiles[@]}"' EXIT
 function list_dir() {
     files=($(find "$1" -maxdepth 1 \( -name 'draft-*.txt' -o -name 'rfc*.txt' \) -print))
     if [[ "${#files[@]}" -eq 0 ]]; then
@@ -210,7 +212,16 @@ function list_dir() {
         file=$(basename "$file" .txt)
 
         tr_i
-        src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
+        src=$(git ls-tree --name-only "$dir" -- "$file".md "$file".xml 2>/dev/null | head -1)
+        if [[ -n "$src" ]]; then
+            tmp="$(mktemp "XXXXX.${src##*.}")"
+            tmpfiles+=("$tmp")
+            git show "$dir:$src" >"$tmp"
+            src="$tmp"
+        else
+            # Fallback to the file in the current directory.
+            src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
+        fi
         abbrev=$("${libdir}/extract-metadata.py" "$src" abbrev)
         title=$("${libdir}/extract-metadata.py" "$src" title)
         td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
