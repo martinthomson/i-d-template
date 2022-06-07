@@ -53,15 +53,13 @@ if [[ "$format" = "html" ]]; then
       w "<$1>$2</$1>"
     }
     function a() {
-        url=$1
-        text=$2
-        shift 2
-        if [ $# -gt 0 ]; then
-            cls=' class="'"$*"'"'
-        else
-            cls=''
-        fi
-        echo '<a href="'"$url"'"'"$cls"'>'"$text"'</a>'
+        url="$1"
+        txt="$2"
+        cls="$3"
+        ttl="$4"
+        [[ -n "$cls" ]] && cls=' class="'"$cls"'"'
+        [[ -n "$ttl" ]] && ttl=' title="'"$ttl"'"'
+        echo '<a href="'"$url"'"'"$cls$ttl"'>'"$txt"'</a>'
     }
 
     function td() {
@@ -102,7 +100,11 @@ elif [[ "$format" = "md" ]]; then
         true
     }
     function a() {
-        echo "[$2]($1)"
+        url="$1"
+        txt="$2"
+        ttl="$4"
+        [[ -n "$ttl" ]] && ttl=" $ttl"
+        echo "[$txt]($url $ttl)"
     }
     function td() {
         echo -n " $1 |"
@@ -194,27 +196,28 @@ function list_dir() {
 
         tr_i
         src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
-        title=$("${libdir}/extract-metadata.py" "$src" abbrev)
-        td "$(a "$(reldot "$dir")/${file}.html" "${title}" html "$file")"
-        td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
+        abbrev=$("${libdir}/extract-metadata.py" "$src" abbrev)
+        title=$("${libdir}/extract-metadata.py" "$src" title)
+        td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
+        td "$(a "$(reldot "$dir")/${file}.txt" "plain text" "txt $file" "$title (Text)")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")
         if [[ "$2" == "$default_branch" ]]; then
-            td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
+            td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' "dt $file" "Datatracker for $file")
             diff=$(rfcdiff "$file" "$this_githubio")
-            td "$(a "$diff" 'diff with last submission' diff "$file")"
+            td "$(a "$diff" 'diff with last submission' "diff $file")"
             if [[ "${#files[@]}" -eq 1 ]]; then
                 td ""
             else
                 label=$(issue_label "$file")
                 if [[ -n "$label" ]]; then
-                    td "$(a $(githubcom labels/$label) "issues")"
+                    td "$(a $(githubcom labels/$label) "issues $file")"
                 else
                     td ""
                 fi
             fi
         else
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
-            td "$(a "$diff" 'diff with '"$default_branch")"
+            td "$(a "$diff" 'diff with '"$default_branch" "diff $file")"
         fi
         tr_o
     done
@@ -237,10 +240,6 @@ done
 if [ "$format" = "html" ]; then
     wi '<script>'
     cat <<EOJS
-// @licstart
-//  Any copyright is dedicated to the Public Domain.
-//  http://creativecommons.org/publicdomain/zero/1.0/
-// @licend
 window.onload = function() {
   var referrer_branch = '$default_branch';
   // e.g., "https://github.com/user/repo/tree/$default_branch"
