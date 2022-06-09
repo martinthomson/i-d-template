@@ -27,7 +27,7 @@ free to do, but a user-based install is easier to manage without invoking
 
 Mac users might need to install [Homebrew](https://brew.sh) to get a version of
 [`make`](https://www.gnu.org/software/make/) that fully supports all of the template
-features.  Apple ships an old version of GNU make which can fail in in
+features.  Apple ships an old version of GNU make with XCode which can fail in
 mysterious ways.  Some effort has been made to avoid this bustage, so most
 features work fine, but no warranty is made if something breaks.
 
@@ -127,10 +127,11 @@ these, I set `GOPATH=~/gocode`.
 
 ## Other tools
 
-If you wish to build GitHub Pages, you will also need to install the Python packages `yaml` (for kramdown-rfc Markdown) and/or `toml` (for mmark Markdown):
+If you wish to build GitHub Pages, you will also need to install the Python packages
+`pyyaml` (for kramdown-rfc Markdown) and/or `toml` (for mmark Markdown):
 
 ```sh
-$ pip3 install --user toml yaml
+$ pip3 install --user toml pyyaml
 ```
 
 Some other helpful tools are listed in `config.mk`.
@@ -141,7 +142,7 @@ Once you have these tools installed, it's worth updating occasionally.  Here's a
 quick set of shortcuts for these tools.
 
 ```sh
-$ pip3 install --user --upgrade xml2rfc archive-repo
+$ pip3 install --user --upgrade xml2rfc archive-repo toml pyyaml
 $ gem uninstall --user-install -n ~/.local/bin kramdown-rfc net-http-persistent
 $ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
 $ go get -u github.com/mmarkdown/mmark@latest
