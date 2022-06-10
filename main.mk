@@ -37,6 +37,7 @@ VENVDIR ?= $(LIBDIR)/.venv
 REQUIREMENTS_TXT = $(LIBDIR)/requirements.txt $(wildcard requirements.txt)
 include $(LIBDIR)/venv.mk
 export PATH := $(VENV):$(PATH)
+export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
 
 # Now build .targets.mk, which contains details of draft versions.
 targets_file := .targets.mk
@@ -280,5 +281,4 @@ clean:: clean-deps
 	    $(uploads) $(draft_diffs)
 
 clean-deps: clean-venv
-	rm -rf $(LIBDIR)/.gems $(LIBDIR)/Gemfile.lock
-  
+	rm -rf $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock
