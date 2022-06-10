@@ -9,7 +9,7 @@ format="$1"
 root=$(realpath "${2:-.}")
 user="${4:-<user>}"
 repo="${5:-<repo>}"
-default_branch="${DEFAULT_BRANCH:-$($(dirname "$0")/default-branch.py)}"
+default_branch="${DEFAULT_BRANCH:-$("$(dirname "$0")/default-branch.py")}"
 branch="${3:-$default_branch}"
 libdir="${LIBDIR:-$(realpath $(dirname "$0"))}"
 shift 5
@@ -23,12 +23,12 @@ function rfcdiff() {
 }
 
 function reldot() {
-    [[ "$1" = "$root" ]] && echo '.' || echo "${1/$root\//}"
+    [[ "$1" = "$root" ]] && echo '.' || echo "${1/"$root"\//}"
 }
 
 function githubio() {
     d="${1%/}/"
-    echo "https://${user}.github.io/${repo}/${d#$default_branch/}${2}.txt"
+    echo "https://${user}.github.io/${repo}/${d#"$default_branch"/}${2}.txt"
 }
 
 function githubcom() {
