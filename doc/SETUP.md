@@ -2,8 +2,6 @@
 
 At a minimum, you need `make` and `python3` with `pip`.
 
-Occasionally, you will want to [Update](#update) these tools.
-
 
 ## PATH
 
@@ -57,31 +55,9 @@ $ curl https://bootstrap.pypa.io/get-pip.py | python
 ```
 
 
-## Markdown
+## mmark
 
-If you use markdown, you will also need to install `kramdown-rfc` or `mmark`.
-
-The template stuff tries to work out which of these you are working with based
-on the first line of the file:
-
-* `kramdown-rfc` files must start with '---'
-
-* `mmark` files must start with '%%%'
-
-### kramdown-rfc
-
-[`kramdown-rfc`](https://github.com/cabo/kramdown-rfc) requires
-[Ruby](https://www.ruby-lang.org/) and can be installed using the Ruby package
-manager, `gem`:
-
-```sh
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
-```
-
-Note: Installing net-http-persistent makes this a lot faster.
-
-
-### mmark
+If you use mmark for markdown (i.e., files starting with `%%%`), you will need to install it.
 
 [`mmark`](https://github.com/mmarkdown/mmark) requires
 [go](https://golang.org/), and that comes with its own complications.  This
@@ -96,15 +72,9 @@ You might want to set aside a directory for your go code other than the default,
 and find a directory that is on the path where you can install `mmark`.  For
 these, I set `GOPATH=~/gocode`.
 
-
-# Update
-
-Once you have these tools installed, it's worth updating occasionally.  Here's a
-quick set of shortcuts for these tools.
+Make sure to update them regularly:
 
 ```sh
-$ gem uninstall --user-install -n ~/.local/bin kramdown-rfc net-http-persistent
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
 $ go get -u github.com/mmarkdown/mmark@latest
 $ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
 ```
