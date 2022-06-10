@@ -80,7 +80,7 @@ NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST = | $(trace) $@ -s venue $(LIBDIR)/add-note.py
+MD_POST = | $(trace) $@ -s venue $(VENV)/python $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
 MD_POST += | $(trace) $@ -s v2v3 $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o /dev/stdout
 endif
