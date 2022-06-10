@@ -15,6 +15,12 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v2
 
+    - name: Cache venv
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: ${{ venv-${{ hashFiles('**/requirements.txt') }}
+
     - name: "Update Archive"
       uses: martinthomson/i-d-template@v1
       with:
