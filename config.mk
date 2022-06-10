@@ -48,6 +48,13 @@ XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
 # This is for people running macs
 SHELL := bash
 
+# Python venv configuration
+REQUIREMENTS_TXT = $(abspath $(LIBDIR)/requirements.txt $(wildcard requirements.txt))
+VENVDIR ?= $(abspath $(LIBDIR)/.venv)
+
+# Ruby bundle configuration (for kramdown-rfc)
+export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
+
 # For uploading draft "releases" to the datatracker.
 curl ?= curl -sS
 DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit

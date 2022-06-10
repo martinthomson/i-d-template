@@ -25,6 +25,7 @@ endif
 .IGNORE: auto_update
 auto_update:
 	$(UPDATE_COMMAND)
+	rm -f $(LIBDIR)/Gemfile.lock $(VENV)/$(MARKER)
 
 .PHONY: update
 update:  auto_update

@@ -95,8 +95,8 @@ ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
-$(LIBDIR)/Gemfile.lock:
-	bundle install --gemfile=$(LIBDIR)/Gemfile
+$(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
+	bundle install --gemfile=$<
 
 %.xml: %.md venv $(LIBDIR)/Gemfile.lock
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
