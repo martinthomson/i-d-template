@@ -55,6 +55,10 @@ SHELL := bash
 REQUIREMENTS_TXT = lib/requirements.txt
 VENVDIR = lib/.venv
 
+# Ruby bundy configuration
+export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
+export BUNDLE_PATH_RELATIVE_TO_CWD = true
+
 # For uploading draft "releases" to the datatracker.
 curl ?= curl -sS
 DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit

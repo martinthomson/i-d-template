@@ -275,5 +275,9 @@ clean:: clean-deps
 clean-deps: clean-venv
 	rm -rf lib/.gems lib/Gemfile.lock
 
+update-deps: venv
+	rm -rf lib/Gemfile.lock
+
+
 
 include lib/Makefile.venv
