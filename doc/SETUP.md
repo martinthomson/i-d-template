@@ -1,6 +1,6 @@
 # Installation and Setup
 
-At a minimum, you need `make` and `xml2rfc`.
+At a minimum, you need `make` and `python3` with `pip`.
 
 Occasionally, you will want to [Update](#update) these tools.
 
@@ -43,13 +43,11 @@ Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 to get `make`.
 
 
-## xml2rfc
+## Python and pip
 
-All systems require [xml2rfc](http://xml2rfc.tools.ietf.org/).  This
-requires [Python 3](https://www.python.org/).  Be sure not to get Python 2,
-which is no longer supported.  The easiest way to get `xml2rfc` is with
-[pip](https://pip.pypa.io/en/stable/installing/), which is either installed with
-python, or part of the `python3-pip` (sometimes `python-pip`) package on most
+All systems require [Python 3](https://www.python.org/). Be sure not to get Python 2, which is no
+longer supported. [`pip`](https://pip.pypa.io/en/stable/installing/) is also required, and is
+either installed with python, or part of the `python3-pip` (sometimes `python-pip`) package on most
 distributions.
 
 On some systems, you might need to install `pip` the hard way:
@@ -57,19 +55,6 @@ On some systems, you might need to install `pip` the hard way:
 ```sh
 $ curl https://bootstrap.pypa.io/get-pip.py | python
 ```
-
-Once pip is installed, you can install xml2rfc.
-
-
-```sh
-$ pip3 install --user xml2rfc
-```
-
-xml2rfc might need development versions of [libxml2](http://xmlsoft.org/) and
-[libxslt](http://xmlsoft.org/XSLT).  These packages are named `libxml2-dev` and
-`libxslt1-dev` (Debian, Ubuntu); `libxml2-devel` and `libxslt1-devel` (RedHat,
-Fedora); `libxml2-devel` and `libxslt-devel` (Cygwin); or `libxml2` and
-`libxslt` (Mac Homebrew).
 
 
 ## Archive-Repo
