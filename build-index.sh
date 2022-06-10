@@ -173,7 +173,7 @@ function issue_label() {
     fi
     for i in "${all_drafts[@]}"; do
         if [[ "${i%.*}" == "$file" ]]; then
-            label=$("${libdir}/extract-metadata.py" "$i" github-issue-label)
+            label=$("${VENV}/python ${libdir}/extract-metadata.py" "$i" github-issue-label)
             [[ -z "$disable_cache" ]] && issue_labels[file]="x$label"
             echo "$label"
             return
@@ -225,8 +225,8 @@ function list_dir() {
             # Fallback to the file in the current directory.
             src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
         fi
-        abbrev=$("${libdir}/extract-metadata.py" "$src" abbrev)
-        title=$("${libdir}/extract-metadata.py" "$src" title)
+        abbrev=$("${VENV}/python ${libdir}/extract-metadata.py" "$src" abbrev)
+        title=$("${VENV}/python ${libdir}/extract-metadata.py" "$src" title)
         td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" "txt $file" "$title (Text)")"
         this_githubio=$(githubio "$branch${dir#$root}" "$file")

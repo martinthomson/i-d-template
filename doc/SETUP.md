@@ -97,24 +97,12 @@ and find a directory that is on the path where you can install `mmark`.  For
 these, I set `GOPATH=~/gocode`.
 
 
-## Other tools
-
-If you wish to build GitHub Pages, you will also need to install the Python packages
-`pyyaml` (for kramdown-rfc Markdown) and/or `toml` (for mmark Markdown):
-
-```sh
-$ pip3 install --user toml pyyaml
-```
-
-Some other helpful tools are listed in `config.mk`.
-
 # Update
 
 Once you have these tools installed, it's worth updating occasionally.  Here's a
 quick set of shortcuts for these tools.
 
 ```sh
-$ pip3 install --user --upgrade xml2rfc archive-repo toml pyyaml
 $ gem uninstall --user-install -n ~/.local/bin kramdown-rfc net-http-persistent
 $ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
 $ go get -u github.com/mmarkdown/mmark@latest
