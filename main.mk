@@ -32,6 +32,12 @@ LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 
+# Virtual environments
+VENVDIR ?= $(LIBDIR)/.venv
+REQUIREMENTS_TXT = $(LIBDIR)/requirements.txt $(wildcard requirements.txt)
+include $(LIBDIR)/venv.mk
+export PATH := $(VENV):$(PATH)
+
 # Now build .targets.mk, which contains details of draft versions.
 targets_file := .targets.mk
 targets_drafts := TARGETS_DRAFTS := $(drafts)
@@ -53,8 +59,6 @@ $(targets_file): $(LIBDIR)/build-targets.sh
 	echo "$(targets_tags)" >>$@
 	$< $(drafts) >>$@
 include $(targets_file)
-
-export PYTHONPATH=$(VENV)
 
 # Now include the advanced stuff that can depend on draft information.
 include $(LIBDIR)/ghpages.mk
@@ -82,15 +86,18 @@ NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST = | $(trace) $@ -s venue $(VENV)/python $(LIBDIR)/add-note.py
+MD_POST = | $(trace) $@ -s venue python $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
-MD_POST += | $(trace) $@ -s v2v3 $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o /dev/stdout
+MD_POST += | $(trace) $@ -s v2v3 xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o /dev/stdout
 endif
 ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
-%.xml: %.md venv lib/Gemfile.lock
+$(LIBDIR)/Gemfile.lock:
+	bundle install --gemfile=$(LIBDIR)/Gemfile
+
+%.xml: %.md venv $(LIBDIR)/Gemfile.lock
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
@@ -111,7 +118,7 @@ ifdef REFCACHEDIR
 endif
 
 %.xml: %.org venv
-	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o $@
+	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 ifeq (true,$(USE_XSLT))
@@ -135,15 +142,15 @@ $(XSLTDIR):
 	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml venv
-	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
 else
 %.html: %.xml $(XML2RFC_CSS) venv
-	$(trace) $@ -s xml2rfc-html $(VENV)/xml2rfc $(xml2rfcargs) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
+	$(trace) $@ -s xml2rfc-html xml2rfc $(xml2rfcargs) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
 %.txt: %.xml venv
-	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
 endif
 
 %.pdf: %.txt
@@ -273,7 +280,4 @@ clean:: clean-deps
 	    $(uploads) $(draft_diffs)
 
 clean-deps: clean-venv
-	rm -rf lib/.gems
-
-
-include lib/Makefile.venv
+	rm -rf $(LIBDIR)/.gems $(LIBDIR)/Gemfile.lock
