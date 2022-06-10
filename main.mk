@@ -273,7 +273,7 @@ clean:: clean-deps
 	    $(uploads) $(draft_diffs)
 
 clean-deps: clean-venv
-	rm -rf lib/gems
+	rm -rf .gems
 
 
 include lib/Makefile.venv
