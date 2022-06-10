@@ -3,7 +3,6 @@
 # in the environment, or command line.
 
 # Mandatory:
-#   https://pypi.python.org/pypi/xml2rfc
 XML2RFC_RFC_BASE_URL := https://www.rfc-editor.org/rfc/
 XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
 XML2RFC_CSS := $(LIBDIR)/v3.css
@@ -48,8 +47,6 @@ XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
 
 # This is for people running macs
 SHELL := bash
-
-python ?= /usr/bin/env python3
 
 REQUIREMENTS_TXT = lib/requirements.txt
 
