@@ -13,6 +13,7 @@ export KRAMDOWN_NO_TARGETS
 KRAMDOWN_PERSISTENT := true
 export KRAMDOWN_PERSISTENT
 
+export VENV := $(VENV)
 export PATH := $(VENV):$(PATH)
 
 # If you are using markdown files use either kramdown-rfc or mmark
