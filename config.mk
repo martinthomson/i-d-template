@@ -51,6 +51,7 @@ XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
 # This is for people running macs
 SHELL := bash
 
+# Python venv configuration
 REQUIREMENTS_TXT = lib/requirements.txt
 VENVDIR = lib/.venv
 
