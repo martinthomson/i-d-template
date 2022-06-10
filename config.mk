@@ -15,7 +15,7 @@ export KRAMDOWN_PERSISTENT
 
 # If you are using markdown files use either kramdown-rfc or mmark
 #   https://github.com/cabo/kramdown-rfc
-kramdown-rfc ?= kramdown-rfc2629
+kramdown-rfc ?= bundle exec --gemfile=lib/Gemfile kramdown-rfc2629
 
 #  mmark (https://github.com/mmarkdown/mmark)
 mmark ?= mmark
@@ -76,3 +76,7 @@ ifneq (,$(shell mkdir -p $(KRAMDOWN_REFCACHEDIR)))
 $(info Created cache directory at $(KRAMDOWN_REFCACHEDIR))
 endif
 export KRAMDOWN_REFCACHEDIR
+
+# install ruby gems
+lib/Gemfile.lock:
+	bundle install --gemfile=lib/Gemfile

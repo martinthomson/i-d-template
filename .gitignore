@@ -8,3 +8,5 @@ draft-*
 issues.json
 pulls.json
 *.DS_Store
+Gemfile.lock
+.venv

@@ -90,7 +90,7 @@ ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
-%.xml: %.md venv
+%.xml: %.md venv lib/Gemfile.lock
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
