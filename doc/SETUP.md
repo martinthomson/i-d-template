@@ -47,7 +47,7 @@ All systems require [Python 3](https://www.python.org/). Be sure not to get
 Python 2 or anything older than Python 3.6, which are no longer supported.
 
 This tool uses [`pip`](https://pip.pypa.io/en/stable/installing/) and
-[`venv`](https://pypi.org/project/virtualenv/).  These might be installed with
+[`venv`](https://docs.python.org/3/library/venv.html).  These might be installed with
 python, but they can be part of separate packages (look for `python3-pip` and
 `python3-venv`).
 
