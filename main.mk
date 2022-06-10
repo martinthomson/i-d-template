@@ -54,6 +54,8 @@ $(targets_file): $(LIBDIR)/build-targets.sh
 	$< $(drafts) >>$@
 include $(targets_file)
 
+export PYTHONPATH=$(VENV)
+
 # Now include the advanced stuff that can depend on draft information.
 include $(LIBDIR)/ghpages.mk
 include $(LIBDIR)/archive.mk
