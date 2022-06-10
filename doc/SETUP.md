@@ -41,23 +41,21 @@ Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 to get `make`.
 
 
-## Python and pip
+## Python
 
-All systems require [Python 3](https://www.python.org/). Be sure not to get Python 2, which is no
-longer supported. [`pip`](https://pip.pypa.io/en/stable/installing/) is also required, and is
-either installed with python, or part of the `python3-pip` (sometimes `python-pip`) package on most
-distributions.
+All systems require [Python 3](https://www.python.org/). Be sure not to get
+Python 2 or anything older than Python 3.6, which are no longer supported.
 
-On some systems, you might need to install `pip` the hard way:
-
-```sh
-$ curl https://bootstrap.pypa.io/get-pip.py | python
-```
+This tool uses [`pip`](https://pip.pypa.io/en/stable/installing/) and
+[`venv`](https://docs.python.org/3/library/venv.html).  These might be installed with
+python, but they can be part of separate packages (look for `python3-pip` and
+`python3-venv`).
 
 
 ## mmark
 
-If you use mmark for markdown (i.e., files starting with `%%%`), you will need to install it.
+If you use mmark for markdown (i.e., files starting with `%%%`), you will need
+to install it.
 
 [`mmark`](https://github.com/mmarkdown/mmark) requires
 [go](https://golang.org/), and that comes with its own complications.  This

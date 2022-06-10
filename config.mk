@@ -6,19 +6,16 @@
 XML2RFC_RFC_BASE_URL := https://www.rfc-editor.org/rfc/
 XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
 XML2RFC_CSS := $(LIBDIR)/v3.css
-xml2rfcargs := -q -s 'Setting consensus="true" for IETF STD document' --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
+xml2rfcargs = -q -s 'Setting consensus="true" for IETF STD document' --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
 # Tell kramdown not to generate targets on references so the above takes effect.
 KRAMDOWN_NO_TARGETS := true
 export KRAMDOWN_NO_TARGETS
 KRAMDOWN_PERSISTENT := true
 export KRAMDOWN_PERSISTENT
 
-export VENV := $(VENV)
-export PATH := $(VENV):$(PATH)
-
 # If you are using markdown files use either kramdown-rfc or mmark
 #   https://github.com/cabo/kramdown-rfc
-kramdown-rfc ?= bundle exec --gemfile=lib/Gemfile kramdown-rfc2629
+kramdown-rfc ?= bundle exec --gemfile=$(LIBDIR)/Gemfile kramdown-rfc
 
 #  mmark (https://github.com/mmarkdown/mmark)
 mmark ?= mmark
@@ -85,7 +82,3 @@ ifneq (,$(shell mkdir -p $(KRAMDOWN_REFCACHEDIR)))
 $(info Created cache directory at $(KRAMDOWN_REFCACHEDIR))
 endif
 export KRAMDOWN_REFCACHEDIR
-
-# install ruby gems
-lib/Gemfile.lock:
-	bundle install --gemfile=lib/Gemfile
