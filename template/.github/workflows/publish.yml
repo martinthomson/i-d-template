@@ -17,12 +17,6 @@ jobs:
     - name: "Get Tag Annotations"
       run: git fetch -f origin ${{ github.ref }}:${{ github.ref }}
 
-    - name: Cache venv
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: ${{ venv-${{ hashFiles('**/requirements.txt') }}
-
     - name: "Cache Setup"
       id: cache-setup
       run: |
