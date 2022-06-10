@@ -281,3 +281,7 @@ clean:: clean-deps
 
 clean-deps: clean-venv
 	rm -rf $(LIBDIR)/.gems $(LIBDIR)/Gemfile.lock
+
+update-deps:
+	rm -rf $(LIBDIR)/Gemfile.lock
+	rm -rf $(VENV)/$(MARKER)
