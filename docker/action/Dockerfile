@@ -37,6 +37,7 @@ RUN set -e; \
       py3-yaml \
       python3 \
       ruby \
+      ruby-bundler \
       sed
 
 # See <https://github.com/Auswaschbar/alpine-localized-docker/blob/master/Dockerfile>
