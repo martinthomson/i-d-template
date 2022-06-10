@@ -54,7 +54,6 @@ VENVDIR ?= $(abspath $(LIBDIR)/.venv)
 
 # Ruby bundy configuration
 export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
-export BUNDLE_PATH_RELATIVE_TO_CWD = true
 
 # For uploading draft "releases" to the datatracker.
 curl ?= curl -sS
