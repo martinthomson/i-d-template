@@ -1,3 +1,3 @@
 ---
-BUNDLE_PATH: "../.gems"
+BUNDLE_PATH: ".gems"
 path_relative_to_cwd: true

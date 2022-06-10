@@ -52,6 +52,7 @@ XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
 SHELL := bash
 
 REQUIREMENTS_TXT = lib/requirements.txt
+VENVDIR = lib/.venv
 
 # For uploading draft "releases" to the datatracker.
 curl ?= curl -sS

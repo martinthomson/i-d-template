@@ -9,7 +9,5 @@
 /*-[0-9][0-9].xml
 .refcache
 .targets.mk
-.venv
-.gems
 archive.json
 report.xml
