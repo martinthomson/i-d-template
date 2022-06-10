@@ -32,6 +32,12 @@ LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 
+# Virtual environments
+VENVDIR ?= $(LIBDIR)/.venv
+REQUIREMENTS_TXT = $(LIBDIR)/requirements.txt $(wildcard requirements.txt)
+include $(LIBDIR)/venv.mk
+export PATH := $(VENV):$(PATH)
+
 # Now build .targets.mk, which contains details of draft versions.
 targets_file := .targets.mk
 targets_drafts := TARGETS_DRAFTS := $(drafts)
@@ -53,8 +59,6 @@ $(targets_file): $(LIBDIR)/build-targets.sh
 	echo "$(targets_tags)" >>$@
 	$< $(drafts) >>$@
 include $(targets_file)
-
-export PYTHONPATH=$(VENV)
 
 # Now include the advanced stuff that can depend on draft information.
 include $(LIBDIR)/ghpages.mk
@@ -90,7 +94,10 @@ ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
-%.xml: %.md venv lib/Gemfile.lock
+$(LIBDIR)/Gemfile.lock:
+	bundle install --gemfile=$(LIBDIR)/Gemfile
+
+%.xml: %.md venv $(LIBDIR)/Gemfile.lock
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
@@ -273,7 +280,5 @@ clean:: clean-deps
 	    $(uploads) $(draft_diffs)
 
 clean-deps: clean-venv
-	rm -rf lib/.gems lib/Gemfile.lock
-
-
-include lib/Makefile.venv
+	rm -rf $(LIBDIR)/.gems $(LIBDIR)/Gemfile.lock
+  
