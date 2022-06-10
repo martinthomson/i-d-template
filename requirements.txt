@@ -2,3 +2,4 @@ xml2rfc==3.12.10
 archive-repo==0.0.2
 toml
 pyyaml
+svgcheck
