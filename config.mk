@@ -13,6 +13,8 @@ export KRAMDOWN_NO_TARGETS
 KRAMDOWN_PERSISTENT := true
 export KRAMDOWN_PERSISTENT
 
+export PATH := $(VENV):$(PATH)
+
 # If you are using markdown files use either kramdown-rfc or mmark
 #   https://github.com/cabo/kramdown-rfc
 kramdown-rfc ?= bundle exec --gemfile=lib/Gemfile kramdown-rfc2629
