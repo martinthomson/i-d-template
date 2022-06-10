@@ -57,19 +57,6 @@ $ curl https://bootstrap.pypa.io/get-pip.py | python
 ```
 
 
-## Archive-Repo
-
-The archive-repo script is used by CI jobs and `make archive` to create an
-archival copy of GitHub issues and pull requests.  It is not needed for most
-local authoring.
-
-If you need it, it can be installed with pip, as above.
-
-```sh
-$ pip3 install --user archive-repo
-```
-
-
 ## Markdown
 
 If you use markdown, you will also need to install `kramdown-rfc` or `mmark`.
