@@ -265,11 +265,15 @@ fix-lint-default-branch:
 ## Cleanup
 COMMA := ,
 .PHONY: clean
-clean:: clean-venv
+clean:: clean-deps
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
+
+clean-deps: clean-venv
+	rm -rf lib/gems
+
 
 include lib/Makefile.venv
