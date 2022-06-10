@@ -6,7 +6,7 @@
 XML2RFC_RFC_BASE_URL := https://www.rfc-editor.org/rfc/
 XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
 XML2RFC_CSS := $(LIBDIR)/v3.css
-xml2rfc = -q -s 'Setting consensus="true" for IETF STD document' --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
+xml2rfcargs = -q -s 'Setting consensus="true" for IETF STD document' --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
 # Tell kramdown not to generate targets on references so the above takes effect.
 KRAMDOWN_NO_TARGETS := true
 export KRAMDOWN_NO_TARGETS
