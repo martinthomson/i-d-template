@@ -82,13 +82,13 @@ MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))),
 endif
 MD_POST = | $(trace) $@ -s venue $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
-MD_POST += | $(trace) $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
+MD_POST += | $(trace) $@ -s v2v3 $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o /dev/stdout
 endif
 ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
-%.xml: %.md
+%.xml: %.md venv
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
@@ -108,8 +108,8 @@ ifdef REFCACHEDIR
 	ln -s $< $@
 endif
 
-%.xml: %.org
-	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
+%.xml: %.org venv
+	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 ifeq (true,$(USE_XSLT))
@@ -132,16 +132,16 @@ $(XSLTDIR):
 %.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
 	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
-%.txt: %.cleanxml
-	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
+%.txt: %.cleanxml venv
+	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
 else
-%.html: %.xml $(XML2RFC_CSS)
-	$(trace) $@ -s xml2rfc-html $(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
+%.html: %.xml $(XML2RFC_CSS) venv
+	$(trace) $@ -s xml2rfc-html $(VENV)/xml2rfc $(xml2rfcargs) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
-%.txt: %.xml
-	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
+%.txt: %.xml venv
+	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
 endif
 
 %.pdf: %.txt
@@ -263,9 +263,11 @@ fix-lint-default-branch:
 ## Cleanup
 COMMA := ,
 .PHONY: clean
-clean::
+clean:: clean-venv
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
+
+include lib/Makefile.venv
