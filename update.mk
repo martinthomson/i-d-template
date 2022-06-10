@@ -20,14 +20,15 @@ ifeq (true, $(UPDATE_NEEDED))
 latest submit:: auto_update
 endif
 
-.PHONY: auto_update
+.PHONY: update auto_update update-deps
 .SILENT: auto_update
 .IGNORE: auto_update
-auto_update:
+auto_update: update-deps
 	$(UPDATE_COMMAND)
+
+update-deps:
 	rm -f $(LIBDIR)/Gemfile.lock $(VENV)/$(MARKER)
 
-.PHONY: update
 update:  auto_update
 	@[ ! -r circle.yml ] || \
 	  echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
