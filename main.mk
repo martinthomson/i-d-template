@@ -280,7 +280,7 @@ clean:: clean-deps
 	    $(uploads) $(draft_diffs)
 
 clean-deps: clean-venv
-	rm -rf $(BUNDLE_PATH)/.gems $(LIBDIR)/Gemfile.lock
+	rm -rf $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock
 
 update-deps:
 	rm -rf $(LIBDIR)/Gemfile.lock
