@@ -49,7 +49,7 @@ XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
 SHELL := bash
 
 # Python venv configuration
-REQUIREMENTS_TXT = $(abspath $(LIBDIR)/requirements.txt)
+REQUIREMENTS_TXT = $(abspath $(LIBDIR)/requirements.txt $(wildcard requirements.txt))
 VENVDIR ?= $(abspath $(LIBDIR)/.venv)
 
 # Ruby bundy configuration
