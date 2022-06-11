@@ -4,7 +4,7 @@
 
 set -e
 
-. $(dirname "$0")/wg-meta.sh
+. "$(dirname "$0")/wg-meta.sh"
 
 user="$1"
 repo="$2"
@@ -21,8 +21,6 @@ for d in "$@"; do
     w="${w%%-*}"
 
     if [[ "$w" == "$last_wg"  ]] || wgmeta "$w"; then
-        cmds=""
-        cmds="s/^ *group: .*/  group: $group_name/;"
         sed -i -e '1,/^---/ {
 s|^area: .*|area: "'"$wg_area"'"|
 s|^workgroup: .*|workgroup: "'"$wg_name"'"|

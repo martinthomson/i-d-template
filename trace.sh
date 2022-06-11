@@ -30,7 +30,7 @@ fi > >(tee -a "$tmp") 2> >(tee -a "$tmp" 1>&2)
 status="$?"
 echo "$file $stage $status" >>"$TRACE_FILE"
 if [[ "$status" -ne 0 ]]; then
-    tail -10 "$tmp" | while read line; do
+    tail -10 "$tmp" | while read -r line; do
         echo "$file $stage $line" >>"$TRACE_FILE"
     done
 fi

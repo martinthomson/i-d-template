@@ -11,7 +11,7 @@ echo
 
 tmp=$(mktemp)
 trap 'rm -f $tmp' EXIT
-cut -f1 -d' ' "$trace" | sort | uniq | while read f; do
+cut -f1 -d' ' "$trace" | sort | uniq | while read -r f; do
     failed=
     grep "^$f " "$trace" | cut -f2- -d' ' | sort | uniq >"$tmp"
     while read -r j s; do
