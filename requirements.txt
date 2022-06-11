@@ -3,3 +3,4 @@ archive-repo>=0.0.2
 toml
 pyyaml
 svgcheck
+rfc-tidy

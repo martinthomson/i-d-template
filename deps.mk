@@ -19,9 +19,11 @@ ifneq (true,$(CI))
 export VENV
 python := $(VENV)/python
 xml2rfc := $(VENV)/xml2rfc $(xml2rfcargs)
+rfc-tidy := $(VENV)/rfc-tidy
 else
-python := python3
-xml2rfc := xml2rfc $(xml2rfcargs)
+python ?= python3
+xml2rfc ?= xml2rfc $(xml2rfcargs)
+rfc-tidy ?= rfc-tidy
 endif
 
 # Ruby

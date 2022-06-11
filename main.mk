@@ -85,8 +85,8 @@ MD_POST = | $(trace) $@ -s venue $(python) $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
 MD_POST += | $(trace) $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
 endif
-ifneq (,$(XML_TIDY))
-MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
+ifeq (true,$(TIDY))
+MD_POST += | $(trace) $@ -s tidy $(rfc-tidy)
 endif
 
 %.xml: %.md $(DEPS_FILES)
