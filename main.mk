@@ -102,12 +102,6 @@ endif
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
 
-ifdef REFCACHEDIR
-%.xml: .refcache
-.refcache: $(REFCACHEDIR)
-	ln -s $< $@
-endif
-
 %.xml: %.org
 	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
