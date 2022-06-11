@@ -96,8 +96,9 @@ RUN set -e; \
       kramdown-rfc \
       net-http-persistent \
       ; \
-    mkdir -p $KRAMDOWN_REFCACHEDIR; \
-    kramdown-rfc-cache-subseries-bibxml || echo 'rfc-editor.org is down again'
+    mkdir -p $HOME/.cache/xml2rfc; \
+    KRAMDOWN_REFCACHEDIR=$HOME/.cache/xml2rfc kramdown-rfc-cache-subseries-bibxml \
+      || echo 'rfc-editor.org is down again'
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
