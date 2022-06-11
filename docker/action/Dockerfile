@@ -58,8 +58,7 @@ ENV SHELL=/bin/bash \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8 \
-    KRAMDOWN_PERSISTENT=t \
-    KRAMDOWN_REFCACHEDIR=/root/.cache/xml2rfc
+    KRAMDOWN_PERSISTENT=t
 
 RUN set -e; \
     install() { \
