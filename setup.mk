@@ -92,7 +92,7 @@ setup-note: $(LIBDIR)/setup-note.sh
 
 .github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml) venv
 	mkdir -p $(dir $@)
-	$(VENV)/python $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
+	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
 	git add $@
 
 .PHONY: setup-master

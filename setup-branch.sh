@@ -23,7 +23,6 @@ git -C "$tmp" rm -rfq .
 
 echo Creating .gitignore and initial files
 echo lib > "$tmp"/.gitignore
-echo venv >> "$tmp"/.gitignore
 echo .refcache >> "$tmp"/.gitignore
 for f in "$@"; do
     touch "$tmp"/"$f"

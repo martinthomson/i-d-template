@@ -26,9 +26,6 @@ endif
 auto_update: update-deps
 	$(UPDATE_COMMAND)
 
-update-deps:
-	rm -f $(LIBDIR)/Gemfile.lock $(VENV)/$(MARKER) package-lock.json
-
 update:  auto_update
 	@[ ! -r circle.yml ] || \
 	  echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.

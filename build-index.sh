@@ -11,8 +11,8 @@ user="${4:-<user>}"
 repo="${5:-<repo>}"
 default_branch="${DEFAULT_BRANCH:-$("$(dirname "$0")/default-branch.py")}"
 branch="${3:-$default_branch}"
-libdir="${LIBDIR:-$(realpath $(dirname "$0"))}"
-[[ -n "$VENV" ]] && python="${VENV}/python"
+libdir="${LIBDIR:-"$(realpath "$(dirname "$0")")"}"
+[[ -n "$PYTHONHOME" ]] && python="${python:-"${PYTHONHOME}/python"}"
 python="${python:-python3}"
 shift 5
 # Remaining arguments (now $@) are source files

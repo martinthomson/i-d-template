@@ -31,23 +31,7 @@ latest:: txt html
 LIBDIR ?= lib
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
-
-# Virtual environments
-VENVDIR ?= $(LIBDIR)/.venv
-REQUIREMENTS_TXT = $(LIBDIR)/requirements.txt $(wildcard requirements.txt)
-include $(LIBDIR)/venv.mk
-export PATH := $(VENV):$(PATH)
-export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
-.PHONY: deps
-deps:: venv $(LIBDIR)/Gemfile.lock
-$(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
-	bundle install --gemfile=$<
-
-ifneq (,$(wildcard package.json))
-deps:: package-lock.json
-package-lock.json: package.json
-	npm install
-endif
+include $(LIBDIR)/deps.mk
 
 # Now build .targets.mk, which contains details of draft versions.
 targets_file := .targets.mk
@@ -97,9 +81,9 @@ NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST = | $(trace) $@ -s venue $(VENV)/python $(LIBDIR)/add-note.py
+MD_POST = | $(trace) $@ -s venue $(python) $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
-MD_POST += | $(trace) $@ -s v2v3 $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o /dev/stdout
+MD_POST += | $(trace) $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
 endif
 ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
@@ -120,7 +104,7 @@ endif
 	fi && [ -e $@ ]
 
 %.xml: %.org deps
-	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o $@
+	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 ifeq (true,$(USE_XSLT))
@@ -144,15 +128,15 @@ $(XSLTDIR):
 	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml deps
-	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 else
 %.html: %.xml $(XML2RFC_CSS) deps
-	$(trace) $@ -s xml2rfc-html $(VENV)/xml2rfc $(xml2rfcargs) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
+	$(trace) $@ -s xml2rfc-html $(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
 %.txt: %.xml deps
-	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 endif
 
 %.pdf: %.txt
@@ -282,4 +266,4 @@ clean:: clean-deps
 	    $(uploads) $(draft_diffs)
 
 clean-deps: clean-venv
-	rm -rf $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock package-lock.json
+	-rm -rf $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock package-lock.json
