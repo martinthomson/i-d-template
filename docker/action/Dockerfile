@@ -94,10 +94,7 @@ RUN set -e; \
       ; \
    gem install --no-doc \
       kramdown-rfc \
-      net-http-persistent \
-      ; \
-    mkdir -p $KRAMDOWN_REFCACHEDIR; \
-    kramdown-rfc-cache-subseries-bibxml || echo 'rfc-editor.org is down again'
+      net-http-persistent
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
