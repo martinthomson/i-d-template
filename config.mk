@@ -15,7 +15,7 @@ export KRAMDOWN_PERSISTENT
 
 # If you are using markdown files use either kramdown-rfc or mmark
 #   https://github.com/cabo/kramdown-rfc
-kramdown-rfc ?= bundle exec --gemfile=$(LIBDIR)/Gemfile kramdown-rfc
+# kramdown-rfc := ...
 
 #  mmark (https://github.com/mmarkdown/mmark)
 mmark ?= mmark

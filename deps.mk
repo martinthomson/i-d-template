@@ -13,9 +13,10 @@ ifneq (,$(strip $(REQUIREMENTS_TXT)))
 include $(LIBDIR)/venv.mk
 deps:: venv
 export PATH := $(VENV):$(PATH)
-ifneq (true,$(CI))
 update-deps::
 	-rm -f $(VENV)/$(MARKER)
+endif
+ifneq (true,$(CI))
 export VENV
 python := $(VENV)/python
 xml2rfc := $(VENV)/xml2rfc $(xml2rfcargs)
@@ -23,16 +24,18 @@ else
 python := python3
 xml2rfc := xml2rfc $(xml2rfcargs)
 endif
-endif
 
 # Ruby
 ifneq (true,$(CI))
 export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
+kramdown-rfc ?= bundle exec --gemfile=$(LIBDIR)/Gemfile kramdown-rfc
 deps:: $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	bundle install --gemfile=$<
 update-deps::
 	-rm -f $(LIBDIR)/Gemfile.lock
+else
+kramdown-rfc ?= kramdown-rfc
 endif
 
 # Nodejs
