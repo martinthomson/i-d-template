@@ -89,7 +89,7 @@ ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
-%.xml: %.md deps
+%.xml: %.md $(DEPS_FILES)
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
@@ -103,7 +103,7 @@ endif
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
 
-%.xml: %.org deps
+%.xml: %.org $(DEPS_FILES)
 	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
@@ -127,15 +127,15 @@ $(XSLTDIR):
 %.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
 	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
-%.txt: %.cleanxml deps
+%.txt: %.cleanxml $(DEPS_FILES)
 	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 else
-%.html: %.xml $(XML2RFC_CSS) deps
+%.html: %.xml $(XML2RFC_CSS) $(DEPS_FILES)
 	$(trace) $@ -s xml2rfc-html $(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
-%.txt: %.xml deps
+%.txt: %.xml $(DEPS_FILES)
 	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 endif
 
@@ -265,5 +265,3 @@ clean:: clean-deps
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
 
-clean-deps: clean-venv
-	-rm -rf $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock package-lock.json

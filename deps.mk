@@ -1,7 +1,7 @@
 ## Installed dependencies
-.PHONY: deps update-deps
-deps::
-update-deps::
+DEPS_MARKER := .deps.txt
+DEPS_FILES :=
+.PHONY: deps clean-deps update-deps
 
 # Python
 VENVDIR ?= $(LIBDIR)/.venv
@@ -11,10 +11,9 @@ REQUIREMENTS_TXT += $(LIBDIR)/requirements.txt
 endif
 ifneq (,$(strip $(REQUIREMENTS_TXT)))
 include $(LIBDIR)/venv.mk
-deps:: venv
+DEPS_FILES += $(VENV)/$(MARKER)
 export PATH := $(VENV):$(PATH)
-update-deps::
-	-rm -f $(VENV)/$(MARKER)
+clean-deps:: clean-venv
 endif
 ifneq (true,$(CI))
 export VENV
@@ -29,11 +28,11 @@ endif
 ifneq (true,$(CI))
 export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
 kramdown-rfc ?= bundle exec --gemfile=$(LIBDIR)/Gemfile kramdown-rfc
-deps:: $(LIBDIR)/Gemfile.lock
+DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	bundle install --gemfile=$<
-update-deps::
-	-rm -f $(LIBDIR)/Gemfile.lock
+clean-deps::
+	-rm -rf $(BUNDLE_PATH)
 else
 kramdown-rfc ?= kramdown-rfc
 endif
@@ -41,10 +40,18 @@ endif
 # Nodejs
 ifneq (true,$(CI))
 ifneq (,$(wildcard package.json))
-deps:: package-lock.json
+DEPS_FILES += package-lock.json
 package-lock.json: package.json
 	npm install
+clean-deps::
+	-rm -rf package-lock.json
+endif
+endif
+
+# Link everything up
+$(DEPS_MARKER): $(DEPS_FILES)
+deps:: $(DEPS_FILES)
+	@touch $(DEPS_FILES)
 update-deps::
-	-rm -f package-lock.json
-endif
-endif
+	-rm -f $(DEPS_FILES)
+clean-deps:: update-deps
