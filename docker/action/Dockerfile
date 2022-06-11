@@ -37,6 +37,7 @@ RUN set -e; \
       py3-yaml \
       python3 \
       ruby \
+      ruby-bundler \
       sed
 
 # See <https://github.com/Auswaschbar/alpine-localized-docker/blob/master/Dockerfile>
@@ -57,8 +58,7 @@ ENV SHELL=/bin/bash \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8 \
-    KRAMDOWN_PERSISTENT=t \
-    KRAMDOWN_REFCACHEDIR=/root/.cache/xml2rfc
+    KRAMDOWN_PERSISTENT=t
 
 RUN set -e; \
     install() { \

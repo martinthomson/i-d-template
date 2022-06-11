@@ -27,7 +27,7 @@ auto_update: update-deps
 	$(UPDATE_COMMAND)
 
 update-deps:
-	rm -f $(LIBDIR)/Gemfile.lock $(VENV)/$(MARKER)
+	rm -f $(LIBDIR)/Gemfile.lock $(VENV)/$(MARKER) package-lock.json
 
 update:  auto_update
 	@[ ! -r circle.yml ] || \

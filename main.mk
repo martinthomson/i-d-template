@@ -38,6 +38,16 @@ REQUIREMENTS_TXT = $(LIBDIR)/requirements.txt $(wildcard requirements.txt)
 include $(LIBDIR)/venv.mk
 export PATH := $(VENV):$(PATH)
 export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
+.PHONY: deps
+deps:: venv $(LIBDIR)/Gemfile.lock
+$(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
+	bundle install --gemfile=$<
+
+ifneq (,$(wildcard package.json))
+deps:: package-lock.json
+package-lock.json: package.json
+	npm install
+endif
 
 # Now build .targets.mk, which contains details of draft versions.
 targets_file := .targets.mk
@@ -95,10 +105,7 @@ ifneq (,$(XML_TIDY))
 MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
 endif
 
-$(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
-	bundle install --gemfile=$<
-
-%.xml: %.md venv $(LIBDIR)/Gemfile.lock
+%.xml: %.md deps
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
@@ -112,13 +119,7 @@ $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
 
-ifdef REFCACHEDIR
-%.xml: .refcache
-.refcache: $(REFCACHEDIR)
-	ln -s $< $@
-endif
-
-%.xml: %.org venv
+%.xml: %.org deps
 	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(VENV)/xml2rfc $(xml2rfcargs) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
@@ -142,15 +143,15 @@ $(XSLTDIR):
 %.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
 	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
-%.txt: %.cleanxml venv
+%.txt: %.cleanxml deps
 	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
 else
-%.html: %.xml $(XML2RFC_CSS) venv
+%.html: %.xml $(XML2RFC_CSS) deps
 	$(trace) $@ -s xml2rfc-html $(VENV)/xml2rfc $(xml2rfcargs) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
-%.txt: %.xml venv
+%.txt: %.xml deps
 	$(trace) $@ -s xml2rfc-txt $(VENV)/xml2rfc $(xml2rfcargs) $< -o $@ --text --no-pagination
 endif
 
@@ -281,4 +282,4 @@ clean:: clean-deps
 	    $(uploads) $(draft_diffs)
 
 clean-deps: clean-venv
-	rm -rf $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock
+	rm -rf $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock package-lock.json

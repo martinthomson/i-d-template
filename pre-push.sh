@@ -2,7 +2,7 @@
 
 err=0
 tags=0
-while read local_ref local_sha remote_ref remote_sha; do
+while read -r local_ref local_sha remote_ref remote_sha; do
     if [[ "${local_ref#refs/tags/draft-}" != "${local_ref}" ]]; then
 	tag="${local_ref#refs/tags/}"
         if [[ -z "$(git for-each-ref --format '%(taggeremail)' "${local_ref}")" ]]; then
