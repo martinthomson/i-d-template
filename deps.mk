@@ -27,8 +27,15 @@ rfc-tidy ?= rfc-tidy
 endif
 
 # Ruby
-ifneq (true,$(CI))
 export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
+ifneq (,$(wildcard Gemfile))
+DEPS_FILES += Gemfile.lock
+Gemfile.lock: Gemfile
+	bundle install --gemfile=$<
+clean-deps::
+	-rm -rf $(BUNDLE_PATH)
+endif
+ifneq (true,$(CI))
 kramdown-rfc ?= bundle exec --gemfile=$(LIBDIR)/Gemfile kramdown-rfc
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
