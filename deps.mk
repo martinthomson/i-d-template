@@ -4,7 +4,7 @@ DEPS_FILES :=
 .PHONY: deps clean-deps update-deps
 
 # Python
-VENVDIR ?= $(LIBDIR)/.venv
+VENVDIR ?= $(abspath $(LIBDIR)/.venv)
 REQUIREMENTS_TXT := $(wildcard requirements.txt)
 ifneq (true,$(CI))
 REQUIREMENTS_TXT += $(LIBDIR)/requirements.txt

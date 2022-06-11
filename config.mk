@@ -2,20 +2,20 @@
 # All are assumed to be on the path, but you can override these
 # in the environment, or command line.
 
-# Mandatory:
+# xml2rfc (when running locally, this is installed in a virtualenv for you)
 XML2RFC_RFC_BASE_URL := https://www.rfc-editor.org/rfc/
 XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
 XML2RFC_CSS := $(LIBDIR)/v3.css
-xml2rfcargs = -q -s 'Setting consensus="true" for IETF STD document' --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
-# Tell kramdown not to generate targets on references so the above takes effect.
-KRAMDOWN_NO_TARGETS := true
-export KRAMDOWN_NO_TARGETS
-KRAMDOWN_PERSISTENT := true
-export KRAMDOWN_PERSISTENT
+xml2rfcargs := -q -s 'Setting consensus="true" for IETF STD document' \
+	       --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
 
 # If you are using markdown files use either kramdown-rfc or mmark
 #   https://github.com/cabo/kramdown-rfc
+# (when running locally, kramdown-rfc is installed for you)
 # kramdown-rfc := ...
+# Tell kramdown not to generate targets on references so the above takes effect.
+export KRAMDOWN_NO_TARGETS := true
+export KRAMDOWN_PERSISTENT := true
 
 #  mmark (https://github.com/mmarkdown/mmark)
 mmark ?= mmark
@@ -48,13 +48,6 @@ XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
 # This is for people running macs
 SHELL := bash
 
-# Python venv configuration
-REQUIREMENTS_TXT = $(abspath $(LIBDIR)/requirements.txt $(wildcard requirements.txt))
-VENVDIR ?= $(abspath $(LIBDIR)/.venv)
-
-# Ruby bundle configuration (for kramdown-rfc)
-export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
-
 # For uploading draft "releases" to the datatracker.
 curl ?= curl -sS
 DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit
@@ -77,7 +70,7 @@ else
 XML2RFC_REFCACHEDIR ?= $(KRAMDOWN_REFCACHEDIR)
 endif
 xml2rfcargs += --cache=$(XML2RFC_REFCACHEDIR)
-ifneq (,$(shell mkdir -p $(KRAMDOWN_REFCACHEDIR)))
+ifneq (,$(shell mkdir -p -v $(KRAMDOWN_REFCACHEDIR)))
 $(info Created cache directory at $(KRAMDOWN_REFCACHEDIR))
 endif
 export KRAMDOWN_REFCACHEDIR
