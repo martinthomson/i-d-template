@@ -41,7 +41,7 @@ DEPS_FILES :=
 .PHONY: deps clean-deps update-deps
 
 # Python
-VENVDIR ?= $(abspath $(LIBDIR)/.venv)
+VENVDIR ?= $(realpath $(LIBDIR))/.venv
 REQUIREMENTS_TXT := $(wildcard requirements.txt)
 ifneq (true,$(CI))
 REQUIREMENTS_TXT += $(LIBDIR)/requirements.txt
@@ -64,7 +64,7 @@ rfc-tidy ?= rfc-tidy
 endif
 
 # Ruby
-export BUNDLE_PATH ?= $(abspath $(LIBDIR)/.gems)
+export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
 ifneq (,$(wildcard Gemfile))
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
