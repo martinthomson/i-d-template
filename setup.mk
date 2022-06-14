@@ -106,7 +106,7 @@ setup-default-branch: setup-files README.md setup-gitignore setup-note
 .PHONY: setup-precommit
 setup-precommit: .git/hooks/pre-commit
 .git/hooks/pre-commit:
-	-ln -s ../../lib/pre-commit.sh $@
+	-ln -s ../../$(LIBDIR)/pre-commit.sh $@
 
 .PHONY: setup-ghpages
 setup-ghpages:

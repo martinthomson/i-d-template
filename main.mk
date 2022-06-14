@@ -29,6 +29,7 @@ latest:: txt html
 ## Modularity
 # Basic files (these can't rely on details from .targets.mk)
 LIBDIR ?= lib
+export LIBDIR
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/deps.mk
