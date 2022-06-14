@@ -36,7 +36,6 @@
 # The plan is to put tools on the path properly, but this might take some time
 # to refine.
 
-DEPS_MARKER := .deps.txt
 DEPS_FILES :=
 .PHONY: deps clean-deps update-deps
 
@@ -101,9 +100,7 @@ endif
 endif
 
 # Link everything up
-$(DEPS_MARKER): $(DEPS_FILES)
 deps:: $(DEPS_FILES)
-	@touch $(DEPS_FILES)
 update-deps::
 	-rm -f $(DEPS_FILES)
 clean-deps:: update-deps
