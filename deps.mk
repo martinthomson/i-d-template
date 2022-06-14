@@ -1,4 +1,41 @@
 ## Installed dependencies
+# This framework will automatically install build-time dependencies as a
+# prerequisite for build targets.  This installation uses local directors
+# (usually under lib/) to store all installed software.
+#
+# Some dependencies are defined in the framework and will always be installed.
+# This includes xml2rfc and kramdown-rfc.  Other dependencies are specific to a
+# particular project and will be driven from files that are in the project
+# repository.
+#
+# Currently, this supports three different package installation frameworks:
+# * pip for python, specified in requirements.txt
+# * gem for ruby, specified in Gemfile
+# * npm for nodejs, specified in package.json
+# Each system has its own format for specifying dependencies.  What you need to
+# know is that if you include any of the above files, you don't need to worry
+# about ensuring that these tools are available when a build runs.
+#
+# This also works in CI runs, with caching, so your builds won't run too slowly.
+# The prerequsites that are installed for all users are installed globally in a
+# CI docker image, which is faster, so there are some minor differences in how
+# CI and local runs operate.
+#
+# For python, if you have some extra tools, just add them to requirements.txt
+# and they will be installed into a venv or virtual environment.  Tools are
+# added to the path, so you should have no problem running them.
+#
+# For ruby, listing tools in a Gemfile will ensure that files are installed, but
+# you need to execute them with `bundle exec` rather than calling them from the
+# path.  You should add Gemfile.lock to your .gitignore file if you do this.
+#
+# For nodejs, new dependencies can be added to package.json (using `npm install
+# -s <package>`) and run with `npx`.  You should add package-lock.json and
+# node_modules/ to your .gitignore file if you do this.
+#
+# The plan is to put tools on the path properly, but this might take some time
+# to refine.
+
 DEPS_MARKER := .deps.txt
 DEPS_FILES :=
 .PHONY: deps clean-deps update-deps

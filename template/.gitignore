@@ -11,3 +11,6 @@
 .targets.mk
 archive.json
 report.xml
+Gemfile.lock
+package-lock.json
+node_modules
