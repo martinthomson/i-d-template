@@ -71,6 +71,9 @@ Gemfile.lock: Gemfile
 	bundle install --gemfile=$<
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
+ifeq (Gemfile.lock,$(wildcard $(BUNDLE_PATH) Gemfile.lock))
+$(warning Missing gems in '$(BUNDLE_PATH)', forcing reinstall$(shell touch Gemfile))
+endif
 endif
 ifneq (true,$(CI))
 kramdown-rfc ?= bundle exec --gemfile=$(LIBDIR)/Gemfile kramdown-rfc
@@ -79,6 +82,9 @@ $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	bundle install --gemfile=$<
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
+ifeq ($(LIBDIR)/Gemfile.lock,$(wildcard $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock))
+$(warning Missing gems in '$(BUNDLE_PATH)', forcing reinstall$(shell touch $(LIBDIR)/Gemfile))
+endif
 else
 kramdown-rfc ?= kramdown-rfc
 endif
