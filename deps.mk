@@ -64,6 +64,10 @@ endif
 
 # Ruby
 export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
+# Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
+# doesn't even match the current ruby version.
+export BUNDLE_BIN := $(BUNDLE_PATH)/bin
+export PATH := $(BUNDLE_BIN):$(PATH)
 ifneq (,$(wildcard Gemfile))
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
@@ -89,14 +93,13 @@ kramdown-rfc ?= kramdown-rfc
 endif
 
 # Nodejs
-ifneq (true,$(CI))
 ifneq (,$(wildcard package.json))
+export PATH := $(abspath node_modules/.bin):$(PATH)
 DEPS_FILES += package-lock.json
 package-lock.json: package.json
 	npm install
 clean-deps::
 	-rm -rf package-lock.json
-endif
 endif
 
 # Link everything up
