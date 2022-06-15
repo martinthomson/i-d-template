@@ -1,6 +1,5 @@
 .PHONY: all latest
 ifeq (,$(TRACE_FILE))
-
 SUMMARY_REPORT ?= $(GITHUB_STEP_SUMMARY)
 ifneq (,$(SUMMARY_REPORT))
 TRACE_FILE := $(shell mktemp)
@@ -18,9 +17,8 @@ all::
 	@$(call MAKE_TRACE,latest lint)
 else
 all:: latest lint
-endif
-
-endif # Summary
+endif # SUMMARY_REPORT
+endif # TRACE_FILE
 
 latest:: txt html
 

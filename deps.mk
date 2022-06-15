@@ -22,19 +22,16 @@
 # CI and local runs operate.
 #
 # For python, if you have some extra tools, just add them to requirements.txt
-# and they will be installed into a venv or virtual environment.  Tools are
-# added to the path, so you should have no problem running them.
+# and they will be installed into a venv or virtual environment.
 #
-# For ruby, listing tools in a Gemfile will ensure that files are installed, but
-# you need to execute them with `bundle exec` rather than calling them from the
-# path.  You should add Gemfile.lock to your .gitignore file if you do this.
+# For ruby, listing tools in a `Gemfile` will ensure that files are installed.
+# You should add `Gemfile.lock` to your .gitignore file if you do this.
 #
-# For nodejs, new dependencies can be added to package.json (using `npm install
-# -s <package>`) and run with `npx`.  You should add package-lock.json and
-# node_modules/ to your .gitignore file if you do this.
+# For nodejs, new dependencies can be added to `package.json`.  Use `npm install
+# -s <package>` to add files.  You should add `package-lock.json` and
+# `node_modules/` to your `.gitignore` file if you do this.
 #
-# The plan is to put tools on the path properly, but this might take some time
-# to refine.
+# Tools are added to the path, so you should have no problem running them.
 
 DEPS_FILES :=
 .PHONY: deps clean-deps update-deps
@@ -79,7 +76,6 @@ $(warning Missing gems in '$(BUNDLE_PATH)', forcing reinstall$(shell touch Gemfi
 endif
 endif
 ifneq (true,$(CI))
-kramdown-rfc ?= bundle exec --gemfile=$(LIBDIR)/Gemfile kramdown-rfc
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	bundle install --gemfile=$<
@@ -88,8 +84,6 @@ clean-deps::
 ifeq ($(LIBDIR)/Gemfile.lock,$(wildcard $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock))
 $(warning Missing gems in '$(BUNDLE_PATH)', forcing reinstall$(shell touch $(LIBDIR)/Gemfile))
 endif
-else
-kramdown-rfc ?= kramdown-rfc
 endif
 
 # Nodejs

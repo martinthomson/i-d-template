@@ -12,7 +12,7 @@ xml2rfcargs := -q -s 'Setting consensus="true" for IETF STD document' \
 # If you are using markdown files use either kramdown-rfc or mmark
 #   https://github.com/cabo/kramdown-rfc
 # (when running locally, kramdown-rfc is installed for you)
-# kramdown-rfc := ...
+kramdown-rfc ?= kramdown-rfc
 # Tell kramdown not to generate targets on references so the above takes effect.
 export KRAMDOWN_NO_TARGETS := true
 export KRAMDOWN_PERSISTENT := true
