@@ -70,9 +70,9 @@ export PATH := $(BUNDLE_BIN):$(PATH)
 ifneq (,$(wildcard Gemfile))
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
-	bundle install --gemfile=$<
+	bundle install --gemfile=$(realpath $<)
 update-deps:: Gemfile
-	bundle update --gemfile=$<
+	bundle update --gemfile=$(realpath $<)
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
 ifeq (Gemfile.lock,$(wildcard $(BUNDLE_PATH) Gemfile.lock))
@@ -82,9 +82,9 @@ endif
 ifneq (true,$(CI))
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
-	bundle install --gemfile=$<
+	bundle install --gemfile=$(realpath $<)
 update-deps:: $(LIBDIR)/Gemfile
-	bundle update --gemfile=$<
+	bundle update --gemfile=$(realpath $<)
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
 ifeq ($(LIBDIR)/Gemfile.lock,$(wildcard $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock))
