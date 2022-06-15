@@ -46,6 +46,8 @@ ifneq (,$(strip $(REQUIREMENTS_TXT)))
 include $(LIBDIR)/venv.mk
 DEPS_FILES += $(VENV)/$(MARKER)
 export PATH := $(VENV):$(PATH)
+update-deps::
+	pip install --upgrade --upgrade-strategy eager $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 clean-deps:: clean-venv
 endif
 ifneq (true,$(CI))
@@ -69,6 +71,8 @@ ifneq (,$(wildcard Gemfile))
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
 	bundle install --gemfile=$<
+update-deps:: Gemfile
+	bundle update --gemfile=$<
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
 ifeq (Gemfile.lock,$(wildcard $(BUNDLE_PATH) Gemfile.lock))
@@ -79,6 +83,8 @@ ifneq (true,$(CI))
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	bundle install --gemfile=$<
+update-deps:: $(LIBDIR)/Gemfile
+	bundle update --gemfile=$<
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
 ifeq ($(LIBDIR)/Gemfile.lock,$(wildcard $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock))
@@ -92,6 +98,8 @@ export PATH := $(abspath node_modules/.bin):$(PATH)
 DEPS_FILES += package-lock.json
 package-lock.json: package.json
 	npm install
+update-deps::
+	npm update --no-save --dev
 clean-deps::
 	-rm -rf package-lock.json
 endif
@@ -99,5 +107,5 @@ endif
 # Link everything up
 deps:: $(DEPS_FILES)
 update-deps::
+clean-deps::
 	-rm -f $(DEPS_FILES)
-clean-deps:: update-deps
