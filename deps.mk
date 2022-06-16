@@ -71,6 +71,7 @@ ifneq (,$(wildcard Gemfile))
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
 	bundle install --gemfile=$(realpath $<)
+	@touch $@
 update-deps:: Gemfile
 	bundle update --gemfile=$(realpath $<)
 clean-deps::
@@ -83,6 +84,7 @@ ifneq (true,$(CI))
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	bundle install --gemfile=$(realpath $<)
+	@touch $@
 update-deps:: $(LIBDIR)/Gemfile
 	bundle update --gemfile=$(realpath $<)
 clean-deps::
