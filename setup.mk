@@ -74,7 +74,7 @@ endif # INDEX_FORMAT
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
 ifndef SUBMODULE
-	echo $(LIBDIR)/ >>$<
+	echo /$(LIBDIR) >>$<
 endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
