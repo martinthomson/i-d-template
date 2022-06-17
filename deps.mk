@@ -62,7 +62,7 @@ rfc-tidy ?= rfc-tidy
 endif
 
 # Ruby
-ifeq (true,$(NO_RUBY))
+ifneq (true,$(NO_RUBY))
 export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
 # Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
 # doesn't even match the current ruby version.

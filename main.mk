@@ -32,28 +32,6 @@ include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
 include $(LIBDIR)/deps.mk
 
-# Now build .targets.mk, which contains details of draft versions.
-targets_file := .targets.mk
-targets_drafts := TARGETS_DRAFTS := $(drafts)
-targets_tags := TARGETS_TAGS := $(drafts_tags)
-
-ifeq (,$(DISABLE_TARGETS_UPDATE))
-# Note that $(shell ) folds multiple lines into one, which is OK here.
-ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
-$(warning Forcing rebuild of $(targets_file))
-# Force an update of .targets.mk by setting a double-colon rule with no
-# prerequisites if the set of drafts or tags it contains is out of date.
-.PHONY: $(targets_file)
-endif
-endif # DISABLE_TARGETS_UPDATE
-
-.SILENT: $(targets_file)
-$(targets_file): $(LIBDIR)/build-targets.sh
-	echo "$(targets_drafts)" >$@
-	echo "$(targets_tags)" >>$@
-	$< $(drafts) >>$@
-include $(targets_file)
-
 # Now include the advanced stuff that can depend on draft information.
 include $(LIBDIR)/ghpages.mk
 include $(LIBDIR)/archive.mk
@@ -256,11 +234,13 @@ fix-lint-default-branch:
 
 ## Cleanup
 COMMA := ,
-.PHONY: clean
-clean:: clean-deps
+.PHONY: clean clean-all
+clean::
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
+clean-all:: clean clean-deps
 
+include $(LIBDIR)/targets.mk

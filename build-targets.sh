@@ -8,6 +8,7 @@
 
 drafts=("$@")
 candidates=$((${#drafts[@]} * 5))
+olddir="${OLDDIR:-old}"
 
 next() {
     printf "${1%-*}-%2.2d" $((1${1##*-} - 99))
@@ -61,19 +62,22 @@ build_target() {
     fi
 
     target="${target_name}.${source_file##*.}"
+    printf ".INTERMEDIATE: ${olddir}/${target}\n"
     if [ "$tag" == HEAD ]; then
-        printf "${target}: ${source_file}\n"
+        printf "${olddir}/${target}: ${source_file} | ${olddir}\n"
         printf "\t"
         print_sed cat sed "${subst[@]}"
         printf " \$< >\$@\n"
     else
-        printf ".INTERMEDIATE: ${target}\n"
-        printf "${target}:\n"
+        printf "${olddir}/${target}: | ${olddir}\n"
         printf "\tgit show \"$tag:$source_file\""
 	print_sed '' ' | sed' "${subst[@]}"
         printf " >\$@\n"
     fi
 }
+
+printf "${olddir}:\n"
+printf "\t@mkdir -p \$@\n"
 
 for draft in "${drafts[@]%.*}"; do
     if [ "${draft#draft-}" != "$draft" ]; then
@@ -97,7 +101,7 @@ for draft in "${drafts[@]%.*}"; do
 
         if [ "${#tags[@]}" -gt 0 ]; then
             # Write out a diff target
-            printf "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt\n"
+            printf "diff-${draft}.html: ${olddir}/${tags[$((${#tags[@]}-1))]}.txt ${olddir}/${next_draft}.txt\n"
             printf "\t-\$(iddiff) -c \$^ > \$@\n"
         fi
     fi
