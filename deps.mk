@@ -69,30 +69,24 @@ export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
 export BUNDLE_BIN := $(BUNDLE_PATH)/bin
 export PATH := $(BUNDLE_BIN):$(PATH)
 ifneq (,$(wildcard Gemfile))
-DEPS_FILES += Gemfile.lock
-Gemfile.lock: Gemfile
+DEPS_FILES += $(BUNDLE_PATH)/.i-d-template.opt
+$(BUNDLE_PATH)/.i-d-template.opt: Gemfile
 	bundle install --gemfile=$(realpath $<)
 	@touch $@
 update-deps:: Gemfile
 	bundle update --gemfile=$(realpath $<)
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
-ifeq (Gemfile.lock,$(wildcard $(BUNDLE_PATH) Gemfile.lock))
-$(warning Missing gems in '$(BUNDLE_PATH)', forcing reinstall$(shell touch Gemfile))
-endif
 endif
 ifneq (true,$(CI))
-DEPS_FILES += $(LIBDIR)/Gemfile.lock
-$(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
+DEPS_FILES += $(BUNDLE_PATH)/.i-d-template.core
+$(BUNDLE_PATH)/.i-d-template.core: $(LIBDIR)/Gemfile
 	bundle install --gemfile=$(realpath $<)
 	@touch $@
 update-deps:: $(LIBDIR)/Gemfile
 	bundle update --gemfile=$(realpath $<)
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
-ifeq ($(LIBDIR)/Gemfile.lock,$(wildcard $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock))
-$(warning Missing gems in '$(BUNDLE_PATH)', forcing reinstall$(shell touch $(LIBDIR)/Gemfile))
-endif
 endif
 endif
 
