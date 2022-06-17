@@ -13,7 +13,7 @@ ifneq (1,$(words $(GIT_ORIG)))
 $(error If you are just starting out, please commit something before starting)
 endif
 
-LATEST_WARNING := $(strip $(foreach draft,$(drafts_source),\
+LATEST_WARNING := $(strip $(foreach draft,$(filter-out rfc%,$(drafts_source)),\
   $(shell grep -q $(basename $(draft))-latest $(draft) || \
       echo $(draft) should include a name of $(basename $(draft))-latest)))
 ifneq (,$(LATEST_WARNING))
