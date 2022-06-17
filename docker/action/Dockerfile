@@ -52,7 +52,8 @@ RUN set -e; \
     make install; \
     cd /; \
     rm -rf "$tmp"; \
-    apk del .locale_build
+    apk del .locale_build; \
+    mkdir -p /i-d-template
 
 ENV SHELL=/bin/bash \
     LANG=en_US.UTF-8 \
@@ -60,6 +61,7 @@ ENV SHELL=/bin/bash \
     LC_ALL=en_US.UTF-8 \
     KRAMDOWN_PERSISTENT=t
 
+COPY ["entrypoint.sh", "requirements.txt", "Gemfile", "/"]
 RUN set -e; \
     install() { \
        file="$1"; url="$2"; sha="$3"; \
@@ -79,22 +81,12 @@ RUN set -e; \
     set -x; \
     tool_install idnits bfda9518d5b4e8a682f2e6f34a449c2d3ea74539 \
       0ea07cdc982645a85622ccc2636a4d21cde54137269f0e8a204e1bc519b48818; \
-    tool_install rfcdiff 1649bbe969670838d8c91d7ba4eafbc5dd96b477 \
-      631fd8aa310c8c1a7efde148441efd96fb33e2b04aef6e326473904d15087760; \
     mmark="2.2.10"; \
     install mmark \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
       54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff; \
     npm install -g aasvg; \
-    pip3 install --compile --no-cache-dir \
-      archive-repo \
-      pyang \
-      svgcheck \
-      xml2rfc \
-      ; \
-   gem install --no-doc \
-      kramdown-rfc \
-      net-http-persistent
+    pip3 install --compile --no-cache-dir --disable-pip-version-check -r /requirements.txt; \
+    bundle install --system --gemfile=/Gemfile
 
-COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
