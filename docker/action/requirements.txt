@@ -1,5 +1,6 @@
 archive-repo
 iddiff
+pyang
 pyyaml
 rfc-tidy
 svgcheck
