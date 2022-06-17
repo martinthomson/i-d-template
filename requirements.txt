@@ -1,7 +1,1 @@
-archive-repo
-iddiff
-pyyaml
-rfc-tidy
-svgcheck
-toml
-xml2rfc
+docker/action/requirements.txt
