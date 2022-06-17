@@ -10,7 +10,7 @@
 /.refcache
 /.targets.mk
 /node_modules/
-/old/
+/versioned/
 Gemfile.lock
 archive.json
 package-lock.json

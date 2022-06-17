@@ -1,12 +1,10 @@
 targets_file := .targets.mk
-# Where old versions of files are stored.
-OLDDIR ?= old
 targets_drafts := \# $(drafts)
 targets_tags := \# $(drafts_tags)
 $(targets_file): $(LIBDIR)/build-targets.sh
 	@echo "$(targets_drafts)" >$@
 	@echo "$(targets_tags)" >>$@
-	OLDDIR="$(OLDDIR)" $< $(drafts) >>$@
+	VERSIONED="$(VERSIONED)" $< $(drafts) >>$@
 .PHONY: extra
 extra: $(targets_file)
 
@@ -25,7 +23,7 @@ endif
 include $(targets_file)
 else
 # Backup rule for building files when we don't find the rule.
-diff-% $(OLDDIR)/%::
+diff-% $(VERSIONED)/%::
 	@$(MAKE) $(targets_file)
 	@$(MAKE) EXTRA_TARGETS=true $@
 endif

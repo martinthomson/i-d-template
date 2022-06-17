@@ -62,6 +62,9 @@ codespell ?= codespell
 # Tracing tool
 trace := $(LIBDIR)/trace.sh
 
+# Where versioned copies are stored.
+VERSIONED ?= versioned
+
 # Setup a shared cache for xml2rfc and kramdown-rfc
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
