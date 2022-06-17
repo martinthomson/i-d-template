@@ -29,9 +29,9 @@ auto_update: update-deps
 update:  auto_update
 	@[ ! -r circle.yml ] || \
 	  echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
-	@for i in Makefile .travis.yml .circleci/config.yml; do \
-	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
-	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
+	@for i in Makefile $(addprefix .github/workflows/,archive.yml ghpages.yml publish.yml update.yml) .circleci/config.yml; do \
+	  [ -f $$i -a -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
+	    echo $$i is out of date, check $(LIBDIR)/template/$$i for changes.; \
 	done
 	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile && \
 	  [ `git status --porcelain Makefile | grep '^[A-Z]' | wc -l` -eq 0 ] || git $(CI_AUTHOR) commit -m "Update Makefile" Makefile
