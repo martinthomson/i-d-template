@@ -1,24 +1,28 @@
 # Installation and Setup
 
-At a minimum, you need `make` and `python3` with `pip`.
+At a minimum, you need a POSIX environment with:
+
+* `make`
+* `python3` with `pip` and `venv`
+* `ruby` with `gem` and `bundler`
+
+When running locally, a python virtual environment is created under `lib/` and
+necessary tools are installed there.  Similarly, ruby installations are created
+under `lib/`.  The tools that are used can be updated with `make update-deps`.
 
 
-## PATH
+## General
 
-These instructions assume that you want to install to `~/.local/bin` and that
-that directory is on `$PATH`.  You can replace this path with your preferred
-binary location throughout.
+These tools work well natively on Linux and Mac.
 
-To put this directory on your path, modify `~/.profile` as follows:
+Windows users should use [the Windows Subsystem for
+Linux](https://docs.microsoft.com/en-us/windows/wsl/install) with a Linux
+distribution like Ubuntu (`wsl --install -d Ubuntu`) to get `make`.
 
-```
-$ mkdir -p ~/.local/bin
-$ echo 'export PATH="${PATH}:~/.local/bin"' >> ~/.profile
-```
-
-Note that most of these tools default to installing for all users, which you are
-free to do, but a user-based install is easier to manage without invoking
-`sudo` and the like.
+It is also possible to use [cygwin](https://cygwin.org/) or an
+[MSYS2](https://www.msys2.org/)-based system (like
+[Mozilla-Build](https://wiki.mozilla.org/MozillaBuild)), but these can be more
+difficult to setup and use.
 
 
 ## make
@@ -33,29 +37,40 @@ features work fine, but no warranty is made if something breaks.
 brew install make
 ```
 
-Note that this installs as `gmake`.  Follow the instructions to add this as
+Note that this might install as `gmake`.  Follow the instructions to add this as
 `make` to your path.
-
-Windows users will need to use [Cygwin](http://cygwin.org/) or [the Windows
-Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-to get `make`.
 
 
 ## Python
 
-All systems require [Python 3](https://www.python.org/). Be sure not to get
+You need to provide [Python 3](https://www.python.org/). Be sure not to get
 Python 2 or anything older than Python 3.6, which are no longer supported.
 
-This tool uses [`pip`](https://pip.pypa.io/en/stable/installing/) and
-[`venv`](https://docs.python.org/3/library/venv.html).  These might be installed with
-python, but they can be part of separate packages (look for `python3-pip` and
-`python3-venv`).
+[`pip`](https://pip.pypa.io/en/stable/installing/) and
+[`venv`](https://docs.python.org/3/library/venv.html) are used to install
+packages into a temporary virtual environment.  These are sometimes installed
+with python, but some Linux distributions can put these in separate packages
+(look for `python3-pip` and `python3-venv`).
+
+
+## Ruby
+
+By default, [Ruby](https://www.ruby-lang.org/) is used to install
+[kramdown-rfc](https://github.com/cabo/kramdown-rfc).  This is installed using
+the Ruby [bundler](https://bundler.io/), which also requires the Ruby package
+tool, [`gem`](https://rubygems.org/).
+
+The `gem` tool is often installed alongside Ruby, but you might need to install
+bundler separately (look for `ruby-bundler`).
+
+You can pass `NO_RUBY=true` as an argument to `make` or export an environment
+variable with that value to disable this feature.
 
 
 ## mmark
 
 If you use mmark for markdown (i.e., files starting with `%%%`), you will need
-to install it.
+to install and manage an mmark installation.
 
 [`mmark`](https://github.com/mmarkdown/mmark) requires
 [go](https://golang.org/), and that comes with its own complications.  This

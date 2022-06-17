@@ -90,7 +90,7 @@ setup-note: $(LIBDIR)/setup-note.sh
 	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts_source) >.note.xml
 	if [ -s .note.xml ]; then git add .note.xml; fi
 
-.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml) venv
+.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml) $(DEPS_FILES)
 	mkdir -p $(dir $@)
 	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
 	git add $@

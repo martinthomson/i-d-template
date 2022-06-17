@@ -62,6 +62,7 @@ rfc-tidy ?= rfc-tidy
 endif
 
 # Ruby
+ifeq (true,$(NO_RUBY))
 export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
 # Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
 # doesn't even match the current ruby version.
@@ -91,6 +92,7 @@ clean-deps::
 	-rm -rf $(BUNDLE_PATH)
 ifeq ($(LIBDIR)/Gemfile.lock,$(wildcard $(BUNDLE_PATH) $(LIBDIR)/Gemfile.lock))
 $(warning Missing gems in '$(BUNDLE_PATH)', forcing reinstall$(shell touch $(LIBDIR)/Gemfile))
+endif
 endif
 endif
 

@@ -33,8 +33,8 @@ xsltproc ?= xsltproc
 idnits ?= idnits
 
 # For diff:
-#   https://www.ietf.org/rfcdiff
-rfcdiff ?= rfcdiff
+#   https://github.com/ietf-tools/iddiff
+iddiff ?= iddiff
 
 # For generating PDF:
 #   https://www.gnu.org/software/enscript/

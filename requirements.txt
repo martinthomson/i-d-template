@@ -1,6 +1,7 @@
-xml2rfc
 archive-repo
-toml
+iddiff
 pyyaml
-svgcheck
 rfc-tidy
+svgcheck
+toml
+xml2rfc

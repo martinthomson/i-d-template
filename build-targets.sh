@@ -98,7 +98,7 @@ for draft in "${drafts[@]%.*}"; do
         if [ "${#tags[@]}" -gt 0 ]; then
             # Write out a diff target
             printf "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt\n"
-            printf "\t-\$(rfcdiff) --html --stdout \$^ > \$@\n"
+            printf "\t-\$(iddiff) -c \$^ > \$@\n"
         fi
     fi
 done
