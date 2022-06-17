@@ -63,7 +63,7 @@ def step_impl(context):
     with cd(context.working_dir):
         for md in glob("draft-*.md"):
             if not "-00.md" in md:
-                upload_file = "." + md.replace(".md", "-00.upload")
+                upload_file = "versioned/." + md.replace(".md", "-00.upload")
                 assert os.path.isfile(upload_file)
 
 
