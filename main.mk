@@ -1,4 +1,3 @@
-.PHONY: all latest
 ifeq (,$(TRACE_FILE))
 SUMMARY_REPORT ?= $(GITHUB_STEP_SUMMARY)
 ifneq (,$(SUMMARY_REPORT))
@@ -22,6 +21,9 @@ endif # TRACE_FILE
 
 latest:: txt html
 
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables
+.PHONY: all latest
+.SUFFIXES:
 .DELETE_ON_ERROR:
 
 ## Modularity
