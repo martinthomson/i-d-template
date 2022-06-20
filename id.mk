@@ -104,3 +104,5 @@ ifeq (,$(DEFAULT_BRANCH))
 DEFAULT_BRANCH := $(shell BRANCH_FETCH=$(BRANCH_FETCH) $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
 endif
 export DEFAULT_BRANCH
+
+PID := $(shell echo $$$$)

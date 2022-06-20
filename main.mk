@@ -21,9 +21,10 @@ endif # TRACE_FILE
 
 latest:: txt html
 
-MAKEFLAGS += --no-builtin-rules --no-builtin-variables
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables --no-print-directory
 .PHONY: all latest
 .SUFFIXES:
+.SUFFIXES: .xml: .md .org .cleanxml .html .txt .pdf .upload
 .DELETE_ON_ERROR:
 
 ## Modularity

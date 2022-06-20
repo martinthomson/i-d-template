@@ -41,7 +41,7 @@ PUSH_GHPAGES ?= false
 fetch-ghpages:
 	git fetch -qf origin gh-pages:gh-pages
 
-GHPAGES_ROOT := /tmp/ghpages$(shell echo $$$$)
+GHPAGES_ROOT := /tmp/ghpages$(PID)
 ghpages: $(GHPAGES_ROOT)
 $(GHPAGES_ROOT): fetch-ghpages
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \

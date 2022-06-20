@@ -12,12 +12,12 @@ NOW = $$(date '+%s')
 ifeq (,$(FETCH_HEAD))
 UPDATE_NEEDED = false
 else
-UPDATE_INTERVAL = 1209600 # 2 weeks
+UPDATE_INTERVAL := 1209600 # 2 weeks
 UPDATE_NEEDED = $(shell [ $$(($(NOW) - $(call last_modified,$(FETCH_HEAD)))) -gt $(UPDATE_INTERVAL) ] && echo true)
 endif
 
-ifeq (true, $(UPDATE_NEEDED))
-latest submit:: auto_update
+ifeq (true,$(UPDATE_NEEDED))
+latest next:: auto_update
 endif
 
 .PHONY: update auto_update update-deps
