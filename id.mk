@@ -1,6 +1,6 @@
 ## Identify drafts, types and versions
 
-drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
+drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9\-]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
 drafts += $(sort $(basename $(wildcard $(foreach ext,xml org md,rfc[0-9]*.$(ext)))))
 
 ifeq (0,$(words $(drafts)))
