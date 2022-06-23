@@ -6,6 +6,8 @@ RUN set -e; \
     echo http://dl-cdn.alpinelinux.org/alpine/v$(cat /etc/alpine-release | cut -d'.' -f1,2)/main >> /etc/apk/repositories; \
     echo http://dl-cdn.alpinelinux.org/alpine/v$(cat /etc/alpine-release | cut -d'.' -f1,2)/community >> /etc/apk/repositories; \
     apk add --no-cache \
+      build-base \
+      python3-dev \
       bash \
       ca-certificates \
       coreutils \
@@ -16,6 +18,8 @@ RUN set -e; \
       libintl \
       libxml2-utils \
       libxslt \
+      libxslt-dev \
+      libxml2-dev \
       make \
       nodejs \
       npm \
