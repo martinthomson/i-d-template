@@ -96,7 +96,7 @@ line.
 
 ![GitHub UI showing a comment icon on a focused line](images/comment-line.png)
 
-You can also dragging the mouse to select more than one line.
+You can also drag the mouse to select more than one line.
 
 Add comments on any changes, then select the "Review changes" button (near the
 top) where you can add some general comments about the changes and choose
@@ -109,11 +109,12 @@ Anyone can review a pull request this way, but reviews from editors that
 
 
 ## Updating Pull Requests
+<a id=update>
 
 During review, people might ask for small changes.
 
-This can be in the form of suggestions.  This is a great feature, please [read
-about
+This can be in the form of suggestions.  This is a great feature, so please
+[read about
 it](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request#applying-a-suggested-change)
 and use it.  Authors of pull requests and (usually) editors of documents can
 accept suggestions through the GitHub UI.
@@ -161,7 +162,8 @@ This will show in the interface with a big X mark, something like this:
 
 ![GitHub UI showing a broken pull request](images/pr-broken.png)
 
-This pull request should not be merged until the build problem is fixed.
+This pull request should not be merged until the build problem is fixed, usually
+by [updating the pull request](#update).
 
 
 ### Merge Conflicts
