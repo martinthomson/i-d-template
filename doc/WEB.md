@@ -13,8 +13,8 @@ If you are looking for how to submit a draft using the GitHub UI, see [the
 instructions for draft submission](SUBMITTING.md#github-release).
 
 
-<a id=create>
 ## Creating Pull Requests
+<a id=create>
 
 This is the preferred method for managing the content of files, especially when
 you are working with others.
@@ -73,8 +73,8 @@ contains more information on creating pull requests.
 Creating a pull request
 
 
-<a id=review>
 ## Reviewing Pull Requests
+<a id=review>
 
 Editors of documents (those with commit access to the repository) can review and
 merge pull requests.  Simply go to the pull requests on the repository
@@ -136,8 +136,8 @@ branch](images/pr-update.png)
 Use the "Commit changes" button to confirm any changes.
 
 
-<a id=merge>
 ## Merging Pull Requests
+<a id=merge>
 
 Once a pull request is ready, it can be merged by an editor by hitting the
 "Merge pull request" button.
@@ -147,8 +147,8 @@ Once a pull request is ready, it can be merged by an editor by hitting the
 Then hit the "Confirm merge" button.
 
 
-<a id=busted>
 ## Dealing with Problems
+<a id=busted>
 
 Sometimes this process doesn't go smoothly.
 
