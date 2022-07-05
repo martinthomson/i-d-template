@@ -217,7 +217,8 @@ function list_dir() {
         [[ -n "${src##*:}" ]] || \
             src="origin/${branch}:$(git ls-tree --name-only "origin/$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
         if [[ -n "${src##*:}" ]]; then
-            tmp="$(mktemp "/tmp/build-index$$-XXXXXX.${src##*.}")"
+            #tmp="$(mktemp "/tmp/build-index$$-XXXXXX.${src##*.}")"
+            tmp="$(mktemp "/tmp/build-index$$-XXXXXX").${src##*.}"
             tmpfiles+=("$tmp")
             git show "$src" >"$tmp"
             src="$tmp"
