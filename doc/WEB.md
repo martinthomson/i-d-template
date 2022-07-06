@@ -7,7 +7,8 @@ To make a change, you [create a pull request](#create), [review it](#review),
 and [merge it](#merge).
 
 This page walks through that process in some detail, in case you aren't familiar
-with the process.  It also covers some [troubleshooting practices](#busted).
+with the process.  It also covers some [troubleshooting practices](#busted) for
+when things (inevitably) go wrong.
 
 If you are looking for how to submit a draft using the GitHub UI, see [the
 instructions for draft submission](SUBMITTING.md#github-release).
@@ -16,8 +17,8 @@ instructions for draft submission](SUBMITTING.md#github-release).
 
 ## Creating Pull Requests
 
-This is the preferred method for managing the content of files, especially when
-you are working with others.
+This is the best way to manage the content of files, especially when you are
+working with others.
 
 Navigate to the draft you want to edit by first going to the
 repository (`https://github.com/_$user_/_$repo_`) and selecting the draft
@@ -36,7 +37,8 @@ main or authoritative copy.
 Make your changes.
 
 At the bottom of that page, there is a form where you commit your changes.
-Enter some notes about the changes you made.
+Enter some notes about the changes you made.  Make [the commit message
+good](http://whatthecommit.com/).
 
 If you have commit access, then you will be presented with an option to create a branch:
 
@@ -45,8 +47,9 @@ If you have commit access, then you will be presented with an option to create a
 Choose this option and maybe select a helpful name for the branch.
 
 If you don't have commit access, then this option does not appear.  GitHub will
-always create a branch for you.  These are named `patch-1`, `patch-2`, etc...,
-which isn't very descriptive, but that doesn't matter.
+create a branch for you.  These are given useless names like `patch-1`,
+`patch-2`, etc..., which isn't very descriptive, but that doesn't matter too
+much.
 
 Hit the "Propose changes" button.
 
