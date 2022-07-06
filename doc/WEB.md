@@ -76,12 +76,13 @@ contains more information on creating pull requests.
 
 Editors of documents (those with commit access to the repository) can review and
 merge pull requests.  Simply go to the pull requests on the repository
-(`https://github.com/_$user_/_$repo_`/pulls) and select the pull request.  This
+(`https://github.com/_$user_/_$repo_/pulls`) and select the pull request.  This
 will initially present a page that shows the summary provided by the author of
 the pull request and any discussion that has occurred.
 
-Here you can add new comments, but the most useful information is what changes
-are made.  To see these, look for the "Files changed" tab, shown here:
+Here you can add new comments, but the most useful information is the changes
+that are being proposed.  To see these, look for the "Files changed" tab, shown
+here:
 
 ![GitHub UI highlighting where the changed files are](images/pr-files.png)
 
@@ -94,7 +95,13 @@ line.
 
 ![GitHub UI showing a comment icon on a focused line](images/comment-line.png)
 
-You can also drag the mouse to select more than one line.
+You can also drag the mouse to select more than one line, something you will
+want to do if you are making suggestions.
+
+Suggestions are great.  Suggestions make it a lot easier to act on comments. See
+[GitHub
+documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request)
+for generating reviews, which explains how to make suggestions.
 
 Add comments on any changes, then select the "Review changes" button (near the
 top) where you can add some general comments about the changes and choose
@@ -111,23 +118,26 @@ Anyone can review a pull request this way, but reviews from editors that
 
 During review, people might ask for small changes.
 
-This can be in the form of suggestions.  This is a great feature, so please
-[read about
+Requests for changes can be accompanied by suggestions.  This is a great
+feature, so please [read about
 it](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request#applying-a-suggested-change)
 and use it.  Authors of pull requests and (usually) editors of documents can
-accept suggestions through the GitHub UI.
+accept suggestions through the GitHub UI.  If you have multiple suggestions, try
+adding them to a batch rather than merging them one by one.
 
 If comments require changes that aren't in the form of suggestions, you can edit
 the file by navigating to the "Files changed" tab and hitting the ellipsis
-button for the changed file.
+button for the changed file, this shows an option to edit the file.
 
 ![GitHub UI showing the choice to edit a file in a pull
 request](images/pr-edit.png)
 
-You will then be presented with the same edit interface.
+You will then be presented with the same edit interface as before.
 
 After making changes to a pull request, do not create a new branch for the
-changes, just commit directly to the branch.
+changes, just commit directly to the branch.  (Well, you *can* but then you will
+be creating a pull request against a pull request and that usually leads to
+someone getting confused and bad things happening, so maybe avoid that.)
 
 ![GitHub UI showing the choice to commit directly to the pull request
 branch](images/pr-update.png)
@@ -197,8 +207,9 @@ branch
 >>>>>>> main
 ```
 
-Replace all of this with the content you wish to include for each conflict.  Use
-the "Prev" and "Next" buttons to quickly find multiple conflicts.
+Replace all of this - including the "<<<" or ">>>" lines - with the content you
+wish to include for each conflict.  Use the "Prev" and "Next" buttons to quickly
+find multiple conflicts.
 
 Usually this means understanding what has happened to make the two sets of lines
 diverge, which can be tricky, so take some care.
@@ -213,8 +224,8 @@ build correctly, it can be reverted.
 
 ![GitHub UI showing an option to revert a pull request](images/pr-revert.png)
 
-This opens a page where you can create a pull request that reverses the changes.
-Create, review, and merge this pull request as normal.
+The "Revert" button opens a page where you can create a pull request that
+reverses the changes.  Create, review, and merge this pull request as normal.
 
 
 ## Linking to Issues
