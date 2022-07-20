@@ -12,27 +12,26 @@ NOW = $$(date '+%s')
 ifeq (,$(FETCH_HEAD))
 UPDATE_NEEDED = false
 else
-UPDATE_INTERVAL = 1209600 # 2 weeks
+UPDATE_INTERVAL := 1209600 # 2 weeks
 UPDATE_NEEDED = $(shell [ $$(($(NOW) - $(call last_modified,$(FETCH_HEAD)))) -gt $(UPDATE_INTERVAL) ] && echo true)
 endif
 
-ifeq (true, $(UPDATE_NEEDED))
-latest submit:: auto_update
+ifeq (true,$(UPDATE_NEEDED))
+latest next:: auto_update
 endif
 
-.PHONY: auto_update
+.PHONY: update auto_update update-deps
 .SILENT: auto_update
 .IGNORE: auto_update
-auto_update:
+auto_update: update-deps
 	$(UPDATE_COMMAND)
 
-.PHONY: update
 update:  auto_update
 	@[ ! -r circle.yml ] || \
 	  echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
-	@for i in Makefile .travis.yml .circleci/config.yml; do \
-	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
-	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
+	@for i in Makefile $(addprefix .github/workflows/,archive.yml ghpages.yml publish.yml update.yml) .circleci/config.yml; do \
+	  [ -f $$i -a -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
+	    echo $$i is out of date, check $(LIBDIR)/template/$$i for changes.; \
 	done
 	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile && \
 	  [ `git status --porcelain Makefile | grep '^[A-Z]' | wc -l` -eq 0 ] || git $(CI_AUTHOR) commit -m "Update Makefile" Makefile
@@ -86,7 +85,7 @@ endif
 	fi
 
 update-venue: $(drafts_source)
-	./lib/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $^
+	./$(LIBDIR)/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $^
 	@if ! git diff --quiet @ $^; then \
 	  git add $^; \
 	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \

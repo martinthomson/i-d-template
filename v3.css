@@ -602,6 +602,11 @@ hr {
   font-weight: bold;
   min-width: 7em;
 }
+.references dt:target::before {
+  content: "⇒";
+  width: 15px;
+  margin: 0 10px 0 -25px;
+}
 .references dd {
   margin-left: 8em;
   overflow: auto;

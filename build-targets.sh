@@ -8,6 +8,7 @@
 
 drafts=("$@")
 candidates=$((${#drafts[@]} * 5))
+versioned="${VERSIONED:-versioned}"
 
 next() {
     printf "${1%-*}-%2.2d" $((1${1##*-} - 99))
@@ -61,25 +62,28 @@ build_target() {
     fi
 
     target="${target_name}.${source_file##*.}"
+    printf ".INTERMEDIATE: ${versioned}/${target}\n"
     if [ "$tag" == HEAD ]; then
-        printf "${target}: ${source_file}\n"
+        printf "${versioned}/${target}: ${source_file} | ${versioned}\n"
         printf "\t"
         print_sed cat sed "${subst[@]}"
         printf " \$< >\$@\n"
     else
-        printf ".INTERMEDIATE: ${target}\n"
-        printf "${target}:\n"
+        printf "${versioned}/${target}: | ${versioned}\n"
         printf "\tgit show \"$tag:$source_file\""
-	print_sed '' ' | sed' "${subst[@]}"
+        print_sed '' ' | sed' "${subst[@]}"
         printf " >\$@\n"
     fi
 }
+
+printf "${versioned}:\n"
+printf "\t@mkdir -p \$@\n"
 
 for draft in "${drafts[@]%.*}"; do
     if [ "${draft#draft-}" != "$draft" ]; then
         tags=($(git tag --list "${draft}-[0-9][0-9]"))
     else
-	tags=($(git tag --list "$draft"))
+        tags=($(git tag --list "$draft"))
     fi
     for i in "${tags[@]}"; do
         build_target "$i" "$i"
@@ -97,8 +101,8 @@ for draft in "${drafts[@]%.*}"; do
 
         if [ "${#tags[@]}" -gt 0 ]; then
             # Write out a diff target
-            printf "diff-${draft}.html: ${tags[$((${#tags[@]}-1))]}.txt ${next_draft}.txt\n"
-            printf "\t-\$(rfcdiff) --html --stdout \$^ > \$@\n"
+            printf "diff-${draft}.html: ${versioned}/${tags[$((${#tags[@]}-1))]}.txt ${versioned}/${next_draft}.txt\n"
+            printf "\t-\$(iddiff) -c \$^ > \$@\n"
         fi
     fi
 done

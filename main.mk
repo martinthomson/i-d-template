@@ -1,6 +1,4 @@
-.PHONY: all latest
 ifeq (,$(TRACE_FILE))
-
 SUMMARY_REPORT ?= $(GITHUB_STEP_SUMMARY)
 ifneq (,$(SUMMARY_REPORT))
 TRACE_FILE := $(shell mktemp)
@@ -18,41 +16,23 @@ all::
 	@$(call MAKE_TRACE,latest lint)
 else
 all:: latest lint
-endif
-
-endif # Summary
+endif # SUMMARY_REPORT
+endif # TRACE_FILE
 
 latest:: txt html
 
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables --no-print-directory
+.PHONY: all latest
+.SUFFIXES:
 .DELETE_ON_ERROR:
 
 ## Modularity
 # Basic files (these can't rely on details from .targets.mk)
 LIBDIR ?= lib
+export LIBDIR
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
-
-# Now build .targets.mk, which contains details of draft versions.
-targets_file := .targets.mk
-targets_drafts := TARGETS_DRAFTS := $(drafts)
-targets_tags := TARGETS_TAGS := $(drafts_tags)
-
-ifeq (,$(DISABLE_TARGETS_UPDATE))
-# Note that $(shell ) folds multiple lines into one, which is OK here.
-ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
-$(warning Forcing rebuild of $(targets_file))
-# Force an update of .targets.mk by setting a double-colon rule with no
-# prerequisites if the set of drafts or tags it contains is out of date.
-.PHONY: $(targets_file)
-endif
-endif # DISABLE_TARGETS_UPDATE
-
-.SILENT: $(targets_file)
-$(targets_file): $(LIBDIR)/build-targets.sh
-	echo "$(targets_drafts)" >$@
-	echo "$(targets_tags)" >>$@
-	$< $(drafts) >>$@
-include $(targets_file)
+include $(LIBDIR)/deps.mk
 
 # Now include the advanced stuff that can depend on draft information.
 include $(LIBDIR)/ghpages.mk
@@ -80,15 +60,15 @@ NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST = | $(trace) $@ -s venue $(LIBDIR)/add-note.py
+MD_POST = | $(trace) $@ -s venue $(python) $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
 MD_POST += | $(trace) $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
 endif
-ifneq (,$(XML_TIDY))
-MD_POST += | $(trace) $@ -s tidy $(XML_TIDY)
+ifeq (true,$(TIDY))
+MD_POST += | $(trace) $@ -s tidy $(rfc-tidy)
 endif
 
-%.xml: %.md
+%.xml: %.md $(DEPS_FILES)
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
@@ -102,7 +82,7 @@ endif
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
 
-%.xml: %.org
+%.xml: %.org $(DEPS_FILES)
 	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
@@ -126,15 +106,15 @@ $(XSLTDIR):
 %.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
 	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
-%.txt: %.cleanxml
+%.txt: %.cleanxml $(DEPS_FILES)
 	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 else
-%.html: %.xml $(XML2RFC_CSS)
+%.html: %.xml $(XML2RFC_CSS) $(DEPS_FILES)
 	$(trace) $@ -s xml2rfc-html $(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
-%.txt: %.xml
+%.txt: %.xml $(DEPS_FILES)
 	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 endif
 
@@ -256,10 +236,13 @@ fix-lint-default-branch:
 
 ## Cleanup
 COMMA := ,
-.PHONY: clean
+.PHONY: clean clean-all
 clean::
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
+clean-all:: clean clean-deps
+
+include $(LIBDIR)/targets.mk

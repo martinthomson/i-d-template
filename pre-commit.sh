@@ -34,4 +34,4 @@ for f in "${files[@]}"; do
 done
 [ "${#files[@]}" -eq 0 ] && exit 0
 
-"$MAKE" "${htmlfiles[@]}" lint "drafts=${tmpfiles[*]%.*}" DISABLE_TARGETS_UPDATE=true
+"$MAKE" "${htmlfiles[@]}" lint "drafts=${tmpfiles[*]%.*}" EXTRA_TARGETS=false

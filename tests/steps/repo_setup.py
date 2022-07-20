@@ -24,14 +24,13 @@ def step_impl(context):
     context.working_dir = mkdtemp()
     context.origin_dir = mkdtemp()
     with cd(context.origin_dir):
-        call(["git", "init"])
-        call(["git", "checkout", "--orphan", "main"])
+        call(["git", "init", "-b", "main"])
         # Need to checkout another branch so that pushes to main work.
-        call(["git", "checkout", "-b", "testing"])
+        call(["git", "checkout", "-b", "nonce-c1a3d943"])
 
     with cd(context.working_dir):
         call(["git", "clone", context.origin_dir, "."])
-        call(["git", "checkout", "--orphan", "main"])
+        call(["git", "checkout", "-b", "main"])
         call(["git", "config", "user.name", "Behave Tests"])
         call(["git", "config", "user.email", "behave@example.com"])
 

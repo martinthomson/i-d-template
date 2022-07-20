@@ -24,9 +24,8 @@ drafts_with_prev := $(foreach draft,$(filter draft-%,$(drafts)),$(if $(f_prev_ta
 drafts_txt := $(addsuffix .txt,$(drafts))
 drafts_html := $(addsuffix .html,$(drafts))
 drafts_xml := $(addsuffix .xml,$(drafts))
-drafts_next_txt := $(addsuffix .txt,$(drafts_next))
-drafts_next_xml := $(addsuffix .xml,$(drafts_next))
-drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
+drafts_next_txt := $(addprefix $(VERSIONED)/,$(addsuffix .txt,$(drafts_next)))
+drafts_next_xml := $(addprefix $(VERSIONED)/,$(addsuffix .xml,$(drafts_next)))
 
 last_modified = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(1))
 file_size = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%z' || echo -c '%s') $(1))
@@ -107,3 +106,5 @@ ifeq (,$(DEFAULT_BRANCH))
 DEFAULT_BRANCH := $(shell BRANCH_FETCH=$(BRANCH_FETCH) $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
 endif
 export DEFAULT_BRANCH
+
+PID := $(shell echo $$$$)

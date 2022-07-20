@@ -13,7 +13,7 @@ ifneq (1,$(words $(GIT_ORIG)))
 $(error If you are just starting out, please commit something before starting)
 endif
 
-LATEST_WARNING := $(strip $(foreach draft,$(drafts_source),\
+LATEST_WARNING := $(strip $(foreach draft,$(filter-out rfc%,$(drafts_source)),\
   $(shell grep -q $(basename $(draft))-latest $(draft) || \
       echo $(draft) should include a name of $(basename $(draft))-latest)))
 ifneq (,$(LATEST_WARNING))
@@ -74,7 +74,7 @@ endif # INDEX_FORMAT
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
 ifndef SUBMODULE
-	echo $(LIBDIR) >>$<
+	echo /$(LIBDIR) >>$<
 endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
@@ -90,7 +90,7 @@ setup-note: $(LIBDIR)/setup-note.sh
 	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts_source) >.note.xml
 	if [ -s .note.xml ]; then git add .note.xml; fi
 
-.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml)
+.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml) $(DEPS_FILES)
 	mkdir -p $(dir $@)
 	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
 	git add $@
@@ -106,7 +106,7 @@ setup-default-branch: setup-files README.md setup-gitignore setup-note
 .PHONY: setup-precommit
 setup-precommit: .git/hooks/pre-commit
 .git/hooks/pre-commit:
-	-ln -s ../../lib/pre-commit.sh $@
+	-ln -s ../../$(LIBDIR)/pre-commit.sh $@
 
 .PHONY: setup-ghpages
 setup-ghpages:

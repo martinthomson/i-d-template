@@ -21,7 +21,7 @@ endif
 ## Store a copy of any GitHub issues and pull requests.
 .PHONY: archive
 archive: archive.json
-archive.json: fetch-archive $(drafts_source)
+archive.json: fetch-archive $(drafts_source) $(DEPS_FILES)
 	@if [ -f $@ ] && [ "$(call file_size,$@)" -gt 0 ] && \
 	    [ "$(call last_modified,$@)" -gt "$(call last_commit,$(ARCHIVE_BRANCH),$@)" ] 2>/dev/null; then \
 	  echo 'Skipping update of $@ (it is newer than the ones on the branch)'; exit; \
@@ -42,7 +42,7 @@ archive.json: fetch-archive $(drafts_source)
 	$(trace) archive -s archive-repo $(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN) $@ --reference $$old_archive;
 
 
-ARCHIVE_ROOT := /tmp/gharchive$(shell echo $$$$)
+ARCHIVE_ROOT := /tmp/gharchive$(PID)
 $(ARCHIVE_ROOT): fetch-archive
 	@git show-ref refs/heads/$(ARCHIVE_BRANCH) >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/$(ARCHIVE_BRANCH) >/dev/null 2>&1 && \

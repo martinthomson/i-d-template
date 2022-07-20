@@ -2,6 +2,8 @@
 
 set -e
 
+hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
+
 branch="$1"
 shift
 
@@ -22,9 +24,7 @@ git -C "$tmp" checkout -q --orphan "$branch"
 git -C "$tmp" rm -rfq .
 
 echo Creating .gitignore and initial files
-echo lib > "$tmp"/.gitignore
-echo venv >> "$tmp"/.gitignore
-echo .refcache >> "$tmp"/.gitignore
+echo "${LIBDIR:-"$(realpath "$(dirname "$0")")"}" > "$tmp"/.gitignore
 for f in "$@"; do
     touch "$tmp"/"$f"
 done

@@ -4,7 +4,7 @@ else
 draft_releases := $(shell git tag --list --points-at HEAD 'draft-*')
 endif
 
-uploads := $(addprefix .,$(addsuffix .upload,$(draft_releases)))
+uploads := $(addprefix $(VERSIONED)/.,$(addsuffix .upload,$(draft_releases)))
 
 ifneq (,$(TRAVIS))
 # Ensure that we build the XML files needed for upload during the main build.

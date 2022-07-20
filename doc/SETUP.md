@@ -1,26 +1,28 @@
 # Installation and Setup
 
-At a minimum, you need `make` and `xml2rfc`.
+At a minimum, you need a POSIX environment with:
 
-Occasionally, you will want to [Update](#update) these tools.
+* `make`
+* `python3` with `pip` and `venv`
+* `ruby` with `gem` and `bundler`
+
+When running locally, a python virtual environment is created under `lib/` and
+necessary tools are installed there.  Similarly, ruby installations are created
+under `lib/`.  The tools that are used can be updated with `make update-deps`.
 
 
-## PATH
+## General
 
-These instructions assume that you want to install to `~/.local/bin` and that
-that directory is on `$PATH`.  You can replace this path with your preferred
-binary location throughout.
+These tools work well natively on Linux and Mac.
 
-To put this directory on your path, modify `~/.profile` as follows:
+Windows users should use [the Windows Subsystem for
+Linux](https://docs.microsoft.com/en-us/windows/wsl/install) with a Linux
+distribution like Ubuntu (`wsl --install -d Ubuntu`) to get `make`.
 
-```
-$ mkdir -p ~/.local/bin
-$ echo 'export PATH="${PATH}:~/.local/bin"' >> ~/.profile
-```
-
-Note that most of these tools default to installing for all users, which you are
-free to do, but a user-based install is easier to manage without invoking
-`sudo` and the like.
+It is also possible to use [cygwin](https://cygwin.org/) or an
+[MSYS2](https://www.msys2.org/)-based system (like
+[Mozilla-Build](https://wiki.mozilla.org/MozillaBuild)), but these can be more
+difficult to setup and use.
 
 
 ## make
@@ -35,81 +37,40 @@ features work fine, but no warranty is made if something breaks.
 brew install make
 ```
 
-Note that this installs as `gmake`.  Follow the instructions to add this as
+Note that this might install as `gmake`.  Follow the instructions to add this as
 `make` to your path.
 
-Windows users will need to use [Cygwin](http://cygwin.org/) or [the Windows
-Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-to get `make`.
+
+## Python
+
+You need to provide [Python 3](https://www.python.org/). Be sure not to get
+Python 2 or anything older than Python 3.6, which are no longer supported.
+
+[`pip`](https://pip.pypa.io/en/stable/installing/) and
+[`venv`](https://docs.python.org/3/library/venv.html) are used to install
+packages into a temporary virtual environment.  These are sometimes installed
+with python, but some Linux distributions can put these in separate packages
+(look for `python3-pip` and `python3-venv`).
 
 
-## xml2rfc
+## Ruby
 
-All systems require [xml2rfc](http://xml2rfc.tools.ietf.org/).  This
-requires [Python 3](https://www.python.org/).  Be sure not to get Python 2,
-which is no longer supported.  The easiest way to get `xml2rfc` is with
-[pip](https://pip.pypa.io/en/stable/installing/), which is either installed with
-python, or part of the `python3-pip` (sometimes `python-pip`) package on most
-distributions.
+By default, [Ruby](https://www.ruby-lang.org/) is used to install
+[kramdown-rfc](https://github.com/cabo/kramdown-rfc).  This is installed using
+the Ruby [bundler](https://bundler.io/), which also requires the Ruby package
+tool, [`gem`](https://rubygems.org/).
 
-On some systems, you might need to install `pip` the hard way:
+The `gem` tool is often installed alongside Ruby, but you might need to install
+bundler separately (look for `ruby-bundler`).
 
-```sh
-$ curl https://bootstrap.pypa.io/get-pip.py | python
-```
-
-Once pip is installed, you can install xml2rfc.
+You can pass `NO_RUBY=true` as an argument to `make` or export an environment
+variable with that value to disable this feature.
 
 
-```sh
-$ pip3 install --user xml2rfc
-```
+## mmark
 
-xml2rfc might need development versions of [libxml2](http://xmlsoft.org/) and
-[libxslt](http://xmlsoft.org/XSLT).  These packages are named `libxml2-dev` and
-`libxslt1-dev` (Debian, Ubuntu); `libxml2-devel` and `libxslt1-devel` (RedHat,
-Fedora); `libxml2-devel` and `libxslt-devel` (Cygwin); or `libxml2` and
-`libxslt` (Mac Homebrew).
-
-
-## Archive-Repo
-
-The archive-repo script is used by CI jobs and `make archive` to create an
-archival copy of GitHub issues and pull requests.  It is not needed for most
-local authoring.
-
-If you need it, it can be installed with pip, as above.
-
-```sh
-$ pip3 install --user archive-repo
-```
-
-
-## Markdown
-
-If you use markdown, you will also need to install `kramdown-rfc` or `mmark`.
-
-The template stuff tries to work out which of these you are working with based
-on the first line of the file:
-
-* `kramdown-rfc` files must start with '---'
-
-* `mmark` files must start with '%%%'
-
-### kramdown-rfc
-
-[`kramdown-rfc`](https://github.com/cabo/kramdown-rfc) requires
-[Ruby](https://www.ruby-lang.org/) and can be installed using the Ruby package
-manager, `gem`:
-
-```sh
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
-```
-
-Note: Installing net-http-persistent makes this a lot faster.
-
-
-### mmark
+If you use mmark for markdown (i.e., files starting with `%%%`), you will need
+to install and manage an mmark installation.
 
 [`mmark`](https://github.com/mmarkdown/mmark) requires
 [go](https://golang.org/), and that comes with its own complications.  This
@@ -124,27 +85,9 @@ You might want to set aside a directory for your go code other than the default,
 and find a directory that is on the path where you can install `mmark`.  For
 these, I set `GOPATH=~/gocode`.
 
-
-## Other tools
-
-If you wish to build GitHub Pages, you will also need to install the Python packages
-`pyyaml` (for kramdown-rfc Markdown) and/or `toml` (for mmark Markdown):
+Make sure to update them regularly:
 
 ```sh
-$ pip3 install --user toml pyyaml
-```
-
-Some other helpful tools are listed in `config.mk`.
-
-# Update
-
-Once you have these tools installed, it's worth updating occasionally.  Here's a
-quick set of shortcuts for these tools.
-
-```sh
-$ pip3 install --user --upgrade xml2rfc archive-repo toml pyyaml
-$ gem uninstall --user-install -n ~/.local/bin kramdown-rfc net-http-persistent
-$ gem install --user-install -N -n ~/.local/bin kramdown-rfc net-http-persistent
 $ go get -u github.com/mmarkdown/mmark@latest
 $ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
 ```
