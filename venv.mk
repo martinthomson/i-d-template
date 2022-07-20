@@ -169,11 +169,11 @@ ifeq (,$(shell command -v touch $(NULL_STDERR)))
 touch=type nul >> $(subst /,\,$(1)) && copy /y /b $(subst /,\,$(1))+,, $(subst /,\,$(1))
 endif
 
-RM ?= rm -f
+RM?=rm -f
 ifeq (,$(shell command -v $(firstword $(RM)) $(NULL_STDERR)))
-RMDIR=rd /s /q
+RMDIR:=rd /s /q
 else
-RMDIR=$(RM) -r
+RMDIR:=$(RM) -r
 endif
 
 
