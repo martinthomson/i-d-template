@@ -9,6 +9,7 @@
 /*-[0-9][0-9].xml
 /.refcache
 /.targets.mk
+/.vscode/
 /node_modules/
 /versioned/
 Gemfile.lock
