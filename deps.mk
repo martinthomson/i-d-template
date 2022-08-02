@@ -80,6 +80,11 @@ rfc-tidy ?= rfc-tidy
 endif
 
 ## Ruby
+ifeq (,$(shell which bundle))
+$(warning ruby bundler not installed; skipping bundle install)
+NO_RUBY := true
+endif
+
 ifneq (true,$(NO_RUBY))
 export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
 # Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
@@ -123,6 +128,14 @@ endif # !CI
 endif # !NO_RUBY
 
 ## Nodejs
+ifeq (,$(shell which npm))
+ifneq (,$(wildcard package.json))
+$(warning package.json exists, but npm not available; npm packages not installed)
+endif
+NO_NODEJS := true
+endif
+
+ifneq (true,$(NO_NODEJS))
 ifneq (,$(wildcard package.json))
 export PATH := $(abspath node_modules/.bin):$(PATH)
 DEPS_FILES += package-lock.json
@@ -136,6 +149,7 @@ update-deps::
 clean-deps::
 	-rm -rf package-lock.json
 endif # package.json
+endif # !NO_NODEJS
 
 ## Link everything up
 deps:: $(DEPS_FILES)
