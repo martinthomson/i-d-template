@@ -37,6 +37,12 @@ function githubcom() {
     echo "https://github.com/${user}/${repo}/${1}"
 }
 
+DATERE='[0-9]* [A-Z][a-z]* 20[0-9][0-9]'
+IGNOREDATE=(
+    '-I' "^   This Internet-Draft will expire on ${DATERE}."
+    '-I' "^Expires: $DATERE"
+    '-I' '.\{67\} 20[0-9][0-9]$'
+)
 
 if [[ "$format" = "html" ]]; then
     indent=''
@@ -204,11 +210,12 @@ fi
 tmpfiles=()
 trap 'rm -f "${tmpfiles[@]}"' EXIT
 function list_dir() {
-    files=($(find "$1" -maxdepth 1 \( -name 'draft-*.txt' -o -name 'rfc*.txt' \) -print))
+    dir="$1"
+    branch="$2"
+    files=($(find "$dir" -maxdepth 1 \( -name 'draft-*.txt' -o -name 'rfc*.txt' \) -print))
     if [[ "${#files[@]}" -eq 0 ]]; then
         return
     fi
-    branch="$2"
     table_i "$branch" "$default_branch"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
@@ -231,7 +238,7 @@ function list_dir() {
         title=$("$python" "${libdir}/extract-metadata.py" "$src" title)
         td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" "txt $file" "$title (Text)")"
-        this_githubio=$(githubio "$branch${dir#$root}" "$file")
+        this_githubio=$(githubio "$branch" "$file")
         if [[ "$2" == "$default_branch" ]]; then
             td "$(a "https://datatracker.ietf.org/doc/${file}" datatracker "dt $file" "Datatracker for $file")"
             diff=$(rfcdiff "$file" "$this_githubio")
@@ -246,7 +253,9 @@ function list_dir() {
                     td ""
                 fi
             fi
-        else
+        elif diff -q "${IGNOREDATE[@]}" "${root}/${file}.txt" "${dir}/${file}.txt" >/dev/null; then
+            td "same as $default_branch"
+	else
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch" "diff $file")"
         fi
