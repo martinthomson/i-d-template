@@ -6,6 +6,7 @@ on:
     paths:
     - ".github/workflows/template.yml"
     - "template/.github/workflows/**"
+    - "v3.css"
 
 jobs:
   build:
@@ -16,9 +17,9 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v2
 
-    - name: "Compare"
+    - name: "Compare workflow files in internet-draft-template"
       run: |
-        git clone https://github.com/martinthomson/internet-draft-template idt
+        git clone --depth 1 https://github.com/martinthomson/internet-draft-template idt
         e=''
         for src in template/.github/workflows/*.yml; do
           dst="idt/${src#*/}"
@@ -28,3 +29,8 @@ jobs:
         if [ -n "$e" ]; then
           ! printf "$e"
         fi
+
+    - name: "Compare CSS in rfc-css"
+      run: |
+        git clone --depth 1 https://github.com/martinthomson/rfc-css rfc-css
+        diff -u <(./rfc-css/combine.sh) v3.css || ! echo "v3.css differs from rfc-css"
