@@ -24,7 +24,7 @@ ifneq (,$(MAKE_TRACE))
 endif
 
 .%.upload: %.xml
-	set -ex; email="$$(git tag --list --format '%(taggeremail)' $(basename $<) | \
+	set -ex; email="$$(git tag --list --format '%(taggeremail)' $(notdir $(basename $<)) | \
 	  sed -e 's/^<//;s/>$$//')"; \
 	[ -z "$$email" ] && email=$$(xmllint --xpath '/rfc/front/author[1]/address/email/text()' $< 2>/dev/null); \
 	[ -z "$$email" ] && ! echo "Unable to find email to use for submission." 1>&2; \
