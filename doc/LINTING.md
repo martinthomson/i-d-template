@@ -1,7 +1,10 @@
-# Adding Linters
+# Additional Tools
 
-So you have some custom process that you want to run on your code.  For
-instance, you want to validate some example code.
+You have some custom process that you want to run to validate code, generate
+examples, or process content.  You might use some specialized tools for this.
+
+
+## Linting Tools
 
 To run a lint automatically, you can extend the `lint` make target with your
 own.  Just add something like this to your `Makefile`:
@@ -17,6 +20,7 @@ lint:: wc
 
 You can add multiple linters as you like.
 
+
 ## Installing Dependencies for CI
 
 Many linters are external software, which means that you probably won't have
@@ -24,31 +28,50 @@ access to those in the minimal CI environment.  Unfortunately, without forking
 the GitHub Action or using a new Docker image, it isn't possible to get
 additional packages installed in the default environment.
 
-So you will need to install dependencies yourself.
+So you will need to ensure that dependencies are available.
 
-For instance, if you are using
-[sf-rfc-validate](https://pypi.org/project/sf-rfc-validate/), you might do this:
+You can list dependencies in a `requirements.txt`, `Gemfile`, or `package.json`
+as [described here](https://github.com/martinthomson/i-d-template/blob/main/deps.mk).
+
+For python, create and add a file called
+[`requirements.txt`](https://pip.pypa.io/en/stable/reference/requirements-file-format/).
+
+For ruby, create and add a file called 
+[`Gemfile`](https://bundler.io/man/gemfile.5.html).  Note that `Gemfile.lock`
+should be added to your `.gitignore`.
+
+For nodejs, create and add a file called
+[`package.json`](https://docs.npmjs.com/cli/v8/configuring-npm/package-json)
+or just run `npm add --save <package>` then add the file.  Note that
+`package-lock.json` should be added to your `.gitignore`.
+
+
+## Manually Installing Dependencies
+
+Say you have a custom command that checks some input files.
 
 ```make
-sf-rfc-validate ?= sf-rfc-validate
-.PHONY: sf-lint
-sf-lint: $(drafts_xml) sf-lint-install
-	$(sf-rfc-validate) $(filter-out sf-lint-install,$^)
+checker-tool ?= checker-tool
+# Use a hidden marker file to indicate that the tool is installed.
+checker-marker ?= .checker-tool-installed.txt
+.PHONY: run-checker
+run-checker: $(drafts_xml) $(checker-marker)
+	$(checker-tool) $(filter-out $(checker-marker),$^)
 
-lint:: sf-lint
+lint:: run-checker
 
-.PHONY: sf-lint-install
-sf-lint-install:
-	@hash sf-rfc-validate.py 2>/dev/null || pip3 install --user sf-rfc-validate
+$(checker-marker):
+	magically install checker-tool as $(checker-tool)
+	@touch $@
 ```
 
-Note that for things like python, the location that the file is installed to
-might not be on the path, so you will need to ensure that you modify the path
-when running in CI.
+Note that you might need to specify a full path to the installed file if the
+installer puts the file in a place that isn't on your `$PATH`. Extra care is
+needed here when running in CI.
 
 One way to do this is to ensure that the binary is identified when running
-`make`.  Modifying `.github/workflows/*.yml` or `.circleci/config.yml` to
-include additional arguments to make should do this.  The following is a
+`make`.  You can modify `.github/workflows/*.yml` or `.circleci/config.yml`
+to include additional arguments to make should do this.  The following is a
 modified target in `.github/workflows/ghpages.yml` and
 `.github/workflows/publish.yml`:
 
@@ -56,7 +79,7 @@ modified target in `.github/workflows/ghpages.yml` and
     - name: "Build Drafts"
       uses: martinthomson/i-d-template@v1
       with:
-        make: latest sf-rfc-validate=/root/.local/bin/sf-rfc-validate
+        make: latest checker-tool=/root/.local/bin/checker-tool
 ```
 
 Alternatively, you can attempt to detect that you are running in CI and adjust
@@ -64,15 +87,17 @@ the installation process accordingly.  Then the target will be run
 automatically.
 
 ```make
-sf-lint-install:
-        @if [ "$CI" = true -a "$CIRCLECI" != true ]; then user=; else user=--user; fi; \
-	  hash sf-rfc-validate.py 2>/dev/null || pip3 install "$user" sf-rfc-validate
+$(checker-marker):
+        @if [ "$CI" = true -a "$CIRCLECI" != true ]; then user=root; else user=user; fi; \
+	  hash $(notdir $(checker-tool)) 2>/dev/null || \
+	  magically install checker-tool for $$user as $(checker-tool)
+	@touch $@
 ```
 
-Note that CircleCI builds don't run as root.
+Note that GitHub Actions builds run as root, but CircleCI builds use a special user.
 
 
-## Using the Mega image in CI
+## Using the Mega/Math image in GitHub Actions
 
 For GitHub Actions, the `martinthomson/i-d-template@v1m` tag identifies an
 alternative action that uses [a different Docker
