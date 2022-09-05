@@ -75,8 +75,9 @@ Note that CircleCI builds don't run as root.
 ## Using the Mega image in CI
 
 For GitHub Actions, the `martinthomson/i-d-template@v1m` tag identifies an
-alternative action that uses a different Docker image than the default.  This
-image includes additional tools, as shown in its
+alternative action that uses [a different Docker
+image](https://github.com/martinthomson/i-d-template/pkgs/container/i-d-template-math)
+than the default.  This image includes additional tools, as shown in its
 [Dockerfile](https://github.com/martinthomson/i-d-template/blob/main/docker/math/Dockerfile).
 
 If you want to use the tools included in this image, use the
