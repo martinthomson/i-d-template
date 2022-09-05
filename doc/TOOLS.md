@@ -4,6 +4,35 @@ You have some custom process that you want to run to validate code, generate
 examples, or process content.  You might use some specialized tools for this.
 
 
+## Preprocessing Markdown
+
+For instance, if a building a draft depends on a preprocessing step where
+markdown is changed to include examples or other information, you can do
+something like this:
+
+```make
+MD_PREPROCESSOR := python3 add-examples.py examples.bin
+draft-unicorn-protocol.xml: add-examples.py examples.bin
+```
+
+This results in the markdown being passed as stdin to the `add-examples.py`
+script. This also shows that the XML file depends on the script and the
+`examples.bin` file.  If either of those files changes - in addition to the
+markdown source - then the draft will be rebuilt.
+
+Note that intermediate files, like the XML file here, are usually deleted
+automatically by `make`.  If a preprocessing step is particularly expensive
+or you need to process the XML specially, you can instruct `make` to keep it
+around:
+
+```make
+.SECONDARY: draft-unicorn-protocol.xml
+```
+
+There is no need to check this file in though.  Intermediate files like this
+should be listed in `.gitignore`.
+
+
 ## Linting Tools
 
 To run a lint automatically, you can extend the `lint` make target with your
@@ -23,32 +52,38 @@ You can add multiple linters as you like.
 
 ## Installing Dependencies for CI
 
-Many linters are external software, which means that you probably won't have
-access to those in the minimal CI environment.  Unfortunately, without forking
-the GitHub Action or using a new Docker image, it isn't possible to get
-additional packages installed in the default environment.
+CI runs in a limited docker image, which means that you probably won't have
+access to your preferred tool in the minimal CI environment.  You could fork
+the docker image for your build, but that also means creating your own fork
+of the GitHub Action as well.
 
-So you will need to ensure that dependencies are available.
+You can manage additional dependencies provided through common package manager
+tools by listing dependencies.  Any dependencies listed in a`requirements.txt`,
+`Gemfile`, or `package.json` will be automatically installed for you as
+[described here](https://github.com/martinthomson/i-d-template/blob/main/deps.mk).
 
-You can list dependencies in a `requirements.txt`, `Gemfile`, or `package.json`
-as [described here](https://github.com/martinthomson/i-d-template/blob/main/deps.mk).
-
-For python, create and add a file called
+* For python, create and add a file called
 [`requirements.txt`](https://pip.pypa.io/en/stable/reference/requirements-file-format/).
 
-For ruby, create and add a file called 
+* For ruby, create and add a file called 
 [`Gemfile`](https://bundler.io/man/gemfile.5.html).  Note that `Gemfile.lock`
 should be added to your `.gitignore`.
 
-For nodejs, create and add a file called
+* For nodejs, create and add a file called
 [`package.json`](https://docs.npmjs.com/cli/v8/configuring-npm/package-json)
 or just run `npm add --save <package>` then add the file.  Note that
 `package-lock.json` should be added to your `.gitignore`.
 
+These will be installed automatically when building locally or in CI.  In CI,
+the files needed are cached, which means that the time needed to installed
+larger packages is amortized over multiple builds.
+
 
 ## Manually Installing Dependencies
 
-Say you have a custom command that checks some input files.
+Say you have a custom command that checks the XML in some way.  You can
+have the build install this automatically by adding a dependency on a rule
+that installs the tool, like so:
 
 ```make
 checker-tool ?= checker-tool
