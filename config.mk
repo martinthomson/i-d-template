@@ -67,7 +67,11 @@ VERSIONED ?= versioned
 
 # Setup a shared cache for xml2rfc and kramdown-rfc
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
+ifeq (true,$(CI))
+XML2RFC_REFCACHEDIR := $(realpath .)/.refcache
+else
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
+endif
 KRAMDOWN_REFCACHEDIR := $(XML2RFC_REFCACHEDIR)
 else
 XML2RFC_REFCACHEDIR ?= $(KRAMDOWN_REFCACHEDIR)

@@ -25,9 +25,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          ${{ env.XML2RFC_REFCACHEDIR }}
-          ${{ env.VENVDIR }}
-          ${{ env.BUNDLE_PATH }}
+          .refcache
+          .venv
+          .gems
           node_modules
           .targets.mk
         key: i-d-${{ steps.setup.outputs.date }}

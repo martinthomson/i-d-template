@@ -40,6 +40,18 @@ def step_impl(context):
             )
 
 
+@then("gitignore negation rules come last")
+def step_impl(context):
+    with cd(context.working_dir):
+        with open(".gitignore", mode="r") as f:
+            neg = False
+            for line in f.read().splitlines():
+                if line[0] == "!":
+                    neg = True
+                else:
+                    assert neg == False
+
+
 @then('gitignore lists "{ignore}"')
 def step_impl(context, ignore):
     with cd(context.working_dir):
