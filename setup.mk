@@ -79,7 +79,7 @@ endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
 	tmp=`mktemp`; \
-	  (grep -v '^!' $^ | sort -u; grep '^!' $^ | sort -u) >$$tmp && \
+	  (cat $^ | grep -v '^!' | sort -u; cat $^ | grep '^!' | sort -u) >$$tmp && \
 	  mv -f $$tmp $<
 	git add $<
 
