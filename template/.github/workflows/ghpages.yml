@@ -18,9 +18,6 @@ jobs:
   build:
     name: "Update Editor's Copy"
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_PATH: /tmp/.gems
-      VENVDIR: /tmp/.venv
     steps:
     - name: "Checkout"
       uses: actions/checkout@v3
@@ -33,9 +30,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          ${{ env.XML2RFC_REFCACHEDIR }}
-          ${{ env.VENVDIR }}
-          ${{ env.BUNDLE_PATH }}
+          .refcache
+          .venv
+          .gems
           node_modules
           .targets.mk
         key: i-d-${{ steps.setup.outputs.date }}

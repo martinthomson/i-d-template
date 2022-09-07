@@ -37,6 +37,10 @@ DEPS_FILES :=
 .PHONY: deps clean-deps update-deps
 
 ## Python
+ifeq (true,$(CI))
+# Override BUNDLE_PATH so we can use caching in CI.
+VENVDIR = $(realpath .)/.venv
+endif
 VENVDIR ?= $(realpath $(LIBDIR))/.venv
 REQUIREMENTS_TXT := $(wildcard requirements.txt)
 ifneq (,$(strip $(REQUIREMENTS_TXT)))
@@ -86,6 +90,10 @@ NO_RUBY := true
 endif
 
 ifneq (true,$(NO_RUBY))
+ifeq (true,$(CI))
+# Override BUNDLE_PATH so we can use caching in CI.
+BUNDLE_PATH := $(realpath .)/.gems
+endif
 export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
 # Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
 # doesn't even match the current ruby version.

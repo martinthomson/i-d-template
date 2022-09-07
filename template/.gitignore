@@ -7,8 +7,10 @@
 *~
 .tags
 /*-[0-9][0-9].xml
+/.gems/
 /.refcache
 /.targets.mk
+/.venv/
 /.vscode/
 /node_modules/
 /versioned/
