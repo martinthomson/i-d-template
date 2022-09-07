@@ -78,7 +78,9 @@ ifndef SUBMODULE
 endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
-	tmp=`mktemp`; cat $^ | sort -u >$$tmp && mv -f $$tmp $<
+	tmp=`mktemp`; \
+	  (grep -v '^!' $^ | sort -u; grep '^!' $^ | sort -u) >$$tmp && \
+	  mv -f $$tmp $<
 	git add $<
 
 README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))

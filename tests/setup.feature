@@ -19,6 +19,7 @@ Feature: Initial setup
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "archive.json"
      and gitignore lists xml files
+     and gitignore negation rules come last
      and a precommit hook is installed
 
   Scenario:  Run setup script with XSLT on correctly-set-up directory
@@ -40,6 +41,7 @@ Feature: Initial setup
      and a branch is created called "gh-pages" containing "index.html"
      and a branch is created called "gh-pages" containing "archive.json"
      and gitignore lists xml files
+     and gitignore negation rules come last
      and a precommit hook is installed
 
   Scenario:  Run setup script with INDEX_FORMAT set
@@ -61,6 +63,7 @@ Feature: Initial setup
      and a branch is created called "gh-pages" containing "index.md"
      and a branch is created called "gh-pages" containing "archive.json"
      and gitignore lists xml files
+     and gitignore negation rules come last
      and a precommit hook is installed
 
   Scenario:  Run setup script when the file contains the wrong name
@@ -107,3 +110,4 @@ Feature: Initial setup
      then it succeeds
      and gitignore lists "IGNORE-ME"
      and gitignore lists xml files
+     and gitignore negation rules come last

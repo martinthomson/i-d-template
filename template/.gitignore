@@ -18,3 +18,4 @@ Gemfile.lock
 archive.json
 package-lock.json
 report.xml
+!requirements.txt
