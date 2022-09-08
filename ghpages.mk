@@ -128,14 +128,15 @@ ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_PUSH_TOKEN),,1)))
 	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) gh-pages
 else
-	@echo git -C $(GHPAGES_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
+	@echo git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) gh-pages
+	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1 \
+	  || $(trace) all -s ghpages-push ! echo "git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) gh-pages"
 endif
 else
 ifeq (true,$(CI))
 	@echo "*** Warning: pushing to the gh-pages branch is disabled."
 else
-	git -C $(GHPAGES_ROOT) push -f origin gh-pages
+	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f origin gh-pages
 endif
 endif # PUSH_GHPAGES
 	-rm -rf $(GHPAGES_ROOT)

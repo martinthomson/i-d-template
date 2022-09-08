@@ -16,7 +16,11 @@ cut -f1 -d' ' "$trace" | sort | uniq | while read -r f; do
     grep "^$f " "$trace" | cut -f2- -d' ' | sort | uniq >"$tmp"
     while read -r j s; do
         if [[ "$failed" != "$j" && "$s" != "0" ]]; then
-            echo "<details><summary>❌ $f: step '$j' failed</summary>"
+            if [[ -z "$failed" ]]; then
+                echo "❌ $f"
+                echo
+            fi
+            echo "<details><summary>❌ step '$j' failed</summary>"
             echo
             echo '```'
             grep "^$f $j " "$trace" | cut -f3- -d' ' | tail +2
