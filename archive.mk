@@ -18,6 +18,21 @@ ifeq (,$(GITHUB_API_TOKEN))
 DISABLE_ARCHIVE_FETCH := true
 endif
 
+archive_script = $(trace) archive -s archive-repo \
+		 $(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN)
+ifeq (true,$(ARCHIVE_FULL))
+define archive_issues
+$(archive_script) $(1)
+endef
+else
+define archive_issues
+old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
+trap 'rm -f $$old_archive' EXIT; \
+git show $(ARCHIVE_BRANCH):$(1) > $$old_archive || true; \
+$(archive_script) $(1) --reference $$old_archive
+endef
+endif
+
 ## Store a copy of any GitHub issues and pull requests.
 .PHONY: archive
 archive: archive.json
@@ -36,11 +51,7 @@ archive.json: fetch-archive $(drafts_source) $(DEPS_FILES)
 	    git show $(ARCHIVE_BRANCH):$@ > $@ || true; \
 	    exit; \
 	fi; \
-	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
-	trap 'rm -f $$old_archive' EXIT; \
-	git show $(ARCHIVE_BRANCH):$@ > $$old_archive || true; \
-	$(trace) archive -s archive-repo $(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN) $@ --reference $$old_archive;
-
+	$(call archive_issues,$@)
 
 ARCHIVE_ROOT := /tmp/gharchive$(PID)
 $(ARCHIVE_ROOT): fetch-archive

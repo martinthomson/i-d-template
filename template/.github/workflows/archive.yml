@@ -26,7 +26,7 @@ jobs:
     - name: "Update GitHub Pages"
       uses: martinthomson/i-d-template@v1
       with:
-        make: gh-archive
+        make: gh-archive ARCHIVE_FULL=${{ github.event_name == 'workflow_dispatch' }}
         token: ${{ github.token }}
 
     - name: "Save Archive"
