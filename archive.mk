@@ -20,9 +20,6 @@ endif
 
 archive_script = $(trace) archive -s archive-repo \
 		 $(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN)
-ifeq (workflow_dispatch,$(GITHUB_EVENT_NAME))
-ARCHIVE_FULL ?= true
-endif
 ifeq (true,$(ARCHIVE_FULL))
 define archive_issues
 echo $(archive_script) $(1); \

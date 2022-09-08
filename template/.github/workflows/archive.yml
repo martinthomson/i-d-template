@@ -6,6 +6,10 @@ on:
   repository_dispatch:
     types: [archive]
   workflow_dispatch:
+    archive_full:
+      description: 'Recreate the archive from scratch'
+      default: false
+      type: boolean
 
 jobs:
   build:
@@ -20,7 +24,7 @@ jobs:
     - name: "Update Archive"
       uses: martinthomson/i-d-template@v1
       with:
-        make: archive
+        make: archive "ARCHIVE_FULL=${{ inputs.archive_full }}"
         token: ${{ github.token }}
 
     - name: "Update GitHub Pages"
