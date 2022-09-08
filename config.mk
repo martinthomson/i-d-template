@@ -34,7 +34,7 @@ idnits ?= idnits
 
 # For diff:
 #   https://github.com/ietf-tools/iddiff
-iddiff ?= iddiff
+iddiff ?= iddiff -c 8
 
 # For generating PDF:
 #   https://www.gnu.org/software/enscript/

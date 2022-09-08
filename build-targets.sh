@@ -102,7 +102,7 @@ for draft in "${drafts[@]%.*}"; do
         if [ "${#tags[@]}" -gt 0 ]; then
             # Write out a diff target
             printf "diff-${draft}.html: ${versioned}/${tags[$((${#tags[@]}-1))]}.txt ${versioned}/${next_draft}.txt\n"
-            printf "\t-\$(iddiff) -c \$^ > \$@\n"
+            printf "\t-\$(iddiff) \$^ > \$@\n"
         fi
     fi
 done
