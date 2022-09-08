@@ -20,8 +20,12 @@ endif
 
 archive_script = $(trace) archive -s archive-repo \
 		 $(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN)
+ifeq (workflow_dispatch,$(GITHUB_EVENT_NAME))
+ARCHIVE_FULL ?= true
+endif
 ifeq (true,$(ARCHIVE_FULL))
 define archive_issues
+echo $(archive_script) $(1); \
 $(archive_script) $(1)
 endef
 else
@@ -29,6 +33,7 @@ define archive_issues
 old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
 trap 'rm -f $$old_archive' EXIT; \
 git show $(ARCHIVE_BRANCH):$(1) > $$old_archive || true; \
+echo $(archive_script) $(1) --reference $$old_archive; \
 $(archive_script) $(1) --reference $$old_archive
 endef
 endif
