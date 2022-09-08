@@ -119,8 +119,8 @@ if [ -n "$wg_all" ]; then
         ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
         ml_sub="$(xmllint --xpath '/response/objects/object[1]/list_subscribe/text()' "$tmp")"
 
+        sed -i -e '/^## Working Group Info/,$ {1s///;t;d;}' CONTRIBUTING.md
         cat >>CONTRIBUTING.md <<EOF
-
 ## Working Group Information
 
 Discussion of this work occurs on the [${group_name}
