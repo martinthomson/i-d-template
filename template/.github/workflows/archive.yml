@@ -6,10 +6,11 @@ on:
   repository_dispatch:
     types: [archive]
   workflow_dispatch:
-    archive_full:
-      description: 'Recreate the archive from scratch'
-      default: false
-      type: boolean
+    inputs:
+      archive_full:
+        description: 'Recreate the archive from scratch'
+        default: false
+        type: boolean
 
 jobs:
   build:
