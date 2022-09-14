@@ -24,8 +24,10 @@ jobs:
 
     - name: "Update Archive"
       uses: martinthomson/i-d-template@v1
+      env:
+        ARCHIVE_FULL: ${{ inputs.archive_full }}
       with:
-        make: archive "ARCHIVE_FULL=${{ inputs.archive_full }}"
+        make: archive
         token: ${{ github.token }}
 
     - name: "Update GitHub Pages"
