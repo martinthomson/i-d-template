@@ -26,7 +26,7 @@ jobs:
       run: |
         e=''
         for src in Gemfile requirements.txt; do
-          dst="docker/action/$f"
+          dst="docker/action/$src"
           [ -f "$src" ] || e="$e\n$src is missing"
           [ -f "$dst" ] || e="$e\n$dst is missing"
           diff -u "$dst" "$src" || e="$e\n$src and $dst differ"
