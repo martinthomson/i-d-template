@@ -7,6 +7,11 @@ on:
     - ".github/workflows/template.yml"
     - "template/.github/workflows/**"
     - "v3.css"
+    - "Gemfile"
+    - "action/docker/Gemfile"
+    - "requirements.txt"
+    - "action/docker/requirements.txt"
+
 
 jobs:
   build:
@@ -17,14 +22,27 @@ jobs:
     - name: "Checkout"
       uses: actions/checkout@v2
 
+    - name: "Verify Gemfile and requirements.txt consistency"
+      run: |
+        e=''
+        for src in Gemfile requirements.txt; do
+          dst="docker/action/$f"
+          [ -f "$src" ] || e="$e\n$src is missing"
+          [ -f "$dst" ] || e="$e\n$dst is missing"
+          diff -u "$dst" "$src" || e="$e\n$src and $dst differ"
+        done
+        if [ -n "$e" ]; then
+          ! printf "$e"
+        fi
+
     - name: "Compare workflow files in internet-draft-template"
       run: |
         git clone --depth 1 https://github.com/martinthomson/internet-draft-template idt
         e=''
         for src in template/.github/workflows/*.yml; do
           dst="idt/${src#*/}"
-          [ -f "$dst" ] || e="$e\n$dst is missing"
-          diff -u "$dst" "$src" || e="$e\n$dst is different"
+          [ -f "$dst" ] || e="$e\nworkflow ${src##*/} is missing from internet-draft-template"
+          diff -u "$dst" "$src" || e="$e\nworkflow ${src##*/} differs"
         done
         if [ -n "$e" ]; then
           ! printf "$e"
