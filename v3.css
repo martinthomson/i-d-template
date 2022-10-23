@@ -338,7 +338,7 @@ dl {
 dl > dt {
   float: left;
   margin-right: 1em;
-  min-width: 20ch;
+  min-width: 12ch;
 }
 dl.dlNewline > dt {
   float: none;
