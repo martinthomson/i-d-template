@@ -39,9 +39,9 @@ function githubcom() {
 
 DATERE='[0-9]* [A-Z][a-z]* 20[0-9][0-9]'
 IGNOREDATE=(
-    '-I' "^   This Internet-Draft will expire on ${DATERE}."
-    '-I' "^Expires: $DATERE"
-    '-I' '.\{67\} 20[0-9][0-9]$'
+    'sed' '-e' "/^   This Internet-Draft will expire on ${DATERE}./d"
+    '-e' "s/^Expires: $DATERE/Expires: DATEHERE/"
+    '-e' 's/\(.\{56\}\).\{11\} 20[0-9][0-9]$/\1/'
 )
 
 if [[ "$format" = "html" ]]; then
@@ -253,7 +253,7 @@ function list_dir() {
                     td ""
                 fi
             fi
-        elif diff -q "${IGNOREDATE[@]}" "${root}/${file}.txt" "${dir}/${file}.txt" >/dev/null; then
+        elif diff -q <("${IGNOREDATE[@]}" "${root}/${file}.txt") <("${IGNOREDATE[@]}" "${dir}/${file}.txt") >/dev/null; then
             td "same as $default_branch"
 	else
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
