@@ -23,8 +23,9 @@ endif
 .PHONY: update auto_update update-deps
 .SILENT: auto_update
 .IGNORE: auto_update
-auto_update: update-deps
+auto_update:
 	$(UPDATE_COMMAND)
+	$(MAKE) update-deps
 
 update:  auto_update
 	@[ ! -r circle.yml ] || \
