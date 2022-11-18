@@ -50,7 +50,7 @@ SHELL := bash
 
 # For uploading draft "releases" to the datatracker.
 curl ?= curl -sS
-DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submit
+DATATRACKER_UPLOAD_URL ?= https://datatracker.ietf.org/api/submission
 
 # The type of index that is created for gh-pages.
 # Supported options are 'html' and 'md'.
