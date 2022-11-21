@@ -62,13 +62,18 @@ build_target() {
     fi
 
     target="${target_name}.${source_file##*.}"
-    printf ".INTERMEDIATE: ${versioned}/${target}\n"
-    if [ "$tag" == HEAD ]; then
+    if [ "${source_file##*.}" != "xml" ] || [ "$tag" = HEAD ]; then
+        # Don't keep the temporary file (unless it is XML from a tag).
+        printf ".INTERMEDIATE: ${versioned}/${target}\n"
+    fi
+    if [ "$tag" = HEAD ]; then
         printf "${versioned}/${target}: ${source_file} | ${versioned}\n"
         printf "\t"
         print_sed cat sed "${subst[@]}"
         printf " \$< >\$@\n"
     else
+        # Keep the XML around for tagged builds (not HEAD).
+        printf ".SECONDARY: ${versioned}/${target%.*}.xml\n"
         printf "${versioned}/${target}: | ${versioned}\n"
         printf "\tgit show \"$tag:$source_file\""
         print_sed '' ' | sed' "${subst[@]}"
