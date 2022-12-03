@@ -20,6 +20,7 @@ RUN set -e; \
       nodejs \
       npm \
       openssh \
+      plantuml \
       py3-appdirs \
       py3-configargparse \
       py3-html5lib \
