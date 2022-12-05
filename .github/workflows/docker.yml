@@ -49,12 +49,12 @@ jobs:
         action_tags="$(tag "$registry" -action)"
         circle_tags="$(tag "$registry" "")"
         math_tags="$(tag "$registry" -math)"
-        echo "registry=$registry" >> $GITHUB_OUTPUT
-        echo "driver_opts=$driver_opts" >> $GITHUB_OUTPUT
-        echo "label=$label" >> $GITHUB_OUTPUT
-        echo "action_tags=$action_tags" >> $GITHUB_OUTPUT
-        echo "circle_tags=$circle_tags" >> $GITHUB_OUTPUT
-        echo "math_tags=$math_tags" >> $GITHUB_OUTPUT
+        echo "registry=$registry" >>"$GITHUB_OUTPUT"
+        echo "driver_opts=$driver_opts" >>"$GITHUB_OUTPUT"
+        echo "label=$label" >>"$GITHUB_OUTPUT"
+        echo "action_tags=$action_tags" >>"$GITHUB_OUTPUT"
+        echo "circle_tags=$circle_tags" >>"$GITHUB_OUTPUT"
+        echo "math_tags=$math_tags" >>"$GITHUB_OUTPUT"
 
     - name: "Setup Docker Buildx"
       uses: docker/setup-buildx-action@v2
