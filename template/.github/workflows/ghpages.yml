@@ -24,7 +24,7 @@ jobs:
 
     - name: "Setup"
       id: setup
-      run: date -u "+::set-output name=date::%FT%T"
+      run: date -u "+date=%FT%T" >>"$GITHUB_OUTPUT"
 
     - name: "Caching"
       uses: actions/cache@v3
