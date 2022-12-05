@@ -65,7 +65,7 @@ for f in $(1); do \
 done
 endef
 
-.PHONY: update-readme update-codeowners update-files update-venue update-ci
+.PHONY: update-readme update-codeowners update-files update-venue update-ci update-workflows
 update-readme:
 	$(call regenerate,README.md)
 
@@ -92,5 +92,6 @@ update-venue: $(drafts_source)
 	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \
 	fi
 
+update-workflows: update-ci
 update-ci:
 	$(call regenerate,$(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml update.yml))
