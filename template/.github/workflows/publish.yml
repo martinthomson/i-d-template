@@ -44,6 +44,6 @@ jobs:
         make: upload
 
     - name: "Archive Submitted Drafts"
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        path: "draft-*-[0-9][0-9].xml"
+        path: "versioned/draft-*-[0-9][0-9].*"
