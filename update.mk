@@ -28,11 +28,9 @@ auto_update:
 	$(MAKE) update-deps
 
 update:  auto_update
-	@[ ! -r circle.yml ] || \
-	  echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
-	@for i in Makefile $(addprefix .github/workflows/,archive.yml ghpages.yml publish.yml update.yml) .circleci/config.yml; do \
-	  [ -f $$i -a -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
-	    echo $$i is out of date, check $(LIBDIR)/template/$$i for changes.; \
+	@for i in Makefile $(addprefix .github/workflows/,archive.yml ghpages.yml publish.yml update.yml); do \
+	  [ -f "$$i" -a -z "$$(comm -13 --nocheck-order $$i $(LIBDIR)/template/$$i)" ] || \
+	    echo "warning: $$i is out of date, run \`make update-files\` to update it."; \
 	done
 	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile && \
 	  [ `git status --porcelain Makefile | grep '^[A-Z]' | wc -l` -eq 0 ] || git $(CI_AUTHOR) commit -m "Update Makefile" Makefile
@@ -66,16 +64,16 @@ done
 endef
 
 .PHONY: update-readme update-codeowners update-files update-venue update-ci update-workflows
-update-readme:
+update-readme: auto_update
 	$(call regenerate,README.md)
 
 update-codeowners:
 	$(call regenerate,.github/CODEOWNERS)
 
 ifneq (true,$(CI))
-update-files: update-ci
+update-files: auto_update update-ci
 else
-update-files:
+update-files: auto_update
 endif
 	$(call regenerate,README.md Makefile .github/CODEOWNERS)
 	# .gitignore is fiddly and therefore requires special handling
@@ -85,13 +83,13 @@ endif
 	  git $(CI_AUTHOR) commit -m "Automatic update of .gitignore"; \
 	fi
 
-update-venue: $(drafts_source)
-	./$(LIBDIR)/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $^
-	@if ! git diff --quiet @ $^; then \
-	  git add $^; \
+update-venue: auto_update $(drafts_source)
+	./$(LIBDIR)/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter-out auto_update,$^)
+	@if ! git diff --quiet @ $(filter-out auto_update,$^); then \
+	  git add $(filter-out auto_update,$^); \
 	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \
 	fi
 
 update-workflows: update-ci
-update-ci:
+update-ci: auto_update
 	$(call regenerate,$(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml update.yml))
