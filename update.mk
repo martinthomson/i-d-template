@@ -1,3 +1,7 @@
+.PHONY: update auto_update update-deps
+.SILENT: auto_update
+.IGNORE: auto_update
+
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
@@ -20,9 +24,6 @@ ifeq (true,$(UPDATE_NEEDED))
 latest next:: auto_update
 endif
 
-.PHONY: update auto_update update-deps
-.SILENT: auto_update
-.IGNORE: auto_update
 auto_update:
 	$(UPDATE_COMMAND)
 	$(MAKE) update-deps
@@ -40,6 +41,9 @@ update:  auto_update
 	  [ -L "$$dotgit"/hooks/pre-push ] || \
 	    ln -s ../../$(LIBDIR)/pre-push.sh "$$dotgit"/hooks/pre-push
 
+else
+.PHONY: auto_update
+auto_update:
 endif # CI
 
 define regenerate
