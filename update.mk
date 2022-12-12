@@ -42,8 +42,9 @@ update:  auto_update
 	    ln -s ../../$(LIBDIR)/pre-push.sh "$$dotgit"/hooks/pre-push
 
 else
-.PHONY: auto_update
+# In CI, do nothing when asked to update.
 auto_update:
+update:
 endif # CI
 
 define regenerate
