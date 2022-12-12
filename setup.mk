@@ -19,7 +19,7 @@ LATEST_WARNING := $(strip $(foreach draft,$(filter-out rfc%,$(drafts_source)),\
 ifneq (,$(LATEST_WARNING))
 $(error Check names: $(LATEST_WARNING))
 endif
-ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | egrep -v '^.. (.gitignore|.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
+ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | grep -E -v '^.. (.gitignore|.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
 $(error You have uncommitted changes or untracked files, please commit them before running setup)
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
