@@ -7,7 +7,8 @@ hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 branch="$1"
 shift
 
-git fetch -qf origin "$branch:$branch"
+# Fetch here, but don't abort on failure.
+git fetch -qf origin "$branch:$branch" >/dev/null 2>&1 || true
 if git show-ref -s "$branch" >/dev/null 2>&1; then
     echo "The $branch branch already exists, skipping setup."
     exit
