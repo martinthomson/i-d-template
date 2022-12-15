@@ -26,7 +26,8 @@ the name of the source file.  For the above example, the tag will submit a draft
 named `draft-ietf-unicorn-protocol.md` or `draft-ietf-unicorn-protocol.xml`.
 
 If you have multiple drafts that you are submitting together, tag them all then
-push the tags at the same time.  Circle CI has a [bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
+push the tags at the same time.  Circle CI has a
+[bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
 that prevents `git push --tags` from triggering builds if you have multiple
 drafts, but pushing individual tags in quick succession will work.
 
@@ -51,6 +52,9 @@ Once the CI system has built the draft, it will publish it automatically and you
 will receive an email asking you to confirm the submission.  You don't need to
 have a GitHub account token configured for this feature to be enabled.
 
+If you have renamed a draft, this will also set the "replaces" field for you
+automatically, based on the git history of the file.
+
 
 <a name="release"></a>
 ## GitHub Release
@@ -58,7 +62,7 @@ have a GitHub account token configured for this feature to be enabled.
 Creating a GitHub release using the intended draft name is an easy way to submit
 versions without using the command line.  Simply publish a new release that uses
 a tag in the form `draft-<author>-<wg>-<name>-<vv>`.  GitHub Actions will take
-care of generating XML and submitting it to the datatracker.
+care of generating XML and submitting it to the datatracker; see above.
 
 This will attribute the submission to the first author listed in the draft, no
 matter who generated the release, just like with a lightweight tag.

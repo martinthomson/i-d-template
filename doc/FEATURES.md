@@ -34,7 +34,8 @@ $ make upload
 ```
 
 Upload tagged changes to the IETF datatracker using the
-[API](https://datatracker.ietf.org/api/submit).
+[API](https://datatracker.ietf.org/api/submit).  This will also manage draft
+renames by setting the "replaces" field.
 
 ```sh
 $ make lint
