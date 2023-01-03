@@ -995,3 +995,7 @@ svg :is([fill="black"], [fill^="#000"], :not([fill])) {
 svg :is([stroke="fill"], [fill^="#fff"]) {
   fill: var(--background-color);
 }
+
+svg :is([fill="white"], [fill="#fff"]) {
+  fill: var(--background-color);
+}
