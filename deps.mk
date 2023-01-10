@@ -38,11 +38,13 @@
 #
 ## Manual Additions
 #
-# To manually add dependencies, follow the pattern below:
+# To manually add dependencies, edit your `Makefile` as follows.
 #
 # 1. Choose a file you will use as a marker to track installation and add that
 #    to `$(DEPS_FILES)`:
-#        DEPS_FILES += .example
+#        DEPS_FILES := .example
+#    This change needs to appear *before* the `include $(LIBDIR)/main.mk`
+#    line of the `Makefile`; subsequent changes can be put below.
 # 2. Add the marker file to your `.gitignore`
 # 3. Add a recipe for the marker file that installs the tool.  If your
 #    installation depends on local files, add those as dependencies.  Make
