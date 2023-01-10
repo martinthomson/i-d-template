@@ -70,6 +70,8 @@
 #
 # Note that the CI images are based on Alpine Linux, which uses `apk`:
 #    https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
+# and the "main" and "community" package repositories (by default):
+#    https://pkgs.alpinelinux.org/packages
 
 .PHONY: deps clean-deps update-deps
 
