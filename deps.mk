@@ -50,10 +50,26 @@
 #        .example: example.cfg
 #                @install-example --config $^
 #                @touch $@
-# 4. (Optionally) Add a dependency to `update-deps` that updates the tool.
-#    This allows people to update the tool periodically to catch changes
-#    in the tool outside of the local repository (such as new releases).
-# 5. Add a dependency to `clean-deps` to remove the tool.
+# 4. If necessary, add the tool to `$(PATH)`.
+# 5. (Optionally) Add a dependency to `update-deps` that updates the tool.
+#    This allows people to update the tool periodically to catch changes in
+#    the tool outside of the local repository (such as new releases).  No
+#    need to do this if you are only installing in CI builds (as below).
+# 6. Add a dependency to `clean-deps` to remove the tool.
+# 7. (Optionally) Add steps to the workflow files so that the tool is
+#    cached between builds in CI.
+#
+# Generally, it is better to install tools in a subdirectory as that does
+# not require alterations to the system that might be disruptive.  However,
+# that can mean that you can't use prebuilt binaries (such as those that
+# are included in an OS distribution).
+#
+# If you use the OS packagage manager, you should only do that in CI by
+# enclosing the above changes in `ifeq(true,$(CI))`. For contributors,
+# document the installation process they should follow.
+#
+# Note that the CI images are based on Alpine Linux, which uses `apk`:
+#    https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 
 .PHONY: deps clean-deps update-deps
 
