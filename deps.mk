@@ -42,22 +42,22 @@
 #
 # 1. Choose a file you will use as a marker to track installation and add that
 #    to `$(DEPS_FILES)`:
-#        DEPS_FILES := .example
+#        DEPS_FILES := .example.dep
 #    This change needs to appear *before* the `include $(LIBDIR)/main.mk`
 #    line of the `Makefile`; subsequent changes can be put below.
 # 2. Add the marker file to your `.gitignore`
 # 3. Add a recipe for the marker file that installs the tool.  If your
 #    installation depends on local files, add those as dependencies.  Make
 #    sure to touch the marker file when you do this.
-#        .example: example.cfg
-#                @install-example --config $^
-#                @touch $@
+#     .example.dep: example.cfg
+#             @install-example --config $^
+#             @touch $@
 # 4. If necessary, add the tool to `$(PATH)`.
 # 5. (Optionally) Add a dependency to `update-deps` that updates the tool.
 #    This allows people to update the tool periodically to catch changes in
 #    the tool outside of the local repository (such as new releases).  No
 #    need to do this if you are only installing in CI builds (as below).
-# 6. Add a dependency to `clean-deps` to remove the tool.
+# 6. (Optionally) Add a dependency to `clean-deps` to remove the tool.
 # 7. (Optionally) Add steps to the workflow files so that the tool is
 #    cached between builds in CI.
 #
@@ -66,11 +66,25 @@
 # that can mean that you can't use prebuilt binaries (such as those that
 # are included in an OS distribution).
 #
-# If you use the OS packagage manager, you should only do that in CI by
-# enclosing the above changes in `ifeq(true,$(CI))`. For contributors,
-# document the installation process they should follow.
+## Using OS Package Manager in CI
 #
-# Note that the CI images are based on Alpine Linux, which uses `apk`:
+# If you use the OS packagage manager, you should only do that in CI by making
+# the installation conditional on `$(CI)`.  This isn't simple as you won't have
+# access to this variable when you set `$(DEPS_FILES)`.  So rather than making
+# that addition conditional, make it unconditional and change the recipe:
+#     .example.dep: example.cfg
+#     ifeq(true,$(CI))
+#             @install-example --config $^
+#     else
+#             # maybe test if the tool is present
+#             # then print a warning and fail if it isn't
+#     endif
+#             @touch $@
+#
+# The additions to `update-deps` and `clean-deps` are unnecessary if you only
+# make changes in CI.
+#
+# CI images are based on Alpine Linux, which uses `apk`:
 #    https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 # and the "main" and "community" package repositories (by default):
 #    https://pkgs.alpinelinux.org/packages
