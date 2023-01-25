@@ -369,11 +369,11 @@ dl > dd > dl {
 a, a[href].selfRef:hover {
   text-decoration: none;
 }
-a[href].selfRef {
-  color: var(--text-color);
-}
 a[href] {
   color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
 }
 a[href]:hover {
   text-decoration: underline;
