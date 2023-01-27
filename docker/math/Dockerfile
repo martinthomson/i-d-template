@@ -5,7 +5,7 @@ FROM ${REGISTRY}/martinthomson/i-d-template-action:${VERSION}
 RUN set -e; \
     apk add --no-cache --virtual .locale_build musl-dev gcc gettext-dev bmake autoconf automake libtool; \
     tmp=$(mktemp -d /tmp/utftex-XXXXX); \
-    git clone --depth=1 https://github.com/bartp5/libtexprintf "$tmp"; \
+    git clone --depth=1 --branch dev https://github.com/bartp5/libtexprintf "$tmp"; \
     cd "$tmp"; \
     ./autogen.sh; \
     ./configure; \
