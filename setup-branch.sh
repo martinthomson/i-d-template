@@ -26,7 +26,7 @@ git -C "$tmp" checkout -q --orphan "$branch"
 git -C "$tmp" rm -rfq .
 
 echo Creating .gitignore and initial files
-echo "/${LIBDIR:-"$(realpath "$(dirname "$0")")"}/" > "$tmp"/.gitignore
+echo "/${LIBDIR:-"$(basename "$(dirname "$0")")"}/" > "$tmp"/.gitignore
 echo "/node_modules/" >> "$tmp"/.gitignore
 echo "/package-lock.json" >> "$tmp"/.gitignore
 echo "/.requirements.txt" >> "$tmp"/.gitignore
