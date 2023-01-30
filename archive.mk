@@ -18,10 +18,27 @@ ifeq (,$(GITHUB_API_TOKEN))
 DISABLE_ARCHIVE_FETCH := true
 endif
 
+archive_script = $(trace) archive -s archive-repo \
+		 $(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN)
+ifeq (true,$(ARCHIVE_FULL))
+define archive_issues
+echo $(archive_script) $(1); \
+$(archive_script) $(1)
+endef
+else
+define archive_issues
+old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
+trap 'rm -f $$old_archive' EXIT; \
+git show $(ARCHIVE_BRANCH):$(1) > $$old_archive || true; \
+echo $(archive_script) $(1) --reference $$old_archive; \
+$(archive_script) $(1) --reference $$old_archive
+endef
+endif
+
 ## Store a copy of any GitHub issues and pull requests.
 .PHONY: archive
 archive: archive.json
-archive.json: fetch-archive $(drafts_source)
+archive.json: fetch-archive $(drafts_source) $(DEPS_FILES)
 	@if [ -f $@ ] && [ "$(call file_size,$@)" -gt 0 ] && \
 	    [ "$(call last_modified,$@)" -gt "$(call last_commit,$(ARCHIVE_BRANCH),$@)" ] 2>/dev/null; then \
 	  echo 'Skipping update of $@ (it is newer than the ones on the branch)'; exit; \
@@ -36,13 +53,9 @@ archive.json: fetch-archive $(drafts_source)
 	    git show $(ARCHIVE_BRANCH):$@ > $@ || true; \
 	    exit; \
 	fi; \
-	old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
-	trap 'rm -f $$old_archive' EXIT; \
-	git show $(ARCHIVE_BRANCH):$@ > $$old_archive || true; \
-	$(python) -m archive-repo archive $(GITHUB_REPO_FULL) $(GITHUB_API_TOKEN) $@ --reference $$old_archive;
+	$(call archive_issues,$@)
 
-
-ARCHIVE_ROOT := /tmp/gharchive$(shell echo $$$$)
+ARCHIVE_ROOT := /tmp/gharchive$(PID)
 $(ARCHIVE_ROOT): fetch-archive
 	@git show-ref refs/heads/$(ARCHIVE_BRANCH) >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/$(ARCHIVE_BRANCH) >/dev/null 2>&1 && \
@@ -55,6 +68,10 @@ $(ARCHIVE_ROOT)/%.json: %.json $(ARCHIVE_ROOT)
 
 ## Commit and push the changes to $(ARCHIVE_BRANCH)
 .PHONY: gh-archive
+ifneq (,$(MAKE_TRACE))
+gh-archive:
+	@$(call MAKE_TRACE,gh-archive)
+else
 gh-archive: $(ARCHIVE_ROOT)/archive.json
 	cp -f $(LIBDIR)/template/issues.html $(LIBDIR)/template/issues.js $(ARCHIVE_ROOT)
 	@-git -C $(ARCHIVE_ROOT) rm --ignore-unmatch -f issues.json pulls.json
@@ -63,15 +80,21 @@ gh-archive: $(ARCHIVE_ROOT)/archive.json
 	  git -C $(ARCHIVE_ROOT) $(CI_AUTHOR) commit -m "Script updating archive at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_PUSH_TOKEN),,1)))
-	git -C $(ARCHIVE_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
+	$(trace) archive -s archive-push git -C $(ARCHIVE_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
 else
 	@echo git -C $(ARCHIVE_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
-	@git -C $(ARCHIVE_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1
+	@git -C $(ARCHIVE_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1 \
+	  || $(trace) all -s archive-push ! echo "git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)"
 endif
 else
-	git -C $(ARCHIVE_ROOT) push -f origin $(ARCHIVE_BRANCH)
+ifeq (true,$(CI))
+	@echo "*** Warning: pushing to the gh-pages branch is disabled."
+else
+	$(trace) all -s archive-push git -C $(ARCHIVE_ROOT) push -f origin $(ARCHIVE_BRANCH)
+endif
 endif # PUSH_GHPAGES
 	-rm -rf $(ARCHIVE_ROOT)
+endif # MAKE_TRACE
 
 ## Save archive.json to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))

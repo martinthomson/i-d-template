@@ -9,9 +9,11 @@ format="$1"
 root=$(realpath "${2:-.}")
 user="${4:-<user>}"
 repo="${5:-<repo>}"
-default_branch="${DEFAULT_BRANCH:-$($(dirname "$0")/default-branch.py)}"
+default_branch="${DEFAULT_BRANCH:-$("$(dirname "$0")/default-branch.py")}"
 branch="${3:-$default_branch}"
-libdir="${LIBDIR:-$(realpath $(dirname "$0"))}"
+libdir="${LIBDIR:-"$(realpath "$(dirname "$0")")"}"
+[[ -n "$VENV" ]] && python="${python:-"${VENV}/python"}"
+python="${python:-python3}"
 shift 5
 # Remaining arguments (now $@) are source files
 all_drafts=("$@")
@@ -19,25 +21,38 @@ all_drafts=("$@")
 gh="https://github.com/${user}/${repo}"
 
 function rfcdiff() {
-    echo "https://www.ietf.org/rfcdiff?url1=${1}&amp;url2=${2}"
+    echo "https://www.ietf.org/rfcdiff?url1=${1}&url2=${2}"
 }
 
 function reldot() {
-    [[ "$1" = "$root" ]] && echo '.' || echo "${1/$root\//}"
+    [[ "$1" = "$root" ]] && echo '.' || echo "${1/"$root"\//}"
 }
 
 function githubio() {
     d="${1%/}/"
-    echo "https://${user}.github.io/${repo}/${d#$default_branch/}${2}.txt"
+    echo "https://${user}.github.io/${repo}/${d#"$default_branch"/}${2}.txt"
 }
 
 function githubcom() {
     echo "https://github.com/${user}/${repo}/${1}"
 }
 
+DATERE='[0-9]* [A-Z][a-z]* 20[0-9][0-9]'
+IGNOREDATE=(
+    'sed' '-e' "/^   This Internet-Draft will expire on ${DATERE}./d"
+    '-e' "s/^Expires: $DATERE/Expires: DATEHERE/"
+    '-e' 's/\(.\{56\}\).\{11\} 20[0-9][0-9]$/\1/'
+)
 
 if [[ "$format" = "html" ]]; then
     indent=''
+    function q() {
+        v="${1//&/&amp;}"
+        echo "${v//</&lt;}"
+    }
+    function qq() {
+        q '"'"$1"'"'
+    }
     function w() {
         echo -n "$indent";echo "$@"
     }
@@ -53,15 +68,13 @@ if [[ "$format" = "html" ]]; then
       w "<$1>$2</$1>"
     }
     function a() {
-        url=$1
-        text=$2
-        shift 2
-        if [ $# -gt 0 ]; then
-            cls=' class="'"$*"'"'
-        else
-            cls=''
-        fi
-        echo '<a href="'"$url"'"'"$cls"'>'"$text"'</a>'
+        url="$1"
+        txt="$2"
+        cls="$3"
+        ttl="$4"
+        [[ -n "$cls" ]] && cls=" class=$(qq "$cls")"
+        [[ -n "$ttl" ]] && ttl=" title=$(qq "$ttl")"
+        echo "<a href=$(qq $url)$cls$ttl>$(q "$txt")</a>"
     }
 
     function td() {
@@ -77,7 +90,7 @@ if [[ "$format" = "html" ]]; then
         wo "</tr>"
     }
     function table_i() {
-        wi '<table id="'"$1"'">'
+        wi "<table id=$(qq "branch-$1")>"
     }
     function table_o() {
         wo '</table>'
@@ -92,33 +105,49 @@ if [[ "$format" = "html" ]]; then
       e p "$@"
     }
 elif [[ "$format" = "md" ]]; then
+    function q() {
+        v="$1"
+        shift
+        for c in "$@"; do
+            v="${v//${c}/\\${c}}"
+        done
+        echo "$v"
+    }
     function w() {
         echo "$@"
     }
     function wi() {
-        true
+        :
     }
     function wo() {
-        true
+        :
     }
     function a() {
-        echo "[$2]($1)"
+        url="$1"
+        txt="$2"
+        ttl="$4"
+        [[ -n "$ttl" ]] && ttl=" \"$(q "$ttl" '"')\""
+        echo "[$(q "$txt" "]")]($(q "$url" ")")$ttl)"
     }
     function td() {
-        echo -n "$1 |"
+        echo -n " $1 |"
     }
     function th() {
-        echo -n "$1 |"
+        echo -n " $1 |"
     }
     function tr_i() {
-        echo -n "| "
+        echo -n "|"
     }
     function tr_o() {
         echo
     }
     function table_i() {
-        echo "| Draft |     |     |     |     |     |     |"
-        echo "| ----- | --- | --- | --- | --- | --- | --- |"
+        extra=""
+        if [[ "$1" == "$2" ]]; then
+            extra=" --- | --- |"
+        fi
+        echo "| Draft |     |     |     |${extra//-/ }"
+        echo "| ----- | --- | --- | --- |${extra}"
     }
     function table_o() {
         echo
@@ -152,7 +181,7 @@ function issue_label() {
     fi
     for i in "${all_drafts[@]}"; do
         if [[ "${i%.*}" == "$file" ]]; then
-            label=$("${libdir}/extract-metadata.py" "$i" github-issue-label)
+            label=$("$python" "${libdir}/extract-metadata.py" "$i" github-issue-label)
             [[ -z "$disable_cache" ]] && issue_labels[file]="x$label"
             echo "$label"
             return
@@ -178,38 +207,57 @@ if [[ "$format" = "html" ]]; then
     wi '<body>'
 fi
 
+tmpfiles=()
+trap 'rm -f "${tmpfiles[@]}"' EXIT
 function list_dir() {
-    files=($(find "$1" -maxdepth 1 \( -name 'draft-*.txt' -o -name 'rfc*.txt' \) -print))
+    dir="$1"
+    branch="$2"
+    files=($(find "$dir" -maxdepth 1 \( -name 'draft-*.txt' -o -name 'rfc*.txt' \) -print))
     if [[ "${#files[@]}" -eq 0 ]]; then
         return
     fi
-    table_i "branch-$2"
+    table_i "$branch" "$default_branch"
     for file in "${files[@]}"; do
         dir=$(dirname "$file")
         file=$(basename "$file" .txt)
 
         tr_i
-        src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
-        title=$("${libdir}/extract-metadata.py" "$src" abbrev)
-        td "$(a "$(reldot "$dir")/${file}.html" "${title}" html "$file")"
-        td "$(a "$(reldot "$dir")/${file}.txt" "plain text" txt "$file")"
-        td $(a "https://datatracker.ietf.org/doc/${file}" 'datatracker' dt "$file")
-        this_githubio=$(githubio "$branch${dir#$root}" "$file")
-        if [[ "$2" != "$default_branch" ]]; then
-            diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
-            td "$(a "$diff" 'diff with '"$default_branch")"
-        fi
-        diff=$(rfcdiff "$file" "$this_githubio")
-        td "$(a "$diff" 'diff with last submission' diff "$file")"
-        if [[ "${#files[@]}" -eq 1 ]]; then
-            td ""
+        src="${branch}:$(git ls-tree --name-only "$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
+        [[ -n "${src##*:}" ]] || \
+            src="origin/${branch}:$(git ls-tree --name-only "origin/$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
+        if [[ -n "${src##*:}" ]]; then
+            tmp="$(mktemp "/tmp/build-index$$-XXXXXX").${src##*.}"
+            tmpfiles+=("$tmp")
+            git show "$src" >"$tmp"
+            src="$tmp"
         else
-            label=$(issue_label "$file")
-            if [[ -n "$label" ]]; then
-                td "$(a $(githubcom labels/$label) "issues")"
-            else
+            # Fallback to the file in the current directory.
+            src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
+        fi
+        abbrev=$("$python" "${libdir}/extract-metadata.py" "$src" abbrev)
+        title=$("$python" "${libdir}/extract-metadata.py" "$src" title)
+        td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
+        td "$(a "$(reldot "$dir")/${file}.txt" "plain text" "txt $file" "$title (Text)")"
+        this_githubio=$(githubio "$branch" "$file")
+        if [[ "$2" == "$default_branch" ]]; then
+            td "$(a "https://datatracker.ietf.org/doc/${file}" datatracker "dt $file" "Datatracker for $file")"
+            diff=$(rfcdiff "$file" "$this_githubio")
+            td "$(a "$diff" 'diff with last submission' "diff $file")"
+            if [[ "${#files[@]}" -eq 1 ]]; then
                 td ""
+            else
+                label=$(issue_label "$file")
+                if [[ -n "$label" ]]; then
+                    td "$(a "$(githubcom labels/$label)" issues "issues $file")"
+                else
+                    td ""
+                fi
             fi
+        elif diff -q <("${IGNOREDATE[@]}" "${root}/${file}.txt") <("${IGNOREDATE[@]}" "${dir}/${file}.txt") >/dev/null; then
+            td "same as $default_branch"
+	else
+            diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
+            td "$(a "$diff" 'diff with '"$default_branch" "diff $file")"
         fi
         tr_o
     done
@@ -218,10 +266,10 @@ function list_dir() {
 
 branchlink="$gh"
 [[ "$branch" = "$default_branch" ]] || branchlink="${branchlink}/tree/${branch}"
-h1 "Editor's drafts for ${branch} branch of $(a "$branchlink" "${user}/${repo}")"
+h1 "Editor's drafts for $(q "$branch") branch of $(a "$branchlink" "${user}/${repo}")"
 p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests") in the $(a "${gh}" repo)."
 
-list_dir "${root}" $branch
+list_dir "${root}" "$branch"
 
 for dir in $(find "${root}" -mindepth 1 -type d \( -name '.*' -prune -o -print \)); do
     dir_branch="${dir#$root/}"
@@ -232,10 +280,6 @@ done
 if [ "$format" = "html" ]; then
     wi '<script>'
     cat <<EOJS
-// @licstart
-//  Any copyright is dedicated to the Public Domain.
-//  http://creativecommons.org/publicdomain/zero/1.0/
-// @licend
 window.onload = function() {
   var referrer_branch = '$default_branch';
   // e.g., "https://github.com/user/repo/tree/$default_branch"

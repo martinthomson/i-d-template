@@ -1,3 +1,7 @@
+.PHONY: update auto_update update-deps
+.SILENT: auto_update
+.IGNORE: auto_update
+
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
@@ -12,27 +16,22 @@ NOW = $$(date '+%s')
 ifeq (,$(FETCH_HEAD))
 UPDATE_NEEDED = false
 else
-UPDATE_INTERVAL = 1209600 # 2 weeks
+UPDATE_INTERVAL := 1209600 # 2 weeks
 UPDATE_NEEDED = $(shell [ $$(($(NOW) - $(call last_modified,$(FETCH_HEAD)))) -gt $(UPDATE_INTERVAL) ] && echo true)
 endif
 
-ifeq (true, $(UPDATE_NEEDED))
-latest submit:: auto_update
+ifeq (true,$(UPDATE_NEEDED))
+latest next:: auto_update
 endif
 
-.PHONY: auto_update
-.SILENT: auto_update
-.IGNORE: auto_update
 auto_update:
 	$(UPDATE_COMMAND)
+	$(MAKE) update-deps
 
-.PHONY: update
 update:  auto_update
-	@[ ! -r circle.yml ] || \
-	  echo circle.yml has been replaced by .circleci/config.yml. Please update from $(LIBDIR)/template.
-	@for i in Makefile .travis.yml .circleci/config.yml; do \
-	  [ -z "$(comm -13 $$i $(LIBDIR)/template/$$i)" ] || \
-	    echo $$i is out of date, check against $(LIBDIR)/template/$$i for changes.; \
+	@for i in Makefile $(addprefix .github/workflows/,archive.yml ghpages.yml publish.yml update.yml); do \
+	  [ -f "$$i" -a -z "$$(comm -13 --nocheck-order $$i $(LIBDIR)/template/$$i)" ] || \
+	    echo "warning: $$i is out of date, run \`make update-files\` to update it."; \
 	done
 	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile && \
 	  [ `git status --porcelain Makefile | grep '^[A-Z]' | wc -l` -eq 0 ] || git $(CI_AUTHOR) commit -m "Update Makefile" Makefile
@@ -42,6 +41,10 @@ update:  auto_update
 	  [ -L "$$dotgit"/hooks/pre-push ] || \
 	    ln -s ../../$(LIBDIR)/pre-push.sh "$$dotgit"/hooks/pre-push
 
+else
+# In CI, do nothing when asked to update.
+auto_update:
+update:
 endif # CI
 
 define regenerate
@@ -54,7 +57,7 @@ for f in $(1); do \
   else \
     amend=; orig=@; \
   fi; \
-  $(MAKE) -f $(LIBDIR)/setup.mk "$$f"; \
+  $(MAKE) -f $(LIBDIR)/setup.mk CHECK_BRANCH=false "$$f"; \
   git add "$$f"; \
   if ! git diff --quiet --cached "$$orig"; then \
     echo "Updating $$f"; \
@@ -65,18 +68,33 @@ for f in $(1); do \
 done
 endef
 
-.PHONY: update-readme update-codeowners update-files
-update-readme:
+.PHONY: update-readme update-codeowners update-files update-venue update-ci update-workflows
+update-readme: auto_update
 	$(call regenerate,README.md)
 
 update-codeowners:
 	$(call regenerate,.github/CODEOWNERS)
 
-update-files:
-	$(call regenerate,README.md Makefile .github/CODEOWNERS .note.xml)
+ifneq (true,$(CI))
+update-files: auto_update update-ci
+else
+update-files: auto_update
+endif
+	$(call regenerate,README.md Makefile .github/CODEOWNERS)
 	# .gitignore is fiddly and therefore requires special handling
-	$(MAKE) -f $(LIBDIR)/setup.mk setup-gitignore
+	$(MAKE) -f $(LIBDIR)/setup.mk CHECK_BRANCH=false setup-gitignore
 	@if ! git diff --quiet @ .gitignore; then \
 	  git add .gitignore; \
 	  git $(CI_AUTHOR) commit -m "Automatic update of .gitignore"; \
 	fi
+
+update-venue: auto_update $(drafts_source)
+	./$(LIBDIR)/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter-out auto_update,$^)
+	@if ! git diff --quiet @ $(filter-out auto_update,$^); then \
+	  git add $(filter-out auto_update,$^); \
+	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \
+	fi
+
+update-workflows: update-ci
+update-ci: auto_update
+	$(call regenerate,$(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml update.yml))

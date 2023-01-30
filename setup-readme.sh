@@ -4,7 +4,7 @@
 
 user="$1"
 repo="$2"
-default_branch="${DEFAULT_BRANCH:-$($(dirname "$0")/default-branch.py)}"
+default_branch="${DEFAULT_BRANCH:-$("$(dirname "$0")/default-branch.py")}"
 shift 2
 
 githubio="https://${user}.github.io/${repo}/#go"
@@ -23,13 +23,13 @@ function fixup_other_md() {
 
 function get_title() {
     if hash xmllint >/dev/null 2>&1; then
-        title=($(xmllint --xpath '/rfc/front/title/text()' "$1"))
+        t=($(xmllint --xpath '/rfc/front/title/text()' "$1"))
     else
         # sed kludge if xmllint isn't available
-        title=($(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$1"))
+        t=($(sed -e '/<title[^>]*>/,/<\/title>/{s/.*<title[^>]*>//;/<\/title>/{s/<\/title>.*//;H;x;q;};H;};d' "$1"))
     fi
     # haxx: rely on bash parameter normalization to remove redundant whitespace
-    echo "${title[*]}"
+    echo "${t[*]}"
 }
 
 first=true
@@ -119,8 +119,8 @@ if [ -n "$wg_all" ]; then
         ml_arch="$(xmllint --xpath '/response/objects/object[1]/list_archive/text()' "$tmp")"
         ml_sub="$(xmllint --xpath '/response/objects/object[1]/list_subscribe/text()' "$tmp")"
 
+        sed -i -e '/^## Working Group Info/,$ {1s///;t;d;}' CONTRIBUTING.md
         cat >>CONTRIBUTING.md <<EOF
-
 ## Working Group Information
 
 Discussion of this work occurs on the [${group_name}

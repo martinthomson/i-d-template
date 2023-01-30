@@ -46,34 +46,34 @@ def run_with_capture(context, command):
     print(context.error, file=sys.stderr)
 
 
-@when(u"the setup script is run")
+@when("the setup script is run")
 def step_impl(context):
     run_with_capture(context, ["make", "-f", "lib/setup.mk"] + offline_make_options)
 
 
-@when(u'the setup script is run with "{option}"')
+@when('the setup script is run with "{option}"')
 def step_impl(context, option):
     run_with_capture(
         context, ["make", "-f", "lib/setup.mk", option] + offline_make_options
     )
 
 
-@when(u"make is run")
+@when("make is run")
 def step_impl(context):
     run_with_capture(context, ["make"] + offline_make_options)
 
 
-@when(u'make "{target}" is run')
+@when('make "{target}" is run')
 def step_impl(context, target):
     run_with_capture(context, ["make", target] + offline_make_options)
 
 
-@when(u'make "{target}" is run with "{option}"')
+@when('make "{target}" is run with "{option}"')
 def step_impl(context, target, option):
     run_with_capture(context, ["make", target, option] + offline_make_options)
 
 
-@when(u"the draft is broken")
+@when("the draft is broken")
 def step_impl(context):
     with cd(context.working_dir):
         break_this = glob("draft-*.md")[0]
@@ -84,23 +84,23 @@ def step_impl(context):
         context.broken_file = break_this
 
 
-@when(u"the lib dir is removed")
+@when("the lib dir is removed")
 def step_impl(context):
     run_with_capture(context, ["rm", "-rf", "lib"])
 
 
-@when(u"lib is added as a submodule")
+@when("lib is added as a submodule")
 def step_impl(context):
     run_with_capture(context, ["git", "submodule", "add", "-f", os.getcwd(), "lib"])
 
 
-@when(u"git commit is run")
+@when("git commit is run")
 def step_impl(context):
     with cd(context.working_dir):
         run_with_capture(context, git_commit + ["-am", "Committing broken draft"])
 
 
-@when(u"a non-broken draft is committed")
+@when("a non-broken draft is committed")
 def step_impl(context):
     with cd(context.working_dir):
         drafts = glob("draft-*.md")

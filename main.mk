@@ -1,36 +1,38 @@
-.PHONY: all latest
+ifeq (,$(TRACE_FILE))
+SUMMARY_REPORT ?= $(GITHUB_STEP_SUMMARY)
+ifneq (,$(SUMMARY_REPORT))
+TRACE_FILE := $(shell mktemp)
+export TRACE_FILE
+
+define MAKE_TRACE
+$(MAKE) -k $(1); \
+  STATUS=$$?; \
+  $(LIBDIR)/format-trace.sh $(TRACE_FILE) $$STATUS >>$(SUMMARY_REPORT); \
+  rm -f $(TRACE_FILE); \
+  exit $$STATUS
+endef
+
+all::
+	@$(call MAKE_TRACE,latest lint)
+else
 all:: latest lint
+endif # SUMMARY_REPORT
+endif # TRACE_FILE
+
 latest:: txt html
 
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables --no-print-directory
+.PHONY: all latest
+.SUFFIXES:
 .DELETE_ON_ERROR:
 
 ## Modularity
 # Basic files (these can't rely on details from .targets.mk)
 LIBDIR ?= lib
+export LIBDIR
 include $(LIBDIR)/config.mk
 include $(LIBDIR)/id.mk
-
-# Now build .targets.mk, which contains details of draft versions.
-targets_file := .targets.mk
-targets_drafts := TARGETS_DRAFTS := $(drafts)
-targets_tags := TARGETS_TAGS := $(drafts_tags)
-
-ifeq (,$(DISABLE_TARGETS_UPDATE))
-# Note that $(shell ) folds multiple lines into one, which is OK here.
-ifneq ($(targets_drafts) $(targets_tags),$(shell head -2 $(targets_file) 2>/dev/null))
-$(warning Forcing rebuild of $(targets_file))
-# Force an update of .targets.mk by setting a double-colon rule with no
-# prerequisites if the set of drafts or tags it contains is out of date.
-.PHONY: $(targets_file)
-endif
-endif # DISABLE_TARGETS_UPDATE
-
-.SILENT: $(targets_file)
-$(targets_file): $(LIBDIR)/build-targets.sh
-	echo "$(targets_drafts)" >$@
-	echo "$(targets_tags)" >>$@
-	$< $(drafts) >>$@
-include $(targets_file)
+include $(LIBDIR)/deps.mk
 
 # Now include the advanced stuff that can depend on draft information.
 include $(LIBDIR)/ghpages.mk
@@ -49,45 +51,39 @@ pdf:: $(addsuffix .pdf,$(drafts))
 
 export XML_RESOURCE_ORG_PREFIX
 
-MD_PRE :=
+MD_PRE =
 ifneq (,$(MD_PREPROCESSOR))
-MD_PRE += | $(MD_PREPROCESSOR)
+MD_PRE += | $(trace) $@ -s preprocessor $(MD_PREPROCESSOR)
 endif
 ifneq (1,$(words $(drafts)))
 NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST := | $(LIBDIR)/add-note.py
+MD_POST = | $(trace) $@ -s venue $(python) $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
-MD_POST += | $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
+MD_POST += | $(trace) $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
 endif
-ifneq (,$(XML_TIDY))
-MD_POST += | $(XML_TIDY)
+ifeq (true,$(TIDY))
+MD_POST += | $(trace) $@ -s tidy $(rfc-tidy)
 endif
 
-%.xml: %.md
+%.xml: %.md $(DEPS_FILES)
 	@h=$$(head -1 $< | cut -c 1-4 -); set -o pipefail; \
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(kramdown-rfc2629) --v3 $(MD_POST) >$@; \
+	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
+	  cat $< $(MD_PRE) | $(trace) $@ -s kramdowm-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
 	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@; \
+	  cat $< $(MD_PRE) | $(trace) $@ -s mmark $(mmark) $(MD_POST) >$@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
 	fi && [ -e $@ ]
 
-ifdef REFCACHEDIR
-%.xml: .refcache
-.refcache: $(REFCACHEDIR)
-	ln -s $< $@
-endif
-
-%.xml: %.org
-	$(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
+%.xml: %.org $(DEPS_FILES)
+	$(trace) $@ -s oxtradoc $(oxtradoc) -m outline-to-xml -n "$@" $< | $(xml2rfc) --v2v3 /dev/stdin -o $@
 
 XSLTDIR ?= $(LIBDIR)/rfc2629xslt
 ifeq (true,$(USE_XSLT))
@@ -105,25 +101,25 @@ $(XSLTDIR):
 	git clone --depth 10 $(CLONE_ARGS) -b master https://github.com/reschke/xml2rfc $@
 
 %.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
-	$(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
+	$(trace) $@ -s xslt-clean $(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
 
 %.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
-	$(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
+	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
-%.txt: %.cleanxml
-	$(xml2rfc) $< -o $@ --text --no-pagination
+%.txt: %.cleanxml $(DEPS_FILES)
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 else
-%.html: %.xml $(XML2RFC_CSS)
-	$(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
+%.html: %.xml $(XML2RFC_CSS) $(DEPS_FILES)
+	$(trace) $@ -s xml2rfc-html $(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
-%.txt: %.xml
-	$(xml2rfc) $< -o $@ --text --no-pagination
+%.txt: %.xml $(DEPS_FILES)
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
 endif
 
 %.pdf: %.txt
-	$(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
+	$(trace) $@ -s enscript $(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
 
 ## Build copies of drafts for submission
 .PHONY: next
@@ -151,7 +147,7 @@ submit::
 .PHONY: check idnits
 check:: idnits
 idnits:: $(drafts_next_txt)
-	echo $^ | xargs -n 1 sh -c '$(idnits) $$0'
+	echo $^ | xargs -n 1 sh -c '$(trace) "$$0" -s idnits $(idnits) "$$0"'
 
 CODESPELL_ARGS :=
 ifneq (,$(wildcard ./.ignore-words))
@@ -160,7 +156,7 @@ endif
 
 .PHONY: spellcheck
 spellcheck:: $(drafts_source)
-	codespell $(CODESPELL_ARGS) $^
+	$(trace) $@ codespell $(CODESPELL_ARGS) $^
 
 ## Build diffs between the current draft versions and the most recent version
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
@@ -204,9 +200,10 @@ endif
 lint-whitespace::
 	@err=0; for f in $(drafts_source); do \
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
-	    echo "$$f has no newline on the last line"; err=1; \
+	    $(trace) "$$f" -s nl ! echo "$$f has no newline on the last line"; err=1; \
 	  fi; \
-	  if grep -n $$' \r*$$' "$$f"; then \
+	  if ! $(trace) "$$f" -s ws ! grep -n $$' \r*$$' "$$f"; then \
+	    $(if $(TRACE_FILE),echo "$${f%.*} ws $$f contains trailing whitespace" >>$(TRACE_FILE);) \
 	    echo "$$f contains trailing whitespace"; err=1; \
 	  fi; \
 	done; [ "$$err" -eq 0 ] || ! echo "*** Run 'make fix-lint' to automatically fix some errors" 1>&2
@@ -220,7 +217,7 @@ lint-default-branch::
 lint-docname::
 	@err=(); for f in $(drafts_source); do \
 	  if [ "$${f#draft-}" != "$$f" ] && ! grep -q "$${f%.*}-latest" "$$f"; then \
-	    echo "$$f does not contain its own name ($${f%.*}-latest)"; err=1; \
+	    $(trace) "$$f" -s lint-docname ! echo "$$f does not contain its own name ($${f%.*}-latest)"; err=1; \
 	  fi; \
 	done; [ "$${#err}" -eq 0 ] || ! echo "*** Correct the name of drafts in docname or similar fields" 1>&2
 
@@ -239,10 +236,13 @@ fix-lint-default-branch:
 
 ## Cleanup
 COMMA := ,
-.PHONY: clean
+.PHONY: clean clean-all
 clean::
 	-rm -f .tags $(targets_file) issues.json \
 	    $(addsuffix .{txt$(COMMA)html$(COMMA)pdf},$(drafts)) index.html \
 	    $(addsuffix -[0-9][0-9].{xml$(COMMA)md$(COMMA)org$(COMMA)txt$(COMMA)raw.txt$(COMMA)html$(COMMA)pdf},$(drafts)) \
 	    $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts))) \
 	    $(uploads) $(draft_diffs)
+clean-all:: clean clean-deps
+
+include $(LIBDIR)/targets.mk

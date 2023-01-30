@@ -2,9 +2,13 @@
 
 set -e
 
+hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
+
 branch="$1"
 shift
 
+# Fetch here, but don't abort on failure.
+git fetch -qf origin "$branch:$branch" >/dev/null 2>&1 || true
 if git show-ref -s "$branch" >/dev/null 2>&1; then
     echo "The $branch branch already exists, skipping setup."
     exit
@@ -22,9 +26,11 @@ git -C "$tmp" checkout -q --orphan "$branch"
 git -C "$tmp" rm -rfq .
 
 echo Creating .gitignore and initial files
-echo lib > "$tmp"/.gitignore
-echo venv >> "$tmp"/.gitignore
-echo .refcache >> "$tmp"/.gitignore
+echo "/${LIBDIR:-"$(basename "$(dirname "$0")")"}/" > "$tmp"/.gitignore
+echo "/node_modules/" >> "$tmp"/.gitignore
+echo "/package-lock.json" >> "$tmp"/.gitignore
+echo "/.requirements.txt" >> "$tmp"/.gitignore
+echo "/Gemfile.lock" >> "$tmp"/.gitignore
 for f in "$@"; do
     touch "$tmp"/"$f"
 done

@@ -41,7 +41,7 @@ PUSH_GHPAGES ?= false
 fetch-ghpages:
 	git fetch -qf origin gh-pages:gh-pages
 
-GHPAGES_ROOT := /tmp/ghpages$(shell echo $$$$)
+GHPAGES_ROOT := /tmp/ghpages$(PID)
 ghpages: $(GHPAGES_ROOT)
 $(GHPAGES_ROOT): fetch-ghpages
 	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
@@ -62,12 +62,12 @@ $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
 GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.$(INDEX_FORMAT)
-$(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
+$(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES)
 	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
 GHPAGES_ALL += $(GHPAGES_ROOT)/index.$(INDEX_FORMAT)
-$(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED)
+$(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES)
 	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(DEFAULT_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 endif
 
@@ -116,21 +116,31 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 
 .PHONY: ghpages gh-pages
 gh-pages: ghpages
+ifneq (,$(MAKE_TRACE))
+ghpages:
+	@$(call MAKE_TRACE,ghpages)
+else
 ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_PUSH_TOKEN),,1)))
-	git -C $(GHPAGES_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) gh-pages
+	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) gh-pages
 else
-	@echo git -C $(GHPAGES_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1
+	@echo git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) gh-pages
+	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1 \
+	  || $(trace) all -s ghpages-push ! echo "git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) gh-pages"
 endif
 else
-	git -C $(GHPAGES_ROOT) push -f origin gh-pages
+ifeq (true,$(CI))
+	@echo "*** Warning: pushing to the gh-pages branch is disabled."
+else
+	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f origin gh-pages
+endif
 endif # PUSH_GHPAGES
 	-rm -rf $(GHPAGES_ROOT)
+endif # MAKE_TRACE
 
 ## Save published documents to the CI_ARTIFACTS directory
 ifneq (,$(CI_ARTIFACTS))

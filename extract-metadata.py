@@ -6,16 +6,40 @@ import re
 import sys
 import xml
 import xml.sax
-import yaml
 
 
 def extract_md(filename):
     try:
         with open(filename, "r") as fh:
-            return next(yaml.safe_load_all(fh))
-    except IOError:
-        return {}
-    except yaml.YAMLError:
+            section_header = fh.readline().strip()
+            if section_header != r"%%%" and section_header != r"---":
+                raise Exception(
+                    'Unexpected first line in markdown file: got "{section_header}", expected `\%\%\%` or `---` '
+                )
+            header_data = ""
+            for line in fh:
+                if line.strip() == section_header:
+                    break
+                header_data += line
+            if section_header == r"---":
+                try:
+                    import yaml
+
+                    return next(yaml.safe_load_all(header_data))
+                except ImportError as err:
+                    raise Exception(
+                        "Unable to import python `yaml` library, needed for Kramdown processing"
+                    ) from err
+            if section_header == r"%%%":
+                try:
+                    import toml
+
+                    return toml.loads(header_data)
+                except ImportError as err:
+                    raise Exception(
+                        "Unable to import python `toml` library, needed for Mmark processing"
+                    ) from err
+    except Exception as err:
         return {}
 
 

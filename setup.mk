@@ -13,20 +13,22 @@ ifneq (1,$(words $(GIT_ORIG)))
 $(error If you are just starting out, please commit something before starting)
 endif
 
-LATEST_WARNING := $(strip $(foreach draft,$(drafts_source),\
+LATEST_WARNING := $(strip $(foreach draft,$(filter-out rfc%,$(drafts_source)),\
   $(shell grep -q $(basename $(draft))-latest $(draft) || \
       echo $(draft) should include a name of $(basename $(draft))-latest)))
 ifneq (,$(LATEST_WARNING))
 $(error Check names: $(LATEST_WARNING))
 endif
-ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | egrep -v '^.. (.gitignore|.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
+ifneq (,$(strip $(shell git status -s --porcelain 2>/dev/null | grep -E -v '^.. (.gitignore|.targets.mk|$(LIBDIR)/?|$(LIBDIR)/.template-files.mk)$$')))
 $(error You have uncommitted changes or untracked files, please commit them before running setup)
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
 $(error Please configure a remote called '$(GIT_REMOTE)' before running setup)
 endif
+ifneq (false,$(CHECK_BRANCH))
 ifeq (,$(shell git show-ref $(GIT_REMOTE)/$(GIT_ORIG)))
 $(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push $(GIT_REMOTE) $(GIT_ORIG)")
+endif
 endif
 
 TEMPLATE_FILES := Makefile .gitignore CONTRIBUTING.md LICENSE.md .editorconfig
@@ -47,7 +49,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 	  echo '	-cp $$< $$@' >>$@;)
 
 .PHONY: setup-files
-setup-files: $(TEMPLATE_FILES) README.md .note.xml .github/CODEOWNERS
+setup-files: $(TEMPLATE_FILES) README.md .github/CODEOWNERS
 	git add $(drafts_source)
 	git add $^
 
@@ -72,22 +74,26 @@ endif # INDEX_FORMAT
 .PHONY: setup-gitignore
 setup-gitignore: .gitignore $(LIBDIR)/template/.gitignore
 ifndef SUBMODULE
-	echo $(LIBDIR) >>$<
+	echo /$(LIBDIR) >>$<
 endif
 	$(foreach x,$(filter-out .xml,$(drafts_source)),\
 	  echo $(basename $(x)).xml >>$<;)
-	tmp=`mktemp`; cat $^ | sort -u >$$tmp && mv -f $$tmp $<
+	tmp=`mktemp`; \
+	  (cat $^ | grep -v '^!' | sort -u; cat $^ | grep '^!' | sort -u) >$$tmp && \
+	  mv -f $$tmp $<
 	git add $<
 
 README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
 	$(LIBDIR)/setup-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
 	git add $@ $(filter %.md, $(TEMPLATE_FILES))
 
-.note.xml: $(LIBDIR)/setup-note.sh
-	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts) >$@
-	git add $@
+.PHONY: setup-note
+setup-note: $(LIBDIR)/setup-note.sh
+	$(LIBDIR)/setup-note.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts_source) >.note.xml
+	if [ -s .note.xml ]; then git add .note.xml; fi
 
-.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml)
+.github/CODEOWNERS: $(LIBDIR)/setup-codeowners.py $(drafts_xml) $(DEPS_FILES)
+	mkdir -p $(dir $@)
 	$(python) $(LIBDIR)/setup-codeowners.py $(filter %.xml,$^) >$@
 	git add $@
 
@@ -96,13 +102,13 @@ setup-master:
 	$(error The setup-master make target was renamed to setup-default-branch)
 
 .PHONY: setup-default-branch
-setup-default-branch: setup-files README.md setup-gitignore
+setup-default-branch: setup-files README.md setup-gitignore setup-note
 	git $(CI_AUTHOR) commit -m "Setup repository for $(firstword $(drafts)) using https://github.com/martinthomson/i-d-template"
 
 .PHONY: setup-precommit
 setup-precommit: .git/hooks/pre-commit
 .git/hooks/pre-commit:
-	-ln -s ../../lib/pre-commit.sh $@
+	-ln -s ../../$(LIBDIR)/pre-commit.sh $@
 
 .PHONY: setup-ghpages
 setup-ghpages:

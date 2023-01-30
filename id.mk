@@ -1,7 +1,9 @@
 ## Identify drafts, types and versions
 
-drafts := $(sort $(basename $(wildcard $(foreach pattern,? *-[-a-z]? *-?[a-z] *[a-z0-9]??,$(foreach ext,xml org md,draft-$(pattern).$(ext))))))
-drafts += $(sort $(basename $(wildcard $(foreach ext,xml org md,rfc[0-9]*.$(ext)))))
+draft_patterns := draft draft-*[a-z] draft-*[-a-z][0-9] draft-*[a-z0-9][a-z0-9][0-9]
+extensions := xml org md
+drafts := $(sort $(basename $(wildcard $(foreach pattern,$(draft_patterns),$(foreach ext,$(extensions),$(pattern).$(ext))))))
+drafts += $(sort $(basename $(wildcard $(foreach n,d dd ddd dddd ddddd,$(foreach ext,$(extensions),rfc$(subst d,[0-9],$(n)).$(ext))))))
 
 ifeq (0,$(words $(drafts)))
 $(warning No file named draft-*.md or draft-*.xml or draft-*.org)
@@ -22,9 +24,8 @@ drafts_with_prev := $(foreach draft,$(filter draft-%,$(drafts)),$(if $(f_prev_ta
 drafts_txt := $(addsuffix .txt,$(drafts))
 drafts_html := $(addsuffix .html,$(drafts))
 drafts_xml := $(addsuffix .xml,$(drafts))
-drafts_next_txt := $(addsuffix .txt,$(drafts_next))
-drafts_next_xml := $(addsuffix .xml,$(drafts_next))
-drafts_prev_txt := $(addsuffix .txt,$(drafts_prev))
+drafts_next_txt := $(addprefix $(VERSIONED)/,$(addsuffix .txt,$(drafts_next)))
+drafts_next_xml := $(addprefix $(VERSIONED)/,$(addsuffix .xml,$(drafts_next)))
 
 last_modified = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(1))
 file_size = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%z' || echo -c '%s') $(1))
@@ -105,3 +106,5 @@ ifeq (,$(DEFAULT_BRANCH))
 DEFAULT_BRANCH := $(shell BRANCH_FETCH=$(BRANCH_FETCH) $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
 endif
 export DEFAULT_BRANCH
+
+PID := $(shell echo $$$$)

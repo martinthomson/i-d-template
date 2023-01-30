@@ -6,7 +6,7 @@ inputs:
   make:
     description: 'The make target to build'
     required: false
-    default: 'latest'
+    default: 'all'
 
   token:
     description: 'Set this to secrets.GITHUB_TOKEN'

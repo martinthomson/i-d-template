@@ -4,7 +4,7 @@ else
 draft_releases := $(shell git tag --list --points-at HEAD 'draft-*')
 endif
 
-uploads := $(addprefix .,$(addsuffix .upload,$(draft_releases)))
+uploads := $(addprefix $(VERSIONED)/.,$(addsuffix .upload,$(draft_releases)))
 
 ifneq (,$(TRAVIS))
 # Ensure that we build the XML files needed for upload during the main build.
@@ -13,16 +13,31 @@ endif
 
 .PHONY: upload publish
 publish: upload
+ifeq (,$(MAKE_TRACE))
 upload: $(uploads)
-	@[ -n "$^" ] || ! echo "error: No files to upload.  Did you use \`git tag -a\`?"
+else
+upload:
+endif
+	@[ -n "$(uploads)" ] || ! echo "error: No files to upload.  Did you use \`git tag -a\`?"
+ifneq (,$(MAKE_TRACE))
+	@$(call MAKE_TRACE,$(uploads))
+endif
 
 .%.upload: %.xml
-	set -ex; email="$(shell git tag --list --format '%(taggeremail)' $(basename $<) | \
-	  sed -e 's/^<//;s/>$$//')"; \
+	set -ex; tag="$(notdir $(basename $<))"; \
+	email="$$(git tag --list --format '%(taggeremail)' "$$tag" | sed -e 's/^<//;s/>$$//')"; \
 	[ -z "$$email" ] && email=$$(xmllint --xpath '/rfc/front/author[1]/address/email/text()' $< 2>/dev/null); \
 	[ -z "$$email" ] && ! echo "Unable to find email to use for submission." 1>&2; \
-	$(curl) -D $@ -F "user=$$email" -F "xml=@$<" "$(DATATRACKER_UPLOAD_URL)" && echo && \
-	  (grep -q ' 200 OK' $@ >/dev/null 2>&1 || ! cat $@ 1>&2)
+	replaces() { \
+	  last=($$(git log --follow --name-only --format=format: -- "$$1" | \
+		   sed -e '/^$$/d' | grep -v draft-todo-yourname-protocol | cut -f 2 | uniq | tail +2 | head -1)); \
+	  [ -z "$$last" ] && return; \
+	  echo -F; echo "replaces=$${last%.*}"; \
+	}; \
+	$(if $(TRACE_FILE),$(trace) $< -s upload-request )$(curl) -D "$@" \
+	    -F "user=$$email" -F "xml=@$<" $$(replaces "$$(git ls-files "$${tag%-[0-9][0-9]}"'.*')") \
+	    "$(DATATRACKER_UPLOAD_URL)" && echo && \
+	  (head -1 "$@" | grep -q '^HTTP/\S\S* 200\b' || $(trace) $< -s upload-result ! cat "$@" 1>&2)
 
 # This ignomonious hack ensures that we can catch missing files properly.
 .%.upload:

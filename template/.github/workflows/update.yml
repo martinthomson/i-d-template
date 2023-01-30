@@ -1,4 +1,4 @@
-name: "Update generated files"
+name: "Update Generated Files"
 # This rule is not run automatically.
 # It can be run manually to update all of the files that are part
 # of the template, specifically:
@@ -20,13 +20,13 @@ on: workflow_dispatch
 
 jobs:
   build:
-    name: "Update files"
+    name: "Update Files"
     runs-on: ubuntu-latest
     steps:
     - name: "Checkout"
       uses: actions/checkout@v2
 
-    - name: "Update generated files"
+    - name: "Update Generated Files"
       uses: martinthomson/i-d-template@v1
       with:
         make: update-files
