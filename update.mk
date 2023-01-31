@@ -30,7 +30,7 @@ auto_update:
 
 update:  auto_update
 	@for i in Makefile $(addprefix .github/workflows/,archive.yml ghpages.yml publish.yml update.yml); do \
-	  [ -f "$$i" -a -z "$$(comm -13 --nocheck-order $$i $(LIBDIR)/template/$$i)" ] || \
+	  [ -f "$$i" -a -z "$$(comm -13 $$i $(LIBDIR)/template/$$i 2>/dev/null)" ] || \
 	    echo "warning: $$i is out of date, run \`make update-files\` to update it."; \
 	done
 	@sed -i~ -e 's,-b master https://github.com/martinthomson/i-d-template,-b main https://github.com/martinthomson/i-d-template,' Makefile && \
