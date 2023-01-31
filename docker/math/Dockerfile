@@ -12,7 +12,7 @@ RUN set -e; \
     cd /; \
     rm -rf "$tmp"; \
     tmp=$(mktemp -d /tmp/utftex-XXXXX); \
-    git clone --depth=1 --branch v1.15 https://github.com/bartp5/libtexprintf "$tmp"; \
+    git clone --depth=1 https://github.com/bartp5/libtexprintf "$tmp"; \
     cd "$tmp"; \
     ./autogen.sh; \
     ./configure; \
