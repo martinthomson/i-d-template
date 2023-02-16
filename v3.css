@@ -325,7 +325,7 @@ ul.empty li, .ulEmpty li {
   margin-top: 0.5em;
 }
 :is(ul, ol).compact, .ulCompact, .olCompact {
-  line-height: 100%;
+  line-height: 1;
   margin: 0 0 0 2em;
 }
 
@@ -547,10 +547,14 @@ hr {
 .bcp14 {
   font-variant: small-caps;
   font-weight: 600;
-  font-size: 14.5px;
+  font-size: var(--small-font-size);
 }
 .role {
   font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
 }
 
 /* info block */
