@@ -27,8 +27,8 @@ drafts_xml := $(addsuffix .xml,$(drafts))
 drafts_next_txt := $(addprefix $(VERSIONED)/,$(addsuffix .txt,$(drafts_next)))
 drafts_next_xml := $(addprefix $(VERSIONED)/,$(addsuffix .xml,$(drafts_next)))
 
-last_modified = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%m' || echo -c '%Y') $(1))
-file_size = $$(stat $$([ $$(uname -s) = Darwin ] && echo -f '%z' || echo -c '%s') $(1))
+last_modified = $$(stat $$([ $$(uname -s) = Darwin -o $$(uname -s) = FreeBSD ] && echo -f '%m' || echo -c '%Y') $(1))
+file_size = $$(stat $$([ $$(uname -s) = Darwin -o $$(uname -s) = FreeBSD ] && echo -f '%z' || echo -c '%s') $(1))
 last_commit = $$(git rev-list -n 1 --timestamp $(1) -- $(2) | sed -e 's/ .*//')
 
 # CI config
