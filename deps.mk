@@ -93,7 +93,7 @@
 
 ## Python
 ifeq (true,$(CI))
-# Override BUNDLE_PATH so we can use caching in CI.
+# Override VENVDIR so we can use caching in CI.
 VENVDIR = $(realpath .)/.venv
 endif
 VENVDIR ?= $(realpath $(LIBDIR))/.venv
@@ -132,11 +132,10 @@ export VENV
 python := $(VENV)/python
 xml2rfc := $(VENV)/xml2rfc $(xml2rfcargs)
 rfc-tidy := $(VENV)/rfc-tidy
-else
+endif
 python ?= python3
 xml2rfc ?= xml2rfc $(xml2rfcargs)
 rfc-tidy ?= rfc-tidy
-endif
 
 ## Ruby
 ifeq (,$(shell which bundle))
