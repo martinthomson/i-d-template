@@ -65,6 +65,13 @@ trace := $(LIBDIR)/trace.sh
 # Where versioned copies are stored.
 VERSIONED ?= versioned
 
+# Disable caching where it appears.
+DISABLE_CACHE ?= false
+ifeq (true,$(DISABLE_CACHE))
+KRAMDOWN_REFCACHE_REFETCH := true
+export KRAMDOWN_REFCACHE_REFETCH
+endif
+
 # Setup a shared cache for xml2rfc and kramdown-rfc
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 ifeq (true,$(CI))

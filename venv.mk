@@ -226,14 +226,14 @@ endif
 
 $(VENV):
 	$(PY) -m venv $(VENVDIR)
-	$(VENV)/python -m pip install --upgrade pip setuptools wheel
+	$(VENV)/python -m pip install $(no-cache) --upgrade pip setuptools wheel
 
 $(VENV)/$(MARKER): $(VENVDEPENDS) | $(VENV)
 ifneq ($(strip $(REQUIREMENTS_TXT)),)
-	$(VENV)/pip install $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	$(VENV)/pip install $(no-cache) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 endif
 ifneq ($(strip $(SETUP_PY)),)
-	$(VENV)/pip install $(foreach path,$(SETUP_PY),-e $(dir $(path)))
+	$(VENV)/pip install $(no-cache) $(foreach path,$(SETUP_PY),-e $(dir $(path)))
 endif
 	$(call touch,$(VENV)/$(MARKER))
 
@@ -270,5 +270,5 @@ $(VENV)/%: $(VENV)/%$(EXE) ;
 endif
 
 $(VENV)/%$(EXE): $(VENV)/$(MARKER)
-	$(VENV)/pip install --upgrade $*
+	$(VENV)/pip install $(no-cache) --upgrade $*
 	$(call touch,$@)

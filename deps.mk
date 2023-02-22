@@ -91,6 +91,11 @@
 
 .PHONY: deps clean-deps update-deps
 
+ifeq (true,$(DISABLE_CACHE))
+no-cache := --no-cache
+bundle-update-all := --all
+endif
+
 ## Python
 ifeq (true,$(CI))
 # Override VENVDIR so we can use caching in CI.
@@ -120,7 +125,7 @@ DEPS_FILES += $(VENV)/$(MARKER)
 endif
 
 update-deps::
-	pip install --upgrade --upgrade-strategy eager $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	pip install $(no-cache) --upgrade --upgrade-strategy eager $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 
 clean-deps:: clean-venv
 
@@ -161,11 +166,11 @@ $(BUNDLE_PATH)/.i-d-template.opt: Gemfile.lock
 	@touch $@
 
 Gemfile.lock: Gemfile
-	bundle install --gemfile=$(realpath $<)
+	bundle install $(no-cache) --gemfile=$(realpath $<)
 	@touch $@
 
 update-deps:: Gemfile
-	bundle update --gemfile=$(realpath $<)
+	bundle update $(bundle-update-all) --gemfile=$(realpath $<)
 
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
@@ -178,11 +183,11 @@ $(BUNDLE_PATH)/.i-d-template.core: $(LIBDIR)/Gemfile.lock
 	@touch $@
 
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
-	bundle install --gemfile=$(realpath $<)
+	bundle install $(no-cache) --gemfile=$(realpath $<)
 	@touch $@
 
 update-deps:: $(LIBDIR)/Gemfile
-	bundle update --gemfile=$(realpath $<)
+	bundle update $(bundle-update-all) --gemfile=$(realpath $<)
 
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
