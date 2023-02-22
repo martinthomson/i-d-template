@@ -93,6 +93,7 @@
 
 ifeq (true,$(DISABLE_CACHE))
 no-cache := --no-cache
+no-cache-dir := --no-cache-dir
 bundle-update-all := --all
 endif
 
@@ -125,7 +126,7 @@ DEPS_FILES += $(VENV)/$(MARKER)
 endif
 
 update-deps::
-	pip install $(no-cache) --upgrade --upgrade-strategy eager $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	pip install $(no-cache-dir) --upgrade --upgrade-strategy eager $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 
 clean-deps:: clean-venv
 
