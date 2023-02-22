@@ -3,6 +3,6 @@ iddiff
 pyang
 pyyaml
 rfc-tidy
-svgcheck
+svgcheck == 0.6.2
 toml
 xml2rfc
