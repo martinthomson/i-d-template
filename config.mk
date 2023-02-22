@@ -65,26 +65,29 @@ trace := $(LIBDIR)/trace.sh
 # Where versioned copies are stored.
 VERSIONED ?= versioned
 
-# Disable caching where it appears.
+# Set this to "true" to disable caching where possible.
 DISABLE_CACHE ?= false
 ifeq (true,$(DISABLE_CACHE))
+# Disable caching in kramdown-rfc.
 KRAMDOWN_REFCACHE_REFETCH := true
 export KRAMDOWN_REFCACHE_REFETCH
-endif
-
-# Setup a shared cache for xml2rfc and kramdown-rfc
+# xml2rfc caches always, so point it at an empty directory.
+TEMP_CACHE := $(shell mktemp -d)
+XML2RFC_REFCACHEDIR := $(TEMP_CACHE)
+else
+# Enable caching for kramdown-rfc and xml2rfc.
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 ifeq (true,$(CI))
 XML2RFC_REFCACHEDIR := $(realpath .)/.refcache
-else
-XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
 endif
+XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
 KRAMDOWN_REFCACHEDIR := $(XML2RFC_REFCACHEDIR)
 else
 XML2RFC_REFCACHEDIR ?= $(KRAMDOWN_REFCACHEDIR)
 endif
-xml2rfcargs += --cache=$(XML2RFC_REFCACHEDIR)
 ifneq (,$(shell mkdir -p -v $(KRAMDOWN_REFCACHEDIR)))
 $(info Created cache directory at $(KRAMDOWN_REFCACHEDIR))
 endif
+endif # DISABLE_CACHE
+xml2rfcargs += --cache=$(XML2RFC_REFCACHEDIR)
 export KRAMDOWN_REFCACHEDIR
