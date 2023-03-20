@@ -21,7 +21,7 @@ all_drafts=("$@")
 gh="https://github.com/${user}/${repo}"
 
 function rfcdiff() {
-    echo "https://www.ietf.org/rfcdiff?url1=${1}&url2=${2}"
+    echo "https://author-tools.ietf.org/api/iddiff?doc_1=${1}&url_2=${2}"
 }
 
 function reldot() {
