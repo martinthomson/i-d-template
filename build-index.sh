@@ -21,7 +21,14 @@ all_drafts=("$@")
 gh="https://github.com/${user}/${repo}"
 
 function rfcdiff() {
-    echo "https://author-tools.ietf.org/api/iddiff?doc_1=${1}&url_2=${2}"
+    function arg() {
+        if [[ "$1" != "${1#*:}" ]]; then
+            echo "url_$2=$1"
+        else
+            echo "doc_$2=$1"
+        fi
+    }
+    echo "https://author-tools.ietf.org/api/iddiff?$(arg "$1" 1)&$(arg "$2" 2)"
 }
 
 function reldot() {
@@ -255,7 +262,7 @@ function list_dir() {
             fi
         elif diff -q <("${IGNOREDATE[@]}" "${root}/${file}.txt") <("${IGNOREDATE[@]}" "${dir}/${file}.txt") >/dev/null; then
             td "same as $default_branch"
-	else
+        else
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch" "diff $file")"
         fi
