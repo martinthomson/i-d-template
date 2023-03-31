@@ -36,6 +36,19 @@
 #
 # Tools are added to the path, so you should have no problem running them.
 #
+## Using Tools
+#
+# Makefile rules can be written to use a new tool.  Ensure that the variable
+# `$(DEPS_FILES)` is a dependency of any target that relies on tools being
+# available.  For example, for a linter:
+#
+#    lint:: example-lint
+#    .PHONY: example-lint
+#    example-lint: $(drafts_xml) $(DEPS_FILES)
+#            $(example-linter) $(filter-out $(DEPS_FILES),$^)
+#
+# Note the filtering that is used here to avoid linting those files.
+#
 ## Manual Additions
 #
 # To manually add dependencies, edit your `Makefile` as follows.
