@@ -37,7 +37,7 @@ endif
 	$(if $(TRACE_FILE),$(trace) $< -s upload-request )$(curl) -D "$@" \
 	    -F "user=$$email" -F "xml=@$<" $$(replaces "$$(git ls-files "$${tag%-[0-9][0-9]}"'.*')") \
 	    "$(DATATRACKER_UPLOAD_URL)" && echo && \
-	  (head -1 "$@" | grep -q '^HTTP/\S\S* 200\b' || $(trace) $< -s upload-result ! cat "$@" 1>&2)
+	  (head -1 "$@" | grep -q '^HTTP/\S\S* 20[01]\b' || $(trace) $< -s upload-result ! cat "$@" 1>&2)
 
 # This ignomonious hack ensures that we can catch missing files properly.
 .%.upload:
