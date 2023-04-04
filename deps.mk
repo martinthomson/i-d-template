@@ -131,10 +131,7 @@ endif
 ifneq (,$(strip $(REQUIREMENTS_TXT)))
 ifeq (true,$(CI))
 # Under CI, install from the local requirements.txt, but install globally (no venv).
-python ?= python3
 pip ?= pip3
-xml2rfc ?= xml2rfc $(xml2rfcargs)
-rfc-tidy ?= rfc-tidy
 $(LOCAL_VENV):
 	$(pip) install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 	@touch $@
@@ -160,12 +157,15 @@ endif
 
 clean-deps:: clean-venv
 endif # CI
-
 update-deps::
 	$(pip) install $(no-cache-dir) --upgrade --upgrade-strategy eager \
 	  $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 endif # -e requirements.txt
 
+# Variable defaults for CI
+python ?= python3
+xml2rfc ?= xml2rfc $(xml2rfcargs)
+rfc-tidy ?= rfc-tidy
 
 
 ## Ruby
