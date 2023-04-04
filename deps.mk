@@ -120,44 +120,55 @@ REQUIREMENTS_TXT := $(wildcard requirements.txt)
 ifneq (,$(strip $(REQUIREMENTS_TXT)))
 # Need to maintain a local marker file in case the lib/ directory is shared.
 LOCAL_VENV := .requirements.txt
+DEPS_FILES += $(LOCAL_VENV)
 endif
 ifneq (true,$(CI))
 # Don't install from lib/requirements.txt in CI; these are in the docker image.
 REQUIREMENTS_TXT += $(LIBDIR)/requirements.txt
 endif
+
+## Install from requirements.txt.
 ifneq (,$(strip $(REQUIREMENTS_TXT)))
-# We have something to install, so include venv.mk.
+ifeq (true,$(CI))
+# Under CI, install from the local requirements.txt, but install globally (no venv).
+python ?= python3
+pip ?= pip3
+xml2rfc ?= xml2rfc $(xml2rfcargs)
+rfc-tidy ?= rfc-tidy
+$(LOCAL_VENV):
+	$(pip) install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	@touch $@
+
+# No clean-deps target in CI..
+
+else # CI
+# We have something to install in a venv, so include venv.mk.
 include $(LIBDIR)/venv.mk
+export VENV
+pip := $(VENV)/pip
+python := $(VENV)/python
+xml2rfc := $(VENV)/xml2rfc $(xml2rfcargs)
+rfc-tidy := $(VENV)/rfc-tidy
 export PATH := $(VENV):$(PATH)
 
 ifneq (,$(LOCAL_VENV))
-DEPS_FILES += $(LOCAL_VENV)
 $(LOCAL_VENV): $(VENV)/$(MARKER)
 	@touch $@
 else
 DEPS_FILES += $(VENV)/$(MARKER)
 endif
 
-update-deps::
-	pip install $(no-cache-dir) --upgrade --upgrade-strategy eager $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
-
 clean-deps:: clean-venv
+endif # CI
 
-endif
+update-deps::
+	$(pip) install $(no-cache-dir) --upgrade --upgrade-strategy eager \
+	  $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+endif # -e requirements.txt
 
-# Now set variables based on environment.
-ifneq (true,$(CI))
-export VENV
-python := $(VENV)/python
-xml2rfc := $(VENV)/xml2rfc $(xml2rfcargs)
-rfc-tidy := $(VENV)/rfc-tidy
-endif
-python ?= python3
-xml2rfc ?= xml2rfc $(xml2rfcargs)
-rfc-tidy ?= rfc-tidy
 
 ## Ruby
-ifeq (,$(shell which bundle))
+ifeq (,$(shell which bundle)$(filter true,$(NO_RUBY)))
 $(warning ruby bundler not installed; skipping bundle install)
 NO_RUBY := true
 endif
@@ -168,6 +179,8 @@ export BUNDLE_IGNORE_MESSAGES
 ifeq (true,$(CI))
 # Override BUNDLE_PATH so we can use caching in CI.
 BUNDLE_PATH := $(realpath .)/.gems
+BUNDLE_DISABLE_VERSION_CHECK := true
+export BUNDLE_DISABLE_VERSION_CHECK
 endif
 export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
 # Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
@@ -203,6 +216,7 @@ clean-deps::
 	-rm -rf $(BUNDLE_PATH)
 endif # !CI
 endif # !NO_RUBY
+
 
 ## Nodejs
 ifeq (,$(shell which npm))
