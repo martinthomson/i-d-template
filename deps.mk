@@ -175,10 +175,7 @@ export PATH := $(BUNDLE_BIN):$(PATH)
 
 ifneq (,$(wildcard Gemfile))
 # A local Gemfile exists.
-DEPS_FILES += $(BUNDLE_PATH)/.i-d-template.opt
-$(BUNDLE_PATH)/.i-d-template.opt: Gemfile.lock
-	@touch $@
-
+DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
 	bundle install $(no-cache) --gemfile=$(realpath $<)
 	@touch $@
@@ -192,10 +189,7 @@ endif # Gemfile
 
 ifneq (true,$(CI))
 # Install kramdown-rfc.
-DEPS_FILES += $(BUNDLE_PATH)/.i-d-template.core
-$(BUNDLE_PATH)/.i-d-template.core: $(LIBDIR)/Gemfile.lock
-	@touch $@
-
+DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	bundle install $(no-cache) --gemfile=$(realpath $<)
 	@touch $@
