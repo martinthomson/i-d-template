@@ -163,6 +163,8 @@ NO_RUBY := true
 endif
 
 ifneq (true,$(NO_RUBY))
+BUNDLE_IGNORE_MESSAGES := true
+export BUNDLE_IGNORE_MESSAGES
 ifeq (true,$(CI))
 # Override BUNDLE_PATH so we can use caching in CI.
 BUNDLE_PATH := $(realpath .)/.gems
