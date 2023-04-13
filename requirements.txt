@@ -1,4 +1,5 @@
 archive-repo
+chardet
 iddiff
 pyang
 pyyaml
