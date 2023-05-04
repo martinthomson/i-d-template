@@ -80,7 +80,7 @@ gh-archive: $(ARCHIVE_ROOT)/archive.json
 	  git -C $(ARCHIVE_ROOT) $(CI_AUTHOR) commit -m "Script updating archive at $(shell date -u +%FT%TZ). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_PUSH_TOKEN),,1)))
-	$(trace) archive -s archive-push git -C $(ARCHIVE_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
+	$(trace) archive -s archive-push git -C $(ARCHIVE_ROOT) push -f "$(shell git remote get-url --push $(GIT_REMOTE))" $(ARCHIVE_BRANCH)
 else
 	@echo git -C $(ARCHIVE_ROOT) push -qf https://github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH)
 	@git -C $(ARCHIVE_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) $(ARCHIVE_BRANCH) >/dev/null 2>&1 \

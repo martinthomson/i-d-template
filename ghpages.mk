@@ -126,7 +126,7 @@ ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_PUSH_TOKEN),,1)))
-	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f https://github.com/$(GITHUB_REPO_FULL) gh-pages
+	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f "$(shell git remote get-url --push $(GIT_REMOTE))" gh-pages
 else
 	@echo git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) gh-pages
 	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1 \
