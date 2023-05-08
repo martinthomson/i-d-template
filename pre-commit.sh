@@ -9,13 +9,14 @@ fi
 
 hash gmake 2> /dev/null && MAKE=gmake || MAKE=make
 
-txtfiles=()
-tmpfiles=()
+srcfiles=()
+xmlfiles=()
+htmlfiles=()
 function cleanup() {
-    rm -f "${tmpfiles[@]}" "${htmlfiles[@]}"
+    rm -f "${srcfiles[@]}" "${xmlfiles[@]}" "${htmlfiles[@]}"
 }
 function abort() {
-    echo "Commit refused: documents don't build successfully."
+    echo "Commit refused: document build error."
     echo "To commit anyway, run \"git commit --no-verify\""
     cleanup
     exit 1
@@ -26,7 +27,8 @@ trap cleanup EXIT
 files=($(git status --porcelain draft-* rfc* | sed '/^[MAU]/{s/^.. //;p;};/^[RC]/{s/.* -> //;p;};d' | sort))
 for f in "${files[@]}"; do
     tmp="${f%.*}"-tmp$$."${f##*.}"
-    tmpfiles+=("$tmp" "${tmp%.*}.xml")
+    srcfiles+=("$tmp")
+    xmlfiles+=("${tmp%.*}.xml")
     htmlfiles+=("${tmp%.*}.html")
     # This makes a copy of the staged file.
     (git show :"$f" 2>/dev/null || cat "$f") \
@@ -34,4 +36,4 @@ for f in "${files[@]}"; do
 done
 [ "${#files[@]}" -eq 0 ] && exit 0
 
-"$MAKE" "${htmlfiles[@]}" lint "drafts=${tmpfiles[*]%.*}" EXTRA_TARGETS=false
+"$MAKE" "${htmlfiles[@]}" lint "drafts=${xmlfiles[*]%.*}" EXTRA_TARGETS=false
