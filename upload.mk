@@ -44,12 +44,23 @@ endif
 	@if $(MAKE) "$*".xml; then \
 	  $(MAKE) "$@"; \
 	else \
+	  t="$*"; t="$${t##*/}"; \
 	  echo "============================================================================"; \
-	  echo "Warning: A source file for '$*' does not exist."; \
+	  echo "Warning: A source file for '$$t' does not exist."; \
+	  echo; \
+	  if [ $(words $(drafts)) -eq 1 ]; then \
+	    echo "  Maybe you meant to name the label '$(drafts)-$${t##*-}' instead."; \
+	  else \
+	    echo "  Maybe you meant one of the following instead:"; \
+	    for d in $(drafts_source); do \
+	      echo "    $${d%.*}-$${t##*-} (from $$d)"; \
+	    done; \
+	  fi; \
 	  echo; \
 	  echo "If you applied this tag in error, remove it before adding another tag:"; \
-	  echo "    git tag -d '$*'"; \
-	  echo "    git push -f $(GIT_REMOTE) ':$*'"; \
+	  echo "    git tag -d '$$t'"; \
+	  echo "    git push -f $(GIT_REMOTE) ':$$t'"; \
+	  echo; \
 	  echo "============================================================================"; \
 	  false; \
 	fi
