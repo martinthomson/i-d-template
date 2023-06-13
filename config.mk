@@ -42,9 +42,6 @@ enscript ?= enscript
 #   http://www.ghostscript.com/
 ps2pdf ?= ps2pdf
 
-# Where to get references
-XML_RESOURCE_ORG_PREFIX ?= https://xml2rfc.tools.ietf.org/public/rfc
-
 # This is for people running macs
 SHELL := bash
 
