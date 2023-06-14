@@ -49,8 +49,6 @@ pdf:: $(addsuffix .pdf,$(drafts))
 ## Basic Recipes
 .INTERMEDIATE: $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts)))
 
-export XML_RESOURCE_ORG_PREFIX
-
 MD_PRE =
 ifneq (,$(MD_PREPROCESSOR))
 MD_PRE += | $(trace) $@ -s preprocessor $(MD_PREPROCESSOR)
