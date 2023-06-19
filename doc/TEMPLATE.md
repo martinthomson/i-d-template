@@ -1,7 +1,6 @@
 # Using the Template Repository
 
-For creating and managing an [Internet
-Draft](https://github.com/ietf/id-guidelines).
+For creating and managing an [Internet-Draft](https://authors.ietf.org/en/content-guidelines-overview) (I-D).
 
 A separate [template
 repository](https://github.com/martinthomson/internet-draft-template) exists to
@@ -17,7 +16,7 @@ simple process.
    to open the settings for your repo, then select Actions > General in the list
    on the left.  Under "Workflow permissions", select "Read and write permissions".
 
-3. Rename your draft and add a title.  The newly created repository will contain
+3. Rename your I-D and add a title.  The newly created repository will contain
    a link to a page where you can do this using the GitHub editor.  Setup will
    automatically run.  Setup should be done in less than a minute.
 
@@ -25,7 +24,7 @@ Now you are set to work on the document, using whatever process you choose.
 This uses all the same capabilities as the manual process, so contributors can
 use command-line tools if that suits them.
 
-To publish a draft, [create a new
+To publish an I-D, [create a new
 release](https://github.com/martinthomson/i-d-template/blob/main/doc/SUBMITTING.md#github-release)
 and the draft will be submitted to the datatracker automatically.
 
