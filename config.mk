@@ -11,7 +11,9 @@ XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
 XML2RFC_OPTS := -q --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
 # Target-specific options.
 XML2RFC_TEXT := --text
-ifneq (true,$(TEXT_PAGINATION))
+ifeq (true,$(TEXT_PAGINATION))
+XML2RFC_TEXT += --pagination
+else
 XML2RFC_TEXT += --no-pagination
 endif
 XML2RFC_CSS := $(LIBDIR)/v3.css
