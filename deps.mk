@@ -144,7 +144,7 @@ include $(LIBDIR)/venv.mk
 export VENV
 pip := $(VENV)/pip
 python := $(VENV)/python
-xml2rfc := $(VENV)/xml2rfc $(xml2rfcargs)
+xml2rfc := $(VENV)/xml2rfc $(XML2RFC_OPTS)
 rfc-tidy := $(VENV)/rfc-tidy
 export PATH := $(VENV):$(PATH)
 
@@ -164,7 +164,7 @@ endif # -e requirements.txt
 
 # Variable defaults for CI
 python ?= python3
-xml2rfc ?= xml2rfc $(xml2rfcargs)
+xml2rfc ?= xml2rfc $(XML2RFC_OPTS)
 rfc-tidy ?= rfc-tidy
 
 

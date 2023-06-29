@@ -5,9 +5,17 @@
 # xml2rfc (when running locally, this is installed in a virtualenv for you)
 XML2RFC_RFC_BASE_URL := https://www.rfc-editor.org/rfc/
 XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
+
+# Set sensible defaults for different xml2rfc targets.
+# Common options (which are added to $xml2rfc later) so that they can be tweaked further.
+XML2RFC_OPTS := -q --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
+# Target-specific options.
+XML2RFC_TEXT := --text
+ifneq (true,TEXT_PAGINATION)
+XML2RFC_TEXT += --no-pagination
+endif
 XML2RFC_CSS := $(LIBDIR)/v3.css
-xml2rfcargs := -q -s 'Setting consensus="true" for IETF STD document' \
-	       --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
+XML2RFC_HTML := --html --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null
 
 # If you are using markdown files use either kramdown-rfc or mmark
 #   https://github.com/cabo/kramdown-rfc
@@ -86,5 +94,5 @@ ifneq (,$(shell mkdir -p -v $(KRAMDOWN_REFCACHEDIR)))
 $(info Created cache directory at $(KRAMDOWN_REFCACHEDIR))
 endif
 endif # DISABLE_CACHE
-xml2rfcargs += --cache=$(XML2RFC_REFCACHEDIR)
+XML2RFC_OPTS += --cache=$(XML2RFC_REFCACHEDIR)
 export KRAMDOWN_REFCACHEDIR

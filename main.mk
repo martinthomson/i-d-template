@@ -105,15 +105,15 @@ $(XSLTDIR):
 	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml $(DEPS_FILES)
-	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $(XML2RFC_TEXT) $< -o $@
 else
 %.html: %.xml $(XML2RFC_CSS) $(DEPS_FILES)
-	$(trace) $@ -s xml2rfc-html $(xml2rfc) --css=$(XML2RFC_CSS) --metadata-js-url=/dev/null $< -o $@ --html
+	$(trace) $@ -s xml2rfc-html $(xml2rfc) $(XML2RFC_HTML) $< -o $@
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 
 %.txt: %.xml $(DEPS_FILES)
-	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $< -o $@ --text --no-pagination
+	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $(XML2RFC_TEXT) $< -o $@
 endif
 
 %.pdf: %.txt
