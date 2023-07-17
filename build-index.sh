@@ -274,7 +274,8 @@ function list_dir() {
 branchlink="$gh"
 [[ "$branch" = "$default_branch" ]] || branchlink="${branchlink}/tree/${branch}"
 h1 "Editor's drafts for $(q "$branch") branch of $(a "$branchlink" "${user}/${repo}")"
-p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests") in the $(a "${gh}" repo)."
+[[ "$branch" = "$default_branch" ]] && \
+    p "View $(a "issues.html" "saved issues"), or the latest GitHub $(a "${gh}/issues" issues) and $(a "${gh}/pulls" "pull requests") in the $(a "${gh}" repo)."
 
 list_dir "${root}" "$branch"
 
