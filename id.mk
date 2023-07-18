@@ -85,11 +85,14 @@ ifeq (,$(CI_REPO_FULL))
 # similar structure)
 GITHUB_REPO_WITHHOST := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
 			sed -e 's/^[a-zA-Z0-9+.-]\+:\/\///;s/.*@//;s/:/\//;s/\.git$$//')
+GITHUB_HOST := $(word 1,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
 GITHUB_USER := $(word 2,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
 GITHUB_REPO := $(word 3,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
 GITHUB_REPO_FULL := $(GITHUB_USER)/$(GITHUB_REPO)
 else
 GITHUB_REPO_FULL := $(CI_REPO_FULL)
+CI_HOST ?= github.com
+GITHUB_HOST := $(CI_HOST)
 GITHUB_USER := $(CI_USER)
 GITHUB_REPO := $(CI_REPO)
 endif
