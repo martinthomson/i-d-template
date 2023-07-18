@@ -19,7 +19,22 @@ shift 6
 # Remaining arguments (now $@) are source files
 all_drafts=("$@")
 
-gh="https://github.com/${user}/${repo}"
+gh="https://${hoster}/${user}/${repo}"
+
+case "$hoster" in
+  codeberg.org)
+    hosterpages="codeberg.page"
+    ;;
+  github.com)
+    hosterpages="github.io"
+    ;;
+  gitlab.com)
+    hosterpages="gitlab.io"
+    ;;
+  *)
+    hosterpages="pages.${hoster}"
+    ;;
+esac
 
 function rfcdiff() {
     function arg() {
@@ -38,11 +53,11 @@ function reldot() {
 
 function githubio() {
     d="${1%/}/"
-    echo "https://${user}.github.io/${repo}/${d#"$default_branch"/}${2}.txt"
+    echo "https://${user}.${hosterpages}/${repo}/${d#"$default_branch"/}${2}.txt"
 }
 
 function githubcom() {
-    echo "https://github.com/${user}/${repo}/${1}"
+    echo "https://${hoster}/${user}/${repo}/${1}"
 }
 
 DATERE='[0-9]* [A-Z][a-z]* 20[0-9][0-9]'
@@ -293,7 +308,7 @@ window.onload = function() {
   var referrer_branch = '$default_branch';
   // e.g., "https://github.com/user/repo/tree/$default_branch"
   var chunks = document.referrer.split("/");
-  if (chunks[2] === 'github.com' && chunks[5] === 'tree') {
+  if (chunks[2] === '${hoster}' && chunks[5] === 'tree') {
     referrer_branch = chunks[6];
   }
   let branch = document.querySelector('#branch-' + referrer_branch);
