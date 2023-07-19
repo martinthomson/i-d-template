@@ -13,15 +13,19 @@ shift 3
 
 case "$host" in
   codeberg.org)
+    src_base="https://${host}/${user}/${repo}/src/branch/${default_branch}/"
     hostpages="codeberg.page"
     ;;
   github.com)
+    src_base="https://${host}/${user}/${repo}/blob/${default_branch}/"
     hostpages="github.io"
     ;;
   gitlab.com)
+    src_base="https://${host}/${user}/${repo}/-/blob/${default_branch}/"
     hostpages="gitlab.io"
     ;;
   *)
+    src_base="./"
     hostpages="pages.${host}"
     ;;
 esac
@@ -30,10 +34,7 @@ githubio="https://${user}.${hostpages}/${repo}/#go"
 
 function fixup_other_md() {
     markdown=(LICENSE.md CONTRIBUTING.md)
-    s='s~{WG_NAME}~'"$1"'~g'
-    s="$s"';s~{GITHUB_USER}~'"$user"'~g'
-    s="$s"';s~{GITHUB_REPO}~'"$repo"'~g'
-    s="$s"';s~{GITHUB_BRANCH}~'"$default_branch"'~g'
+    s="$s"';s~{SRC_BASE}~'"$src_base"'~g'
     sed -i~ -e "$s" "${markdown[@]}"
     for i in "${markdown[@]}"; do
         rm -f "$i"~
@@ -101,7 +102,7 @@ cat <<EOF
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/${user}/${repo}/blob/${default_branch}/CONTRIBUTING.md).
+[guidelines for contributions](${src_base}CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.
