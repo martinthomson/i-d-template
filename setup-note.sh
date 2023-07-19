@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-# Usage: $0 <user> <repo> [drafts...]
+# Usage: $0 github.com <user> <repo> [drafts...]
 
 set -e
 
-user="$1"
-repo="$2"
-shift 2
+host="$1"
+user="$2"
+repo="$3"
+shift 3
 
 # Determine if the draft is a kramdown draft with a venue section.
 hasvenue() {
@@ -56,5 +57,5 @@ if [[ -n "$wg" ]]; then
     which is archived at <eref target=\"${wg_arch}\"/>.</t>"
 fi
 echo "<t>Source for this draft and an issue tracker can be found at
-    <eref target=\"https://github.com/${user}/${repo}\"/>.</t>"
+    <eref target=\"https://${host}/${user}/${repo}\"/>.</t>"
 echo '</note>'

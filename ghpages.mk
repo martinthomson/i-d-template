@@ -36,19 +36,30 @@ PUSH_GHPAGES ?= true
 endif
 PUSH_GHPAGES ?= false
 
+# PAGES_BRANCH is where the latest upstream version of the (typically GitHub)
+# Pages is fetched from, and where it is pushed to. Different hosters have
+# different branch names for this purpose (if they do it that way at all).
+ifeq (github.com,$(GITHUB_HOST))
+	PAGES_BRANCH ?= gh-pages
+else
+	# This is common across all Forgejo instances, and as there is no more
+	# generic default, this is also the catch-all.
+	PAGES_BRANCH ?= pages
+endif
+
 .IGNORE: fetch-ghpages
 .PHONY: fetch-ghpages
 fetch-ghpages:
-	git fetch -qf origin gh-pages:gh-pages
+	git fetch -qf origin ${PAGES_BRANCH}:${PAGES_BRANCH}
 
 GHPAGES_ROOT := /tmp/ghpages$(PID)
 ghpages: $(GHPAGES_ROOT)
 $(GHPAGES_ROOT): fetch-ghpages
-	@git show-ref refs/heads/gh-pages >/dev/null 2>&1 || \
-	  (git show-ref refs/remotes/origin/gh-pages >/dev/null 2>&1 && \
-	    git branch -t gh-pages origin/gh-pages) || \
-	  ! echo 'Error: No gh-pages branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
-	git clone -q -b gh-pages . $@
+	@git show-ref refs/heads/${PAGES_BRANCH} >/dev/null 2>&1 || \
+	  (git show-ref refs/remotes/origin/${PAGES_BRANCH} >/dev/null 2>&1 && \
+	    git branch -t ${PAGES_BRANCH} origin/${PAGES_BRANCH}) || \
+	  ! echo 'Error: No ${PAGES_BRANCH} branch, run `make -f $(LIBDIR)/setup.mk setup-ghpages` to initialize it.'
+	git clone -q -b ${PAGES_BRANCH} . $@
 
 GHPAGES_TARGET := $(GHPAGES_ROOT)$(filter-out /$(DEFAULT_BRANCH),/$(SOURCE_BRANCH))
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
@@ -63,17 +74,17 @@ $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 
 GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.$(INDEX_FORMAT)
 $(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES)
-	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_HOST)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
 GHPAGES_ALL += $(GHPAGES_ROOT)/index.$(INDEX_FORMAT)
 $(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES)
-	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(DEFAULT_BRANCH)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
+	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(DEFAULT_BRANCH)" "$(GITHUB_HOST)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 endif
 
-# GHPAGES_COMMIT_TTL is the number of days worth of commits to keep on the gh-pages branch.
+# GHPAGES_COMMIT_TTL is the number of days worth of commits to keep on the ${PAGES_BRANCH} branch.
 GHPAGES_COMMIT_TTL ?= 30
-# GHPAGES_BRANCH_TTL is the number of days to retain a directory on gh-pages
+# GHPAGES_BRANCH_TTL is the number of days to retain a directory on ${PAGES_BRANCH}
 # after the corresponding branch has been deleted. This is measured from the last change.
 GHPAGES_BRANCH_TTL ?= 30
 .PHONY: cleanup-ghpages
@@ -82,22 +93,22 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	  git remote prune $$remote; \
 	done;
 
-# Drop old gh-pages commits
+# Drop old ${PAGES_BRANCH} commits
 # Retain $(GHPAGES_COMMIT_TTL) days of history.
 # Only run this if more than $(GHPAGES_COMMIT_TTL)*2 days of history exists.
 	@KEEP=$$((`date '+%s'`-($(GHPAGES_COMMIT_TTL)*86400))); \
 	CUTOFF=$$((`date '+%s'`-($(GHPAGES_COMMIT_TTL)*172800))); \
-	ROOT=`git -C $(GHPAGES_ROOT) rev-list --max-parents=0 gh-pages`; \
+	ROOT=`git -C $(GHPAGES_ROOT) rev-list --max-parents=0 ${PAGES_BRANCH}`; \
 	if [ `git -C $(GHPAGES_ROOT) show -s --format=%ct $$ROOT` -lt $$CUTOFF ]; then \
-	  NEW_ROOT=`git -C $(GHPAGES_ROOT) rev-list --min-age=$$KEEP --max-count=1 gh-pages`; \
+	  NEW_ROOT=`git -C $(GHPAGES_ROOT) rev-list --min-age=$$KEEP --max-count=1 ${PAGES_BRANCH}`; \
 	  if [ $$NEW_ROOT != $$ROOT ]; then \
 		git -C $(GHPAGES_ROOT) replace --graft $$NEW_ROOT && \
-		FILTER_BRANCH_SQUELCH_WARNING=1 git -C $(GHPAGES_ROOT) filter-branch gh-pages; \
+		FILTER_BRANCH_SQUELCH_WARNING=1 git -C $(GHPAGES_ROOT) filter-branch ${PAGES_BRANCH}; \
 	  fi \
 	fi
 
 # Clean up obsolete directories
-# Keep old branches for $(GHPAGES_BRANCH_TTL) days after the last changes (on the gh-pages branch).
+# Keep old branches for $(GHPAGES_BRANCH_TTL) days after the last changes (on the ${PAGES_BRANCH} branch).
 	@CUTOFF=$$(($$(date '+%s')-($(GHPAGES_BRANCH_TTL)*86400))); \
 	MAYBE_OBSOLETE=`comm -13 <(git branch -a | sed -e 's,.*[ /],,' | sort | uniq) <(ls $(GHPAGES_ROOT) | sed -e 's,.*/,,')`; \
 	for item in $$MAYBE_OBSOLETE; do \
@@ -123,20 +134,20 @@ else
 ghpages: cleanup-ghpages $(GHPAGES_ALL)
 	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
-	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating gh-pages from $(shell git rev-parse --short HEAD). [ci skip]"; fi
+	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating ${PAGES_BRANCH} from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))
 ifneq (,$(if $(CI_HAS_WRITE_KEY),1,$(if $(GITHUB_PUSH_TOKEN),,1)))
-	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f "$(shell git remote get-url --push $(GIT_REMOTE))" gh-pages
+	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f "$(shell git remote get-url --push $(GIT_REMOTE))" ${PAGES_BRANCH}
 else
-	@echo git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) gh-pages
-	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) gh-pages >/dev/null 2>&1 \
-	  || $(trace) all -s ghpages-push ! echo "git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) gh-pages"
+	@echo git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) ${PAGES_BRANCH}
+	@git -C $(GHPAGES_ROOT) push -qf https://$(GITHUB_PUSH_TOKEN)@github.com/$(GITHUB_REPO_FULL) ${PAGES_BRANCH} >/dev/null 2>&1 \
+	  || $(trace) all -s ghpages-push ! echo "git -C $(GHPAGES_ROOT) push -qf https://****@github.com/$(GITHUB_REPO_FULL) ${PAGES_BRANCH}"
 endif
 else
 ifeq (true,$(CI))
-	@echo "*** Warning: pushing to the gh-pages branch is disabled."
+	@echo "*** Warning: pushing to the ${PAGES_BRANCH} branch is disabled."
 else
-	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f origin gh-pages
+	$(trace) all -s ghpages-push git -C $(GHPAGES_ROOT) push -f origin ${PAGES_BRANCH}
 endif
 endif # PUSH_GHPAGES
 	-rm -rf $(GHPAGES_ROOT)

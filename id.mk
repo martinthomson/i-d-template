@@ -79,12 +79,20 @@ endif
 GIT_REMOTE ?= origin
 export GIT_REMOTE
 ifeq (,$(CI_REPO_FULL))
-GITHUB_REPO_FULL := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
-		      sed -e 's/^.*github\.com.//;s/\.git$$//')
-GITHUB_USER := $(word 1,$(subst /, ,$(GITHUB_REPO_FULL)))
-GITHUB_REPO := $(word 2,$(subst /, ,$(GITHUB_REPO_FULL)))
+# The github.com/user/repository part of either a
+# git@github.com:user/repository.git or a https://github.com/user/repository
+# remote (or any other hoster's domain/user/repository part if it uses a
+# similar structure)
+GITHUB_REPO_WITHHOST := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
+			sed -e 's/^[a-zA-Z0-9+.-]\+:\/\///;s/.*@//;s/:/\//;s/\.git$$//')
+GITHUB_HOST := $(word 1,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
+GITHUB_USER := $(word 2,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
+GITHUB_REPO := $(word 3,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
+GITHUB_REPO_FULL := $(GITHUB_USER)/$(GITHUB_REPO)
 else
 GITHUB_REPO_FULL := $(CI_REPO_FULL)
+CI_HOST ?= github.com
+GITHUB_HOST := $(CI_HOST)
 GITHUB_USER := $(CI_USER)
 GITHUB_REPO := $(CI_REPO)
 endif
