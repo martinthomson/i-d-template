@@ -1,13 +1,32 @@
 #!/usr/bin/env bash
 
-# Usage: $0 <user> <repo> [draftxml ...]
+# Usage: $0 github.com <user> <repo> [draftxml ...]
 
-user="$1"
-repo="$2"
+host="$1"
+user="$2"
+repo="$3"
+# This is not overridden for non-github hosts because the typical way this is
+# called is through setup.mk anyway, which exports DEFAULT_BRANCH
+# unconditionally
 default_branch="${DEFAULT_BRANCH:-$("$(dirname "$0")/default-branch.py")}"
-shift 2
+shift 3
 
-githubio="https://${user}.github.io/${repo}/#go"
+case "$host" in
+  codeberg.org)
+    hostpages="codeberg.page"
+    ;;
+  github.com)
+    hostpages="github.io"
+    ;;
+  gitlab.com)
+    hostpages="gitlab.io"
+    ;;
+  *)
+    hostpages="pages.${host}"
+    ;;
+esac
+
+githubio="https://${user}.${hostpages}/${repo}/#go"
 
 function fixup_other_md() {
     markdown=(LICENSE.md CONTRIBUTING.md)
