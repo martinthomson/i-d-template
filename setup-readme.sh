@@ -105,7 +105,7 @@ See the
 [guidelines for contributions](${src_base}CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
-The GitHub interface supports creating pull requests using the Edit (✏) button.
+The ${host} interface supports creating pull requests using the Edit (✏) button.
 
 
 ## Command Line Usage
@@ -147,7 +147,7 @@ Discussion of this work occurs on the [${group_name}
 ${group_type} mailing list](mailto:${ml})
 ([archive](${ml_arch}),
 [subscribe](${ml_sub})).
-In addition to contributions in GitHub, you are encouraged to participate in
+In addition to contributions in ${host}, you are encouraged to participate in
 discussions there.
 
 **Note**: Some working groups adopt a policy whereby substantive discussion of
