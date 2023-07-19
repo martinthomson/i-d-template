@@ -36,9 +36,16 @@ PUSH_GHPAGES ?= true
 endif
 PUSH_GHPAGES ?= false
 
-# Allow overriding the pages branch. It is gh-pages on GitHub, but pages on
-# Forgejo (currently not auto-detected).
-PAGES_BRANCH ?= gh-pages
+# PAGES_BRANCH is where the latest upstream version of the (typically GitHub)
+# Pages is fetched from, and where it is pushed to. Different hosters have
+# different branch names for this purpose (if they do it that way at all).
+ifeq (github.com,$(GITHUB_HOST))
+	PAGES_BRANCH ?= gh-pages
+else
+	# This is common across all Forgejo instances, and as there is no more
+	# generic default, this is also the catch-all.
+	PAGES_BRANCH ?= pages
+endif
 
 .IGNORE: fetch-ghpages
 .PHONY: fetch-ghpages
