@@ -60,7 +60,7 @@ Markdown is similar:
 docname: draft-ietf-unicorn-protocol-latest
 title: The Unicorn Protocol
 ---
-~~~
+```
 _(If using `mmark`, replace `---` by `%%%`.)_
 
 Add the draft, commit and push your changes:
