@@ -68,13 +68,14 @@ $ git remote set-url origin https://github.com/new/repo
 ```
 
 After the draft is renamed and the origin is updated, you might want to rebuild
-the README:
+the README and the "venue" information in the draft (markdown only):
 
 ```sh
 $ make update-readme
+$ make update-venue
 ```
 
-This will overwrite the contents of README.md.  If you have made changes to the
-README, you can just update the intro text and the links instead.
+This will overwrite the contents of `README.md` and update the header of any markdown draft.
+If you have made changes to the README, you can just update the intro text and the links instead.
  
 You should also update any links to your repo from other places.
