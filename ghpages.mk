@@ -40,11 +40,14 @@ PUSH_GHPAGES ?= false
 # Pages is fetched from, and where it is pushed to. Different hosters have
 # different branch names for this purpose (if they do it that way at all).
 ifeq (github.com,$(GITHUB_HOST))
-	PAGES_BRANCH ?= gh-pages
+PAGES_BRANCH ?= gh-pages
+else ifeq (tmp,$(GITHUB_HOST))
+# OK, this is gross, but this is what happens when we are operating under test.
+PAGES_BRANCH ?= gh-pages
 else
-	# This is common across all Forgejo instances, and as there is no more
-	# generic default, this is also the catch-all.
-	PAGES_BRANCH ?= pages
+# This is common across all Forgejo instances, and as there is no more
+# generic default, this is also the catch-all.
+PAGES_BRANCH ?= pages
 endif
 
 .IGNORE: fetch-ghpages
