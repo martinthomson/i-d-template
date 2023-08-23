@@ -79,3 +79,8 @@ This will overwrite the contents of `README.md` and update the header of any mar
 If you have made changes to the README, you can just update the intro text and the links instead.
  
 You should also update any links to your repo from other places.
+
+
+## Submit
+
+Of course, you also need to [submit the draft as a -00](./SUBMITTING.md).
