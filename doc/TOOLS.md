@@ -50,7 +50,7 @@ lint:: wc
 You can add multiple linters as you like.
 
 
-## Installing Dependencies for CI
+## Installing Dependencies
 
 CI runs in a limited docker image, which means that you probably won't have
 access to your preferred tool in the minimal CI environment.  You could fork
@@ -74,9 +74,9 @@ should be added to your `.gitignore`.
 or just run `npm add --save <package>` then add the file.  Note that
 `package-lock.json` should be added to your `.gitignore`.
 
-These will be installed automatically when building locally or in CI.  In CI,
-the files needed are cached, which means that the time needed to installed
-larger packages is amortized over multiple builds.
+Tools listed in these files will be installed automatically when building, both
+locally or in CI.  In CI, the files needed are cached, which means that the time
+needed to install larger packages is amortized over multiple builds.
 
 
 ## Manually Installing Dependencies
@@ -89,6 +89,9 @@ that installs the tool, like so:
 checker-tool ?= checker-tool
 # Use a hidden marker file to indicate that the tool is installed.
 checker-marker ?= .checker-tool-installed.txt
+# Adding the marker to $(DEPS_FILES) is optional, but it will ensure
+# that your installation will be refreshed with `make update`.
+DEPS_FILES += $(checker-marker)
 .PHONY: run-checker
 run-checker: $(drafts_xml) $(checker-marker)
 	$(checker-tool) $(filter-out $(checker-marker),$^)
@@ -123,13 +126,13 @@ automatically.
 
 ```make
 $(checker-marker):
-        @if [ "$CI" = true -a "$CIRCLECI" != true ]; then user=root; else user=user; fi; \
-	  hash $(notdir $(checker-tool)) 2>/dev/null || \
-	  magically install checker-tool for $$user as $(checker-tool)
+        @hash $(notdir $(checker-tool)) 2>/dev/null || \
+	  magically install checker-tool for $$USER as $(checker-tool)
 	@touch $@
 ```
 
-Note that GitHub Actions builds run as root, but CircleCI builds use a special user.
+Note that GitHub Actions builds run as root, but CircleCI builds use a special user,
+which can have a significant effect on how you install some packages.
 
 
 ## Using the Mega/Math image in GitHub Actions
