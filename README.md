@@ -1,7 +1,7 @@
 # Internet Draft Template Repository
 
 The contents of this repository can be used to manage the editing of an
-[Internet Draft](https://github.com/ietf/id-guidelines).
+[Internet Draft](https://authors.ietf.org/en/content-guidelines-overview).
 
 This tool provides many
 [features](https://github.com/martinthomson/i-d-template/blob/main/doc/FEATURES.md).
