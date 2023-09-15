@@ -127,7 +127,7 @@ identify the specific XML file directly.  This works for any version you have
 submitted.
 
 ```sh
-$ make draft-ietf-unicorn-protocol-05.xml
+$ make versioned/draft-ietf-unicorn-protocol-05.xml
 ```
 
 [Submit the .xml file](https://datatracker.ietf.org/submit/).  Please don't
