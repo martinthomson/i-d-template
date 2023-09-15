@@ -110,9 +110,10 @@ submissions.
 ## Manual Process
 
 If you don't want to use automation, you can make a submission version of your
-draft and upload it yourself.  You can submit a draft manually using this
-process.  You can also use this process to create a preview of the next version
-of a draft.
+draft and upload it yourself.  Or, in rare circumstances, you might have to
+email a draft for submission.  You can generate the next numbered version of a
+draft using this process, or you can generate any previously tagged version of
+a draft.  Numbered drafts will be created in a directory named `versioned`.
 
 This uses git tags to work out what versions exist already, so always use tags.
 `make next` will calculate the next version number based on what is tagged. When
@@ -129,6 +130,9 @@ submitted.
 ```sh
 $ make versioned/draft-ietf-unicorn-protocol-05.xml
 ```
+
+**Note**: For older versions of `make`, you might have to run `make extra`
+before these targets become available.
 
 [Submit the .xml file](https://datatracker.ietf.org/submit/).  Please don't
 submit a `.txt` file.
