@@ -1,0 +1,10 @@
+# Auto-update GitHub Actions
+version: 2
+updates:
+  - package-ecosystem:
+      - "Bundler"
+      - "github-actions"
+      - "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
