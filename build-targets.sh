@@ -9,6 +9,8 @@
 drafts=("$@")
 candidates=$((${#drafts[@]} * 5))
 versioned="${VERSIONED:-versioned}"
+txt_html_warning="$(mktemp)"
+trap 'rm -f "$txt_html_warning"' EXIT
 
 next() {
     printf "${1%-*}-%2.2d" $((1${1##*-} - 99))
@@ -35,6 +37,11 @@ build_target() {
     source_file=
     subst=()
     for file in $(git ls-tree --name-only "$tag" | grep '^draft-'); do
+        if [ "${file##*.}" = "txt" -o "${file##*.}" = "html" ]; then
+            echo "warning: $file is checked in at revision $tag" 1>&2
+            rm -f "$txt_html_warning"
+            continue
+        fi
         if [ "${file%.*}" = "${target_name%-*}" ]; then
             source_file="$file"
             file_tag="$target_name"
@@ -111,3 +118,8 @@ for draft in "${drafts[@]%.*}"; do
         fi
     fi
 done
+
+if [ ! -e "$txt_html_warning" ]; then
+    echo "warning: checked in txt or html files can cause issues" 1>&2
+    echo "warning: remove these files with \`git rm\`" 1>&2
+fi
