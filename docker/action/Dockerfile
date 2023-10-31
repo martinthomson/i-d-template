@@ -81,10 +81,10 @@ RUN set -e; \
     set -x; \
     tool_install idnits bfda9518d5b4e8a682f2e6f34a449c2d3ea74539 \
       0ea07cdc982645a85622ccc2636a4d21cde54137269f0e8a204e1bc519b48818; \
-    mmark="2.2.10"; \
+    mmark="2.2.40"; \
     install mmark \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
-      54ce59da52c59bcc810132ef395f523beeb46bdf9df9b1e3f9be882860934cff; \
+      720f8cccd5c38a2a333d0a6af4146df1dd798f4cfcb5e83419fc518348bdf7ad; \
     npm install -g aasvg; \
     pip3 install --compile --no-cache-dir --disable-pip-version-check -r /i-d-template/requirements.txt; \
     bundle install --system --gemfile=/i-d-template/Gemfile
