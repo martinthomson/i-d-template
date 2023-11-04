@@ -27,7 +27,7 @@ $(archive_script) $(1)
 endef
 else
 define archive_issues
-old_archive=$$(mktemp /tmp/archive-old.XXXXXX); \
+old_archive=$$(mktemp $(TMPDIR)/tmp/archive-old.XXXXXX); \
 trap 'rm -f $$old_archive' EXIT; \
 git show $(ARCHIVE_BRANCH):$(1) > $$old_archive || true; \
 echo $(archive_script) $(1) --reference $$old_archive; \
@@ -55,7 +55,7 @@ archive.json: fetch-archive $(drafts_source) $(DEPS_FILES)
 	fi; \
 	$(call archive_issues,$@)
 
-ARCHIVE_ROOT := /tmp/gharchive$(PID)
+ARCHIVE_ROOT := $(TMPDIR)/gharchive$(PID)
 $(ARCHIVE_ROOT): fetch-archive
 	@git show-ref refs/heads/$(ARCHIVE_BRANCH) >/dev/null 2>&1 || \
 	  (git show-ref refs/remotes/origin/$(ARCHIVE_BRANCH) >/dev/null 2>&1 && \

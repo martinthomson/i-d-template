@@ -55,7 +55,7 @@ endif
 fetch-ghpages:
 	git fetch -qf origin ${PAGES_BRANCH}:${PAGES_BRANCH}
 
-GHPAGES_ROOT := /tmp/ghpages$(PID)
+GHPAGES_ROOT := $(TMPDIR)/ghpages$(PID)
 ghpages: $(GHPAGES_ROOT)
 $(GHPAGES_ROOT): fetch-ghpages
 	@git show-ref refs/heads/${PAGES_BRANCH} >/dev/null 2>&1 || \

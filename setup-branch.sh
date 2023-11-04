@@ -5,6 +5,7 @@ set -e
 hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
 
 branch="$1"
+TMPDIR="${TMPDIR:-/tmp}"
 shift
 
 # Fetch here, but don't abort on failure.
@@ -14,7 +15,7 @@ if git show-ref -s "$branch" >/dev/null 2>&1; then
     exit
 fi
 
-tmp=$(mktemp -d /tmp/init-branch-"$branch"-XXXXX)
+tmp=$(mktemp -d "${TMPDIR}/init-branch-${branch}-XXXXX")
 function cleanup() {
     rm -rf "$tmp"
 }

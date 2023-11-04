@@ -13,6 +13,7 @@ repo="${6:-<repo>}"
 default_branch="${DEFAULT_BRANCH:-$("$(dirname "$0")/default-branch.py")}"
 branch="${3:-$default_branch}"
 libdir="${LIBDIR:-"$(realpath "$(dirname "$0")")"}"
+TMPDIR="${TMPDIR:-/tmp}"
 [[ -n "$VENV" ]] && python="${python:-"${VENV}/python"}"
 python="${python:-python3}"
 shift 6
@@ -249,7 +250,7 @@ function list_dir() {
         [[ -n "${src##*:}" ]] || \
             src="origin/${branch}:$(git ls-tree --name-only "origin/$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
         if [[ -n "${src##*:}" ]]; then
-            tmp="$(mktemp "/tmp/build-index$$-XXXXXX").${src##*.}"
+            tmp="$(mktemp "${TMPDIR}/build-index$$-XXXXXX").${src##*.}"
             tmpfiles+=("$tmp")
             git show "$src" >"$tmp"
             src="$tmp"

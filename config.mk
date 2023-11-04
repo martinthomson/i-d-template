@@ -72,6 +72,9 @@ trace := $(LIBDIR)/trace.sh
 # Where versioned copies are stored.
 VERSIONED ?= versioned
 
+# We can blame this one on some weird configuration.
+TMPDIR ?= /tmp
+
 # Set this to "true" to disable caching where possible.
 DISABLE_CACHE ?= false
 ifeq (true,$(DISABLE_CACHE))
