@@ -84,7 +84,7 @@ ifeq (,$(CI_REPO_FULL))
 # remote (or any other hoster's domain/user/repository part if it uses a
 # similar structure)
 GITHUB_REPO_WITHHOST := $(shell git ls-remote --get-url $(GIT_REMOTE) 2>/dev/null |\
-			sed -e 's/^[a-zA-Z0-9+.-]\+:\/\///;s/.*@//;s/:/\//;s/\.git$$//')
+			sed -e 's/^[a-zA-Z0-9+.-]*:\/\///;s/.*@//;s/:/\//;s/\.git$$//')
 GITHUB_HOST := $(word 1,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
 GITHUB_USER := $(word 2,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
 GITHUB_REPO := $(word 3,$(subst /, ,$(GITHUB_REPO_WITHHOST)))
