@@ -17,6 +17,7 @@ RUN set -e; \
       libxml2-utils \
       libxslt \
       make \
+      musl-locales \
       nodejs \
       npm \
       openssh \
@@ -39,21 +40,6 @@ RUN set -e; \
       ruby \
       ruby-bundler \
       sed
-
-# See <https://github.com/Auswaschbar/alpine-localized-docker/blob/master/Dockerfile>
-ENV MUSL_LOCPATH="/usr/share/i18n/locales/musl"
-RUN set -e; \
-    apk add --no-cache --virtual .locale_build cmake musl-dev gcc gettext-dev; \
-    tmp=$(mktemp -d /tmp/musl-locales-XXXXX); \
-    git clone https://gitlab.com/rilian-la-te/musl-locales "$tmp"; \
-    cd "$tmp"; \
-    cmake -DCMAKE_BUILD_TYPE=Release -DLOCALE_PROFILE=OFF -DCMAKE_INSTALL_PREFIX:PATH=/usr .; \
-    make; \
-    make install; \
-    cd /; \
-    rm -rf "$tmp"; \
-    apk del .locale_build; \
-    mkdir -p /i-d-template
 
 ENV SHELL=/bin/bash \
     LANG=en_US.UTF-8 \
