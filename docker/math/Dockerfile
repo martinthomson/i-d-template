@@ -27,4 +27,11 @@ RUN set -e; \
     rm -rf "$tmp"; \
     apk del .locale_build
 
-RUN apk add npm && npm install -g mathjax-node-cli
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ttf-freefont \
+    yarn && \
+    npm install -g mathjax-node-cli
