@@ -54,7 +54,7 @@ jobs:
             docker exec -u 0 test chown -R idci:idci /test
             docker exec -u 0 test apk add black
             docker exec -w /test test black --check .
-            docker exec -u 0 test pip install behave
+            docker exec -u 0 test pip3 install --break-system-packages behave
             docker exec test mkdir /tmp/artifacts
             docker exec -w /test test behave --junit --junit-directory /tmp/artifacts /test/tests
 
