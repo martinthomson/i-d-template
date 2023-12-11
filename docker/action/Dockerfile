@@ -72,7 +72,8 @@ RUN set -e; \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
       720f8cccd5c38a2a333d0a6af4146df1dd798f4cfcb5e83419fc518348bdf7ad; \
     npm install -g aasvg; \
-    pip3 install --compile --no-cache-dir --disable-pip-version-check -r /i-d-template/requirements.txt; \
+    pip3 install --no-cache-dir --break-system-packages --disable-pip-version-check \
+      -r /i-d-template/requirements.txt; \
     bundle install --system --gemfile=/i-d-template/Gemfile
 
 ENTRYPOINT ["/i-d-template/entrypoint.sh"]
