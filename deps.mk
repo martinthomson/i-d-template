@@ -113,14 +113,6 @@ endif
 ## Python
 
 ifeq (true,$(CI))
-# PEP 668 really messes with things here.
-ifeq (root,$(USER))
-break-system-packages := --break-system-packages
-else
-ifeq (0,$(shell id -u))
-break-system-packages := --break-system-packages
-endif
-endif
 # Override VENVDIR so we can use caching in CI.
 VENVDIR = $(realpath .)/.venv
 endif
@@ -145,7 +137,7 @@ ifeq (true,$(CI))
 # Under CI, install from the local requirements.txt, but install globally (no venv).
 pip ?= pip3
 $(LOCAL_VENV):
-	$(pip) install $(no-cache-dir) $(break-system-packages) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	$(pip) install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 	@touch $@
 
 # No clean-deps target in CI..
