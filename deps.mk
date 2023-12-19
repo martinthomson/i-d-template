@@ -145,7 +145,6 @@ ifeq (true,$(CI))
 # Under CI, install from the local requirements.txt, but install globally (no venv).
 pip ?= pip3
 $(LOCAL_VENV):
-	@which $(pip)
 	$(pip) install $(no-cache-dir) $(break-system-packages) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 	@touch $@
 
