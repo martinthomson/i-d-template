@@ -45,7 +45,8 @@ ENV SHELL=/bin/bash \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8 \
-    KRAMDOWN_PERSISTENT=t
+    KRAMDOWN_PERSISTENT=t \
+    PIP_BREAK_SYSTEM_PACKAGES=true
 
 COPY ["entrypoint.sh", "requirements.txt", "Gemfile", "/i-d-template/"]
 RUN set -e; \
@@ -72,7 +73,7 @@ RUN set -e; \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
       720f8cccd5c38a2a333d0a6af4146df1dd798f4cfcb5e83419fc518348bdf7ad; \
     npm install -g aasvg; \
-    pip3 install --no-cache-dir --break-system-packages --disable-pip-version-check \
+    pip3 install --no-cache-dir --disable-pip-version-check \
       -r /i-d-template/requirements.txt; \
     bundle install --system --gemfile=/i-d-template/Gemfile
 
