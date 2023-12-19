@@ -111,17 +111,29 @@ bundle-update-all := --all
 endif
 
 ## Python
+
 ifeq (true,$(CI))
+# PEP 668 really messes with things here.
+ifeq (root,$(USER))
+break-system-packages := --break-system-packages
+else
+ifeq (0,$(shell id -u))
+break-system-packages := --break-system-packages
+endif
+endif
 # Override VENVDIR so we can use caching in CI.
 VENVDIR = $(realpath .)/.venv
 endif
+
 VENVDIR ?= $(realpath $(LIBDIR))/.venv
 REQUIREMENTS_TXT := $(wildcard requirements.txt)
+
 ifneq (,$(strip $(REQUIREMENTS_TXT)))
 # Need to maintain a local marker file in case the lib/ directory is shared.
 LOCAL_VENV := .requirements.txt
 DEPS_FILES += $(LOCAL_VENV)
 endif
+
 ifneq (true,$(CI))
 # Don't install from lib/requirements.txt in CI; these are in the docker image.
 REQUIREMENTS_TXT += $(LIBDIR)/requirements.txt
@@ -133,7 +145,8 @@ ifeq (true,$(CI))
 # Under CI, install from the local requirements.txt, but install globally (no venv).
 pip ?= pip3
 $(LOCAL_VENV):
-	$(pip) install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	@which $(pip)
+	$(pip) install $(no-cache-dir) $(break-system-packages) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 	@touch $@
 
 # No clean-deps target in CI..
