@@ -6,6 +6,8 @@ At a minimum, you need a POSIX environment with:
 * `python3` with `pip` and `venv`
 * `ruby` with `gem` and `bundler`
 
+Optionally, you might also want `mmark` or NodeJS and `npm`.
+
 When running locally, a python virtual environment is created under `lib/` and
 necessary tools are installed there.  Similarly, ruby installations are created
 under `lib/`.  The tools that are used can be updated with `make update-deps`.
@@ -69,28 +71,12 @@ variable with that value to disable this feature.
 
 ## mmark
 
-If you use mmark for markdown (i.e., files starting with `%%%`), you will need
-to install and manage an mmark installation.
+If you use `mmark` for markdown (i.e., files starting with `%%%`), you will need
+to install and manage an `mmark` installation.
 
-[`mmark`](https://github.com/mmarkdown/mmark) requires
-[go](https://golang.org/), and that comes with its own complications.  This
-assumes that you have Golang setup already.
-
-```sh
-$ go get github.com/mmarkdown/mmark
-$ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark
-```
-
-You might want to set aside a directory for your go code other than the default,
-and find a directory that is on the path where you can install `mmark`.  For
-these, I set `GOPATH=~/gocode`.
-
-Make sure to update them regularly:
-
-```sh
-$ go get -u github.com/mmarkdown/mmark@latest
-$ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
-```
+Binaries for [`mmark`](https://github.com/mmarkdown/mmark) is available from
+their [releases](https://github.com/mmarkdown/mmark/releases) and Mac users can
+use homebrew (`brew install mmark`).
 
 
 ## npm
@@ -98,7 +84,13 @@ $ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
 If you use dependencies such as [aasvg](https://github.com/martinthomson/aasvg),
 you need to have NodeJS and npm installed.
 
-If npm is installed and your project has a `package.json`, then running `make`
+If `npm` is installed and your project has a `package.json`, then running `make`
 will automatically call npm to install the dependencies.
 
-You can create the `package.json` by running, e.g., `npm i -save aasvg`.
+You can create the `package.json` by running `npm`, for example:
+
+```sh
+$ npm i -save aasvg
+$ git add package.json
+$ git commit
+```
