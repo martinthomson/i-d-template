@@ -91,3 +91,14 @@ Make sure to update them regularly:
 $ go get -u github.com/mmarkdown/mmark@latest
 $ GOBIN=~/.local/bin go install github.com/mmarkdown/mmark@latest
 ```
+
+
+## npm
+
+If you use dependencies such as [aasvg](https://github.com/martinthomson/aasvg),
+you need to have NodeJS and npm installed.
+
+If npm is installed and your project has a `package.json`, then running `make`
+will automatically call npm to install the dependencies.
+
+You can create the `package.json` by running, e.g., `npm i -save aasvg`.
