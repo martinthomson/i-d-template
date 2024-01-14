@@ -86,7 +86,7 @@ $(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES)
 endif
 
 # GHPAGES_COMMIT_TTL is the number of days worth of commits to keep on the ${PAGES_BRANCH} branch.
-GHPAGES_COMMIT_TTL ?= 30
+GHPAGES_COMMIT_TTL ?= 90
 # GHPAGES_BRANCH_TTL is the number of days to retain a directory on ${PAGES_BRANCH}
 # after the corresponding branch has been deleted. This is measured from the last change.
 GHPAGES_BRANCH_TTL ?= 30
