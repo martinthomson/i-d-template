@@ -7,7 +7,12 @@ $ make
 Turn internet-draft source into text and HTML.  This supports XML files using
 [xml2rfc](https://xml2rfc.tools.ietf.org/), markdown files using either
 [kramdown-rfc](https://github.com/cabo/kramdown-rfc) or
-[mmark](https://github.com/miekg/mmark)
+[mmark](https://github.com/miekg/mmark).
+
+Multiple files can be managed in the same repository.  This only requires the
+addition of the source files for each draft, though you might choose to
+[update](https://github.com/martinthomson/i-d-template/blob/main/doc/UPDATE.md#automatically-generated-files)
+some files.
 
 ```sh
 $ make diff
