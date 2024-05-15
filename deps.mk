@@ -108,7 +108,13 @@
 # Using $(realpath) exposes make to spaces in directory names above this one.
 # Though we might prefer to use $(realpath), this function operates a fallback
 # so that the full path is not used if there are spaces in directory names.
-safe-realpath = $(if $(filter-out 1,$(words $(realpath $(1)))),$(1),$(realpath $1))
+ifeq ($(words $(realpath $(LIBDIR))),1)
+safe-realpath = $(realpath $(1))
+relative-paths := false
+else
+safe-realpath = $(1)
+relative-paths := true
+endif
 
 ifeq (true,$(DISABLE_CACHE))
 no-cache := --no-cache
@@ -193,11 +199,25 @@ BUNDLE_PATH := $(call safe-realpath,.)/.gems
 BUNDLE_DISABLE_VERSION_CHECK := true
 export BUNDLE_DISABLE_VERSION_CHECK
 endif
-export BUNDLE_PATH ?= $(call safe-realpath,$(LIBDIR))/.gems
+BUNDLE_PATH ?= $(call safe-realpath,$(LIBDIR))/.gems
 # Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
 # doesn't even match the current ruby version.
-export BUNDLE_BIN := $(BUNDLE_PATH)/bin
+BUNDLE_BIN := $(BUNDLE_PATH)/bin
 export PATH := $(BUNDLE_BIN):$(PATH)
+ifeq (true,$(relative-paths))
+# This means that BUNDLE_PATH is relative, which bundler will interpret
+# as being relative to the Gemfile, not the current directory, so tweak
+# the two path settings for bundler.  After setting $PATH.  Yuck.
+ifeq (true,$(CI))
+BUNDLE_PATH := ../.gems
+else
+BUNDLE_PATH := .gems
+endif
+BUNDLE_BIN := $(BUNDLE_PATH)/bin
+endif
+export BUNDLE_PATH
+export BUNDLE_BIN
+
 
 ifneq (,$(wildcard Gemfile))
 # A local Gemfile exists.
