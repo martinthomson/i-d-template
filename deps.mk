@@ -104,6 +104,12 @@
 
 .PHONY: deps clean-deps update-deps
 
+# Make really doesn't handle spaces in filenames well.
+# Using $(realpath) exposes make to spaces in directory names above this one.
+# Though we might prefer to use $(realpath), this function operates a fallback
+# so that the full path is not used if there are spaces in directory names.
+safe-realpath = $(if $(filter-out 1,$(words $(realpath $(1)))),"$(1)",$(realpath $1))
+
 ifeq (true,$(DISABLE_CACHE))
 no-cache := --no-cache
 no-cache-dir := --no-cache-dir
@@ -114,10 +120,10 @@ endif
 
 ifeq (true,$(CI))
 # Override VENVDIR so we can use caching in CI.
-VENVDIR = $(realpath .)/.venv
+VENVDIR = $(call safe-realpath,.)/.venv
 endif
 
-VENVDIR ?= $(realpath $(LIBDIR))/.venv
+VENVDIR ?= $(call safe-realpath,$(LIBDIR))/.venv
 REQUIREMENTS_TXT := $(wildcard requirements.txt)
 
 ifneq (,$(strip $(REQUIREMENTS_TXT)))
@@ -183,11 +189,11 @@ BUNDLE_IGNORE_MESSAGES := true
 export BUNDLE_IGNORE_MESSAGES
 ifeq (true,$(CI))
 # Override BUNDLE_PATH so we can use caching in CI.
-BUNDLE_PATH := $(realpath .)/.gems
+BUNDLE_PATH := $(call safe-realpath,.)/.gems
 BUNDLE_DISABLE_VERSION_CHECK := true
 export BUNDLE_DISABLE_VERSION_CHECK
 endif
-export BUNDLE_PATH ?= $(realpath $(LIBDIR))/.gems
+export BUNDLE_PATH ?= $(call safe-realpath,$(LIBDIR))/.gems
 # Install binaries to somewhere sensible instead of .../ruby/$v/bin where $v
 # doesn't even match the current ruby version.
 export BUNDLE_BIN := $(BUNDLE_PATH)/bin
@@ -197,11 +203,11 @@ ifneq (,$(wildcard Gemfile))
 # A local Gemfile exists.
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
-	bundle install $(no-cache) --gemfile=$(realpath $<)
+	bundle install $(no-cache) --gemfile=$(call safe-realpath,$<)
 	@touch $@
 
 update-deps:: Gemfile
-	bundle update $(bundle-update-all) --gemfile=$(realpath $<)
+	bundle update $(bundle-update-all) --gemfile=$(call safe-realpath,$<)
 
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
@@ -211,11 +217,11 @@ ifneq (true,$(CI))
 # Install kramdown-rfc.
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
-	bundle install $(no-cache) --gemfile=$(realpath $<)
+	bundle install $(no-cache) --gemfile=$(call safe-realpath,$<)
 	@touch $@
 
 update-deps:: $(LIBDIR)/Gemfile
-	bundle update $(bundle-update-all) --gemfile=$(realpath $<)
+	bundle update $(bundle-update-all) --gemfile=$(call safe-realpath,$<)
 
 clean-deps::
 	-rm -rf $(BUNDLE_PATH)
