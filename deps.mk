@@ -108,7 +108,7 @@
 # Using $(realpath) exposes make to spaces in directory names above this one.
 # Though we might prefer to use $(realpath), this function operates a fallback
 # so that the full path is not used if there are spaces in directory names.
-safe-realpath = $(if $(filter-out 1,$(words $(realpath $(1)))),"$(1)",$(realpath $1))
+safe-realpath = $(if $(filter-out 1,$(words $(realpath $(1)))),$(1),$(realpath $1))
 
 ifeq (true,$(DISABLE_CACHE))
 no-cache := --no-cache
