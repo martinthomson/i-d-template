@@ -112,6 +112,7 @@ ifeq ($(words $(realpath $(LIBDIR))),1)
 safe-realpath = $(realpath $(1))
 relative-paths := false
 else
+$(warning Your $$LIBDIR ($(LIBDIR)) contains spaces; some things might break.)
 safe-realpath = $(1)
 relative-paths := true
 endif
