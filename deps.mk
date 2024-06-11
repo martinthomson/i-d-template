@@ -210,13 +210,12 @@ export PATH := $(BUNDLE_BIN):$(PATH)
 ifeq (true,$(relative-paths))
 # This means that BUNDLE_PATH is relative, which bundler will interpret
 # as being relative to the Gemfile, not the current directory, so tweak
-# the two path settings for bundler.  After setting $PATH.  Yuck.
-ifeq (true,$(CI))
-BUNDLE_PATH := ../.gems
-else
-BUNDLE_PATH := .gems
-endif
-BUNDLE_BIN := $(BUNDLE_PATH)/bin
+# the two path settings for bundler.  After setting $PATH.
+# Thankfully, we don't install from $(LIBDIR)/Gemfile in CI, which
+# would mean that this would need to be "../.gems" there.
+$(warning Using a relative path for bundler)
+bundle-path-override-lib := BUNDLE_PATH=$(LIBDIR)/.gems BUNDLE_BIN=$(LIBDIR)/.gems/bin
+bundle-path-override := BUNDLE_PATH=.gems BUNDLE_BIN=.gems/bin
 endif
 export BUNDLE_PATH
 export BUNDLE_BIN
@@ -226,11 +225,11 @@ ifneq (,$(wildcard Gemfile))
 # A local Gemfile exists.
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
-	bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
+	$(bundle-path-override-lib) bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
 	@touch $@
 
 update-deps:: Gemfile
-	bundle update $(bundle-update-all) --gemfile="$(call safe-realpath,$<)"
+	$(bundle-path-override-lib) bundle update $(bundle-update-all) --gemfile="$(call safe-realpath,$<)"
 
 clean-deps::
 	-rm -rf "$(BUNDLE_PATH)"
@@ -240,11 +239,11 @@ ifneq (true,$(CI))
 # Install kramdown-rfc.
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
-	bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
+	$(bundle-path-override) bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
 	@touch $@
 
 update-deps:: $(LIBDIR)/Gemfile
-	bundle update $(bundle-update-all) --gemfile="$(call safe-realpath,$<)"
+	$(bundle-path-override) bundle update $(bundle-update-all) --gemfile="$(call safe-realpath,$<)"
 
 clean-deps::
 	-rm -rf "$(BUNDLE_PATH)"
