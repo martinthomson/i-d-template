@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "draft-*"
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Submitter email"
+        default: ""
+        type: string
 
 jobs:
   build:
@@ -11,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: "Checkout"
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # See https://github.com/actions/checkout/issues/290
     - name: "Get Tag Annotations"
@@ -41,7 +47,7 @@ jobs:
     - name: "Upload to Datatracker"
       uses: martinthomson/i-d-template@v1
       with:
-        make: upload
+        make: upload "UPLOAD_EMAIL=${{ inputs.email }}"
 
     - name: "Archive Submitted Drafts"
       uses: actions/upload-artifact@v3
