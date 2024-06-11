@@ -27,7 +27,7 @@ jobs:
       run: date -u "+date=%FT%T" >>"$GITHUB_OUTPUT"
 
     - name: "Caching"
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           .refcache
