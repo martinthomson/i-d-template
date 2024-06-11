@@ -112,7 +112,9 @@ ifeq ($(words $(realpath $(LIBDIR))),1)
 safe-realpath = $(realpath $(1))
 relative-paths := false
 else
+ifneq (,$(DISABLE_SPACES_WARNING))
 $(warning Your $$LIBDIR ($(LIBDIR)) contains spaces; some things might break.)
+endif
 safe-realpath = $(1)
 relative-paths := true
 endif
@@ -150,7 +152,7 @@ ifeq (true,$(CI))
 # Under CI, install from the local requirements.txt, but install globally (no venv).
 pip ?= pip3
 $(LOCAL_VENV):
-	$(pip) install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	"$(pip)" install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 	@touch $@
 
 # No clean-deps target in CI..
@@ -175,8 +177,8 @@ endif
 clean-deps:: clean-venv
 endif # CI
 update-deps::
-	$(pip) install $(no-cache-dir) --upgrade --upgrade-strategy eager \
-	  $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	"$(pip)" install $(no-cache-dir) --upgrade --upgrade-strategy eager \
+	  $(foreach path,$(REQUIREMENTS_TXT),-r "$(path)")
 endif # -e requirements.txt
 
 # Variable defaults for CI

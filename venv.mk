@@ -190,8 +190,8 @@ clean-venv:
 
 .PHONY: show-venv
 show-venv: venv
-	@$(VENV)/python -c "import sys; print('Python ' + sys.version.replace('\n',''))"
-	@$(VENV)/pip --version
+	@"$(VENV)/python" -c "import sys; print('Python ' + sys.version.replace('\n',''))"
+	@"$(VENV)/pip" --version
 	@echo venv: $(VENVDIR)
 
 .PHONY: debug-venv
@@ -226,14 +226,14 @@ endif
 
 $(VENV):
 	$(PY) -m venv $(VENVDIR)
-	$(VENV)/python -m pip install $(no-cache-dir) --upgrade pip setuptools wheel
+	"$(VENV)/python" -m pip install $(no-cache-dir) --upgrade pip setuptools wheel
 
 $(VENV)/$(MARKER): $(VENVDEPENDS) | $(VENV)
 ifneq ($(strip $(REQUIREMENTS_TXT)),)
-	$(VENV)/pip install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	"$(VENV)/pip" install $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 endif
 ifneq ($(strip $(SETUP_PY)),)
-	$(VENV)/pip install $(no-cache-dir) $(foreach path,$(SETUP_PY),-e $(dir $(path)))
+	"$(VENV)/pip" install $(no-cache-dir) $(foreach path,$(SETUP_PY),-e $(dir $(path)))
 endif
 	$(call touch,$(VENV)/$(MARKER))
 
@@ -244,19 +244,19 @@ endif
 
 .PHONY: python
 python: venv
-	exec $(VENV)/python
+	exec "$(VENV)/python"
 
 .PHONY: ipython
 ipython: $(VENV)/ipython
-	exec $(VENV)/ipython
+	exec "$(VENV)/ipython"
 
 .PHONY: shell
 shell: venv
-	. $(VENV)/activate && exec $(notdir $(SHELL))
+	. "$(VENV)/activate" && exec $(notdir $(SHELL))
 
 .PHONY: bash zsh
 bash zsh: venv
-	. $(VENV)/activate && exec $@
+	. "$(VENV)/activate" && exec $@
 
 
 #
@@ -270,5 +270,5 @@ $(VENV)/%: $(VENV)/%$(EXE) ;
 endif
 
 $(VENV)/%$(EXE): $(VENV)/$(MARKER)
-	$(VENV)/pip install $(no-cache-dir) --upgrade $*
+	"$(VENV)/pip" install $(no-cache-dir) --upgrade $*
 	$(call touch,$@)
