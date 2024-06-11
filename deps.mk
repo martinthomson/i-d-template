@@ -224,28 +224,28 @@ ifneq (,$(wildcard Gemfile))
 # A local Gemfile exists.
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
-	bundle install $(no-cache) --gemfile=$(call safe-realpath,$<)
+	bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
 	@touch $@
 
 update-deps:: Gemfile
-	bundle update $(bundle-update-all) --gemfile=$(call safe-realpath,$<)
+	bundle update $(bundle-update-all) --gemfile="$(call safe-realpath,$<)"
 
 clean-deps::
-	-rm -rf $(BUNDLE_PATH)
+	-rm -rf "$(BUNDLE_PATH)"
 endif # Gemfile
 
 ifneq (true,$(CI))
 # Install kramdown-rfc.
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
-	bundle install $(no-cache) --gemfile=$(call safe-realpath,$<)
+	bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
 	@touch $@
 
 update-deps:: $(LIBDIR)/Gemfile
-	bundle update $(bundle-update-all) --gemfile=$(call safe-realpath,$<)
+	bundle update $(bundle-update-all) --gemfile="$(call safe-realpath,$<)"
 
 clean-deps::
-	-rm -rf $(BUNDLE_PATH)
+	-rm -rf "$(BUNDLE_PATH)"
 endif # !CI
 endif # !NO_RUBY
 
