@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
 gem 'kramdown-rfc'
-gem 'net-http-persistent'
+gem 'rexml', "<=3.2.6"
