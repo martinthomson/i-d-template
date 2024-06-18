@@ -14,7 +14,7 @@ def extract_md(filename):
             section_header = fh.readline().strip()
             if section_header != r"%%%" and section_header != r"---":
                 raise Exception(
-                    'Unexpected first line in markdown file: got "{section_header}", expected `\%\%\%` or `---` '
+                    'Unexpected first line in markdown file: got "{section_header}", expected `%%%` or `---`'
                 )
             header_data = ""
             for line in fh:
@@ -53,7 +53,7 @@ def extract_xml(filename):
 
 class XmlHandler(xml.sax.handler.ContentHandler):
     interesting_elements = ["title", "area", "workgroup"]
-    wsp = re.compile("\s+")
+    wsp = re.compile(r"\s+")
 
     def __init__(self):
         self.metadata = {}
