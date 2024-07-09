@@ -25,10 +25,8 @@ endif
 
 .%.upload: %.xml
 	set -ex; tag="$(notdir $(basename $<))"; \
-	email="$(UPLOAD_EMAIL)"; \
-	[ -z "$$email" ] && email="$$(git tag --list --format '%(taggeremail)' "$$tag" | sed -e 's/^<//;s/>$$//')"; \
-	[ -z "$$email" ] && email=$$(xmllint --xpath '/rfc/front/author[1]/address/email/text()' $< 2>/dev/null); \
-	[ -z "$$email" ] && ! echo "Unable to find email to use for submission." 1>&2; \
+	email="$$($(LIBDIR)/get-email.sh "$$tag" "$<")"; \
+	[ -z "$$email" ] && exit 1; \
 	replaces() { \
 	  [ "$${1##*-}" = "00" ] || return; \
 	  file="$$(git ls-files "$${1%-[0-9][0-9]}.*")"; \
