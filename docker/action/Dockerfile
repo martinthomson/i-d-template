@@ -64,6 +64,7 @@ RUN set -e; \
       curl -SSLf -o "/usr/local/bin/${tool}" \
         "https://raw.githubusercontent.com/ietf-tools/${tool}-mirror/${version}/${tool}"; \
       [ $(sha256sum -b "/usr/local/bin/${tool}" | cut -d ' ' -f 1 -) = "$sha" ]; \
+      chmod 755 "/usr/local/bin/${tool}"; \
     }; \
     set -x; \
     tool_install idnits bfda9518d5b4e8a682f2e6f34a449c2d3ea74539 \
