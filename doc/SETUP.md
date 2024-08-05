@@ -19,7 +19,20 @@ These tools work well natively on Linux and Mac.
 
 Windows users should use [the Windows Subsystem for
 Linux](https://docs.microsoft.com/en-us/windows/wsl/install) with a Linux
-distribution like Ubuntu (`wsl --install -d Ubuntu`) to get `make`.
+distribution like Ubuntu (`wsl --install -d Ubuntu` from an administrator
+prompt).
+
+From within Ubuntu, you can install the dependencies for this repository:
+
+```sh
+sudo apt-get install -y git make python3-pip python3-venv
+```
+
+You can also add recommended packages, as follows:
+
+```sh
+sudo apt-get install -y ruby-bundler npm libxml2-utils
+```
 
 It is also possible to use [cygwin](https://cygwin.org/) or an
 [MSYS2](https://www.msys2.org/)-based system (like
