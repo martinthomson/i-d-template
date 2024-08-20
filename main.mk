@@ -111,6 +111,9 @@ else
 	$(trace) $@ -s xml2rfc-html $(xml2rfc) $(XML2RFC_HTML) $< -o $@
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
+ifneq (,$(FAVICON))
+	@-sed -i.favicon -e '/<link[^>]*rel="license">/{p;c \'$$'\n''$(FAVICON)'$$'\n'';}' $@; rm -f $@.favicon
+endif
 
 %.txt: %.xml $(DEPS_FILES)
 	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $(XML2RFC_TEXT) $< -o $@
