@@ -30,7 +30,7 @@ draft="$2"
 for k in taggeremail committeremail authoremail; do
     tagger="$(git tag --list --format '%('"$k"')' "$tag" | sed -e 's/^<//;s/>$//')"
     ghuser="${tagger%@users.noreply.github.com}"
-    if [ "$ghuser" = "$email" ]; then
+    if [ "$ghuser" = "$tagger" ]; then
         emailok "git $k" "$tagger"
     elif [ -n "$GITHUB_API_TOKEN" ]; then
         script="import json,sys
