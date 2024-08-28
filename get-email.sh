@@ -11,7 +11,7 @@
 tried=()
 emailok() {
     tried+=("$1")
-    if [ -n "$2" ]; then
+    if [ -n "$2" -a "$2" != "noreply@github.com" ]; then
         echo "$2"
         exit 0
     fi
