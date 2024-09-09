@@ -68,6 +68,36 @@ This will attribute the submission to the first author listed in the draft, no
 matter who generated the release, just like with a lightweight tag.
 
 
+## Picking an Email
+
+The IETF datatracker is quite picky about the email that is associated with a
+submission.  To work around that, there are several ways email addresses are
+chosen for a submission.
+
+1. An email address can be set when manually running the GitHub action.
+   This isn't a common way of requesting submission, but you might manually run
+   the action if a build fails.
+
+3. Setting a variable called `UPLOAD_EMAIL` in your Makefile.  Make sure to
+   export the value:
+
+```make
+export UPLOAD_EMAIL ?= my@email.example
+```
+
+3. The email address you used to create the tag (annotated tags only).
+   This will come from your git configuration.
+
+4. Your GitHub account email address.
+
+5. The email address of the first author in the draft.
+
+You can tell datatracker about your email address(es)
+[here](https://datatracker.ietf.org/accounts/profile/).  You might need to
+ensure that the first email the above process finds is the primary address
+known to the datatracker.
+
+
 ## If the Build Fails
 
 Sometimes the build will fail.  Some errors can be worked around by retrying the
