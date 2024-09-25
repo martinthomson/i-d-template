@@ -65,6 +65,11 @@ $ make issues
 
 Download a copy of GitHub issues and pull requests.
 
+If there are surprising errors, this may help:
+```sh
+$ make clean
+```
+
 
 ## Setup a Repository
 
