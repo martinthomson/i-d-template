@@ -77,13 +77,16 @@ update-codeowners:
 
 # We only need to copy over the rules that include and setup main.mk.
 # This keeps anything above the include where it is and moves everything else below these two things.
-# There is a tricky part in suppressing any blank line after `include <...>/main.mk`.
+# There is a tricky part in suppressing any blank line after `include <...>/main.mk`
+# when preserving existing lines.
 # This uses 'x' and 'n' to get the next line, then conditionally prints a non-blank line.
 update-makefile: Makefile $(LIBDIR)/template/Makefile
-	@x=$$(mktemp); mv $< "$$x"; \
+	@x=$$(mktemp);y=$$(mktemp); mv $< "$$x"; \
+	sed -n -e '1,/^include.*main\.mk$$/{/^include.*main\.mk$$/{x;n;/^$$/!p;};d;};/main\.mk:$$/,/^$$/d;p' "$$x" > "$$y"; \
 	sed -n -e '1,/^include.*main\.mk$$/{x;1d;p;}' "$$x" > $<; \
 	sed -n -e '/^include.*main\.mk$$/,/^$$/p;/main\.mk:$$/,/^$$/p' $(LIBDIR)/template/Makefile >> $<; \
-	sed -n -e '1,/^include.*main\.mk$$/{/^include.*main\.mk$$/{x;n;/^$$/!p;};d;};/main\.mk:$$/,/^$$/d;p' "$$x" >> $<
+	[ $$(cat "$$y" | wc -l) -gt 0 ] && echo >> $<; cat "$$y" >> $<; \
+	rm -f "$$x" "$$y"
 	@if ! git diff --quiet @ $<; then \
 	  git add $<; \
 	  git $(CI_AUTHOR) commit -m "Automatic update of $<"; \
