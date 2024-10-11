@@ -52,8 +52,9 @@ if len(sys.argv) >= 2:
             universal_newlines=True,
             encoding="utf-8",
             stderr=sink,
-        )
-        print(s.strip(), end="")
-        GetAuthorsEmail.get_emails(f)
+        ).strip()
+        if s != "":
+            print(s, end="")
+            GetAuthorsEmail.get_emails(f)
 else:
     GetAuthorsEmail.get_emails(sys.stdin)
