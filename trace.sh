@@ -22,11 +22,6 @@ fi
 
 report() {
     status="$1"
-    if [[ "$verbose" -eq 1 ]]; then
-        [[ "$status" -eq 0 ]] && res="\e[32mOK\e[0m" || res="\e[31mFAIL\e[0m"
-        printf "${file}: \e[35m${stage}\e[0m ... ${res}\n" 1>&2
-    fi
-    exit "$status"
 }
 
 tmp="$(mktemp)"
@@ -43,10 +38,13 @@ status="$?"
 if [[ -n "$TRACE_FILE" ]]; then
     echo "$file $stage $status" >>"$TRACE_FILE"
     if [[ "$status" -ne 0 ]]; then
-        tail -16 "$tmp" | while read -r line; do
+        tail -16 "$err" | while read -r line; do
             echo "$file $stage $line" >>"$TRACE_FILE"
         done
     fi
 fi
-[[ "$verbose" -gt 1 || "$status" -ne 0 ]] && cat "$err" 1>&2
-report "$status"
+if [[ "$verbose" -eq 1 ]]; then
+    [[ "$status" -eq 0 ]] && res="\e[32mOK\e[0m" || res="\e[31mFAIL\e[0m"
+    printf "${file}: \e[35m${stage}\e[0m ... ${res}\n" 1>&2
+fi
+exit "$status"
