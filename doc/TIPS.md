@@ -1,3 +1,53 @@
+## When Something Goes Wrong
+
+Sometimes, something breaks.  There are a few things you can try to reset and
+continue.
+
+Cleaning temporary files might help.
+
+```sh
+$ make clean
+```
+
+You can also update the template (`update`),
+the tools that are automatically installed (`update-deps`), or
+the files that are copied to your repository (`update-files`).
+
+```sh
+$ make update
+$ make update-deps
+$ make update-files
+```
+
+Sometimes, it can help to blow away the `lib` directory:
+
+```sh
+$ rm -rf lib
+```
+
+
+## Save Space
+
+The `lib` directory can get pretty big, because it contains copies of all
+of the tools that your draft needs.  If you have multiple drafts, you can
+point all those drafts to the same checkout with a symlink, as long as you
+aren't using `git submodules`:
+
+```sh
+$ rm -rf lib
+$ ln -s ../some-other-draft/lib lib
+```
+
+An advantage of this is that updates to `xml2rfc` and other tools that
+are triggered from one repository will be available to all others.
+
+This largely works even if you have different configurations for each
+repository. For instance, if you have a `Gemfile` or `requirements.txt`,
+any tool that one repository installs will be available to all others.
+You do need to remember to list tools in one of these files if you use
+them, or builds will fail in CI or for other people.
+
+
 ## When Creating Pull Requests on Another Repository
 
 Make the `origin` remote point to two different places.  Pull from the "main"
@@ -20,7 +70,7 @@ setup another remote for your fork, or just pull or fetch directly by
 specifying the full remote name:
 
 ```sh
-$ git pull https://github.com/martinthomson/tls13-spec master
+$ git pull https://github.com/martinthomson/tls13-spec main
 $ git fetch https://github.com/martinthomson/tls13-spec
 ```
 
