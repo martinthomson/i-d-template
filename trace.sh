@@ -29,8 +29,6 @@ report() {
     exit "$status"
 }
 
-set -x
-
 sout="$(mktemp)"
 serr="$(mktemp)"
 trap 'rm -f "$sout" "$serr"' EXIT
