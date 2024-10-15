@@ -134,7 +134,7 @@ ifneq (,$(MAKE_TRACE))
 ghpages:
 	@$(call MAKE_TRACE,ghpages)
 else
-ghpages: cleanup-ghpages $(GHPAGES_ALL)
+ghpages: $(GHPAGES_ALL) | cleanup-ghpages
 	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating ${PAGES_BRANCH} from $(shell git rev-parse --short HEAD). [ci skip]"; fi
