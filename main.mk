@@ -49,6 +49,9 @@ pdf:: $(addsuffix .pdf,$(drafts))
 ## Basic Recipes
 .INTERMEDIATE: $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts)))
 
+ifeq (true,$(CI))
+VERBOSE ?= true
+endif
 ifeq (true,$(VERBOSE))
 trace := $(trace) -v
 echo := echo

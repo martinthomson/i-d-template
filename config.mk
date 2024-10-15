@@ -75,7 +75,7 @@ codespell ?= codespell
 # Tracing tool
 trace := $(LIBDIR)/trace.sh
 # Verbose output
-VERBOSE := false
+VERBOSE :=
 
 # Where versioned copies are stored.
 VERSIONED ?= versioned
