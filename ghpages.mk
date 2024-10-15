@@ -76,7 +76,7 @@ $(GHPAGES_INSTALLED): $(GHPAGES_PUBLISHED) $(GHPAGES_TARGET)
 	cp -f $(notdir $@) $@
 
 GHPAGES_ALL := $(GHPAGES_INSTALLED) $(GHPAGES_TARGET)/index.$(INDEX_FORMAT)
-$(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES)
+$(GHPAGES_TARGET)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES) | cleanup-ghpages
 	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(SOURCE_BRANCH)" "$(GITHUB_HOST)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 
 ifneq ($(GHPAGES_TARGET),$(GHPAGES_ROOT))
@@ -134,7 +134,7 @@ ifneq (,$(MAKE_TRACE))
 ghpages:
 	@$(call MAKE_TRACE,ghpages)
 else
-ghpages: $(GHPAGES_ALL) | cleanup-ghpages
+ghpages: $(GHPAGES_ALL)
 	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating ${PAGES_BRANCH} from $(shell git rev-parse --short HEAD). [ci skip]"; fi
