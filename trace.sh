@@ -29,33 +29,26 @@ report() {
     exit "$status"
 }
 
-if [[ -z "$TRACE_FILE" ]]; then
-    if [[ "$1" == "!" ]]; then
-        shift
-        ! "$@"
-    else
-        "$@"
-    fi
-    report "$?"
-fi
+set -x
 
-tmp=$(mktemp)
-trap 'rm -f $tmp' EXIT
+sout="$(mktemp)"
+serr="$(mktemp)"
+trap 'rm -f "$sout" "$serr"' EXIT
 set -o pipefail
 if [[ "$1" == "!" ]]; then
     shift
     ! "$@"
 else
     "$@"
-fi > >(tee -a "$tmp") 2> >(tee -a "$tmp" 1>&2)
+fi > >(tee -a "$sout") 2> >(tee -a "$serr" 1>&2)
 status="$?"
 if [[ -n "$TRACE_FILE" ]]; then
     echo "$file $stage $status" >>"$TRACE_FILE"
     if [[ "$status" -ne 0 ]]; then
-        tail -16 "$tmp" | while read -r line; do
+        tail -16 "$serr" | while read -r line; do
             echo "$file $stage $line" >>"$TRACE_FILE"
         done
     fi
 fi
-[[ "$verbose" -gt 1 || "$status" -ne 0 ]] && cat "$tmp"
-report "$?"
+[[ "$verbose" -gt 1 || "$status" -ne 0 ]] && cat "$serr" 1>&2
+report "$status"
