@@ -49,6 +49,15 @@ pdf:: $(addsuffix .pdf,$(drafts))
 ## Basic Recipes
 .INTERMEDIATE: $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts)))
 
+ifeq (true,$(VERBOSE))
+trace := $(trace) -v
+echo := echo
+at :=
+else
+echo := :
+at := @
+endif
+
 MD_PRE =
 ifneq (,$(MD_PREPROCESSOR))
 MD_PRE += | $(trace) $@ -s preprocessor $(MD_PREPROCESSOR)
@@ -58,12 +67,12 @@ NOT_CURRENT = $(filter-out $(basename $<),$(drafts))
 MD_PRE += | sed -e '$(join $(addprefix s/,$(addsuffix -latest/,$(NOT_CURRENT))), \
 		$(addsuffix /g;,$(NOT_CURRENT)))'
 endif
-MD_POST = | $(trace) $@ -s venue $(python) $(LIBDIR)/add-note.py
+MD_POST = | $(trace) -q $@ -s venue $(python) $(LIBDIR)/add-note.py
 ifneq (true,$(USE_XSLT))
-MD_POST += | $(trace) $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
+MD_POST += | $(trace) -q $@ -s v2v3 $(xml2rfc) --v2v3 /dev/stdin -o /dev/stdout
 endif
 ifeq (true,$(TIDY))
-MD_POST += | $(trace) $@ -s tidy $(rfc-tidy)
+MD_POST += | $(trace) -q $@ -s tidy $(rfc-tidy)
 endif
 
 %.xml: %.md $(DEPS_FILES)
@@ -71,10 +80,10 @@ endif
 	if [ "$${h:0:1}" = $$'\ufeff' ]; then echo 'warning: BOM in $<' 1>&2; h="$${h:1:3}"; \
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
+	  $(echo) '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
 	  cat $< $(MD_PRE) | $(trace) $@ -s kramdowm-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
-	  echo '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
+	  $(echo) '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
 	  cat $< $(MD_PRE) | $(trace) $@ -s mmark $(mmark) $(MD_POST) >$@; \
 	else \
 	  ! echo "Unable to detect '%%%' or '---' in markdown file" 1>&2; \
@@ -99,16 +108,16 @@ $(XSLTDIR):
 	git clone --depth 10 $(CLONE_ARGS) -b master https://github.com/reschke/xml2rfc $@
 
 %.cleanxml: %.xml $(LIBDIR)/clean-for-DTD.xslt $(LIBDIR)/rfc2629.xslt
-	$(trace) $@ -s xslt-clean $(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
+	$(at)$(trace) $@ -s xslt-clean $(xsltproc) --novalid $(LIBDIR)/clean-for-DTD.xslt $< > $@
 
 %.html: %.xml $(LIBDIR)/rfc2629.xslt $(LIBDIR)/style.css
-	$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
+	$(at)$(trace) $@ -s xslt-html $(xsltproc) --novalid --stringparam xml2rfc-ext-css-contents "$$(cat $(LIBDIR)/style.css)" $(LIBDIR)/rfc2629.xslt $< > $@
 
 %.txt: %.cleanxml $(DEPS_FILES)
-	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $(XML2RFC_TEXT) $< -o $@
+	$(at)$(trace) $@ -s xml2rfc-txt $(xml2rfc) $(XML2RFC_TEXT) $< -o $@
 else
 %.html: %.xml $(XML2RFC_CSS) $(DEPS_FILES)
-	$(trace) $@ -s xml2rfc-html $(xml2rfc) $(XML2RFC_HTML) $< -o $@
+	$(at)$(trace) $@ -s xml2rfc-html $(xml2rfc) $(XML2RFC_HTML) $< -o $@
 # Workaround for https://trac.tools.ietf.org/tools/xml2rfc/trac/ticket/470
 	@-sed -i.rfc-local -e 's,<link[^>]*href=["'"'"]rfc-local.css["'"'"][^>]*>,,' $@; rm -f $@.rfc-local
 ifneq (,$(FAVICON))
@@ -116,11 +125,11 @@ ifneq (,$(FAVICON))
 endif
 
 %.txt: %.xml $(DEPS_FILES)
-	$(trace) $@ -s xml2rfc-txt $(xml2rfc) $(XML2RFC_TEXT) $< -o $@
+	$(at)$(trace) $@ -s xml2rfc-txt $(xml2rfc) $(XML2RFC_TEXT) $< -o $@
 endif
 
 %.pdf: %.txt
-	$(trace) $@ -s enscript $(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
+	$(at)$(trace) $@ -s enscript $(enscript) --margins 76::76: -B -q -p - $< | $(ps2pdf) - $@
 
 ## Build copies of drafts for submission
 .PHONY: next
@@ -148,7 +157,7 @@ submit::
 .PHONY: check idnits
 check:: idnits
 idnits:: $(drafts_next_txt)
-	echo $^ | xargs -n 1 sh -c '$(trace) "$$0" -s idnits $(idnits) "$$0"'
+	@echo $^ | xargs -n 1 sh -c '$(trace) "$$0" -s idnits $(idnits) "$$0"'
 
 CODESPELL_ARGS :=
 ifneq (,$(wildcard ./.ignore-words))
@@ -201,9 +210,9 @@ endif
 lint-whitespace::
 	@err=0; for f in $(drafts_source); do \
 	  if [  ! -z "$$(tail -c 1 "$$f")" ]; then \
-	    $(trace) "$$f" -s nl ! echo "$$f has no newline on the last line"; err=1; \
+	    $(trace) -q "$$f" -s nl ! echo "$$f has no newline on the last line"; err=1; \
 	  fi; \
-	  if ! $(trace) "$$f" -s ws ! grep -n $$' \r*$$' "$$f"; then \
+	  if ! $(trace) -q "$$f" -s ws ! grep -n $$' \r*$$' "$$f"; then \
 	    $(if $(TRACE_FILE),echo "$${f%.*} ws $$f contains trailing whitespace" >>$(TRACE_FILE);) \
 	    echo "$$f contains trailing whitespace"; err=1; \
 	  fi; \
