@@ -76,7 +76,7 @@ def step_impl(context, target, option):
 @when("the draft is broken")
 def step_impl(context):
     import platform
-    if any(platform.system() == p for p in ['Darwin', 'BSD']):
+    if platform.system() in ['Darwin', 'BSD']:
         sed_no_backup = ["sed", "-i", ""]
     else:
         sed_no_backup = ["sed", "-i"]
