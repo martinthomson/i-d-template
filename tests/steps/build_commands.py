@@ -75,11 +75,16 @@ def step_impl(context, target, option):
 
 @when("the draft is broken")
 def step_impl(context):
+    import platform
+    if any(platform.system() == p for p in ['Darwin', 'BSD']):
+        sed_no_backup = ["sed", "-i", ""]
+    else:
+        sed_no_backup = ["sed", "-i"]
     with cd(context.working_dir):
         break_this = glob("draft-*.md")[0]
         run_with_capture(
             context,
-            ["sed", "-i", "-e", "s/TODO Security/{{broken-reference}}/", break_this],
+            sed_no_backup + ["-e", "s/TODO Security/{{broken-reference}}/", break_this],
         )
         context.broken_file = break_this
 
