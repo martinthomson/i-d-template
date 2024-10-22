@@ -32,6 +32,12 @@ function get_title() {
     echo "${t[*]}"
 }
 
+if [[ "$OSTYPE" =~ (darwin|bsd).* ]] ; then
+  function sed_no_backup() { sed -i '' "$@" ; }
+else
+  function sed_no_backup() { sed -i "$@" ; }
+fi
+
 first=true
 for d in "$@"; do
     fullname="${d%.xml}"
@@ -125,7 +131,7 @@ if [ -n "$wg_all" ]; then
         # /./{x;/\n/{s/.//;p;};x;} prints a blank line before a non-blank line,
         #    but only if the hold buffer has a blank line in it.
         #    The s/.//;p; part ensures that an extra blank line isn't added by deleting one.
-        sed -i -e '/^$/{H;d;};/^## Working Group Info/,$d;/./{x;/\n/{s/.//;p;};x;}' CONTRIBUTING.md
+        sed_no_backup -e '/^$/{H;d;};/^## Working Group Info/,$d;/./{x;/\n/{s/.//;p;};x;}' CONTRIBUTING.md
         cat >>CONTRIBUTING.md <<EOF
 
 
