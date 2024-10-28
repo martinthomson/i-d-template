@@ -96,7 +96,8 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 	  git remote prune $$remote; \
 	done;
 
-# Drop old ${PAGES_BRANCH} commits
+ifneq (true,$(CI))
+# Drop old ${PAGES_BRANCH} commits.
 # Retain $(GHPAGES_COMMIT_TTL) days of history.
 # Only run this if more than $(GHPAGES_COMMIT_TTL)*2 days of history exists.
 	@KEEP=$$((`date '+%s'`-($(GHPAGES_COMMIT_TTL)*86400))); \
@@ -109,6 +110,7 @@ cleanup-ghpages: $(GHPAGES_ROOT)
 		FILTER_BRANCH_SQUELCH_WARNING=1 git -C $(GHPAGES_ROOT) filter-branch ${PAGES_BRANCH}; \
 	  fi \
 	fi
+endif
 
 # Clean up obsolete directories
 # Keep old branches for $(GHPAGES_BRANCH_TTL) days after the last changes (on the ${PAGES_BRANCH} branch).
