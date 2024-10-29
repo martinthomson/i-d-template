@@ -229,6 +229,7 @@
   --pilcrow-strong: #bbb;
   --small-font-size: 14.5px;
   --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
   scrollbar-color: #bbb #eee;
 }
 body {
@@ -247,7 +248,7 @@ body {
 
 /* headings */
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Sofia Sans Semi Condensed", sans-serif;
+  font-family: var(--font-title);
   font-weight: 680;
   margin: 0.8em 0 0.3em;
   font-size-adjust: 0.5;
@@ -655,6 +656,12 @@ sub, sup {
 #toc {
   padding: 0.75em 0 2em 0;
   margin-bottom: 1em;
+}
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+  }
 }
 #toc nav ul {
   margin: 0 0.5em 0 0;
