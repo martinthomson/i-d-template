@@ -45,7 +45,7 @@ oxtradoc ?= oxtradoc.in
 xsltproc ?= xsltproc
 
 # For sanity checkout your draft:
-#   https://www.ietf.org/tools/idnits
+#   https://github.com/ietf-tools/idnits
 idnits ?= idnits
 
 # For diff:

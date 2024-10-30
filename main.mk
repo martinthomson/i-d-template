@@ -159,8 +159,22 @@ submit::
 ## Check for validity
 .PHONY: check idnits
 check:: idnits
-idnits:: $(drafts_next_txt)
-	@echo $^ | xargs -n 1 sh -c '$(trace) "$$0" -s idnits $(idnits) "$$0"'
+
+# Mode can be "normal", "submission", or "forgive-checklist"
+idnits_mode ?= normal
+ifneq (true,$(NO_NODEJS))
+idnits_bin ?= node_modules/.bin/idnits
+$(idnits_bin):
+	npm install -q github:ietf-tools/idnits
+else
+idnits_bin :=
+endif
+
+idnits:: $(drafts_next_xml) | $(idnits_bin)
+	@for i in $^; do \
+	  [ "$$i" == "$(idnits_bin)" ] || \
+	    $(trace) "$$i" -s idnits $(idnits) -m $(idnits_mode) "$$i"; \
+	done
 
 CODESPELL_ARGS :=
 ifneq (,$(wildcard ./.ignore-words))
