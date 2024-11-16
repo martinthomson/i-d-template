@@ -171,7 +171,7 @@ idnits_bin :=
 endif
 
 ifneq (,$(shell which script 2>/dev/null))
-faketty = script -qec "$(1)" /dev/null
+faketty = script -qec "$(subst ",\",$(1))" /dev/null
 else
 faketty = $(1)
 endif
