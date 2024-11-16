@@ -47,6 +47,15 @@ any tool that one repository installs will be available to all others.
 You do need to remember to list tools in one of these files if you use
 them, or builds will fail in CI or for other people.
 
+Set `ID_TEMPLATE_HOME` in your environment to a common location
+(such as a checkout of this repository) and the `Makefile` will create
+a symlink for you.
+
+```sh
+$ git clone https://github.com/martinthomson/i-d-template i-d-template
+$ echo 'export ID_TEMPLATE_HOME="'"$(pwd)"'/i-d-template"' >> ~/.profile
+```
+
 
 ## When Creating Pull Requests on Another Repository
 
