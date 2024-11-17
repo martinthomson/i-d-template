@@ -165,7 +165,7 @@ idnits_mode ?= normal
 ifneq (true,$(NO_NODEJS))
 idnits_bin ?= node_modules/.bin/idnits
 $(idnits_bin):
-	npm install -q github:ietf-tools/idnits
+	npm install -q --no-save github:ietf-tools/idnits
 else
 idnits_bin :=
 endif
@@ -188,8 +188,8 @@ CODESPELL_ARGS += -I .ignore-words
 endif
 
 .PHONY: spellcheck
-spellcheck:: $(drafts_source)
-	$(trace) $@ codespell $(CODESPELL_ARGS) $^
+spellcheck:: $(drafts_source) $(VENV)/codespell$(EXE)
+	$(trace) $@ codespell $(CODESPELL_ARGS) $(drafts_source)
 
 ## Build diffs between the current draft versions and the most recent version
 draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
