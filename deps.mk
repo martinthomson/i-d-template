@@ -260,8 +260,8 @@ NO_NODEJS := true
 endif
 
 ifneq (true,$(NO_NODEJS))
-ifneq (,$(wildcard package.json))
 export PATH := $(abspath node_modules/.bin):$(PATH)
+ifneq (,$(wildcard package.json))
 DEPS_FILES += package-lock.json
 package-lock.json: package.json
 	npm install
