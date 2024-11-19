@@ -95,6 +95,15 @@ else
 ifeq (,$(KRAMDOWN_REFCACHEDIR))
 ifeq (true,$(CI))
 XML2RFC_REFCACHEDIR := $(realpath .)/.refcache
+# In CI, only cache drafts for 5 minutes to pick up on recent updates.
+export KRAMDOWN_REFCACHETTL := 300
+else
+# When running locally, cache drafts for a week.
+export KRAMDOWN_REFCACHETTL_RFC := 23673600
+# Cache IANA and DOI for 3 months since they change rarely.
+export KRAMDOWN_REFCACHETTL := 604800
+# Cache RFCs for 9 months since they are immutable.
+export KRAMDOWN_REFCACHETTL_DOI_IANA := 7776000
 endif
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
 KRAMDOWN_REFCACHEDIR := $(XML2RFC_REFCACHEDIR)
