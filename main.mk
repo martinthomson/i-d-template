@@ -40,6 +40,15 @@ include $(LIBDIR)/archive.mk
 include $(LIBDIR)/upload.mk
 include $(LIBDIR)/update.mk
 
+-include .includes.mk
+.includes.mk: $(filter %.md,$(drafts_source))
+	@rm -f $@
+	@for d in $^; do \
+	  for f in $$(sed -e 's/^{::include\(-nested\)* \(.*\)}$$/\2/;t;d' "$$d"); do \
+	    echo "$${d%.md}.xml: $$f" >> $@; \
+	  done; \
+	done
+
 ## Basic Targets
 .PHONY: txt html pdf
 txt:: $(drafts_txt)
