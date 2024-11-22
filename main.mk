@@ -241,7 +241,7 @@ endif
 ifeq (true,$(PRE_SETUP))
 # Disable this check for setup.
 lint:: lint-docname
-emdif
+endif
 
 lint-whitespace::
 	@err=0; for f in $(drafts_source); do \
