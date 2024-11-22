@@ -27,7 +27,11 @@ endif
 endif
 endif
 
-# Default to pushing if a key or token is available.
+# Disable pushing if we're not setup and for pull requests.
+# Otherwise, enable it if we appear to have credentials.
+ifeq (true,$(PRE_SETUP))
+PUSH_GHPAGES ?= false
+endif
 ifeq (pull_request,$(GITHUB_EVENT_NAME))
 PUSH_GHPAGES ?= false
 endif

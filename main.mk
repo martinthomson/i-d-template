@@ -234,10 +234,14 @@ $(TEST_REPORT):
 	echo '</testsuite>' >>$@
 
 .PHONY: lint lint-whitespace lint-default-branch lint-docname
-lint:: lint-whitespace lint-docname
+lint:: lint-whitespace
 ifneq (true,$(CI))
 lint:: lint-default-branch
 endif
+ifeq (true,$(PRE_SETUP))
+# Disable this check for setup.
+lint:: lint-docname
+emdif
 
 lint-whitespace::
 	@err=0; for f in $(drafts_source); do \

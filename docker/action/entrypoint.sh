@@ -11,7 +11,7 @@ if [ ! -f Makefile ]; then
   echo "Cloning i-d-template into lib for default configuration."
   echo "Note: Until setup is complete, the editor's copy will not be updated."
   git clone https://github.com/martinthomson/i-d-template lib
-  echo "PUSH_GHPAGES := false" >Makefile
+  echo "PRE_SETUP := true" >Makefile
   cat lib/template/Makefile >>Makefile
 fi
 
