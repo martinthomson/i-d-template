@@ -69,10 +69,20 @@ done
 endef
 
 .PHONY: update-readme update-codeowners update-makefile update-gitignore update-files update-venue update-ci update-workflows
-update-readme: auto_update
+
+# Re-run setup for .gitignore.
+# This should be an ordering prerequisite for any rule that might create files.
+update-gitignore:
+	$(MAKE) -f $(LIBDIR)/setup.mk CHECK_BRANCH=false setup-gitignore
+	@if ! git diff --quiet @ .gitignore; then \
+	  git add .gitignore; \
+	  git $(CI_AUTHOR) commit -m "Automatic update of .gitignore"; \
+	fi
+
+update-readme: auto_update | update-gitignore
 	$(call regenerate,README.md)
 
-update-codeowners:
+update-codeowners: | update-gitignore
 	$(call regenerate,.github/CODEOWNERS)
 
 # We only need to copy over the rules that include and setup main.mk.
@@ -80,7 +90,7 @@ update-codeowners:
 # There is a tricky part in suppressing any blank line after `include <...>/main.mk`
 # when preserving existing lines.
 # This uses 'x' and 'n' to get the next line, then conditionally prints a non-blank line.
-update-makefile: Makefile $(LIBDIR)/template/Makefile
+update-makefile: Makefile $(LIBDIR)/template/Makefile | update-gitignore
 	@x=$$(mktemp);y=$$(mktemp); mv $< "$$x"; \
 	sed -n -e '1,/^include.*main\.mk$$/{/^include.*main\.mk$$/{x;n;/^$$/!p;};d;};/main\.mk:$$/,/^$$/d;p' "$$x" > "$$y"; \
 	sed -n -e '1,/^include.*main\.mk$$/{x;1d;p;}' "$$x" > $<; \
@@ -92,30 +102,22 @@ update-makefile: Makefile $(LIBDIR)/template/Makefile
 	  git $(CI_AUTHOR) commit -m "Automatic update of $<"; \
 	fi
 
-# Re-run setup for .gitignore.
-update-gitignore:
-	$(MAKE) -f $(LIBDIR)/setup.mk CHECK_BRANCH=false setup-gitignore
-	@if ! git diff --quiet @ .gitignore; then \
-	  git add .gitignore; \
-	  git $(CI_AUTHOR) commit -m "Automatic update of .gitignore"; \
-	fi
-
 
 ifneq (true,$(CI))
 UPDATE_CI := update-ci
 else
 UPDATE_CI :=
 endif
-update-files: auto_update update-makefile update-gitignore $(UPDATE_CI)
+update-files: auto_update update-gitignore update-makefile $(UPDATE_CI)
 	$(call regenerate,README.md .github/CODEOWNERS)
 
 update-venue: auto_update $(drafts_source)
-	./$(LIBDIR)/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter-out auto_update,$^)
+	./$(LIBDIR)/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts_source)
 	@if ! git diff --quiet @ $(filter-out auto_update,$^); then \
 	  git add $(filter-out auto_update,$^); \
 	  git $(CI_AUTHOR) commit -m "Automatic update of venue information"; \
 	fi
 
 update-workflows: update-ci
-update-ci: auto_update
+update-ci: auto_update | update-gitignore
 	$(call regenerate,$(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml update.yml))
