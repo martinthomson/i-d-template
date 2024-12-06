@@ -93,7 +93,7 @@ endif
 	else h="$${h:0:3}"; fi; \
 	if [ "$$h" = '---' ]; then \
 	  $(echo) '$(subst ','"'"',cat $< $(MD_PRE) | $(kramdown-rfc) --v3 $(MD_POST) >$@)'; \
-	  cat $< $(MD_PRE) | $(trace) $@ -s kramdowm-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
+	  cat $< $(MD_PRE) | $(trace) $@ -s kramdown-rfc $(kramdown-rfc) --v3 $(MD_POST) >$@; \
 	elif [ "$$h" = '%%%' ]; then \
 	  $(echo) '$(subst ','"'"',cat $< $(MD_PRE) | $(mmark) $(MD_POST) >$@)'; \
 	  cat $< $(MD_PRE) | $(trace) $@ -s mmark $(mmark) $(MD_POST) >$@; \
