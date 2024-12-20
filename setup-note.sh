@@ -50,6 +50,7 @@ if ! wgmeta "$wg"; then
     wg=""
 fi
 
+{
 echo '<note title="Discussion Venues" removeInRFC="true">'
 if [[ -n "$wg" ]]; then
   echo "<t>Discussion of this document takes place on the
@@ -59,3 +60,4 @@ fi
 echo "<t>Source for this draft and an issue tracker can be found at
     <eref target=\"https://${host}/${user}/${repo}\"/>.</t>"
 echo '</note>'
+} > .note.xml
