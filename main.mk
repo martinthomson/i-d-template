@@ -234,13 +234,13 @@ $(TEST_REPORT):
 	echo '</testsuite>' >>$@
 
 .PHONY: lint lint-whitespace lint-default-branch lint-docname
-lint:: lint-whitespace
+lint::
 ifneq (true,$(CI))
 lint:: lint-default-branch
 endif
-ifeq (true,$(PRE_SETUP))
-# Disable this check for setup.
-lint:: lint-docname
+ifneq (true,$(PRE_SETUP))
+# Disable most lints during repository setup
+lint:: lint-docname lint-whitespace
 endif
 
 lint-whitespace::

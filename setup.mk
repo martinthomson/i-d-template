@@ -1,10 +1,14 @@
+# This file is not the same as other .mk files here.
+# It is not included from main.mk, rather it includes main.mk.
 .PHONY: setup
 setup: setup-default-branch setup-ghpages setup-precommit
 
 LIBDIR ?= lib
 include $(LIBDIR)/main.mk
 
-# Check that everything is ready
+# Check that everything is ready.
+# These checks are all safeguards to ensure that this process doesn't
+# damage the repository too much by accident.
 ifeq (,$(wildcard .git))
 $(error Please make sure that this is a git repository by running "git init")
 endif
