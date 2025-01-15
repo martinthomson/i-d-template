@@ -51,7 +51,7 @@ for d in "$@"; do
 
         if [ "$author" = "ietf" ]; then
             status="Working Group"
-            status_full="IETF [${wgupper} Working Group](https://datatracker.ietf.org/wg/${wg}/documents/) Internet-Draft"
+            status_full="IETF [${wgupper} Working Group](https://datatracker.ietf.org/group/${wg}/documents/) Internet-Draft"
         else
             status="Individual"
             status_full="individual Internet-Draft"
