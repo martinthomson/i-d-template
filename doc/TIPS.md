@@ -49,12 +49,14 @@ them, or builds will fail in CI or for other people.
 
 Set `ID_TEMPLATE_HOME` in your environment to a common location
 (such as a checkout of this repository) and the `Makefile` will create
-a symlink for you.
+a symlink for you[^old].
 
 ```sh
 $ git clone https://github.com/martinthomson/i-d-template i-d-template
 $ echo 'export ID_TEMPLATE_HOME="'"$(pwd)"'/i-d-template"' >> ~/.profile
 ```
+
+[^old]: Old versions of the `Makefile` don't, so you might need to update.
 
 
 ## When Creating Pull Requests on Another Repository
