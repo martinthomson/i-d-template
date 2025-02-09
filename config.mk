@@ -8,7 +8,7 @@ XML2RFC_ID_BASE_URL := https://datatracker.ietf.org/doc/html/
 
 # Set sensible defaults for different xml2rfc targets.
 # Common options (which are added to $xml2rfc later) so that they can be tweaked further.
-XML2RFC_OPTS := -q --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL)
+XML2RFC_OPTS := -q --rfc-base-url $(XML2RFC_RFC_BASE_URL) --id-base-url $(XML2RFC_ID_BASE_URL) --allow-local-file-access
 # Target-specific options.
 XML2RFC_TEXT := --text
 ifeq (true,$(TEXT_PAGINATION))
