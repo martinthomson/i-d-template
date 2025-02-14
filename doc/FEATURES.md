@@ -89,7 +89,3 @@ continuous integration that can:
 * Automatically save a copy of GitHub issues and pull requests to the repository
   for offline access.  This includes a simple HTML viewer.
 * Automatically [submit tagged versions of drafts](./SUBMITTING.md) to the IETF datatracker.
-
-Alternatively, you can also use [circleci](http://circleci.com/) or
-[travis](https://travis-ci.org/) [as described
-here](REPO.md#automatic-update-for-editors-copy).
