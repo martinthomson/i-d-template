@@ -1,15 +1,6 @@
-ifneq (,$(CIRCLE_TAG)$(TRAVIS_TAG))
-draft_releases := $(CIRCLE_TAG)$(TRAVIS_TAG)
-else
 draft_releases := $(shell git tag --list --points-at HEAD 'draft-*')
-endif
 
 uploads := $(addprefix $(VERSIONED)/.,$(addsuffix .upload,$(draft_releases)))
-
-ifneq (,$(TRAVIS))
-# Ensure that we build the XML files needed for upload during the main build.
-latest:: $(addsuffix .xml,$(draft_releases))
-endif
 
 .PHONY: upload publish
 publish: upload
