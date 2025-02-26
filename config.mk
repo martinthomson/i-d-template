@@ -26,6 +26,10 @@ kramdown-rfc ?= kramdown-rfc
 # Tell kramdown not to generate targets on references so the above takes effect.
 export KRAMDOWN_NO_TARGETS := true
 export KRAMDOWN_PERSISTENT := true
+ifneq (true,$(VERBOSE))
+# Suppress messages about downloading references.
+export KRAMDOWN_REFCACHE_QUIET := true
+endif
 
 # Use an emoji for the favicon
 FAVICON_EMOJI ?=
@@ -104,10 +108,6 @@ export KRAMDOWN_REFCACHETTL_RFC := 23673600
 export KRAMDOWN_REFCACHETTL := 604800
 # Cache RFCs for 9 months since they are immutable.
 export KRAMDOWN_REFCACHETTL_DOI_IANA := 7776000
-ifneq (true,$(VERBOSE))
-# Suppress messages about downloading references.
-export KRAMDOWN_REFCACHE_QUIET := t
-endif
 endif
 XML2RFC_REFCACHEDIR ?= $(HOME)/.cache/xml2rfc
 KRAMDOWN_REFCACHEDIR := $(XML2RFC_REFCACHEDIR)
