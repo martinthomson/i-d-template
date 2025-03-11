@@ -88,7 +88,7 @@ endif
 	git add $<
 
 README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
-	$(LIBDIR)/setup-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
+	$(LIBDIR)/setup-readme.sh $(GITHUB_HOST) $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
 	git add $@ $(filter %.md, $(TEMPLATE_FILES))
 
 .PHONY: setup-note
