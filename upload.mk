@@ -24,7 +24,7 @@ ifneq (,$(MAKE_TRACE))
 endif
 
 .%.upload: %.xml
-	set -ex; tag="$(notdir $(basename $<))"; \
+	@set -e$(if $(filter-out false,$(VERBOSE)),x,); tag="$(notdir $(basename $<))"; \
 	email="$$($(LIBDIR)/get-email.sh "$$tag" "$<")"; \
 	[ -z "$$email" ] && exit 1; \
 	replaces() { \

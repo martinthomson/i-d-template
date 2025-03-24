@@ -47,8 +47,11 @@ auto_update:
 update:
 endif # CI
 
+# This function regenerates a file using setup.mk
+# $(1) = the file name
+# $(2) = an optional test for when the file should NOT be updated
 define regenerate
-@set -ex; \
+@set -e$(if $(filter-out false,$(VERBOSE)),x,); \
 for f in $(1); do \
   $(if $(2),if $(2); then echo "Skip update for $(1)" 2>&1; break; fi;) \
   if [ -n "$$(git ls-tree -r @ --name-only "$$f")" ]; then \
@@ -81,7 +84,7 @@ update-gitignore:
 	fi
 
 update-readme: auto_update | update-gitignore
-	$(call regenerate,README.md)
+	$(call regenerate,README.md,[ "$$(sed -ne '1{s/^<!-- regenerate: \([a-z]*\) .*-->$$/\1/;t x;s/.*/on/;: x;p;}' README.md)" = off ])
 
 update-codeowners: | update-gitignore
 	$(call regenerate,.github/CODEOWNERS,[ -f .github/CODEOWNERS -a "$$(head -1 .github/CODEOWNERS 2>/dev/null)" != "# Automatically generated CODEOWNERS" ])

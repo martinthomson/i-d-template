@@ -49,6 +49,9 @@ for d in "$@"; do
     if "$first"; then
         fixup_other_md "$wg"
 
+        echo "<!-- regenerate: on (set to off if you edit this file) -->"
+        echo
+
         if [ "$author" = "ietf" ]; then
             status="Working Group"
             status_full="IETF [${wgupper} Working Group](https://datatracker.ietf.org/group/${wg}/documents/) Internet-Draft"
