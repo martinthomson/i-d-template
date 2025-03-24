@@ -50,6 +50,7 @@ endif # CI
 define regenerate
 @set -ex; \
 for f in $(1); do \
+  $(if $(2),if $(2); then echo "Skip update for $(1)" 2>&1; break; fi;) \
   if [ -n "$$(git ls-tree -r @ --name-only "$$f")" ]; then \
     amend=--amend; orig=@~; \
     git rm -f "$$f" && \
@@ -83,7 +84,7 @@ update-readme: auto_update | update-gitignore
 	$(call regenerate,README.md)
 
 update-codeowners: | update-gitignore
-	$(call regenerate,.github/CODEOWNERS)
+	$(call regenerate,.github/CODEOWNERS,[ -f .github/CODEOWNERS -a "$$(head -1 .github/CODEOWNERS 2>/dev/null)" != "# Automatically generated CODEOWNERS" ])
 
 # We only need to copy over the rules that include and setup main.mk.
 # This keeps anything above the include where it is and moves everything else below these two things.
