@@ -27,7 +27,7 @@ $(archive_script) $(1)
 endef
 else
 define archive_issues
-old_archive=$$(mktemp $(TMPDIR)/tmp/archive-old.XXXXXX); \
+old_archive=$$(mktemp $(TMPDIR)/archive-old.XXXXXX); \
 trap 'rm -f $$old_archive' EXIT; \
 git show $(ARCHIVE_BRANCH):$(1) > $$old_archive || true; \
 echo $(archive_script) $(1) --reference $$old_archive; \
