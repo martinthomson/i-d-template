@@ -12,6 +12,7 @@
 /.refcache
 /.venv/
 /.vscode/
+/.idea/
 /node_modules/
 /versioned/
 Gemfile.lock
