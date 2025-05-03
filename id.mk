@@ -37,8 +37,6 @@ ifneq (,$(GITHUB_REPOSITORY))
 CI_USER ?= $(word 1,$(subst /, ,$(GITHUB_REPOSITORY))
 CI_REPO ?= $(word 2,$(subst /, ,$(GITHUB_REPOSITORY)))
 else
-CI_USER ?= $(word 1,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_USERNAME)
-CI_REPO ?= $(word 2,$(subst /, ,$(TRAVIS_REPO_SLUG)))$(CIRCLE_PROJECT_REPONAME)
 ifneq (,$(CI_USER))
 ifneq (,$(CI_REPO))
 CI_REPO_FULL = $(CI_USER)/$(CI_REPO)
@@ -48,25 +46,12 @@ endif
 
 # CI_IS_PR being true disables some options.
 ifdef CI_PULL_REQUESTS
-# Circle makes this easy
 CI_IS_PR = true
 else
 ifdef GITHUB_BASE_REF
 CI_IS_PR = true
-else
-ifdef TRAVIS_PULL_REQUEST
-ifeq (false,$(TRAVIS_PULL_REQUEST))
-# If $TRAVIS_PULL_REQUEST is the word 'false', it's a branch build.
-CI_IS_PR = false
-else
-CI_IS_PR = true
-endif
-else
-CI_IS_PR = false
 endif
 endif
-endif
-CI_ARTIFACTS := $(CIRCLE_ARTIFACTS)
 
 ifeq (,$(shell git config --global --get user.name))
 CI_AUTHOR = -c user.name="ID Bot"
