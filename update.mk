@@ -84,7 +84,7 @@ update-gitignore:
 	fi
 
 update-readme: auto_update | update-gitignore
-	$(call regenerate,README.md,[ "$$(sed -ne '1{s/^<!-- regenerate: \([a-z]*\) .*-->$$/\1/;t x;s/.*/on/;: x;p;}' README.md)" = off ])
+	$(call regenerate,README.md,[ "$$(grep -m 1 '^<!-- regenerate:' README.md | sed -e 's/^<!-- regenerate: \([a-z]*\) .*-->$$/\1/')" = off ])
 
 update-codeowners: | update-gitignore
 	$(call regenerate,.github/CODEOWNERS,[ -f .github/CODEOWNERS -a "$$(head -1 .github/CODEOWNERS 2>/dev/null)" != "# Automatically generated CODEOWNERS" ])
