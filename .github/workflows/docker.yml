@@ -47,13 +47,11 @@ jobs:
           driver_opts=
         fi
         action_tags="$(tag "$registry" -action)"
-        circle_tags="$(tag "$registry" "")"
         math_tags="$(tag "$registry" -math)"
         echo "registry=$registry" >>"$GITHUB_OUTPUT"
         echo "driver_opts=$driver_opts" >>"$GITHUB_OUTPUT"
         echo "label=$label" >>"$GITHUB_OUTPUT"
         echo "action_tags=$action_tags" >>"$GITHUB_OUTPUT"
-        echo "circle_tags=$circle_tags" >>"$GITHUB_OUTPUT"
         echo "math_tags=$math_tags" >>"$GITHUB_OUTPUT"
 
     - name: "Setup Docker Buildx"
@@ -69,24 +67,36 @@ jobs:
         username: ${{ secrets.GHCR_USERNAME }}
         password: ${{ secrets.GHCR_PASSWORD }}
 
-    - name: "Build and Publish GitHub Actions Image"
+    - name: "Build GitHub Actions Image"
+      uses: docker/build-push-action@v6
+      with:
+        context: ./docker/action
+        file: ./docker/action/Dockerfile
+        load: true
+        tags: ${{ steps.config.outputs.action_tags }}
+
+    - name: "Test GitHub Actions Image"
+      run: |
+        set -x
+        cleanup() { set +e; docker cp test:/tmp/artifacts /tmp/artifacts; docker rm -f test; }
+        trap cleanup EXIT
+        docker run -d --name test --entrypoint /bin/sleep \
+          ${{ steps.config.outputs.action_tags }} 360
+        docker cp . test:/test
+        docker exec test git config --global --add safe.directory /test
+        docker exec -u 0 test apk add black
+        docker exec -w /test test black --check .
+        docker exec -u 0 test pip3 install --break-system-packages behave
+        docker exec test mkdir /tmp/artifacts
+        docker exec -w /test test behave --junit --junit-directory /tmp/artifacts /test/tests    
+
+    - name: "Publish GitHub Actions Image"
       uses: docker/build-push-action@v6
       with:
         context: ./docker/action
         file: ./docker/action/Dockerfile
         push: true
         tags: ${{ steps.config.outputs.action_tags }}
-
-    - name: "Build and Publish CircleCI Image"
-      uses: docker/build-push-action@v6
-      with:
-        context: ./docker/circleci
-        file: ./docker/circleci/Dockerfile
-        build-args: |
-          REGISTRY=${{ steps.config.outputs.registry }}
-          VERSION=${{ steps.config.outputs.label }}
-        push: true
-        tags: ${{ steps.config.outputs.circle_tags }}
 
     - name: "Build and Publish Math Image"
       uses: docker/build-push-action@v6
