@@ -111,7 +111,14 @@ BRANCH_FETCH := true
 endif
 export BRANCH_FETCH
 ifeq (,$(DEFAULT_BRANCH))
+ifeq (github.com,$(GITHUB_HOST))
 DEFAULT_BRANCH := $(shell BRANCH_FETCH=$(BRANCH_FETCH) $(LIBDIR)/default-branch.py $(GITHUB_USER) $(GITHUB_REPO) $(GITHUB_API_TOKEN))
+else
+# default-branch.py recognition only works on GitHub; on other hosters it needs
+# to be set manually (also around setup.mk!), or they just use the default
+# value.
+DEFAULT_BRANCH := main
+endif
 endif
 export DEFAULT_BRANCH
 
