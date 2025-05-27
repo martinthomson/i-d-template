@@ -112,8 +112,7 @@ UPDATE_CI := update-ci
 else
 UPDATE_CI :=
 endif
-update-files: auto_update update-gitignore update-makefile $(UPDATE_CI)
-	$(call regenerate,README.md .github/CODEOWNERS)
+update-files: auto_update update-codeowners update-gitignore update-makefile update-readme $(UPDATE_CI)
 
 update-venue: auto_update $(drafts_source)
 	./$(LIBDIR)/update-venue.sh $(GITHUB_USER) $(GITHUB_REPO) $(drafts_source)
