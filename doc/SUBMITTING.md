@@ -1,7 +1,7 @@
 # Submitting Drafts
 
 Occasionally, you will want to submit versions of your draft to the official
-IETF repository.  You can use GitHub Actions (or CircleCI) to manage the
+IETF repository.  You can use GitHub Actions to manage the
 process in a mostly automated fashion by [pushing a tag](#ci) or [creating a
 release](#release).  You can [tag and publish from the command line](#cli)
 or just [generate XML for the next version and submit manually](#manual).
@@ -26,10 +26,7 @@ the name of the source file.  For the above example, the tag will submit a draft
 named `draft-ietf-unicorn-protocol.md` or `draft-ietf-unicorn-protocol.xml`.
 
 If you have multiple drafts that you are submitting together, tag them all then
-push the tags at the same time.  Circle CI has a
-[bug](https://support.circleci.com/hc/en-us/articles/115013854347-Jobs-builds-not-triggered-when-pushing-tag)
-that prevents `git push --tags` from triggering builds if you have multiple
-drafts, but pushing individual tags in quick succession will work.
+push the tags at the same time.
 
 For this feature to work best, use an annotated tag (that's the `-a` option
 above).  Annotated tags require a comment (use `-m` to set this on the
@@ -53,7 +50,9 @@ will receive an email asking you to confirm the submission.  You don't need to
 have a GitHub account token configured for this feature to be enabled.
 
 If you have renamed a draft, this will also set the "replaces" field for you
-automatically, based on the git history of the file.
+automatically, based on the git history of the file.  It can get this wrong
+sometimes by missing a rename, which can be fixed manually by contacting
+working group chairs.
 
 
 <a name="release"></a>
@@ -101,9 +100,8 @@ known to the datatracker.
 ## If the Build Fails
 
 Sometimes the build will fail.  Some errors can be worked around by retrying the
-build.  Both GitHub Actions and CircleCI offer options to restart the build from
-the status page.  If you think that an error isn't your fault, try running the
-build again.
+build.  GitHub Actions offers options to restart the build from the status page.
+If you think that an error isn't your fault, it could work if you try again.
 
 If you need to fix a problem in the draft, you can delete the tag:
 

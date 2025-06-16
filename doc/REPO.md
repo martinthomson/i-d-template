@@ -146,43 +146,8 @@ automatically enabling builds that update the editor's copy, publish tagged
 drafts to datatracker, and periodically save an archive of issues and pull
 requests.
 
-Or, you can disable GitHub Actions by deleting files under `.github/workflows`
-and use Circle CI, as described in the next section.
-
-
-# Automatic Update for Editor's Copy with Circle CI
-
-This requires that you sign in with [Circle](https://circleci.com/).
-
-First enable builds for the new repository in the [Circle
-Dashboard](https://app.circleci.com/).
-
-Then, you need to get yourself a [new GitHub application
-token](https://github.com/settings/tokens/new).  The application token only
-needs the `public_repo` privilege.  This will let it push updates to your
-`gh-pages` branch.
-
-You can add environment variables using the Circle interface.  Make a variable
-with the name `GH_TOKEN` and the value of your newly-created application token.
-
-**WARNING**: You might want to use a dummy account for application tokens to
-minimize the consequences of accidental leaks of your key.
-
-Once you enable pushes, be very careful merging pull requests that alter
-`.circleci/config.yml` or `Makefile`.  Changes to those files can cause the
-value of the token to be published for all to see.  You don't want that to
-happen.  Even though tokens can be revoked easily, discovering a leak might take
-some time.  Only pushes to the main repository will be able to see the token, so
-there is no need to worry about running CI on malicious pull requests (just
-don't merge them).
-
-Circle will now check pull requests for errors, letting you know if things
-didn't work out so that you don't merge anything suspect.
-
-A `.travis.yml` file exists
-([here](https://github.com/martinthomson/i-d-template/blob/main/template/.travis.yml))
-that can be used to setup [Travis](https://travis-ci.org).  However, that
-process is less well supported.
+Or, you can disable GitHub Actions by deleting files under `.github/workflows`,
+as described in the next section.
 
 
 # Regenerating README.md

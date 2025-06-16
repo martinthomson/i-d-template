@@ -205,34 +205,6 @@ draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
 
-## Generate a test report
-ifneq (,$(CIRCLE_TEST_REPORTS))
-TEST_REPORT := $(CIRCLE_TEST_REPORTS)/report/drafts.xml
-else
-TEST_REPORT := report.xml
-endif
-all_outputs := $(drafts_html) $(drafts_txt)
-.PHONY: report
-report: $(TEST_REPORT)
-$(TEST_REPORT):
-	@echo build_report $^
-	@mkdir -p $(dir $@)
-	@echo '<?xml version="1.0" encoding="UTF-8"?>' >$@
-	@passed=();failed=();for i in $(all_outputs); do \
-	  if [ -f "$$i" ]; then passed+=("$$i"); else failed+=("$$i"); fi; \
-	done; echo '<testsuite' >>$@; \
-	echo '    tests="'"$$(($${#passed[@]} + $${#failed[@]}))"'"' >>$@; \
-	echo '    failures="'"$${#failed[@]}"'">' >>$@; \
-	for i in "$${passed[@]}"; do \
-	  echo '  <testcase name="'"$$i"'" classname="build.'"$${i%.*}"'"/>' >>$@; \
-	done; \
-	for i in "$${failed[@]}"; do \
-	  echo '  <testcase name="'"$$i"'" classname="build.'"$${i%.*}"'">' >>$@; \
-	  echo '    <failure message="Error building file"/>' >>$@; \
-	  echo '  </testcase>' >>$@; \
-	done; \
-	echo '</testsuite>' >>$@
-
 .PHONY: lint lint-whitespace lint-default-branch lint-docname
 lint::
 ifneq (true,$(CI))

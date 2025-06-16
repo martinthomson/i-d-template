@@ -108,10 +108,9 @@ installer puts the file in a place that isn't on your `$PATH`. Extra care is
 needed here when running in CI.
 
 One way to do this is to ensure that the binary is identified when running
-`make`.  You can modify `.github/workflows/*.yml` or `.circleci/config.yml`
-to include additional arguments to make should do this.  The following is a
-modified target in `.github/workflows/ghpages.yml` and
-`.github/workflows/publish.yml`:
+`make`.  You can modify `.github/workflows/*.yml` to include additional
+arguments to make should do this.  The following is a modified target
+in `.github/workflows/ghpages.yml` and `.github/workflows/publish.yml`:
 
 ```yaml
     - name: "Build Drafts"
@@ -131,7 +130,7 @@ $(checker-marker):
 	@touch $@
 ```
 
-Note that GitHub Actions builds run as root, but CircleCI builds use a special user,
+Note that GitHub Actions builds run as root,
 which can have a significant effect on how you install some packages.
 
 
