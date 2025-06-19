@@ -10,6 +10,7 @@ drafts=("$@")
 candidates=$((${#drafts[@]} * 5))
 versioned="${VERSIONED:-versioned}"
 txt_html_warning="$(mktemp)"
+today="$(date -u -I)"
 trap 'rm -f "$txt_html_warning"' EXIT
 
 next() {
@@ -60,6 +61,12 @@ build_target() {
                 file_tag="$prev_file_tag"
             fi
         fi
+        tag_date=
+        for k in tagger committer author; do
+            [[ -n "$tag_date" ]] || \
+                tag_date="$(TZ=UTC0 git tag --list --format '%('"$k"'date:short-local)' "$file_tag")"
+        done
+        subst+=("s/${file%.*}-date/${tag_date:-$today}/g")
         subst+=("s/${file%.*}-latest/${file_tag}/g")
     done
 

@@ -27,8 +27,8 @@ emailok "\$UPLOAD_EMAIL environment variable" "$UPLOAD_EMAIL"
 tag="$1"
 draft="$2"
 
-for k in taggeremail committeremail authoremail; do
-    tagger="$(git tag --list --format '%('"$k"')' "$tag" | sed -e 's/^<//;s/>$//')"
+for k in tagger committer author; do
+    tagger="$(git tag --list --format '%('"$k"'email)' "$tag" | sed -e 's/^<//;s/>$//')"
     ghuser="${tagger%@users.noreply.github.com}"
     ghuser="${ghuser#*+}"
     if [ "$ghuser" = "$tagger" ]; then
