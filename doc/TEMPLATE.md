@@ -24,11 +24,11 @@ To publish an I-D, [create a new
 release](https://github.com/martinthomson/i-d-template/blob/main/doc/SUBMITTING.md#github-release)
 and the draft will be submitted to the datatracker automatically.
 
-Note: The newly created repository will run a few actions during this process
-that might fail.  That's OK.  They will succeed once you edit the draft.  If it
-bothers you, delete the runs in the UI.
+For private repositories, GitHub pages is not automatically enabled.
+You will have to enable that feature manually through the repository settings.
 
 <details>
+<summary>Information on setup</summary>
 
 It is not possible to update workflows (the files GitHub Actions use) from an
 action unless you use custom personal access tokens.  Rather than complicate the
