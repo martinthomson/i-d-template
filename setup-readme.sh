@@ -54,7 +54,7 @@ for d in "$@"; do
 
         if [ "$author" = "ietf" ]; then
             status="Working Group"
-            status_full="IETF [${wgupper} Working Group](https://datatracker.ietf.org/group/${wg}/documents/) Internet-Draft"
+            status_full="IETF [${wgupper} Working Group](https://datatracker.ietf.org/wg/${wg}/documents/) Internet-Draft"
         else
             status="Individual"
             status_full="individual Internet-Draft"
@@ -93,14 +93,8 @@ cat <<EOF
 See the
 [guidelines for contributions](https://github.com/${user}/${repo}/blob/${default_branch}/CONTRIBUTING.md).
 
-Suggestions for changes, or reporting issues/concerns can be made in a number of ways:
-- Send mail to the mailing list (found in the Datatracker page above)
-- Email the authors
-- Use the GitHub screen editor (the ✏ icon at the top of the file display) and then click on "Commit changes"
-add explanatory text, and click on "Propose"
-- Click on "Issues" above and then "New Issue"
-- Clone the repository and make a pull request
-
+The contributing file also has tips on how to make contributions, if you
+don't already know how to do that.
 
 ## Command Line Usage
 
@@ -142,7 +136,6 @@ if [ -n "$wg_all" ]; then
         sed_no_backup -e '/^$/{H;d;};/^## Working Group Info/,$d;/./{x;/\n/{s/.//;p;};x;}' CONTRIBUTING.md
         cat >>CONTRIBUTING.md <<EOF
 
-
 ## Working Group Information
 
 Discussion of this work occurs on the [${group_name}
@@ -157,6 +150,26 @@ technical issues needs to occur on the mailing list.
 
 You might also like to familiarize yourself with other
 [${group_type} documents](https://datatracker.ietf.org/${group_type_abbr}/${wg_all}/documents/).
+
+## How to Contribute
+
+Contributions can be made by creating pull requests, opening an issue, or
+posting to the working group mailing list. See above for the email address
+and a note about policy.
+
+There are several ways to create a pull request ("PR"):
+
+- Email the authors
+- Use the GitHub screen editor and follow these steps:
+  - View the draft source
+  - Select the pencil icon to edit the file (usually top-right on the screen)
+  - Make edits
+  - Select "Commit changes"
+  - Add a title and explanatory text
+  - Select "Propose"
+  - When prompted, click on "Create Pull Request"
+- Copy the repository and make a pull request using the Git command-line
+tool, using the [GitHub documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) if needed.
 EOF
     fi
 fi
