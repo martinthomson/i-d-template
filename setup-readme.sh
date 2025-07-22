@@ -93,8 +93,13 @@ cat <<EOF
 See the
 [guidelines for contributions](https://github.com/${user}/${repo}/blob/${default_branch}/CONTRIBUTING.md).
 
-Contributions can be made by creating pull requests.
-The GitHub interface supports creating pull requests using the Edit (✏) button.
+Suggestions for changes, or reporting issues/concerns can be made in a number of ways:
+- Send mail to the mailing list (found in the Datatracker page above)
+- Email the authors
+- Use the GitHub screen editor (the ✏ icon at the top of the file display) and then click on "Commit changes"
+add explanatory text, and click on "Propose"
+- Click on "Issues" above and then "New Issue"
+- Clone the repository and make a pull request
 
 
 ## Command Line Usage
