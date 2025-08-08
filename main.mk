@@ -179,16 +179,10 @@ else
 idnits_bin :=
 endif
 
-ifneq (,$(shell which script 2>/dev/null))
-faketty = script -qec "$(subst ",\",$(1))" /dev/null
-else
-faketty = $(1)
-endif
-
 idnits:: $(drafts_next_xml) | $(idnits_bin)
 	@for i in $^; do \
 	  [ "$$i" == "$(idnits_bin)" ] || \
-	    $(trace) "$$i" -s idnits $(call faketty,$(idnits) -m $(idnits_mode) "$$i"); \
+	    $(trace) "$$i" -s idnits $(idnits) -m $(idnits_mode) "$$i"; \
 	done
 
 CODESPELL_ARGS :=
