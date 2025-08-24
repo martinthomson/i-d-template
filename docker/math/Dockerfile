@@ -34,4 +34,4 @@ RUN apk add --no-cache \
     harfbuzz \
     ttf-freefont \
     yarn && \
-    npm install -g mathjax-node-cli
+    npm install -g cabo/mathjax-node-cli
