@@ -114,7 +114,7 @@ endif
 	  if [ -d "$(GHPAGES_ROOT)/$$item" ] && \
 	     [ `git -C $(GHPAGES_ROOT) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; then \
 	    echo "Remove obsolete '$$item'"; \
-	    git -C $(GHPAGES_ROOT) rm -rfq -- $$item; \
+	    git -C $(GHPAGES_ROOT) rm -rfq --ignore-unmatch -- $$item; \
 	  fi \
 	done
 
