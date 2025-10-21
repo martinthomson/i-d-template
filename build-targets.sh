@@ -97,30 +97,13 @@ build_target() {
         print_sed '' ' | sed' "${subst[@]}"
         printf " >\$@\n"
     fi
+
     # Copy any includes into the versioned directory.
     # This is sloppy, because it doesn't set up proper dependencies.
     # To do that would require traversing all the files in this script.
     # This script already takes too long to run on larger repositories.
     # So just make a script that hacks.
-    if [ "${source_file##*.}" = "md" ]; then
-        printf '\tfor inc in $$(sed -ne '"'"'/^{::include [^\/]/{ s/^{::include '"$target_name"'\///;s/}$$//; p; }'"'"' $@); do \\\n'
-        printf '\t  target='"$target_name"'/$$inc; \\\n'
-        printf '\t  mkdir -p $$(dirname "$$target"); \\\n'
-        printf '\t  git show "$$tag:$$inc" >"$$target" || \\\n'
-        printf '\t    (echo "Attempting to make a copy of $$inc"; \\\n'
-        if [ "$tag" = HEAD ]; then
-            printf '\t     tmp=.; \\\n'
-        else
-            printf '\t     tmp=$$(mktemp -d); git clone . -b "$$tag" "$$tmp"; \\\n'
-            printf '\t     ln -s "$(LIBDIR)" "$$tmp/$(LIBDIR)"; \\\n'
-        fi
-        printf '\t     make -C "$$tmp" "$$inc" && cp "$$tmp/$$inc" "$$target"; \\\n'
-        if [ "$tag" != HEAD ]; then
-            printf '\t     rm -rf "$$tmp"; \\\n'
-        fi
-        printf '\t  ); \\\n'
-        printf '\tdone\n'
-    fi
+    printf '\t$(LIBDIR)/make-includes.sh "'"$tag"'" "'"$target_name"'" "$@"\n'
 }
 
 printf "${versioned}:\n"
