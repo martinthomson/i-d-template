@@ -22,7 +22,7 @@ get_includes() {
 }
 
 for inc in $(get_includes "$target_name" "$filename"); do
-    target="$target_name/$inc"
+    target="versioned/$target_name/$inc"
     mkdir -p $(dirname "$target")
     if ! git show "$tag:$inc" >"$target" 2>/dev/null; then
         echo "Attempting to make a copy of $inc" 1>&2
