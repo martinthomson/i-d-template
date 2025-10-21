@@ -77,7 +77,7 @@ build_target() {
 
     # Rewrite includes in markdown.
     if [ "${source_file##*.}" = "md" ]; then
-        subst+=('/^{::include [^\/]/{ s/^{::include /{::include '"$target_name"'\//; }')
+        subst+=('/^{::include [^\/]/{ s/^{::include /{::include versioned\/'"$target_name"'\//; }')
     fi
     target="${target_name}.${source_file##*.}"
     if [ "${source_file##.*}" != "xml" ] || [ "$tag" = HEAD ]; then

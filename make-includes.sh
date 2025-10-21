@@ -13,10 +13,12 @@ target_name="$2"
 # The name of the versioned file that has been created.
 filename="$3"
 
+set -x
+
 get_includes() {
     case "${2##*.}" in
         md|mkd)
-            sed -ne '/^{::include [^\/]/{ s/^{::include '"$1"'\///;s/}$//; p; }' "$2"
+            sed -ne '/^{::include [^\/]/{ s/^{::include versioned\/'"$1"'\///;s/}$//; p; }' "$2"
             ;;
     esac
 }
