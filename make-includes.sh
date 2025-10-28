@@ -13,8 +13,6 @@ target_name="$2"
 # The name of the versioned file that has been created.
 filename="$3"
 
-set -x
-
 get_includes() {
     case "${2##*.}" in
         md|mkd)
