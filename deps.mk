@@ -268,7 +268,7 @@ package-lock.json: package.json
 	@touch $@
 
 update-deps::
-	npm update --no-save --dev
+	npm update --no-save --include=dev
 
 clean-deps::
 	-rm -rf package-lock.json
