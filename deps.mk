@@ -177,7 +177,7 @@ endif
 clean-deps:: clean-venv
 endif # CI
 update-deps::
-	"$(pip)" install --no-user $(no-cache-dir) --upgrade --upgrade-strategy eager \
+	"$(pip)" install -q --no-user $(no-cache-dir) --upgrade --upgrade-strategy eager \
 	  $(foreach path,$(REQUIREMENTS_TXT),-r "$(path)")
 endif # -e requirements.txt
 
