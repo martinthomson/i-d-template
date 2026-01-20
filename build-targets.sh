@@ -10,7 +10,7 @@ drafts=("$@")
 candidates=$((${#drafts[@]} * 5))
 versioned="${VERSIONED:-versioned}"
 txt_html_warning="$(mktemp)"
-today="$(date -u -I)"
+today="$(date -u +"%Y-%m-%d")"
 trap 'rm -f "$txt_html_warning"' EXIT
 
 next() {
