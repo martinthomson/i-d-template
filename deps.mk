@@ -9,10 +9,11 @@
 # particular project and will be driven from files that are in the project
 # repository.
 #
-# Currently, this supports three different package installation frameworks:
+# Currently, this supports four different package installation frameworks:
 # * pip for python, specified in requirements.txt
 # * gem for ruby, specified in Gemfile
 # * npm for nodejs, specified in package.json
+# * cargo-binstall for rust/cargo, specified in cargo.txt
 # Each system has its own format for specifying dependencies.  What you need to
 # know is that if you include any of the above files, you don't need to worry
 # about ensuring that these tools are available when a build runs.
@@ -30,9 +31,15 @@
 # For ruby, listing tools in a `Gemfile` will ensure that files are installed.
 # You should add `Gemfile.lock` to your .gitignore file if you do this.
 #
-# For nodejs, new dependencies can be added to `package.json`.  Use `npm install
-# -s <package>` to add files.  You should add `package-lock.json` and
-# `node_modules/` to your `.gitignore` file if you do this.
+# For nodejs, new dependencies can be added to `package.json`.
+# Use `npm install -s <package>` to add files.
+# You should add `package-lock.json` and `node_modules/` to your `.gitignore`
+# file if you do this.
+#
+# For rust/cargo, new dependencies can be added to `cargo.txt`.
+# This file contains just a list of packages with optional versions,
+# in the form `package` or `package@1.2.3`.
+# Precompiled binaries in the crate are installed, if they are available.
 #
 # Tools are added to the path, so you should have no problem running them.
 #
@@ -152,7 +159,7 @@ ifeq (true,$(CI))
 # Under CI, install from the local requirements.txt, but install globally (no venv).
 pip ?= pip3
 $(LOCAL_VENV):
-	"$(pip)" install --no-user $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
+	"$(pip)" install -q --no-user $(no-cache-dir) $(foreach path,$(REQUIREMENTS_TXT),-r $(path))
 	@touch $@
 
 # No clean-deps target in CI..
@@ -177,7 +184,7 @@ endif
 clean-deps:: clean-venv
 endif # CI
 update-deps::
-	"$(pip)" install -q --no-user $(no-cache-dir) --upgrade --upgrade-strategy eager \
+	"$(pip)" install -q -q --no-user $(no-cache-dir) --upgrade --upgrade-strategy eager \
 	  $(foreach path,$(REQUIREMENTS_TXT),-r "$(path)")
 endif # -e requirements.txt
 
@@ -231,7 +238,7 @@ Gemfile.lock: Gemfile
 
 update-deps:: Gemfile
 	$(bundle-path-override-lib) bundle update $(bundle-update-all) \
-	  --gemfile="$(call safe-realpath,$<)" --bundler
+	  --gemfile="$(call safe-realpath,$<)"
 
 clean-deps::
 	-rm -rf "$(BUNDLE_PATH)"
@@ -247,7 +254,7 @@ $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 
 update-deps:: $(LIBDIR)/Gemfile
 	$(bundle-path-override) bundle update $(bundle-update-all) \
-	  --gemfile="$(call safe-realpath,$<)" --bundler
+	  --gemfile="$(call safe-realpath,$<)"
 
 clean-deps::
 	-rm -rf "$(BUNDLE_PATH)"
@@ -275,9 +282,42 @@ update-deps::
 	npm update --no-save --include=dev
 
 clean-deps::
-	-rm -rf package-lock.json
+	-rm -f package-lock.json
 endif # package.json
 endif # !NO_NODEJS
+
+## Rust/Cargo
+ifeq (,$(shell which cargo-binstall))
+ifneq (,$(wildcard cargo.txt))
+$(warning cargo.txt exists, but cargo-binstall not available; cargo packages not installed)
+endif
+NO_CARGO := true
+endif
+
+ifneq (true,$(NO_CARGO))
+CARGO_INSTALL_ROOT := $(abspath $(LIBDIR)/.cargo)
+export PATH:= $(CARGO_INSTALL_ROOT)/bin:$(PATH)
+ifneq (,$(wildcard cargo.txt))
+DEPS_FILES += $(CARGO_INSTALL_ROOT)/.crates.toml
+$(CARGO_INSTALL_ROOT)/.crates.toml: cargo.txt
+	@for b in "$$(cat cargo.txt)"; do \
+	  [ -n "$$b" ] && [ "$${b###}" = "$$b" ] && \
+	    cargo-binstall --root "$(CARGO_INSTALL_ROOT)" --disable-telemetry \
+	      -y --log-level info --strategies quick-install "$$b"; \
+	done
+	@touch $@
+
+update-deps::
+	@for b in "$$(cat cargo.txt)"; do \
+	  [ -n "$$b" ] && [ "$${b###}" = "$$b" ] && \
+	    cargo-binstall --root "$(CARGO_INSTALL_ROOT)" --disable-telemetry \
+	      -y --log-level info --strategies quick-install "$$b"; \
+	done
+
+clean-deps::
+	-rm -rf "$(CARGO_INSTALL_ROOT)"
+endif # cargo.txt
+endif #!NO_CARGO
 
 ## Link everything up
 deps:: $(DEPS_FILES)

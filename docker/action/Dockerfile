@@ -76,6 +76,9 @@ RUN set -e; \
     npm install -g aasvg; \
     pip3 install --no-cache-dir --disable-pip-version-check \
       -r /i-d-template/requirements.txt; \
-    bundle install --system --gemfile=/i-d-template/Gemfile
+    bundle install --system --gemfile=/i-d-template/Gemfile; \
+    install cargo-binstall \
+      "https://github.com/cargo-bins/cargo-binstall/releases/download/v1.16.7/cargo-binstall-x86_64-unknown-linux-musl.tgz" \
+      730c2aba29f8cfa9b78d4b3fbaa705f593643ab1db579f619f90ed90fc6eefec
 
 ENTRYPOINT ["/i-d-template/entrypoint.sh"]
