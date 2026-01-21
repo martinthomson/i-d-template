@@ -199,6 +199,10 @@ draft_diffs := $(addprefix diff-,$(addsuffix .html,$(drafts_with_prev)))
 .PHONY: diff
 diff: $(draft_diffs)
 
+.PHONY: echars
+echars: $(DEPS_FILES)
+	@for f in $(drafts_source); do echo "$$f:"; echars "$$f"; done
+
 .PHONY: lint lint-whitespace lint-default-branch lint-docname
 lint::
 ifneq (true,$(CI))
