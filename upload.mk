@@ -33,7 +33,15 @@ endif
 	$(if $(TRACE_FILE),$(trace) $< -s upload-request )$(curl) -D "$@" \
 	    -F "user=$$email" -F "xml=@$<" $$(replaces "$$tag") \
 	    "$(DATATRACKER_UPLOAD_URL)" && echo && \
-	  (head -1 "$@" | grep -q '^HTTP/\S\S* 20[01]\b' || $(trace) $< -s upload-result ! cat "$@" 1>&2)
+	  (head -1 "$@" | grep -q '^HTTP/\S\S* 20[01]\b' || { \
+	   $(if $(and $(TRACE_FILE),$(shell which jq 2>/dev/null)), \
+	       msg="$$(jq -r '.error' "$@")"; \
+	       echo "$<" upload "Datatracker error: $${msg:-(unknown)}" >>"$(TRACE_FILE)"; \
+	       jq -r '.messages[]' "$@" | while read -r line; do \
+		 echo "$<" upload "$$line" >>"$(TRACE_FILE)"; \
+	       done \
+	     , cat "$@" 1>&2 \
+	    ); false; })
 
 # This ignomonious hack ensures that we can catch missing files properly.
 .%.upload:
