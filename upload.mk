@@ -20,9 +20,11 @@ endif
 	[ -z "$$email" ] && exit 1; \
 	replaces() { \
 	  [ "$${1##*-}" = "00" ] || return; \
-	  file="$$(git ls-files "$${1%-[0-9][0-9]}.*")"; \
-	  for last in $$(git log --follow --name-only --format=format: -- "$${file%-[0-9][0-9]}" | \
+	  base="$${1%-[0-9][0-9]}"; \
+	  file="$$(git ls-files "$${base}.*")"; \
+	  for last in $$(git log --follow --name-only --format=format: -- "$$file" | \
 		sed -e '/^$$/d' | grep -v draft-todo-yourname-protocol | cut -f 2 | uniq | tail +2); do \
+	    [ "$${last%.*}" = "$$base" ] && continue; \
 	    if [ -n "$$(git tag -l "$${last%.*}-[0-9][0-9]")" ]; then \
 	      echo -F; echo "replaces=$${last%.*}"; break; \
 	    fi; \
