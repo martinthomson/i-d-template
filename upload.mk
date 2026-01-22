@@ -37,6 +37,7 @@ comma := ,
 	    "$(DATATRACKER_UPLOAD_URL)" && echo && \
 	  (head -1 "$@" | grep -q '^HTTP/\S\S* 20[01]\b' || { \
 	   $(if $(and $(TRACE_FILE),$(shell which jq 2>/dev/null)), \
+	       echo "$<" upload 1; \
 	       msg="$$(sed -ne '/^$/$(comma)$p' "$@" | jq -r '.error')"; \
 	       echo "$<" upload "Datatracker error: $${msg:-(unknown)}" >>"$(TRACE_FILE)"; \
 	       sed -ne '/^$/$(comma)$p' "$@" | jq -r '.messages[]' | while read -r line; do \
