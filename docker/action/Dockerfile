@@ -13,6 +13,7 @@ RUN set -e; \
       findutils \
       git \
       grep \
+      jq \
       libintl \
       libxml2-utils \
       libxslt \
