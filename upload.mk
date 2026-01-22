@@ -14,6 +14,8 @@ ifneq (,$(MAKE_TRACE))
 	@$(call MAKE_TRACE,$(uploads))
 endif
 
+comma := ,
+
 .%.upload: %.xml
 	@set -e$(if $(filter-out false,$(VERBOSE)),x,); tag="$(notdir $(basename $<))"; \
 	email="$$($(LIBDIR)/get-email.sh "$$tag" "$<")"; \
@@ -35,9 +37,9 @@ endif
 	    "$(DATATRACKER_UPLOAD_URL)" && echo && \
 	  (head -1 "$@" | grep -q '^HTTP/\S\S* 20[01]\b' || { \
 	   $(if $(and $(TRACE_FILE),$(shell which jq 2>/dev/null)), \
-	       msg="$$(sed -ne '/^$/,$p' "$@" | jq -r '.error')"; \
+	       msg="$$(sed -ne '/^$/$(comma)$p' "$@" | jq -r '.error')"; \
 	       echo "$<" upload "Datatracker error: $${msg:-(unknown)}" >>"$(TRACE_FILE)"; \
-	       sed -ne '/^$/,$p' "$@" | jq -r '.messages[]' "$@" | while read -r line; do \
+	       sed -ne '/^$/$(comma)$p' "$@" | jq -r '.messages[]' | while read -r line; do \
 		 echo "$<" upload "$$line" >>"$(TRACE_FILE)"; \
 	       done \
 	     , cat "$@" 1>&2 \
