@@ -11,7 +11,8 @@ if os.environ.get("DEFAULT_BRANCH") is not None:
 
 
 def warn(m):
-    print(f"warning: {sys.argv[0]}: {m}", file=sys.stderr)
+    if os.environ.get("CI") != "true":
+        print(f"warning: {sys.argv[0]}: {m}", file=sys.stderr)
 
 
 def get_branch(rev):
