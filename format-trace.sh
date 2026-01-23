@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 trace="$1"
-step="$2"
+step="${GITHUB_STEP:-$2}"
 status="$3"
 
 if [[ "$status" -eq 0 ]]; then

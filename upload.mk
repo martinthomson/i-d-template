@@ -35,11 +35,11 @@ endif
 	    -F "user=$$email" -F "xml=@$<" $$(replaces "$$tag") "$(DATATRACKER_UPLOAD_URL)" && \
 	if ! head -1 "$$HEADER" | grep -q '^HTTP/\S\S* 20[01]\b'; then \
 	  $(if $(and $(TRACE_FILE),$(shell which jq 2>/dev/null)), \
-	     echo "$<" upload 1 >>"$(TRACE_FILE)"; \
+	     echo "$(basename $<)" upload 1 >>"$(TRACE_FILE)"; \
 	     msg="$$(jq -r '.error' "$@")"; \
-	     echo "$<" upload "Datatracker error: $${msg:-(unknown)}" | tee -a "$(TRACE_FILE)" 1>&2; \
+	     echo "$(basename $<)" upload "Datatracker error: $${msg:-(unknown)}" | tee -a "$(TRACE_FILE)" 1>&2; \
 	     jq -r '.messages[]' "$@" | while read -r line; do \
-	       echo "$<" upload "$$line" | tee -a "$(TRACE_FILE)" 1>&2; \
+	       echo "$(basename $<)" upload "$$line" | tee -a "$(TRACE_FILE)" 1>&2; \
 	     done; \
 	  , \
 	    echo "Datatracker error:"; ! cat "$@" 1>&2; \

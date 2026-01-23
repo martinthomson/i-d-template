@@ -54,6 +54,7 @@ jobs:
         make: upload
       env:
         UPLOAD_EMAIL: ${{ inputs.email }}
+        GITHUB_STEP: upload
 
     - name: "Archive Submitted Drafts"
       uses: actions/upload-artifact@v4
