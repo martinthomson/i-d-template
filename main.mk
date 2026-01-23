@@ -7,8 +7,8 @@ export TRACE_FILE
 define MAKE_TRACE
 $(MAKE) -k $(1); \
   STATUS=$$?; \
-  $(LIBDIR)/format-trace.sh $(TRACE_FILE) $$STATUS >>$(SUMMARY_REPORT); \
-  rm -f $(TRACE_FILE); \
+  "$(LIBDIR)/format-trace.sh" "$(TRACE_FILE)" "$(1)" $$STATUS >>"$(SUMMARY_REPORT)"; \
+  rm -f "$(TRACE_FILE)"; \
   exit $$STATUS
 endef
 
