@@ -14,8 +14,6 @@ ifneq (,$(MAKE_TRACE))
 	@$(call MAKE_TRACE,$(uploads))
 endif
 
-comma := ,
-
 .%.upload: %.xml
 	@set -e$(if $(filter-out false,$(VERBOSE)),x,); tag="$(notdir $(basename $<))"; \
 	email="$$($(LIBDIR)/get-email.sh "$$tag" "$<")"; \
@@ -32,19 +30,24 @@ comma := ,
 	    fi; \
 	  done; \
 	}; \
-	$(if $(TRACE_FILE),$(trace) $< -s upload-request )$(curl) -D "$@" \
-	    -F "user=$$email" -F "xml=@$<" $$(replaces "$$tag") \
-	    "$(DATATRACKER_UPLOAD_URL)" && echo && \
-	  (head -1 "$@" | grep -q '^HTTP/\S\S* 20[01]\b' || { \
-	   $(if $(and $(TRACE_FILE),$(shell which jq 2>/dev/null)), \
-	       echo "$<" upload 1 >>"$(TRACE_FILE)"; \
-	       msg="$$(sed -ne '/^$$/$(comma)$$p' "$@" | jq -r '.error')"; \
-	       echo "$<" upload "Datatracker error: $${msg:-(unknown)}" >>"$(TRACE_FILE)"; \
-	       sed -ne '/^$$/$(comma)$$p' "$@" | jq -r '.messages[]' | while read -r line; do \
-		 echo "$<" upload "$$line" >>"$(TRACE_FILE)"; \
-	       done \
-	     , cat "$@" 1>&2 \
-	    ); false; })
+	HEADER=check; \
+	$(if $(TRACE_FILE),$(trace) $< -s upload-request )$(curl) -D "$$HEADER" -o "$@" \
+	    -F "user=$$email" -F "xml=@$<" $$(replaces "$$tag") "$(DATATRACKER_UPLOAD_URL)" && \
+	if ! head -1 "$$HEADER" | grep -q '^HTTP/\S\S* 20[01]\b'; then \
+	  $(if $(and $(TRACE_FILE),$(shell which jq 2>/dev/null)), \
+	     echo "$<" upload 1 >>"$(TRACE_FILE)"; \
+	     msg="$$(jq -r '.error' "$@")"; \
+	     echo "$<" upload "Datatracker error: $${msg:-(unknown)}" | tee -a "$(TRACE_FILE)" 1>&2; \
+	     jq -r '.messages[]' "$@" | while read -r line; do \
+	       echo "$<" upload "$$line" | tee -a "$(TRACE_FILE)" 1>&2; \
+	     done; \
+	  , \
+	    echo "Datatracker error:"; ! cat "$@" 1>&2; \
+	  ) \
+	fi
+
+#	HEADER=$$(mktemp); trap 'rm -f "$$HEADER"' EXIT; \
+
 
 # This ignomonious hack ensures that we can catch missing files properly.
 .%.upload:
