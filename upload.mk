@@ -43,7 +43,7 @@ endif
 	     done; \
 	  , \
 	    echo "Datatracker error:"; ! cat "$@" 1>&2; \
-	  ); false; \
+	  ) false; \
 	fi
 
 #	HEADER=$$(mktemp); trap 'rm -f "$$HEADER"' EXIT; \
