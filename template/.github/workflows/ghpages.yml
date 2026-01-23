@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
     - name: "Checkout"
       uses: actions/checkout@v5
@@ -41,7 +42,25 @@ jobs:
         restore-keys: i-d-
 
     - name: "Build Drafts"
+      id: build
       uses: martinthomson/i-d-template@v1
+      with:
+        token: ${{ github.token }}
+
+    - name: "Fix Lints"
+      id: fix-lint
+      if: always() && steps.build.outcome == 'failure'
+      uses: martinthomson/i-d-template@v1
+      with:
+        make: fix-lint
+
+    - name: "Propose Linting Fixes"
+      if: >
+        always() &&
+        steps.fix-lint.outcome != 'skipped' &&
+        github.event.pull_request &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      uses: parkerbxyz/suggest-changes@v3
       with:
         token: ${{ github.token }}
 
