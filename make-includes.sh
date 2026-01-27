@@ -13,10 +13,12 @@ target_name="$2"
 # The name of the versioned file that has been created.
 filename="$3"
 
+hash realpath 2>/dev/null || function realpath() { cd "$1"; pwd -P; }
+
 get_includes() {
     case "${2##*.}" in
         md|mkd)
-            sed -ne '/^{::include [^\/]/{ s/^{::include versioned\/'"$1"'\///;s/}$//; p; }' "$2"
+            sed -ne '/^{::include [^\/]/{ s/^{::include versioned\/'"$1"'\///;s/}.*$//; p; }' "$2"
             ;;
     esac
 }
@@ -37,6 +39,7 @@ for inc in $(get_includes "$target_name" "$filename"); do
                 tmp=.
             fi
         fi
-        make -C "$tmp" "$inc" && cp "$tmp/$inc" "$target"
+        make -C "$tmp" "$inc" ID_TEMPLATE_HOME="${ID_TEMPLATE_HOME:-$(realpath "$LIBDIR")}" \
+          && cp "$tmp/$inc" "$target"
     fi
 done

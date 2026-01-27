@@ -120,7 +120,7 @@ safe-realpath = $(realpath $(1))
 relative-paths := false
 else
 ifneq (,$(DISABLE_SPACES_WARNING))
-$(warning Your $$LIBDIR ($(LIBDIR)) contains spaces; some things might break.)
+$(warning Your $$LIBDIR ($(LIBDIR) = $(realpath $(LIBDIR))) contains spaces; some things might break.)
 endif
 safe-realpath = $(1)
 relative-paths := true
