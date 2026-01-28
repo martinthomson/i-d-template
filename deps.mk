@@ -192,6 +192,7 @@ endif # -e requirements.txt
 python ?= python3
 xml2rfc ?= xml2rfc $(XML2RFC_OPTS)
 rfc-tidy ?= rfc-tidy
+export python
 
 
 ## Ruby
