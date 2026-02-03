@@ -234,7 +234,7 @@ ifneq (,$(wildcard Gemfile))
 DEPS_FILES += Gemfile.lock
 Gemfile.lock: Gemfile
 	$(bundle-path-override-lib) bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
-	$(bundle-path-override-lib) bundle binstubs --all
+	$(bundle-path-override-lib) BUNDLE_GEMFILE="$(call safe-realpath,$<)" bundle binstubs --all
 	@touch $@
 
 update-deps:: Gemfile
@@ -250,7 +250,7 @@ ifneq (true,$(CI))
 DEPS_FILES += $(LIBDIR)/Gemfile.lock
 $(LIBDIR)/Gemfile.lock: $(LIBDIR)/Gemfile
 	$(bundle-path-override) bundle install $(no-cache) --gemfile="$(call safe-realpath,$<)"
-	$(bundle-path-override) bundle binstubs --all
+	$(bundle-path-override) BUNDLE_GEMFILE="$(call safe-realpath,$<)" bundle binstubs --all
 	@touch $@
 
 update-deps:: $(LIBDIR)/Gemfile
