@@ -1,5 +1,8 @@
 draft_releases := $(shell git tag --list --points-at HEAD 'draft-*')
 
+.PHONY: releases
+releases: $(addprefix $(VERSIONED)/,$(addsuffix .xml,$(draft_releases)))
+
 uploads := $(addprefix $(VERSIONED)/.,$(addsuffix .upload,$(draft_releases)))
 
 .PHONY: upload publish
