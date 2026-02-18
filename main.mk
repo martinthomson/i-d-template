@@ -1,5 +1,5 @@
 ifneq (true,$(NO_LINT))
-LINT_TARGET=lint
+LINT_TARGET := lint
 endif
 
 ifeq (,$(TRACE_FILE))
