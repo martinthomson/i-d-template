@@ -1,3 +1,7 @@
+ifneq (true,$(NO_LINT))
+LINT_TARGET=lint
+endif
+
 ifeq (,$(TRACE_FILE))
 SUMMARY_REPORT ?= $(GITHUB_STEP_SUMMARY)
 ifneq (,$(SUMMARY_REPORT))
@@ -13,9 +17,9 @@ $(MAKE) -k $(1); \
 endef
 
 all::
-	@$(call MAKE_TRACE,latest lint)
+	@$(call MAKE_TRACE,latest $(LINT_TARGET))
 else
-all:: latest lint
+all:: latest $(LINT_TARGET)
 endif # SUMMARY_REPORT
 endif # TRACE_FILE
 
@@ -57,6 +61,7 @@ pdf:: $(addsuffix .pdf,$(drafts))
 
 ## Basic Recipes
 .INTERMEDIATE: $(filter-out $(drafts_source),$(addsuffix .xml,$(drafts)))
+
 
 ifeq (true,$(CI))
 VERBOSE ?= true
