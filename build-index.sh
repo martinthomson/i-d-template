@@ -258,6 +258,7 @@ function list_dir() {
             # Fallback to the file in the current directory.
             src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
         fi
+        [[ -z "$src" ]] && continue
         abbrev=$("$python" "${libdir}/extract-metadata.py" "$src" abbrev)
         title=$("$python" "${libdir}/extract-metadata.py" "$src" title)
         td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
