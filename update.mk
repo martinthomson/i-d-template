@@ -5,7 +5,7 @@
 ifneq (true,$(CI))
 ifndef SUBMODULE
 UPDATE_COMMAND = echo Updating template && git -C $(LIBDIR) pull && \
-		 ([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull)
+                 ([ ! -d $(XSLTDIR) ] || git -C $(XSLTDIR) pull)
 FETCH_HEAD = $(wildcard $(LIBDIR)/.git/FETCH_HEAD)
 else
 UPDATE_COMMAND = echo Your template is old, please run `make update`
@@ -96,9 +96,9 @@ update-codeowners: | update-gitignore
 # This uses 'x' and 'n' to get the next line, then conditionally prints a non-blank line.
 update-makefile: Makefile $(LIBDIR)/template/Makefile | update-gitignore
 	@x=$$(mktemp);y=$$(mktemp); mv $< "$$x"; \
-	sed -n -e '1,/^include.*main\.mk$$/{/^include.*main\.mk$$/{x;n;/^$$/!p;};d;};/main\.mk:$$/,/^$$/d;p' "$$x" > "$$y"; \
-	sed -n -e '1,/^include.*main\.mk$$/{x;1d;p;}' "$$x" > $<; \
-	sed -n -e '/^include.*main\.mk$$/,/^$$/p;/main\.mk:$$/,/^$$/p' $(LIBDIR)/template/Makefile >> $<; \
+	sed -n -e '1,/^-?include.*main\.mk$$/{/^-?include.*main\.mk$$/{x;n;/^$$/!p;};d;};/main\.mk:$$/,/^$$/d;p' "$$x" > "$$y"; \
+	sed -n -e '1,/^-?include.*main\.mk$$/{x;1d;p;}' "$$x" > $<; \
+	sed -n -e '/^-include.*main\.mk$$/,/^$$/p;/main\.mk:$$/,/^$$/p' $(LIBDIR)/template/Makefile >> $<; \
 	[ $$(cat "$$y" | wc -l) -gt 0 ] && echo >> $<; cat "$$y" >> $<; \
 	rm -f "$$x" "$$y"
 	@if ! git diff --quiet @ $<; then \
