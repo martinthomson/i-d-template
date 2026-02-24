@@ -113,6 +113,10 @@ $ git push origin :draft-ietf-unicorn-protocol-03
 Fix the draft, push the changes, let the CI check them, then you can reapply the
 tag.
 
+If the build fails because your name is bad, you especially need to delete the old tag.
+Otherwise, the tool will imagine that you have renamed the draft,
+which will cause the submission of the new version to fail.
+
 
 <a name="cli"></a>
 ## Semi-automated Process
