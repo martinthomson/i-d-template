@@ -33,7 +33,7 @@ endif
 	    fi; \
 	  done; \
 	}; \
-	HEADER=check; \
+	HEADER=$$(mktemp); trap 'rm -f "$$HEADER"' EXIT; \
 	$(if $(TRACE_FILE),$(trace) $< -s upload-request )$(curl) -D "$$HEADER" -o "$@" \
 	    -F "user=$$email" -F "xml=@$<" $$(replaces "$$tag") "$(DATATRACKER_UPLOAD_URL)" && \
 	if ! head -1 "$$HEADER" | grep -q '^HTTP/\S\S* 20[01]\b'; then \
@@ -49,7 +49,6 @@ endif
 	  ) false; \
 	fi
 
-#	HEADER=$$(mktemp); trap 'rm -f "$$HEADER"' EXIT; \
 
 
 # This ignomonious hack ensures that we can catch missing files properly.
