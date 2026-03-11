@@ -194,6 +194,11 @@ xml2rfc ?= xml2rfc $(XML2RFC_OPTS)
 rfc-tidy ?= rfc-tidy
 export python
 
+# xml2rfc depends on having python 3.10
+python_minor := 10
+ifneq (0,$(shell $(python) -c 'import sys;exit(sys.version_info[:2] < (3,$(python_minor)))')$(.SHELLSTATUS))
+$(warning $(python) needs to be at least 3.$(python_minor); you have $(shell $(python) --version))
+endif
 
 ## Ruby
 ifeq (,$(shell which bundle)$(filter true,$(NO_RUBY)))
