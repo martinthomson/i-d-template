@@ -75,9 +75,10 @@ RUN set -e; \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
       720f8cccd5c38a2a333d0a6af4146df1dd798f4cfcb5e83419fc518348bdf7ad; \
     npm install -g aasvg; \
-    pip3 install --no-cache-dir --disable-pip-version-check \
+    pip3 install --no-cache-dir --disable-pip-version-check --root-user-action=ignore \
       -r /i-d-template/requirements.txt; \
-    bundle install --system --gemfile=/i-d-template/Gemfile; \
+    bundle config set path.system true; \
+    bundle install --gemfile=/i-d-template/Gemfile; \
     install cargo-binstall \
       "https://github.com/cargo-bins/cargo-binstall/releases/download/v1.16.7/cargo-binstall-x86_64-unknown-linux-musl.tgz" \
       730c2aba29f8cfa9b78d4b3fbaa705f593643ab1db579f619f90ed90fc6eefec
