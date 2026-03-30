@@ -74,7 +74,6 @@ RUN set -e; \
     install mmark \
       "https://github.com/mmarkdown/mmark/releases/download/v${mmark}/mmark_${mmark}_linux_amd64.tgz" \
       720f8cccd5c38a2a333d0a6af4146df1dd798f4cfcb5e83419fc518348bdf7ad; \
-    npm install -g aasvg; npm list -g; \
     pip3 install --no-cache-dir --disable-pip-version-check --root-user-action=ignore \
       -r /i-d-template/requirements.txt; \
     bundle config set path.system true; \
