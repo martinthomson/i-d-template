@@ -196,8 +196,10 @@ export python
 
 # xml2rfc depends on having python 3.10
 python_minor := 10
+ifneq (,$(wildcard $(python)))
 ifneq (True,$(shell $(python) -c 'import sys;print(sys.version_info[:2] >= (3,$(python_minor)))'))
 $(warning $(python) needs to be at least 3.$(python_minor); you have $(shell $(python) --version 2>&1))
+endif
 endif
 
 ## Ruby
