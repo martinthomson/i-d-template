@@ -103,7 +103,12 @@ will automatically call npm to install the dependencies.
 You can create the `package.json` by running `npm`, for example:
 
 ```sh
-$ npm i -save aasvg
-$ git add package.json
-$ git commit
+npm i --save aasvg@0.4.3
+git add package.json
+git commit -m "Add aasvg" package.json
 ```
+
+### aasvg compatibility with xml2rfc
+
+Do not use a version of `aasvg` newer than 0.4.3, as this may cause
+incompatibilities with `xml2rfc`.
