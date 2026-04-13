@@ -311,7 +311,7 @@ $(CARGO_INSTALL_ROOT)/.crates.toml: cargo.txt
 	@for b in "$$(cat cargo.txt)"; do \
 	  [ -n "$$b" ] && [ "$${b###}" = "$$b" ] && \
 	    cargo-binstall --root "$(CARGO_INSTALL_ROOT)" --disable-telemetry \
-	      -y --log-level info --strategies quick-install "$$b"; \
+	      -y --log-level info "$$b"; \
 	done
 	@touch $@
 
