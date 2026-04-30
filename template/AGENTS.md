@@ -17,6 +17,9 @@
 | `make next` | Build versioned copies for submission |
 | `make deps` | Install dependencies |
 
+Before `make next`, it is a good idea to run `make idnits` and `make spellcheck`
+and address any reported issues, but neither is required by the build.
+
 ## Before Committing
 
 A pre-commit hook runs `make lint` and builds HTML to catch errors.
@@ -30,4 +33,32 @@ Always fix lint issues before committing:
 
 ## Source Files
 
-Draft sources are `draft-*.md`, `draft-*.xml`, or `draft-*.org` files in the repo root. The build system auto-detects the format and processes them through the appropriate toolchain (kramdown-rfc, mmark, or xml2rfc).
+Drafts are authored in one of three formats, kept in the repo root:
+
+- `draft-*.md` — Markdown, the most common format. Two flavors are supported:
+  [kramdown-rfc](https://github.com/cabo/kramdown-rfc) (most common) and
+  [mmark](https://mmark.miek.nl/).
+- `draft-*.xml` — [xml2rfc](https://authors.ietf.org/en/rfcxml-overview) v3, used directly when authored as XML.
+- `draft-*.org` — Org mode (rare).
+
+Note: when a draft is authored in Markdown, the build produces an intermediate
+`draft-*.xml` file as a build artifact. Only edit `draft-*.xml` directly if it
+is the authored source (i.e. there is no corresponding `draft-*.md` or
+`draft-*.org`). When in doubt, edit the `.md` file.
+
+## Documentation
+
+Detailed documentation lives under `lib/doc/` (the `lib/` directory is the
+i-d-template toolchain, vendored as a git submodule):
+
+- `lib/doc/SETUP.md` — installing dependencies and platform notes
+- `lib/doc/FEATURES.md` — full feature reference
+- `lib/doc/SUBMITTING.md` — how to tag and submit drafts to the IETF datatracker
+- `lib/doc/REPO.md` — repository setup guide
+- `lib/doc/TEMPLATE.md` — template-based setup workflow
+
+## Never Do
+
+- Do not modify files under `lib/`. This is the i-d-template toolchain, updated separately via the git submodule.
+- Do not edit `.github/workflows/` unless the task explicitly concerns CI configuration.
+- Do not commit `draft-*.txt` or `draft-*.html` — these are build artifacts. The intermediate `draft-*.xml` produced from a `.md` source is also a build artifact.
