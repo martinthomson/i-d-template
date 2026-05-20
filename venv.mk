@@ -228,7 +228,7 @@ endif
 python_minor := 10
 
 $(VENV):
-	[ "$$($(PY) -c 'import sys;print(sys.version_info[:2] >= (3,$(python_minor)))')" = "True" ] || \
+	@[ "$$($(PY) -c 'import sys;print(sys.version_info[:2] >= (3,$(python_minor)))')" = "True" ] || \
 	  ! echo "Warning: python needs to be at least 3.$(python_minor); you have $$($(PY --version 2>&1))" 1>&2
 	$(PY) -m venv $(VENVDIR)
 	"$(VENV)/python" -m pip install --no-user $(no-cache-dir) --upgrade pip setuptools wheel
