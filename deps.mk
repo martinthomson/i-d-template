@@ -203,7 +203,7 @@ endif
 endif
 
 ## Ruby
-ifeq (,$(shell which bundle)$(filter true,$(NO_RUBY)))
+ifeq (,$(shell which bundle 2>/dev/null)$(filter true,$(NO_RUBY)))
 $(warning ruby bundler not installed; skipping bundle install)
 NO_RUBY := true
 endif
@@ -271,7 +271,7 @@ endif # !NO_RUBY
 
 
 ## Nodejs
-ifeq (,$(shell which npm))
+ifeq (,$(shell which npm 2>/dev/null))
 ifneq (,$(wildcard package.json))
 $(warning package.json exists, but npm not available; npm packages not installed)
 endif
@@ -295,7 +295,7 @@ endif # package.json
 endif # !NO_NODEJS
 
 ## Rust/Cargo
-ifeq (,$(shell which cargo-binstall))
+ifeq (,$(shell which cargo-binstall 2>/dev/null))
 ifneq (,$(wildcard cargo.txt))
 $(warning cargo.txt exists, but cargo-binstall not available; cargo packages not installed)
 endif
