@@ -22,17 +22,27 @@ Linux](https://docs.microsoft.com/en-us/windows/wsl/install) with a Linux
 distribution like Ubuntu (`wsl --install -d Ubuntu` from an administrator
 prompt).
 
-From within Ubuntu, you can install the dependencies for this repository:
+<details>
+<summary>Ubuntu installations
 
 ```sh
-sudo apt-get install -y git make python3-pip python3-venv
+sudo apt-get install -y \
+  git make python3-pip python3-venv \
+  jq libxml2-utils npm ruby-bundler
 ```
 
-You can also add recommended packages, as follows:
+</details>
+
+<details>
+<summary>Arch installations
 
 ```sh
-sudo apt-get install -y ruby-bundler npm libxml2-utils
+sudo pacman -S --noconfirm \
+  git make python-pip \
+  jq libxslt npm ruby-default-gems
 ```
+
+</details>
 
 It is also possible to use [cygwin](https://cygwin.org/) or an
 [MSYS2](https://www.msys2.org/)-based system (like
@@ -59,7 +69,7 @@ Note that this might install as `gmake`.  Follow the instructions to add this as
 ## Python
 
 You need to provide [Python 3](https://www.python.org/). Be sure not to get
-Python 2 or anything older than Python 3.6, which are no longer supported.
+Python 2 or anything older than Python 3.10, which are no longer supported.
 
 [`pip`](https://pip.pypa.io/en/stable/installing/) and
 [`venv`](https://docs.python.org/3/library/venv.html) are used to install
@@ -110,5 +120,5 @@ git commit -m "Add aasvg" package.json
 
 ### aasvg compatibility with xml2rfc
 
-Do not use a version of `aasvg` newer than 0.4.3, as this may cause
-incompatibilities with `xml2rfc`.
+Do not use a version of `aasvg` newer than 0.4.3,
+as this presently causes incompatibilities with `xml2rfc`.
