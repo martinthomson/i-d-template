@@ -23,7 +23,7 @@ distribution like Ubuntu (`wsl --install -d Ubuntu` from an administrator
 prompt).
 
 <details>
-<summary>Ubuntu installations
+<summary>Ubuntu installations</summary>
 
 ```sh
 sudo apt-get install -y \
@@ -34,7 +34,7 @@ sudo apt-get install -y \
 </details>
 
 <details>
-<summary>Arch installations
+<summary>Arch installations</summary>
 
 ```sh
 sudo pacman -S --noconfirm \
