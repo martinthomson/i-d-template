@@ -2,6 +2,7 @@
 
 # Usage: $0 <user> <repo> [draftxml ...]
 
+LIBDIR="${LIBDIR:-lib}"
 user="$1"
 repo="$2"
 default_branch="${DEFAULT_BRANCH:-$("$(dirname "$0")/default-branch.py")}"
@@ -9,16 +10,12 @@ shift 2
 
 githubio="https://${user}.github.io/${repo}/#go"
 
-function fixup_other_md() {
-    markdown=(LICENSE.md CONTRIBUTING.md)
+function other_md() {
     s='s~{WG_NAME}~'"$1"'~g'
     s="$s"';s~{GITHUB_USER}~'"$user"'~g'
     s="$s"';s~{GITHUB_REPO}~'"$repo"'~g'
     s="$s"';s~{GITHUB_BRANCH}~'"$default_branch"'~g'
-    sed -i~ -e "$s" "${markdown[@]}"
-    for i in "${markdown[@]}"; do
-        rm -f "$i"~
-    done
+    sed -e "$s" "${LIBDIR}/template/$1"
 }
 
 function get_title() {
@@ -32,11 +29,7 @@ function get_title() {
     echo "${t[*]}"
 }
 
-if [[ "$OSTYPE" =~ (darwin|bsd).* ]] ; then
-  function sed_no_backup() { sed -i '' "$@" ; }
-else
-  function sed_no_backup() { sed -i "$@" ; }
-fi
+set -x
 
 first=true
 for d in "$@"; do
@@ -47,8 +40,6 @@ for d in "$@"; do
     title=$(get_title "$d")
 
     if "$first"; then
-        fixup_other_md "$wg"
-
         echo "<!-- regenerate: on (set to off if you edit this file) -->"
         echo
 
@@ -59,7 +50,7 @@ for d in "$@"; do
             status="Individual"
             status_full="individual Internet-Draft"
         fi
-        if [ $# -gt 1 ]; then
+        if [[ $# -gt 1 ]]; then
             echo "# ${wgupper} Drafts"
             status_full="${status_full}s"
         else
@@ -70,11 +61,11 @@ for d in "$@"; do
         echo "This is the working area for ${status_full}."
         wg_all="$wg"
         first=false
-    elif [ "$wg" != "$wg_all" ]; then
+    elif [[ "$wg" != "$wg_all" ]]; then
         wg_all=""
     fi
 
-    if [ $# -gt 1 ]; then
+    if [[ $# -gt 1 ]]; then
         echo
         echo "## $title"
     fi
@@ -110,12 +101,14 @@ Command line usage requires that you have the necessary software installed.  See
 EOF
 
 if [ -n "$wg_all" ]; then
+    other_md LICENSE.md >LICENSE.md
+
     api="https://datatracker.ietf.org"
     wgmeta="${api}/api/v1/group/group/?format=xml&acronym=${wg_all}"
     tmp=$(mktemp)
     trap 'rm -f $tmp' EXIT
     if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp" &&
-       [ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]; then
+       [[ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]]; then
         group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
         group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
         # Getting the abbreviation for the group type is pure haxx
@@ -133,7 +126,13 @@ if [ -n "$wg_all" ]; then
         # /./{x;/\n/{s/.//;p;};x;} prints a blank line before a non-blank line,
         #    but only if the hold buffer has a blank line in it.
         #    The s/.//;p; part ensures that an extra blank line isn't added by deleting one.
-        sed_no_backup -e '/^$/{H;d;};/^## Working Group Info/,$d;/./{x;/\n/{s/.//;p;};x;}' CONTRIBUTING.md
+        c="$(mktemp)"
+        if [[ -f CONTRIBUTING.md ]]; then
+            sed -e '/^$/{H;d;};/^## Working Group Info/,$d;/./{x;/\n/{s/.//;p;};x;}' CONTRIBUTING.md
+        else
+            other_md CONTRIBUTING.md
+        fi >"$c"
+        mv -f "$c" CONTRIBUTING.md
         cat >>CONTRIBUTING.md <<EOF
 
 
@@ -151,29 +150,8 @@ technical issues needs to occur on the mailing list.
 
 You might also like to familiarize yourself with other
 [${group_type} documents](https://datatracker.ietf.org/${group_type_abbr}/${wg_all}/documents/).
-
-## How to Contribute
-
-Contributions can be made by creating pull requests, opening an issue, or
-posting to the working group mailing list. See above for the email address
-and a note about policy.
-
-Here are two ways to create a pull request ("PR"):
-
-- Copy the repository and make a pull request using the Git command-line
-tool, using the [GitHub documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) if needed.
-
-- You can use the GitHub UI as follows:
-  - View the draft source
-  - Select the pencil icon to edit the file (usually top-right on the screen)
-  - Make edits
-  - Select "Commit changes"
-  - Add a title and explanatory text
-  - Select "Propose"
-  - When prompted, click on "Create Pull Request"
-
-Document authors/editors are often happy to accept contributions of text,
-and might be willing to help you through the process. Email them and ask.
 EOF
+    else
+        other_md CONTRIBUTING.md >CONTRIBUTING.md
     fi
 fi

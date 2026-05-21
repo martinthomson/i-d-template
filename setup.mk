@@ -35,7 +35,8 @@ $(error Please push the '$(GIT_ORIG)' branch to '$(GIT_REMOTE)', e.g., "git push
 endif
 endif
 
-TEMPLATE_FILES := Makefile .gitignore CONTRIBUTING.md LICENSE.md .editorconfig
+TEMPLATE_FILES := Makefile .gitignore .editorconfig
+README_FILES := README.md CONTRIBUTING.md LICENSE.md
 ifneq (true,$(CI))
 # When this runs in CI, we can't change these due to GitHub permissions.
 TEMPLATE_FILES += $(addprefix .github/workflows/,ghpages.yml publish.yml archive.yml update.yml)
@@ -51,7 +52,7 @@ $(TEMPLATE_FILE_MK): $(LIBDIR)/setup.mk
 	  echo '	-cp $$< $$@' >>$@;)
 
 .PHONY: setup-files
-setup-files: $(TEMPLATE_FILES) README.md .github/CODEOWNERS
+setup-files: $(TEMPLATE_FILES) $(README_FILES) .github/CODEOWNERS
 	git add $(drafts_source)
 	git add $^
 
@@ -85,9 +86,10 @@ endif
 	  mv -f $$tmp $<
 	git add $<
 
-README.md: $(LIBDIR)/setup-readme.sh $(drafts_xml) $(filter %.md, $(TEMPLATE_FILES))
+$(README_FILES) &: $(LIBDIR)/setup-readme.sh $(drafts_xml) \
+    $(wildcard $(addprefix $(LIBDIR)/template/,$(README_FILES)))
 	$(LIBDIR)/setup-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
-	git add $@ $(filter %.md, $(TEMPLATE_FILES))
+	git add $(README_FILES)
 
 .PHONY: setup-note
 setup-note: $(LIBDIR)/setup-note.sh
