@@ -29,9 +29,8 @@ function get_title() {
     echo "${t[*]}"
 }
 
-set -x
-
 first=true
+exec 3>README.md
 for d in "$@"; do
     fullname="${d%.xml}"
     author=$(echo "${fullname}" | cut -f 2 -d - -)
@@ -40,8 +39,8 @@ for d in "$@"; do
     title=$(get_title "$d")
 
     if "$first"; then
-        echo "<!-- regenerate: on (set to off if you edit this file) -->"
-        echo
+        echo "<!-- regenerate: on (set to off if you edit this file) -->" >&3
+        echo >&3
 
         if [ "$author" = "ietf" ]; then
             status="Working Group"
@@ -51,14 +50,14 @@ for d in "$@"; do
             status_full="individual Internet-Draft"
         fi
         if [[ $# -gt 1 ]]; then
-            echo "# ${wgupper} Drafts"
+            echo "# ${wgupper} Drafts" >&3
             status_full="${status_full}s"
         else
-            echo "# $title"
+            echo "# $title" >&3
             status_full="the ${status_full}, \"${title}\""
         fi
-        echo
-        echo "This is the working area for ${status_full}."
+        echo >&3
+        echo "This is the working area for ${status_full}." >&3
         wg_all="$wg"
         first=false
     elif [[ "$wg" != "$wg_all" ]]; then
@@ -66,17 +65,17 @@ for d in "$@"; do
     fi
 
     if [[ $# -gt 1 ]]; then
-        echo
-        echo "## $title"
+        echo >&3
+        echo "## $title" >&3
     fi
-    echo
-    echo "* [Editor's Copy](${githubio}.${fullname}.html)"
-    echo "* [Datatracker Page](https://datatracker.ietf.org/doc/${fullname})"
-    echo "* [${status} Draft](https://datatracker.ietf.org/doc/html/${fullname})"
-    echo "* [Compare Editor's Copy to ${status} Draft](${githubio}.${fullname}.diff)"
+    echo >&3
+    echo "* [Editor's Copy](${githubio}.${fullname}.html)" >&3
+    echo "* [Datatracker Page](https://datatracker.ietf.org/doc/${fullname})" >&3
+    echo "* [${status} Draft](https://datatracker.ietf.org/doc/html/${fullname})" >&3
+    echo "* [Compare Editor's Copy to ${status} Draft](${githubio}.${fullname}.diff)" >&3
 done
 
-cat <<EOF
+cat >&3 <<EOF
 
 
 ## Contributing
@@ -99,6 +98,7 @@ Command line usage requires that you have the necessary software installed.  See
 [the instructions](https://github.com/martinthomson/i-d-template/blob/main/doc/SETUP.md).
 
 EOF
+exec 3>&-
 
 if [ -n "$wg_all" ]; then
     other_md LICENSE.md >LICENSE.md

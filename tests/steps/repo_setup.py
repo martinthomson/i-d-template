@@ -114,37 +114,33 @@ def step_impl(context):
 
 @given("a git repo with a single Kramdown draft")
 def step_impl(context):
-    context.execute_steps(
-        """
+    context.execute_steps("""
         Given an empty git repo
         and lib is cloned in
         and a Kramdown draft is created
-        and pushed to origin/main"""
-    )
+        and pushed to origin/main""")
 
 
 @given("a git repo with multiple Kramdown drafts")
 def step_impl(context):
-    context.execute_steps(
-        """
+    context.execute_steps("""
         Given a git repo with a single Kramdown draft
         and a Kramdown draft is created
-        and pushed to origin/main"""
-    )
+        and pushed to origin/main""")
 
 
 @given("a configured git repo with a Kramdown draft")
 def step_impl(context):
-    context.execute_steps("Given a git repo with a single Kramdown draft")
-    with cd(context.working_dir):
-        context.result = call(["make", "-f", "lib/setup.mk", "BRANCH_FETCH=false"])
+    context.execute_steps("""
+        Given a git repo with a single Kramdown draft
+        when the setup script is run""")
 
 
 @given("a configured git repo with multiple Kramdown drafts")
 def step_impl(context):
-    context.execute_steps("Given a git repo with multiple Kramdown drafts")
-    with cd(context.working_dir):
-        context.result = call(["make", "-f", "lib/setup.mk", "BRANCH_FETCH=false"])
+    context.execute_steps("""
+        Given a git repo with multiple Kramdown drafts
+        when the setup script is run""")
 
 
 @given('drafts are modified with sed -e "{}"')

@@ -88,7 +88,7 @@ endif
 
 $(README_FILES) &: $(LIBDIR)/setup-readme.sh $(drafts_xml) \
     $(wildcard $(addprefix $(LIBDIR)/template/,$(README_FILES)))
-	$(LIBDIR)/setup-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^) >$@
+	$(LIBDIR)/setup-readme.sh $(GITHUB_USER) $(GITHUB_REPO) $(filter %.xml,$^)
 	git add $(README_FILES)
 
 .PHONY: setup-note

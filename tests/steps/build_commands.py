@@ -20,6 +20,8 @@ offline_make_options = [
     "PUSH_GHPAGES=false",
     "FETCH_ISSUES=false",
     "BRANCH_FETCH=false",
+    "GITHUB_USER=dummy",
+    "GITHUB_REPO=repo",
 ]
 
 
