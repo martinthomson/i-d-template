@@ -17,9 +17,7 @@ git_commit = [
     "commit",
 ]
 offline_make_options = [
-    "PUSH_GHPAGES=false",
-    "FETCH_ISSUES=false",
-    "BRANCH_FETCH=false",
+    "DISABLE_FETCHING=true",
     "GITHUB_USER=dummy",
     "GITHUB_REPO=repo",
 ]

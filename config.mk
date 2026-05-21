@@ -120,3 +120,13 @@ endif
 endif # DISABLE_CACHE
 XML2RFC_OPTS += --cache=$(XML2RFC_REFCACHEDIR)
 export KRAMDOWN_REFCACHEDIR
+
+# To speed up tests or run locally, this disables
+DISABLE_FETCHING ?= false
+ifeq (true,$(DISABLE_FETCHING))
+export PUSH_GHPAGES := false
+export FETCH_ISSUES := false
+export BRANCH_FETCH := false
+export DATATRACKER_API := false
+export KRAMDOWN_OFFLINE := true
+endif

@@ -3,14 +3,18 @@
 # Populates values for:
 # wg_name, wg_type, wg_mail, and wg_arch for the identified working group.
 wgmeta() {
+    if [[ "$DATATRACKER_API" == "false" ]] || ! hash xmllint; then
+        return
+    fi
+
     wg="$1"
     [[ -n "$wg" ]] || return 2
     api="https://datatracker.ietf.org"
     wgmeta="$api/api/v1/group/group/?format=xml&acronym=$wg"
     tmp=$(mktemp)
     trap 'rm -f $tmp' EXIT
-    if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp" &&
-            [[ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]]; then
+    curl -SsLf "$wgmeta" -o "$tmp"
+    if [[ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]]; then
         wg_area_url="$(xmllint --xpath '/response/objects/object[1]/parent/text()' "$tmp")"
         wg_area="$(curl -Ssf "${api}${wg_area_url}?format=xml" | \
                       xmllint --xpath '/object/name/text()' /dev/stdin)"

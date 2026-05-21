@@ -107,7 +107,8 @@ if [ -n "$wg_all" ]; then
     wgmeta="${api}/api/v1/group/group/?format=xml&acronym=${wg_all}"
     tmp=$(mktemp)
     trap 'rm -f $tmp' EXIT
-    if hash xmllint && curl -SsLf "$wgmeta" -o "$tmp" &&
+    if [[ "$DATATRACKER_API" != "false" ]] && hash xmllint &&
+       curl -SsLf "$wgmeta" -o "$tmp" &&
        [[ "$(xmllint --xpath '/response/meta/total_count/text()' "$tmp")" == "1" ]]; then
         group_name="$(xmllint --xpath '/response/objects/object[1]/name/text()' "$tmp")"
         group_type_url="$(xmllint --xpath '/response/objects/object[1]/type/text()' "$tmp")"
