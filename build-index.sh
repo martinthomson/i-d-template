@@ -245,7 +245,6 @@ function list_dir() {
         dir=$(dirname "$file")
         file=$(basename "$file" .txt)
 
-        tr_i
         src="${branch}:$(git ls-tree --name-only "$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
         [[ -n "${src##*:}" ]] || \
             src="origin/${branch}:$(git ls-tree --name-only "origin/$branch" -- "$file".md "$file".xml 2>/dev/null | head -1)"
@@ -259,6 +258,7 @@ function list_dir() {
             src=$(ls "$file".{md,xml} 2>/dev/null | head -1)
         fi
         [[ -z "$src" ]] && continue
+        tr_i
         abbrev=$("$python" "${libdir}/extract-metadata.py" "$src" abbrev)
         title=$("$python" "${libdir}/extract-metadata.py" "$src" title)
         td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
