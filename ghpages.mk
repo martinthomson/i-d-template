@@ -109,9 +109,9 @@ endif
 # Clean up obsolete directories
 # Keep old branches for $(GHPAGES_BRANCH_TTL) days after the last changes (on the ${PAGES_BRANCH} branch).
 	@CUTOFF=$$(($$(date '+%s')-($(GHPAGES_BRANCH_TTL)*86400))); \
-	for item in comm -13 \
+	for item in $$(comm -13 \
 	    <(git branch --list --all --format='%(refname:short)' | sort | uniq) \
-	    <(git -C $(GHPAGES_ROOT) ls-tree --name-only -r -d gh-pages | sort | uniq); do \
+	    <(git -C $(GHPAGES_ROOT) ls-tree --name-only -r -d gh-pages | sort | uniq)); do \
 	  if [ -d "$(GHPAGES_ROOT)/$$item" ] && \
 	     [ `git -C $(GHPAGES_ROOT) log -n 1 --format=%ct -- $$item` -lt $$CUTOFF ]; then \
 	    echo "Remove obsolete '$$item'"; \
