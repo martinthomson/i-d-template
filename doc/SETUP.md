@@ -86,7 +86,7 @@ the Ruby [bundler](https://bundler.io/), which also requires the Ruby package
 tool, [`gem`](https://rubygems.org/).
 
 The `gem` tool is often installed alongside Ruby, but you might need to install
-bundler separately (look for `ruby-bundler`).
+bundler separately (look for `ruby-bundler`, you might also need `ruby-erb`).
 
 You can pass `NO_RUBY=true` as an argument to `make` or export an environment
 variable with that value to disable this feature.
