@@ -168,7 +168,7 @@ elif [[ "$format" = "md" ]]; then
     function table_i() {
         extra=""
         if [[ "$1" == "$2" ]]; then
-            extra=" --- | --- |"
+            extra=" --- | --- | --- |"
         fi
         echo "| Draft |     |     |     |${extra//-/ }"
         echo "| ----- | --- | --- | --- |${extra}"
@@ -264,10 +264,13 @@ function list_dir() {
         td "$(a "$(reldot "$dir")/${file}.html" "$abbrev" "html $file" "$title (HTML)")"
         td "$(a "$(reldot "$dir")/${file}.txt" "plain text" "txt $file" "$title (Text)")"
         this_githubio=$(githubio "$branch" "$file")
+        builds="$(reldot "$dir")/diff.html"
+        [[ "${#files[@]}" -eq 1 ]] || builds="${builds}?doc=${file}"
         if [[ "$2" == "$default_branch" ]]; then
             td "$(a "https://datatracker.ietf.org/doc/${file}" datatracker "dt $file" "Datatracker for $file")"
             diff=$(rfcdiff "$file" "$this_githubio")
             td "$(a "$diff" 'diff with last submission' "diff $file")"
+            td "$(a "$builds" 'compare builds' "builds $file" "Compare any two builds of $file")"
             if [[ "${#files[@]}" -eq 1 ]]; then
                 td ""
             else
@@ -284,6 +287,8 @@ function list_dir() {
             diff=$(rfcdiff $(githubio "$default_branch/" "$file") "$this_githubio")
             td "$(a "$diff" 'diff with '"$default_branch" "diff $file")"
         fi
+        [[ "$2" == "$default_branch" ]] || \
+            td "$(a "$builds" 'compare builds' "builds $file" "Compare any two builds of $file")"
         tr_o
     done
     table_o

@@ -79,6 +79,19 @@ $(GHPAGES_ROOT)/index.$(INDEX_FORMAT): $(GHPAGES_INSTALLED) $(DEPS_FILES)
 	$(LIBDIR)/build-index.sh $(INDEX_FORMAT) "$(dir $@)" "$(DEFAULT_BRANCH)" "$(GITHUB_HOST)" "$(GITHUB_USER)" "$(GITHUB_REPO)" $(drafts_source) >$@
 endif
 
+# Keep the text of each build under builds/, so that diff.html can compare any
+# two builds in the browser (see build-store.py). Builds older than
+# GHPAGES_BUILD_TTL days are dropped.
+GHPAGES_BUILD_TTL ?= $(GHPAGES_COMMIT_TTL)
+GHPAGES_BUILDS := $(GHPAGES_TARGET)/builds
+GHPAGES_ALL += $(GHPAGES_TARGET)/diff.html $(GHPAGES_TARGET)/iddiff.js
+$(GHPAGES_TARGET)/diff.html $(GHPAGES_TARGET)/iddiff.js: $(GHPAGES_TARGET)/%: $(LIBDIR)/% $(GHPAGES_TARGET) | cleanup-ghpages
+	cp -f $< $@
+# Phony, so that the build is stored even where file timestamps are coarse.
+.PHONY: ghpages-builds
+ghpages-builds: $(filter %.txt,$(GHPAGES_INSTALLED))
+	$(python) $(LIBDIR)/build-store.py $(GHPAGES_BUILDS) $(GHPAGES_BUILD_TTL) $^
+
 # GHPAGES_COMMIT_TTL is the number of days worth of commits to keep on the ${PAGES_BRANCH} branch.
 GHPAGES_COMMIT_TTL ?= 90
 # GHPAGES_BRANCH_TTL is the number of days to retain a directory on ${PAGES_BRANCH}
@@ -131,8 +144,8 @@ ifneq (,$(MAKE_TRACE))
 ghpages:
 	@$(call MAKE_TRACE,ghpages)
 else
-ghpages: $(GHPAGES_ALL)
-	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL)
+ghpages: $(GHPAGES_ALL) ghpages-builds
+	git -C $(GHPAGES_ROOT) add -f $(GHPAGES_ALL) $(GHPAGES_BUILDS)
 	if test `git -C $(GHPAGES_ROOT) status --porcelain | grep '^[A-Z]' | wc -l` -gt 0; then \
 	  git -C $(GHPAGES_ROOT) $(CI_AUTHOR) commit -m "Script updating ${PAGES_BRANCH} from $(shell git rev-parse --short HEAD). [ci skip]"; fi
 ifeq (true,$(PUSH_GHPAGES))

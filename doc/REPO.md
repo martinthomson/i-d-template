@@ -140,6 +140,12 @@ $ make ghpages
 
 When you do that, you will need to push the `gh-pages` branch yourself.
 
+The `gh-pages` branch also keeps the text of each build under `builds/`.  The
+`diff.html` page on that branch shows the differences between any two builds,
+side by side, in the same format as the IETF iddiff tool; the index page links
+to it as "compare builds".  Builds older than `GHPAGES_BUILD_TTL` days (90 by
+default) are dropped.
+
 The default template includes files that will enable [GitHub
 Actions](https://github.com/features/actions).  These will result in
 automatically enabling builds that update the editor's copy, publish tagged

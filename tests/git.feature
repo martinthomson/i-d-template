@@ -4,8 +4,11 @@ Feature: git integration
     Given a configured git repo with a Kramdown draft
      when make "ghpages" is run
      then it succeeds
-     and a branch is created called "gh-pages" containing "index.html"
+     and a branch is created called "gh-pages" containing "index.html" which contains "compare builds"
      and documents are added to gh-pages
+     and a branch is created called "gh-pages" containing "diff.html"
+     and a branch is created called "gh-pages" containing "iddiff.js"
+     and a branch is created called "gh-pages" containing "builds/index.json" which contains "drafts"
 
   Scenario:  make ghpages with a non-main default branch
     Given a configured git repo with a Kramdown draft

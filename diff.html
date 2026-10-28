@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Compare builds</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Side-by-side diff of two builds of a draft, computed in the browser by
+     iddiff.js. Builds are listed in builds/index.json next to this file.
+
+     ?from=<commit>[&to=<commit>][&doc=<draft-name>]
+         Compare two builds by source commit; "to" defaults to the latest
+         build and "doc" to the first draft in the repository.
+     ?url1=<url>&url2=<url>
+         Compare two text files from any URL that this page may fetch. -->
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; font-family: system-ui, sans-serif; font-size: 14px; color: #222; }
+  header { padding: 10px 14px; border-bottom: 1px solid #ccc; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+  header b { font-size: 16px; margin-right: 6px; }
+  select { font: inherit; font-size: 13px; max-width: 38vw; padding: 3px; }
+  #status { color: #555; font-size: 13px; }
+  iframe { flex: 1; border: 0; width: 100%; }
+</style>
+</head>
+<body>
+<header>
+  <b>Compare builds</b>
+  <label id="doc-label" hidden>draft <select id="doc"></select></label>
+  <label>from <select id="from"></select></label>
+  <label>to <select id="to"></select></label>
+  <span id="status">Loading…</span>
+</header>
+<iframe id="out" title="diff"></iframe>
+<script type="module">
+import { iddiff } from './iddiff.js';
+
+const status = document.getElementById('status');
+const query = new URLSearchParams(location.search);
+
+async function text(url) {
+  const response = await fetch(url, { cache: 'no-cache' });
+  if (!response.ok) throw new Error(`${response.status} for ${url}`);
+  return response.text();
+}
+
+function render(name1, text1, name2, text2) {
+  const start = performance.now();
+  const html = iddiff(text1, text2, name1, name2);
+  document.getElementById('out').srcdoc = html;
+  status.textContent = `iddiff in ${Math.round(performance.now() - start)} ms`;
+}
+
+async function fromUrls(url1, url2) {
+  document.querySelectorAll('header label').forEach((l) => (l.hidden = true));
+  document.title = `Compare ${url1} and ${url2}`;
+  const [text1, text2] = await Promise.all([text(url1), text(url2)]);
+  render(url1, text1, url2, text2);
+}
+
+async function fromBuilds() {
+  const index = await (await fetch('builds/index.json', { cache: 'no-cache' })).json();
+  const builds = index.builds; // newest first
+  if (builds.length < 2) {
+    status.textContent = 'Fewer than 2 builds are stored; come back after the next change.';
+    return;
+  }
+  const drafts = [...new Set(builds.flatMap((b) => b.drafts))];
+  const doc = drafts.includes(query.get('doc')) ? query.get('doc') : builds[0].drafts[0];
+  const find = (s) => builds.find((b) => s && (b.sha.startsWith(s) || s.startsWith(b.sha)));
+  const from = find(query.get('from')) || builds[1];
+  const wantTo = query.get('to');
+  const to = wantTo && wantTo !== 'latest' ? find(wantTo) : builds[0];
+  if (!from || !to) {
+    status.textContent = 'Unknown build. Known builds: ' + builds.map((b) => b.sha).join(', ');
+    return;
+  }
+
+  const navigate = () => {
+    const f = document.getElementById('from').value;
+    const t = document.getElementById('to').value;
+    const d = document.getElementById('doc').value;
+    const q = new URLSearchParams({ from: f });
+    if (t !== builds[0].sha) q.set('to', t);
+    if (d !== builds[0].drafts[0]) q.set('doc', d);
+    location.search = '?' + q;
+  };
+  const docSelect = document.getElementById('doc');
+  for (const d of drafts) docSelect.add(new Option(d, d, false, d === doc));
+  document.getElementById('doc-label').hidden = drafts.length < 2;
+  docSelect.onchange = navigate;
+  for (const [id, selected] of [['from', from], ['to', to]]) {
+    const select = document.getElementById(id);
+    for (const b of builds) {
+      const label = `${b.sha}  ${b.date}  ${b.subject}`.slice(0, 80);
+      select.add(new Option(label, b.sha, false, b.sha === selected.sha));
+    }
+    select.onchange = navigate;
+  }
+  document.title = `Compare builds ${from.sha}..${to.sha}`;
+
+  // A build from before a draft was renamed has only the old name.
+  const name = (b) => `${b.drafts.includes(doc) ? doc : b.drafts[0]}-${b.sha}.txt`;
+  const [text1, text2] = await Promise.all([text(`builds/${name(from)}`), text(`builds/${name(to)}`)]);
+  render(name(from), text1, name(to), text2);
+}
+
+const job = query.has('url1') || query.has('url2')
+  ? fromUrls(query.get('url1'), query.get('url2'))
+  : fromBuilds();
+job.catch((e) => (status.textContent = 'Error: ' + e.message));
+</script>
+</body>
+</html>
